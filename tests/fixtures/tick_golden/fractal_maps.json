@@ -1,0 +1,264 @@
+{
+ "entry": "fractal_maps",
+ "rc": 0,
+ "seals": {
+  "12069a5caad9939ffd032d57c292bdeb28bc914c29dea0153723398f6cfdf357": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "z_order_interleave_of_x_5_y_3"
+   ]
+  },
+  "2490cdc949c7ab534ba7c27a01382002a155de8d1f3b5a60ff2edc766c767d2b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hausdorff_dimension_of_the_koch_curve"
+   ]
+  },
+  "289ff30dcd05199ec3efe9b9fbd4c4392237e4d74ce4dad4a053e8450e6b8d25": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hausdorff_dimension_of_the_sierpinski_triangle"
+   ]
+  },
+  "2ceeb4a1d264eee3b813ac8cd1d7b64588cde650db68b6d4fa87e56907db5340": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "z_squared_plus_c_at_c_1_escapes_through_1_2_5_26"
+   ]
+  },
+  "3bfadd19a9916ce0015afa0f3541cb2726f1bc48be26c2c11c3066c3326061e1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "quicksort_expected_comparisons_2_n_ln_n_at_1024"
+   ]
+  },
+  "4b13d61ba416e6e873311c7f4ab7b847059ca1bfb5f57e65886d707e3fc8f886": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hausdorff_dimension_of_the_cantor_set"
+   ]
+  },
+  "4bcd2eb31d2766441bb188e5ba94b2fe2ed9c86e8adfe149c72355a330287c20": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "binary_search_probes_on_the_keeping_log2_882022"
+   ]
+  },
+  "4f41de9de967dc0bb9c53568f8849a5348034436c187a4ee59b9993d826992ed": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "comparison_sort_lower_bound_log2_of_1024_factorial"
+   ]
+  },
+  "503840b7349f9c010fd53055e52aa4343e45cccbc8758a76b4654377ee61f89e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hilbert_curve_of_order_10_fills_4_to_the_10_cells"
+   ]
+  },
+  "74175c5ee1eea39ee06c860be519a12ac7333e5d355ba0aa8109850e812eaa64": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "merge_sort_comparisons_n_log2_n_at_1024"
+   ]
+  },
+  "7dd6962ed8678eefc4461a94d7e377842ffecb49c89969680e4c4b909a835b4e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "logistic_map_2_cycle_upper_point_at_r_3_2"
+   ]
+  },
+  "a06bb44bd34e2b1611f16e34c062d1f8308af5a5a1b23744647e0d5d85f1bbef": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "koch_snowflake_area_converges_to_8_over_5"
+   ]
+  },
+  "c7997667d619b9fa877632dca3606f448c8fc2ba7dff8427e4f2d1594b0a64c9": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "radix_sort_advantage_over_comparisons_log2_n_over_4_digit_groups"
+   ]
+  },
+  "cfd2d0ca0a895732ec53c1265397f5310afe6daf500a2215a33f2bc638bd6dac": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "richardson_coast_d_1_25_halving_the_ruler_multiplies_the_length"
+   ]
+  },
+  "e29d3f5e2a784ecd609cf0eca6b76d89d4f75670d2bb4c8cea4321a95cdd049c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hausdorff_dimension_of_the_menger_sponge"
+   ]
+  },
+  "ed4767a59d13a4c09eb814e42537e7d611e7f438aafeea861e5c3843652a42c9": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "quicksort_worst_case_n_n_minus_1_over_2_at_1024"
+   ]
+  },
+  "f84c7153b6f7be2dcaa7842f375b607cd440818f0a81e13c9a5353f1fb389da9": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "koch_snowflake_perimeter_after_10_steps_in_units_of_the_first"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_fractals_as_maps_and_sorting_algorithms_the_same_shape_at_ev": {
+   "field": "mathematics",
+   "question": "Fractals as maps and sorting algorithms - the same shape at every scale, the ruler that sets the length, the curve that makes a many-dimensional address one line, and the sorts that make a map usable",
+   "references": [
+    "F. Hausdorff (1918): dimension; H. von Koch (1904); W. Sierpinski (1915); G. Cantor (1883); K. Menger (1926)",
+    "L. F. Richardson (1961): the coastline; B. Mandelbrot (1967): How Long Is the Coast of Britain?; (1982): The Fractal Geometry of Nature",
+    "G. Peano (1890), D. Hilbert (1891): space-filling curves; G. M. Morton (1966): the Z-order key",
+    "J. von Neumann (1945): merge sort; C. A. R. Hoare (1961): quicksort; D. E. Knuth, TAOCP vol. 3 (1973): the comparison lower bound; J. Stirling (1730)",
+    "R. M. May (1976): the logistic map; M. Feigenbaum (1978): the cascade; M. Dewey (1876): the call number",
+    "docs/OUR_FORM_MEASURED_2026-10-08.md (882,022 cards; the floor tree); docs/DESIGN_FROM_THE_DOTS.md",
+    "Matthew 13:47-48 (the net gathered every kind, and they sat down and sorted); 1 Corinthians 14:40",
+    "stick_bubbles_joined; stick_tensors; stick_where_two_domains_connect; stick_a_superheterodyne_receiver"
+   ],
+   "statement": "A fractal is a map that is the same at every scale. Its dimension is log N / log s; a finite area can wear an infinite coastline; and the length you measure depends on the ruler you state - halve the ruler on a coast of dimension 1.25 and the length grows by 2^0.25. A space-filling curve is a fractal used as a map: the Hilbert and Z-order curves turn a many-dimensional address into one line while keeping neighbours near, which is a call number's job. A sorting algorithm is how a map is made usable: merge sort is itself a fractal, the same split at every scale, costing n log n against a lower bound of log n! that no comparison sort can beat; quicksort pays the same on average and n^2 when the pivot is unlucky; a sorted keeping is searched in log n probes; and a key made of digits is sorted in linear time by its digits. A map can also be a map OF a map: iterate z -> z^2 + c and ask which c stay bounded, and the answer is the Mandelbrot set; the logistic map's doublings are the first steps of its own cascade. For the engine: the floor tree is a trie and the call number a radix key, the kernel's recursion is a fractal (a complication is a smaller copy of it), stated precision is the ruler, and a space-filling key is the lever that keeps a domain's neighbours on one shelf. Nothing in the engine iterates on itself. The likeness is kept a likeness.",
+   "ticks": [
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[dimension: the same shape at every scale, counted] The Sierpinski triangle is 3 copies of itself at half size: dimension log 3 / log 2 = 1.585 (sealed). Koch: 4 copies at a third, 1.262 (sealed). Cantor: 2 at a third, 0.631 (sealed). Menger: 20 at a third, 2.727 (sealed). A fractal's dimension is the exponent that relates how many copies to how small - the one number that says 'the same at every scale'.",
+     "kind": "instance",
+     "seal": "289ff30dcd05199ec3efe9b9fbd4c4392237e4d74ce4dad4a053e8450e6b8d25"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[Koch 1.262]",
+     "kind": "instance",
+     "seal": "2490cdc949c7ab534ba7c27a01382002a155de8d1f3b5a60ff2edc766c767d2b"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[Cantor 0.631]",
+     "kind": "instance",
+     "seal": "4b13d61ba416e6e873311c7f4ab7b847059ca1bfb5f57e65886d707e3fc8f886"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[Menger 2.727]",
+     "kind": "instance",
+     "seal": "e29d3f5e2a784ecd609cf0eca6b76d89d4f75670d2bb4c8cea4321a95cdd049c"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[a finite area with an infinite edge] The Koch snowflake's area converges to 1 + (1/3)/(1 - 4/9) = 8/5 of its first triangle (sealed) while its perimeter after ten steps is already (4/3)^10 = 17.76 times the first (sealed) and grows without bound. A keeping can be finite and its boundary of detail endless: the map is bounded, the coastline is not.",
+     "kind": "instance",
+     "seal": "a06bb44bd34e2b1611f16e34c062d1f8308af5a5a1b23744647e0d5d85f1bbef"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[the perimeter at step ten]",
+     "kind": "instance",
+     "seal": "f84c7153b6f7be2dcaa7842f375b607cd440818f0a81e13c9a5353f1fb389da9"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[the ruler sets the length - the coastline IS stated precision] Richardson: L = F epsilon^(1 - D). On a coast of dimension 1.25, halving the ruler multiplies the measured length by 2^0.25 = 1.189 (sealed). There is no length without a stated ruler; the engine judges a claim at the precision it states for the same reason (feedback_stated_precision_sets_the_bar): the number depends on the ruler, so the ruler must be read first.",
+     "kind": "instance",
+     "seal": "cfd2d0ca0a895732ec53c1265397f5310afe6daf500a2215a33f2bc638bd6dac"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[a fractal used as a map: the Z-order key] Interleave the bits of x = 5 (101) and y = 3 (011) as y2 x2 y1 x1 y0 x0 = 011011 = 27 (sealed). One number now addresses a point of the plane, and points that are near on the plane are mostly near on the line - Morton's key (1966), the Hilbert curve's cousin. That is what a call number does for the keeping: a many-dimensional address (domain, class, item; the bubbles' grid) made one shelf line with neighbours kept adjacent.",
+     "kind": "instance",
+     "seal": "12069a5caad9939ffd032d57c292bdeb28bc914c29dea0153723398f6cfdf357"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[the Hilbert curve fills the square] Order 10 visits 4^10 = 1,048,576 cells (sealed), every one once, and it keeps locality better than any other space-filling curve - the key to use when the domains are orthogonalized and the keeping is laid on one line (docs/DESIGN_FROM_THE_DOTS.md, lever 2).",
+     "kind": "instance",
+     "seal": "503840b7349f9c010fd53055e52aa4343e45cccbc8758a76b4654377ee61f89e"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[merge sort is a fractal] Split in two, sort each half the same way, merge: the recursion tree is the same shape at every level, log2 n levels deep and n wide, so n log2 n = 10,240 comparisons at n = 1024 (sealed). The kernel's own shape - find, distinguish, verify, serve - runs the same way at every scale (a complication is a smaller copy of it); merge sort is that shape as an algorithm.",
+     "kind": "instance",
+     "seal": "74175c5ee1eea39ee06c860be519a12ac7333e5d355ba0aa8109850e812eaa64"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[no comparison sort can beat log2 n!] At n = 1024 the bound is log2(1024!) = 8,769 comparisons (sealed, through the evaluator's own factorial); merge sort's 10,240 is within 17% of it. A bound that cannot be beaten is a bound worth sealing: it says how much of the cost is the problem and how much the method.",
+     "kind": "instance",
+     "seal": "4f41de9de967dc0bb9c53568f8849a5348034436c187a4ee59b9993d826992ed"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[quicksort: the same on average, n^2 when unlucky] Expected 2 n ln n = 14,196 comparisons at 1024 (sealed); worst case n(n-1)/2 = 523,776 (sealed) when every pivot is the smallest. The method's average is fine; its boundary is the sorted input. Success guides, failure narrows the path.",
+     "kind": "instance",
+     "seal": "3bfadd19a9916ce0015afa0f3541cb2726f1bc48be26c2c11c3066c3326061e1"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[the worst case]",
+     "kind": "instance",
+     "seal": "ed4767a59d13a4c09eb814e42537e7d611e7f438aafeea861e5c3843652a42c9"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[a sorted keeping is searched in log n probes] log2(882,022) = 19.75 (sealed): twenty probes find any card by its key once the keeping is sorted - against 882,022 by scanning and 1 by the delta read. Sorting is what makes a map usable; the id read is what makes it instant.",
+     "kind": "instance",
+     "seal": "4bcd2eb31d2766441bb188e5ba94b2fe2ed9c86e8adfe149c72355a330287c20"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[radix: a key made of digits sorts in linear time] A call number shelf.class.item is a digit key; radix sort in 4 digit groups costs 4 n against n log2 n for comparisons - at this size log2 n / 4 = 4.94 times fewer operations (sealed). The call number is not only an address: it is the key that sorts the keeping without comparing cards.",
+     "kind": "instance",
+     "seal": "c7997667d619b9fa877632dca3606f448c8fc2ba7dff8427e4f2d1594b0a64c9"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[a map of a map: the Mandelbrot set] Iterate z -> z^2 + c from 0. At c = 1: 1, 2, 5, 26 (sealed) - past 2 by the third step, escaping. At c = -1: -1, 0, -1, 0 - bounded forever. The Mandelbrot set is the map of which c stay home; its boundary is a fractal of dimension 2. A map's behaviour, mapped.",
+     "kind": "instance",
+     "seal": "2ceeb4a1d264eee3b813ac8cd1d7b64588cde650db68b6d4fa87e56907db5340"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[the logistic map's first doubling] At r = 3.2 the fixed point 1 - 1/r = 0.6875 has gone unstable and the orbit settles on a 2-cycle whose upper point is (r + 1 + sqrt((r - 3)(r + 1)))/(2r) = 0.7995 (sealed). The doublings continue at Feigenbaum's ratio 4.669 (cited) into chaos: the same map, self-similar in its own parameter.",
+     "kind": "instance",
+     "seal": "7dd6962ed8678eefc4461a94d7e377842ffecb49c89969680e4c4b909a835b4e"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[the postulate it builds on] The kernel is self-similar: find, distinguish, verify, serve, keep the trail works at every scale it has been built at - the engine, a complication, a standalone coach - and a complication is a smaller copy of it with its own postulates. Not kept as a fact: five writings of it across different domains converged on one shape, and from that working the truth is inferred, never proven.",
+     "kind": "postulate",
+     "source": "Matt, 2026-10-08: 'a fractal is the complication that we create to add on the core engine'; project_one_kernel_and_workready_forge; project_gen3_charter_every_copy_is_whole"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[what carries over, by name] The floor tree is a TRIE (part_of at every depth, the same shape - a fractal map of the keeping, measured: 882,022 cards, 0 orphans); the call number is a RADIX KEY (shelf.class.item sorts by digits, no comparison); the frozen cache's offsets are a SORTED INDEX (the boot seeks, it does not scan); FTS top-k is a PARTIAL SORT with a heap (k log n); the kernel's recursion is MERGE SORT'S shape; stated precision is RICHARDSON'S RULER; a space-filling key (Hilbert/Z-order over the orthogonalized domains) is the NEXT LEVER for keeping a domain's neighbours on one shelf. Each is a structure the code already has, named.",
+     "kind": "equivalence",
+     "source": "docs/OUR_FORM_MEASURED_2026-10-08.md; docs/DESIGN_FROM_THE_DOTS.md; src/concordance/corpus.py (call_number, deep_call, the frozen cache)"
+    },
+    {
+     "by": "engine:fractal_maps",
+     "claim": "[what does NOT carry over] Nothing in the engine iterates on itself - no z -> z^2 + c, no map fed its own output, no self-generation (the found-never-generated law is exactly this exclusion); the keeping's fractal dimension has NOT been measured (the floor tree's branching counted as log N / log s is a next measurement, not a fact); sorting is on keys, never on truth - a verdict is not a rank; and a space-filling key is proposed, not built.",
+     "kind": "exclusion",
+     "source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it"
+    }
+   ]
+  }
+ }
+}

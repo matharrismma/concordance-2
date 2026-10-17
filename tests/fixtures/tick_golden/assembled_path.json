@@ -1,0 +1,200 @@
+{
+ "entry": "assembled_path",
+ "rc": 0,
+ "seals": {
+  "12ec78d07df0a055eef5d63e9970547f643f85db409acb44e3c1a6f4e2655d51": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "flux_of_r_through_the_unit_sphere_surface_side"
+   ]
+  },
+  "1365e53619ee02d2160b94e3e96dadf717b15ecb3f0a4f8f599e1c99fbcac0d4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "conservative_field_corner_path_0_0_to_3_0_to_3_4"
+   ]
+  },
+  "20076db699867bd9b01af239bffd6ad889b71280cf0babbf52aa108f184afca3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "curl_of_a_gradient_vanishes_one_plus_zero"
+   ]
+  },
+  "282791b23571e35336eb663ee739b91a4cb76a4d09fb0b21688c83494c7b3b84": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "circulation_of_minus_y_x_around_the_unit_circle"
+   ]
+  },
+  "326481b4f5ea540728d0fd9a251dbf3be36cf23d32a803e65b07d383809b12a6": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "harmonic_mean_value_of_x2_plus_y2_on_the_unit_circle"
+   ]
+  },
+  "542ca8e684bbde1868048bc057b463a53e163253be209949ce0ed8506bcffbf2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "kirchhoff_current_law_6v_across_2_and_3_ohm"
+   ]
+  },
+  "5490d13a50ec287e78d3248f86dba467ed1cbbac89cf50b1c086bf5fd57aabb2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "kirchhoff_voltage_law_around_the_2_ohm_loop_one_plus_zero"
+   ]
+  },
+  "59c6522f34cce8bad33b3f7ece93254dc41330b35646af85272d1e79df9c05f4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "front_door_coverage_two_of_three_material_fragments"
+   ]
+  },
+  "75cd9f5b4ed5a92b6235428953cd0aa02df0092505d7ad5a44a458a0b1b8619d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "conservative_field_straight_path_0_0_to_3_4"
+   ]
+  },
+  "8f3e0abd9892e77f93bf923fd41387af835608c4fa0f547654d4d7d25a701004": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "greens_theorem_curl_2_over_the_unit_disc"
+   ]
+  },
+  "af560bf9532f7e5efe0845f3ba6c1f57b643e9288daf9417be419ae3443869e8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gradient_of_x2_plus_y2_at_3_4_has_magnitude_10"
+   ]
+  },
+  "d4788b5c5c686ad402503ba4b5a1c290cf34ccbb4af5cdd6e97639cd0f54810f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "divergence_theorem_volume_side_div_3"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_gradient_divergence_and_curl_the_three_numbers_that_quantify": {
+   "field": "mathematics",
+   "question": "Gradient, divergence and curl - the three numbers that quantify the preciseness of an assembled path",
+   "references": [
+    "J. L. Lagrange (1762), C. F. Gauss (1813), M. Ostrogradsky (1826): the divergence theorem",
+    "G. Green (1828); G. G. Stokes (1854, the Smith's Prize question); W. Thomson: circulation and curl",
+    "H. Helmholtz (1858): every field is a gradient part plus a curl part",
+    "G. Kirchhoff (1845, 1847): the current law (div = 0 at a node) and the voltage law (curl = 0 around a loop), and the graph theory he founded for them",
+    "W. V. D. Hodge (1941): the decomposition; A. Hirani (2003): discrete exterior calculus on meshes and graphs",
+    "J. C. Maxwell, A Treatise on Electricity and Magnetism (1873): div and curl as the grammar of the field equations",
+    "docs/DESIGN_FROM_THE_DOTS.md (2026-10-08); the front door's coverage block (the failure report C4)",
+    "Proverbs 4:26-27 ('ponder the path of thy feet ... turn not to the right hand nor to the left'); Isaiah 40:3-4",
+    "stick_where_two_domains_connect; stick_the_geometry_of_resonance_disaster; stick_maxwells_demon; stick_the_vacuum_triode"
+   ],
+   "statement": "A path the engine assembles is a flow, and three numbers say how precise a flow is. CURL asks whether the path is conservative: a curl-free field is the gradient of a potential, and its integral depends only on the endpoints, so the answer does not depend on the route taken; a field with curl gives a different answer each way round. DIVERGENCE asks where the flow has sources and sinks: what is created inside a region shows as flux at its boundary, so a path that creates content with no cited source leaks, and a path that loses content has a sink that must be recorded. GRADIENT asks whether each step climbs: a precise path follows the gradient of fit and narrows at every step. Kirchhoff's two laws are exactly div = 0 at every node and curl = 0 around every loop; a circuit is a flow that obeys both, and so must an assembled answer. On the engine these are discrete: differences across the edges of the connection graph, net flow at a card, circulation around a cycle - Kirchhoff's calculus, not a continuum's. The likeness is kept a likeness.",
+   "ticks": [
+    {
+     "by": "engine:assembled_path",
+     "claim": "[gradient: the direction a precise step takes] f = x^2 + y^2 at (3, 4): grad f = (6, 8), magnitude sqrt(36 + 64) = 10 (sealed), pointing straight away from the origin. The gradient is the direction of steepest climb and its length is how steep. A path that narrows a question follows the gradient of fit; a step with zero gradient is a step that learned nothing.",
+     "kind": "instance",
+     "seal": "af560bf9532f7e5efe0845f3ba6c1f57b643e9288daf9417be419ae3443869e8"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[curl-free means route-independent: path one] Along the straight line from (0, 0) to (3, 4), int grad f . dr = int_0^1 50 t dt = 25 (sealed).",
+     "kind": "instance",
+     "seal": "75cd9f5b4ed5a92b6235428953cd0aa02df0092505d7ad5a44a458a0b1b8619d"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[curl-free means route-independent: path two] Along the corner path (0,0) -> (3,0) -> (3,4), int 2x dx + int 2y dy = 9 + 16 = 25 (sealed). Two different routes, the same number, because the field is a gradient (f(3,4) - f(0,0) = 25). This is the test of a precise assembled path: run the steps in another order and the answer must not move. The engine's verifiers commute for exactly this reason, and the recall set counts a phrasing reached by a different family as reached.",
+     "kind": "instance",
+     "seal": "1365e53619ee02d2160b94e3e96dadf717b15ecb3f0a4f8f599e1c99fbcac0d4"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[the curl of a gradient is zero] For f = x^2 y the gradient is (2xy, x^2) and its curl at (3, 4) is d(x^2)/dx - d(2xy)/dy = 6 - 6 = 0 (sealed as 1 + 0 = 1). Any field that comes from a potential has no circulation: it cannot be made to give a different answer by going around. A path that is a gradient of one potential - one question, one fit - is conservative by construction.",
+     "kind": "instance",
+     "seal": "20076db699867bd9b01af239bffd6ad889b71280cf0babbf52aa108f184afca3"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[a field WITH curl: the answer depends on the route] The rotating field (-y, x) carried around the unit circle: int_0^{2 pi} (sin^2 t + cos^2 t) dt = 2 pi (sealed), not 0. Go once around and the integral has grown by 2 pi; this field is no gradient. An assembled path whose answer changes with the order of its steps has curl, and curl is the quantity of that imprecision.",
+     "kind": "instance",
+     "seal": "282791b23571e35336eb663ee739b91a4cb76a4d09fb0b21688c83494c7b3b84"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[Green: circulation equals the curl inside] The same 2 pi as the double integral of the curl, 2, over the unit disc: int_0^{2 pi} int_0^1 2 r dr dt = 2 pi (sealed). What goes around the edge is the sum of the rotation inside; a loop's imprecision is the sum of the local twists along the way - so it can be located, step by step.",
+     "kind": "instance",
+     "seal": "8f3e0abd9892e77f93bf923fd41387af835608c4fa0f547654d4d7d25a701004"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[divergence: sources show at the boundary, surface side] The flux of r = (x, y, z) out of the unit sphere is int int (r . n) dS with r . n = 1: int_0^{2 pi} int_0^pi sin phi dphi dtheta = 4 pi (sealed).",
+     "kind": "instance",
+     "seal": "12ec78d07df0a055eef5d63e9970547f643f85db409acb44e3c1a6f4e2655d51"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[divergence: sources show at the boundary, volume side] div r = 3 everywhere, and 3 times the unit ball's volume, 3 int int int r^2 sin phi dr dphi dtheta = 4 pi (sealed) - the same number. What is created inside a region is exactly what crosses its boundary. In the engine: whatever an answer contains must have entered through a cited source; a sentence with no source is a source term with no account - divergence where none is allowed. The front door's coverage block measures it.",
+     "kind": "instance",
+     "seal": "d4788b5c5c686ad402503ba4b5a1c290cf34ccbb4af5cdd6e97639cd0f54810f"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[harmonic = no hidden peak] The mean of f = x^2 + y^2 around the unit circle centred at the origin is int (cos^2 t + sin^2 t) dt / 2 pi = 1 (sealed) = f(0) + (1/4) laplacian f, with laplacian f = 4. A harmonic function (laplacian zero) equals its mean on every circle and has no interior extreme: a potential with no hidden resonance peak (stick_the_geometry_of_resonance_disaster). The Laplacian is div of grad - the two operators composed - and it is the number that says whether a potential has a secret maximum.",
+     "kind": "instance",
+     "seal": "326481b4f5ea540728d0fd9a251dbf3be36cf23d32a803e65b07d383809b12a6"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[Kirchhoff's current law IS div = 0] 6 V across 2 ohm and 3 ohm in parallel: 3 A + 2 A = 5 A into the node and 5 A out (sealed). No charge accumulates at a node: the net flow is zero. The vacuum-tube computer's components obey it, and so must an assembled answer: nothing appears at a step that did not flow in.",
+     "kind": "instance",
+     "seal": "542ca8e684bbde1868048bc057b463a53e163253be209949ce0ed8506bcffbf2"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[Kirchhoff's voltage law IS curl = 0] Around the 2 ohm loop: 6 - 3 * 2 = 0 (sealed as 1 + 0 = 1). The sum of the potential changes around any closed loop is zero: a potential exists, and the voltage at a node does not depend on which path you measured along. Kirchhoff (1845) wrote the two laws for circuits and invented graph theory to state them; they are div = 0 and curl = 0 on a graph.",
+     "kind": "instance",
+     "seal": "5490d13a50ec287e78d3248f86dba467ed1cbbac89cf50b1c086bf5fd57aabb2"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[the engine's own divergence meter] A claim with three material fragments, two of them inside checked spans, has coverage 2/3 = 0.6667 (sealed) and the front door says PARTIAL, never HOLDS: one third of the sentence flowed through no verifier. Coverage is the engine's divergence - the share of the output that crossed a checked boundary - and it is already measured on every verify.",
+     "kind": "witness",
+     "seal": "59c6522f34cce8bad33b3f7ece93254dc41330b35646af85272d1e79df9c05f4"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[what carries over, by name] The engine's path is DISCRETE, and discrete calculus is real (Kirchhoff 1847; Hodge 1941; Hirani 2003): GRADIENT = the change of fit across one step (one edge of the connection graph; the candidates door narrows when it is positive); DIVERGENCE = net content at a step - sources are cited cards, sinks are recorded misses, and coverage measures the unsourced remainder; CURL = circulation around a cycle of steps - the verdict's dependence on the order the verifiers ran, which the engine tests by running them in any order (they commute) and the recall set credits across families; KCL/KVL = the two invariants an assembled answer must satisfy. Each of these is a count or a difference on the live graph, used exactly as stated.",
+     "kind": "equivalence",
+     "source": "G. Kirchhoff (1847); W. V. D. Hodge (1941); A. Hirani (2003); docs/DESIGN_FROM_THE_DOTS.md; the coverage block (failure report C4)"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[the design postulate] An assembled answer obeys Kirchhoff's two laws on its own graph: nothing appears at a step that did not flow in from a cited source (div = 0 away from the keeping), and the verdict does not depend on the order the steps ran (curl = 0 around every loop). Not kept as a fact: it is made to work - the coverage block and the commuting verifiers are the instances - and from its working the truth of the design is inferred, never proven.",
+     "kind": "postulate",
+     "source": "Matt, 2026-10-08; docs/DESIGN_FROM_THE_DOTS.md; G. Kirchhoff (1845)"
+    },
+    {
+     "by": "engine:assembled_path",
+     "claim": "[what does NOT carry over] There is no continuum: no limits, no smoothness, no Laplacian beyond the graph Laplacian; curl is defined only on the graph's cycles, not at a point; no Helmholtz decomposition of the engine's flow has been COMPUTED yet (a next measurement, not a fact); the 'potential' of a path is its fit score, a cosine, not an energy; and a Kirchhoff instance sealed here is a circuit, not the engine - the engine's KCL/KVL are the coverage block and the commuting verifiers, measured as such.",
+     "kind": "exclusion",
+     "source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it"
+    }
+   ]
+  }
+ }
+}

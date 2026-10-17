@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "name": "calendar_time",
+ "aliases": [
+  "calendar",
+  "timekeeping",
+  "the_calendar",
+  "leap_year"
+ ],
+ "doc": "THE CALENDAR - keeping time by sun and number (Matt, 2026-10-10, down the list). The day is one rotation\n(86400 seconds), the year one orbit (about 365.2422 days); the Gregorian calendar approximates the year as\n365.2425 by a leap rule (97 leap days per 400 years). SEALED: the seconds in a day and the Gregorian mean year.\nRests on astronomy (the orbit and the rotation) and metrology (the second). Idempotent.",
+ "seals": [
+  {
+   "key": "secondsday",
+   "nid": "seconds_in_a_day",
+   "expr": "24*60*60",
+   "value": 86400,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "gregorian",
+   "nid": "gregorian_mean_year_days",
+   "expr": "365 + 97/400",
+   "value": 365.2425,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The calendar - keeping time by sun and number",
+   "by": "tools/tick.py calendar_time",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the day - one rotation, SEALED] A day is one turn of the Earth, divided 24 x 60 x 60 = 86400 seconds (sealed). The division into 24, 60, 60 is Babylonian (base 60); the second is now the SI base unit, fixed by the caesium atom. Ties card_floor_astronomy (the rotation).",
+     "seal": "secondsday"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the year - one orbit, and the leap rule, SEALED] A tropical year is about 365.2422 days - not whole - so the Gregorian calendar adds 97 leap days every 400 years, averaging 365 + 97/400 = 365.2425 (sealed), off by only 26 seconds a year. The leap rule (every 4, except centuries, except every 400) is number chasing the sun. Ties card_floor_astronomy (the orbit).",
+     "seal": "gregorian"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] The calendar rests on astronomy (the day is the rotation, the year the orbit) and metrology (the second, the SI base unit). It is the oldest applied science - reconciling the incommensurable periods of day, month and year by number. Ties card_floor_the_calendar.",
+     "source": "the one map; the Gregorian reform (1582); the SI second; card_floor_the_calendar"
+    }
+   ]
+  }
+ ]
+}

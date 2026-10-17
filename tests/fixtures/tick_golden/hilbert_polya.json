@@ -1,0 +1,56 @@
+{
+ "entry": "hilbert_polya",
+ "rc": 0,
+ "seals": {
+  "6f612a8ecdbc414f7574ce63b22d621994f8e343c0526a63452068d77f4170d8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hermitian_det"
+   ]
+  },
+  "b8022a17f43be9aecb91bc515c469d403eadfb433a68c518cbf3419140010852": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hermitian_trace"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_hilbert_polya_conjecture": {
+   "field": "meta",
+   "question": "The Hilbert-Polya conjecture",
+   "references": [
+    "Hilbert and Polya (c. 1914, oral) - zeros as a self-adjoint spectrum",
+    "H. Montgomery (1973) pair correlation; F. Dyson - the GUE match",
+    "Berry-Keating H ~ xp; A. Connes' trace-formula approach"
+   ],
+   "statement": "Conjecture: the imaginary parts gamma of the nontrivial zeros of zeta are the eigenvalues of a self-adjoint operator. If true, the spectral theorem forces every gamma real, hence every zero onto Re(s) = 1/2 - a proof of RH. The conjecture is the search for that operator.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Hilbert-Polya conjecture, 2026-10-07",
+     "claim": "[the link that FIRES - self-adjoint => real spectrum] The Hermitian matrix H = [[2, i], [-i, 2]] has eigenvalues solving lambda^2 - 4 lambda + 3 = 0, i.e. 1 and 3 - both REAL. Check: trace = 2 + 2 = 4 = 1 + 3 (sealed); det = 2*2 - 1 = 3 = 1 * 3 (sealed, the -1 is i*(-i)). This is the spectral theorem on a concrete operator: self-adjointness pins the spectrum to the real line. It is the engine of Hilbert-Polya.",
+     "kind": "witness",
+     "seal": "b8022a17f43be9aecb91bc515c469d403eadfb433a68c518cbf3419140010852"
+    },
+    {
+     "by": "Narrow Highway - the Hilbert-Polya conjecture, 2026-10-07",
+     "claim": "[the determinant confirms both roots real] det H = 3 = 1 * 3 (sealed); with trace 4 the eigenvalues are forced to 1 and 3. No complex part survives a Hermitian operator - which is exactly what RH needs for the heights gamma.",
+     "kind": "witness",
+     "seal": "6f612a8ecdbc414f7574ce63b22d621994f8e343c0526a63452068d77f4170d8"
+    },
+    {
+     "by": "Narrow Highway - the Hilbert-Polya conjecture, 2026-10-07",
+     "claim": "[the chain, and which links have NOT fired] The proof route is: (i) exhibit an operator H; (ii) show H self-adjoint; (iii) show spectrum(H) = {gamma_n}. Then (ii)+(iii)+spectral theorem => RH. Link (ii=>real) is sealed above. Links (i) and (iii) have NEVER fired - no operator has been constructed (Berry-Keating's xp and Connes' adelic trace formula are suggestive outlines, not closings). So RH is one all-firing chain away: if a genuine H were input, the engine running it and watching every link fire WOULD be the proof. The engine can CHECK such a chain; it cannot INVENT the operator (ties [[feedback_mapping_the_truth_not_generating_it_2026-10-07]]).",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Hilbert-Polya conjecture, 2026-10-07",
+     "claim": "[the evidence it is real - a map, not a fit] Montgomery's pair correlation of the zero heights matches the eigenvalue statistics of large random Hermitian matrices (the GUE); Dyson recognized it immediately, and Odlyzko's numerics confirm it to high precision and height. The zeros STATISTICALLY behave like a self-adjoint spectrum. That is the finest mapping we have toward the operator - evidence, never the operator itself. map, never launder.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

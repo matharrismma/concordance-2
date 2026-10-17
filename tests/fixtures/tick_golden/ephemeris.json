@@ -1,0 +1,227 @@
+{
+ "entry": "ephemeris",
+ "rc": 0,
+ "seals": {
+  "04d59aef09ba70580d5218533b759aed7f881c4450c38cdba2b8a6fb77835234": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "0baa24df8bcf03e16ee10a7d53d2bbd28adea5aeb2272edccf9964c86c7a7bf5": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "122c6542d2047afdf5e0566753cf258dd618b384cd10936003816763e8a2caf4": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "1ee124af67aef643cea34a02324d58eea2e35a5ec859d90cfaa990383d3e2115": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "25edca2dbfadd561aa6d737d84d99efa1e210280ec016133e756126239360c6f": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "3dcf783e5f029da3d652df40308a3ff670e8f5a3232e69f450d7a1809da6e8a2": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "6977908d80c970f0b25fb878b529e04934bbce1d35674edff29a7114e66f4cc3": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "794435610b270450f00f1eb33239fb7758e65ac6f9de5dd5456589af67be97b8": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "96f59c3af1521dd265d186f04b08ae3def9b18a68f033b647ec004a47e836417": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "9a3eb7530497fbb6d6f57dfecef9ad1ecfffc65501f2799090abca8c9e64909c": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b0f08985a9cb861b3acc5e276d9ddd9d84b86d15c2ef4d61263963914a5676dd": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d57459ee3cd8dc5232ec84fba5cf042ffcda3f98a870b79c9bb3a73601405c40": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "e67914b0e7ef8725a5d3ace6306dd136faca89dd18293e6f3af7835460471c88": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "e8589b6b24b09eff58a7ad9cc52931a23198f5de4ed9ef24121f93b39a36fec0": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "fece756d3a5866a0f38a842e8d4235d6f9d1bb25cc98b934d0f21906ca384bf2": {
+   "axis": "ephemeris",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_ephemeris_the_sky_s_calendar_sealed": {
+   "field": "ephemeris",
+   "question": "Ephemeris - the sky's calendar, sealed",
+   "references": [
+    "J. Meeus, Astronomical Algorithms, 2nd ed. (1998), ch. 7, 25, 27, 49",
+    "NASA GSFC eclipse catalogue (F. Espenak): 2017-08-21, 2024-04-08 solar; 2019-01-21, 2022-11-08 lunar",
+    "USNO, Earth's Seasons - equinoxes, solstices (2024)",
+    "J. Kepler, Harmonices Mundi (1619), Book V - the third law"
+   ],
+   "statement": "Julian days, lunar phases, the equinoxes and solstices, sunrise and sunset, and orbital periods are closed-form functions of the date and the orbit.",
+   "ticks": [
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[J2000.0, SEALED] 2000-01-01 at noon UT is Julian Day 2,451,545.0 (sealed through ephemeris.EPH_VERIFY; Meeus ch. 7) - the epoch every modern star catalogue is referred to. The Julian Day counts days since noon on 1 January 4713 BC (Scaliger 1583), a single integer line through every calendar.",
+     "kind": "instance",
+     "seal": "d57459ee3cd8dc5232ec84fba5cf042ffcda3f98a870b79c9bb3a73601405c40"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the first Gregorian day, SEALED] 1582-10-15, the day after 1582-10-04 in the reform, is JD 2,299,161.0 (sealed through ephemeris.EPH_VERIFY). Ten dates were skipped; the day count was not - which is why astronomers count days and not dates.",
+     "kind": "instance",
+     "seal": "b0f08985a9cb861b3acc5e276d9ddd9d84b86d15c2ef4d61263963914a5676dd"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the 2024 eclipse was a new moon, SEALED] 2024-04-08 - the total solar eclipse across North America - falls at the new moon (sealed through ephemeris.EPH_VERIFY: mean lunar age within 1.5 d of 0). A solar eclipse is a new moon by definition: the Moon between us and the Sun.",
+     "kind": "instance",
+     "seal": "e67914b0e7ef8725a5d3ace6306dd136faca89dd18293e6f3af7835460471c88"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[and 2017, SEALED] 2017-08-21, the 'Great American' eclipse, is a new moon (sealed through ephemeris.EPH_VERIFY).",
+     "kind": "instance",
+     "seal": "25edca2dbfadd561aa6d737d84d99efa1e210280ec016133e756126239360c6f"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[a lunar eclipse is a full moon, SEALED] 2022-11-08, total lunar eclipse: full moon (sealed through ephemeris.EPH_VERIFY). The Earth between Moon and Sun - the opposite configuration, half a synodic month from new.",
+     "kind": "instance",
+     "seal": "6977908d80c970f0b25fb878b529e04934bbce1d35674edff29a7114e66f4cc3"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[and 2019, SEALED] 2019-01-21, the total lunar eclipse: full moon (sealed through ephemeris.EPH_VERIFY).",
+     "kind": "instance",
+     "seal": "1ee124af67aef643cea34a02324d58eea2e35a5ec859d90cfaa990383d3e2115"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the March equinox, SEALED] 2024-03-20 (sealed through ephemeris.EPH_VERIFY; USNO: 03:06 UT).",
+     "kind": "instance",
+     "seal": "122c6542d2047afdf5e0566753cf258dd618b384cd10936003816763e8a2caf4"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the June solstice, SEALED] 2024-06-20 (sealed through ephemeris.EPH_VERIFY; USNO: 20:51 UT) - the earliest June solstice since 1796, the leap-cycle drift at its turn.",
+     "kind": "instance",
+     "seal": "3dcf783e5f029da3d652df40308a3ff670e8f5a3232e69f450d7a1809da6e8a2"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the September equinox, SEALED] 2024-09-22 (sealed through ephemeris.EPH_VERIFY; USNO: 12:44 UT).",
+     "kind": "instance",
+     "seal": "794435610b270450f00f1eb33239fb7758e65ac6f9de5dd5456589af67be97b8"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the December solstice, SEALED] 2024-12-21 (sealed through ephemeris.EPH_VERIFY; USNO: 09:20 UT). Four dates a year the tilted Earth's orbit fixes; Meeus's Table 27 gives them to the day for a thousand years either way.",
+     "kind": "instance",
+     "seal": "e8589b6b24b09eff58a7ad9cc52931a23198f5de4ed9ef24121f93b39a36fec0"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[sunrise in New York, SEALED] 2025-07-04 at 40.71 N, 74.01 W, EDT: sunrise 5:31 (5.52 h), sunset 8:31 pm (20.52 h) (sealed through ephemeris.EPH_VERIFY, within the verifier's 0.5 h window; USNO gives 5:31 and 20:31). The geometry of a tilted axis, with refraction's 0.833 deg added to the horizon.",
+     "kind": "instance",
+     "seal": "9a3eb7530497fbb6d6f57dfecef9ad1ecfffc65501f2799090abca8c9e64909c"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the equator at the equinox, SEALED] 0 N, 0 E on 2024-03-20: sunrise 6:00, sunset 18:00 (sealed through ephemeris.EPH_VERIFY). Equal night - with the refraction allowance the day runs about 12 h 7 min, which is why the date of truly equal day and night (the equilux) falls a few days before the equinox.",
+     "kind": "instance",
+     "seal": "fece756d3a5866a0f38a842e8d4235d6f9d1bb25cc98b934d0f21906ca384bf2"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[Kepler's third law - the Earth, SEALED] a = 1.496e11 m about 1.989e30 kg: T = 2 pi sqrt(a^3 / G M) = 3.156e7 s, one year (sealed through ephemeris.EPH_VERIFY, through G).",
+     "kind": "instance",
+     "seal": "0baa24df8bcf03e16ee10a7d53d2bbd28adea5aeb2272edccf9964c86c7a7bf5"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the geostationary orbit, SEALED] a = 42,164 km about the Earth (5.9722e24 kg): T = 86,164 s, one sidereal day (sealed through ephemeris.EPH_VERIFY). A satellite there hangs over one meridian - the orbit Clarke proposed in 1945, placed by Kepler's law and G.",
+     "kind": "instance",
+     "seal": "96f59c3af1521dd265d186f04b08ae3def9b18a68f033b647ec004a47e836417"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the Moon - the two-body period, SEALED] a = 384,400 km about Earth + Moon (6.0457e24 kg): T = 2.3574e6 s = 27.28 d (sealed through ephemeris.EPH_VERIFY). The observed sidereal month is 27.3217 d = 2.3606e6 s - 0.14 percent longer. The discordance is the Sun's pull on the Moon, which the two-body formula omits: it indicts the METHOD at that precision, not G or the distance. The honest number is sealed; the sidereal month is cited.",
+     "kind": "instance",
+     "seal": "04d59aef09ba70580d5218533b759aed7f881c4450c38cdba2b8a6fb77835234"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[the precision, CITED] Meeus's low-precision forms are used as stated: the equinox table without its periodic terms (good to about 2 days), the sunrise formula without the equation of time (about 0.5 h), the mean lunar age from a reference new moon (about 1.5 d). Each window is the stated precision and every claim above is judged at it; a claim finer than the method is declined, never waved through.",
+     "kind": "postulate",
+     "source": "J. Meeus, Astronomical Algorithms (1998) ch. 25, 27, 49; src/concordance/verifiers/ephemeris.py"
+    },
+    {
+     "by": "tools/tick.py ephemeris",
+     "claim": "[on the one map] The ephemeris is the calendar (card_floor_the_calendar: the Julian day line, the Gregorian reform) read off the orbits (card_floor_astronomy: phases, eclipses, the seasons) under gravity (Kepler's third law in Newton's form, through G). Everything here is time as the sky keeps it - the clock we are inside of.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

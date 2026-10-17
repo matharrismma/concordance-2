@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "grassmannian",
+ "aliases": [
+  "grassmannian",
+  "positive_grassmannian",
+  "amplituhedron",
+  "positive_geometry"
+ ],
+ "handler": "grassmannian",
+ "why_python": "calls verify_derivation itself (5x)"
+}

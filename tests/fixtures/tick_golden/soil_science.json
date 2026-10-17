@@ -1,0 +1,47 @@
+{
+ "entry": "soil_science",
+ "rc": 0,
+ "seals": {
+  "2e93e10c0db9c3a4b23ffee96d56d96d5c66f495dc6ca0be7d43b84ed12e3cc3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "soil_carbon_to_nitrogen_ratio"
+   ]
+  },
+  "a4f1b398b5fc6487e1530a82d409abf8da68405a0c95b3c08eb7edafe3bdaf1b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ideal_loam_composition_percent_sum"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_soil_science_the_living_skin_of_the_land": {
+   "field": "",
+   "question": "Soil science - the living skin of the land",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py soil_science",
+     "claim": "[what soil is made of, SEALED] An ideal loam is about 45 percent mineral, 25 percent water, 25 percent air and 5 percent organic matter - 45+25+25+5 = 100 (sealed). Half of soil is pore space (water and air); that is what roots breathe and drink. Ties card_floor_earth_science (weathered rock) and card_floor_chemistry.",
+     "kind": "instance",
+     "seal": "a4f1b398b5fc6487e1530a82d409abf8da68405a0c95b3c08eb7edafe3bdaf1b"
+    },
+    {
+     "by": "tools/tick.py soil_science",
+     "claim": "[the carbon-nitrogen balance, SEALED] Soil organic matter sits near a carbon-to-nitrogen ratio of about 10 to 1 (sealed); microbes decompose fast when the ratio is low and tie up nitrogen when it is high. The fertility of the soil is this living chemistry. Ties card_floor_biology and card_floor_chemistry.",
+     "kind": "instance",
+     "seal": "2e93e10c0db9c3a4b23ffee96d56d96d5c66f495dc6ca0be7d43b84ed12e3cc3"
+    },
+    {
+     "by": "tools/tick.py soil_science",
+     "claim": "[on the one map] Soil is the thin living skin where rock, water, air and life meet: it rests on chemistry (the mineral nutrients and pH), earth science (the parent rock weathered over deep time) and biology (the microbes, fungi and roots). Lose it and agriculture fails. Ties card_floor_soil_science.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

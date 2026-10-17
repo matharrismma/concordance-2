@@ -1,0 +1,451 @@
+{
+ "entry": "formal_logic",
+ "rc": 0,
+ "seals": {
+  "0ffc798c1c016f5bc1b65a5ccd4c3016f9af318ba72b4cdb393481fcca0b661a": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "1576d5211863855b0bee72b1f15c046af4f4904ccd0e9b5c222f8831a74765fe": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "16be227e2c500435ad33091a129cf327a966c264ee73308d64d4e3eb2065ddb3": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "1773656b31450ec19add148bcc817315cb5c55519c799e6d1f6d87a98f4696d7": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "38cd5cf7f77e86267c823148eaab5be06c4f600e5d84ed19f3c38fe0ff308c47": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "4ae4b41e9e156dfae4f9c1b4f2ac064c4ca6dd6f120fadae79a3550385469f08": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "4d274728f723c4eb2efa521cc0f8769eb3bb2fc4ef1db07417352ad240c13268": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "4e405f6cba1052427e30dd67a6bbeaf47fa80a03ffa53e7d7d611e14f3d3dedf": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "50cefb744e0268ec2f797f88c1d50b20b0431479b48c268213d57195118e05d3": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5ef64c896831023e91500d4b74958c3eca61055ee113d279208d8f6b4b699560": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "611d66cc5a4b58cb639af164e912c530260b3280e12ceafe728a8c115d283d9c": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "650f17c64989b3574a404c8a8f9e175a8ff8034d8324ff7a323aeaf31d02a6e9": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "694d46006594fab30c52dfcbade66eec8b3e177a47d016b3da92411decf799c6": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "6cb27b4dc3a0f1d3cd1dd9697066c1ba2ef48a5f77e33d06f138e7872a76b241": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7350c0bc5669a707869bc1aec1bf94071ca7a4891ac9430cffb6a150bb582f59": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "75308a758fe1f360970a2b2f5377d90ed2060935e0115d0b3eb6aa405c44e368": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "768f70a2a8fa36e3bffcc1033c5e4bf1f083e8600c1b1d126ed4e9128a853a34": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7d19e009f60569bf6a7101837efd7dc08c029c0b13c74006bf0fdb8a00a36066": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "8b992a035fae13adfe0d0344c8e4788bc15077c5ba9744235d60ff54039eff5e": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a133a8b432ac8baf56a96fe65c6dd116bb44bac90833af030abcf51f36926104": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "beea6e5a501e873ef940e3a44ddd89a744f92dd16955dbea08b143515966a118": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "bf721976b7c16218903a1baaba8367baf8e4385c24554e75d3be20b047580a12": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d38e36c370ebcbfc277158fdf667c183f9af37dc96249ce85d6c145cc9e422db": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d481d0e4e787ed09bd16d6ca39692ddfecee1f1113d1848dd4658c984e398198": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d646baf4bb92b09df17b83c3392d71e9009f8ab576c67b29e25a0c27de5600cd": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "ebae2057abf6f01f83072bdf25b0b17558a9b86406ad466e3bd30799548959e6": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "eea2da4c2ab3eea32e4c86a66f6fd1ea3d6f5d9780570cf5c6bb6fd460952d18": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "efcd8228c04dbd2476e26f82cc52fdba6cf36e4c07428b8b6ab197f30ad9bae8": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "f0f0c523df13d85a79e535d8ffcb3d23cdcc13ab8de1f28e22cacd94556a67ee": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "faa573cd7dfab0352980cfe1d61012e80a10c75ab44fe2a522b739b0527e9c18": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "fcaafe2868ea3e068682458c85f3ac56068f264801a7c612654cad3f227942a6": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "fd87dafa24edc450286cae8c368192dea37ae9398ccad38bbd74d298d264f942": {
+   "axis": "formal_logic",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_formal_logic_boolean_algebra_inference_forms_nand_and_nor": {
+   "field": "formal_logic",
+   "question": "Formal logic - Boolean algebra, inference forms, NAND and NOR",
+   "references": [
+    "G. Boole, The Laws of Thought (1854)",
+    "H. M. Sheffer, A set of five independent postulates for Boolean algebras (1913)"
+   ],
+   "statement": "Every law of propositional logic is a theorem of the two-element Boolean algebra, decided by its truth table.",
+   "ticks": [
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[identity, SEALED] p & True = p: True is the identity for AND (sealed by its truth table through formal_logic.LOGIC_VERIFY). The algebra's two elements, 1 and 0, are the units of its two operations.",
+     "kind": "instance",
+     "seal": "a133a8b432ac8baf56a96fe65c6dd116bb44bac90833af030abcf51f36926104"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[identity, the dual] p | False = p: False is the identity for OR (sealed by its truth table through formal_logic.LOGIC_VERIFY). Every law below has a dual - swap AND with OR and True with False - and the dual is a theorem too.",
+     "kind": "instance",
+     "seal": "ebae2057abf6f01f83072bdf25b0b17558a9b86406ad466e3bd30799548959e6"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[domination, SEALED] p & False = False (sealed by its truth table through formal_logic.LOGIC_VERIFY): False annihilates under AND.",
+     "kind": "instance",
+     "seal": "0ffc798c1c016f5bc1b65a5ccd4c3016f9af318ba72b4cdb393481fcca0b661a"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[domination, the dual] p | True = True (sealed by its truth table through formal_logic.LOGIC_VERIFY): True annihilates under OR.",
+     "kind": "instance",
+     "seal": "5ef64c896831023e91500d4b74958c3eca61055ee113d279208d8f6b4b699560"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[idempotent, SEALED] p & p = p (sealed by its truth table through formal_logic.LOGIC_VERIFY): saying it twice adds nothing - unlike arithmetic, where x * x is not x.",
+     "kind": "instance",
+     "seal": "efcd8228c04dbd2476e26f82cc52fdba6cf36e4c07428b8b6ab197f30ad9bae8"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[idempotent, the dual] p | p = p (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "kind": "instance",
+     "seal": "faa573cd7dfab0352980cfe1d61012e80a10c75ab44fe2a522b739b0527e9c18"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[complement, SEALED] p & ~p = False (sealed by its truth table through formal_logic.LOGIC_VERIFY): the law of non-contradiction - a thing and its denial are never both true.",
+     "kind": "instance",
+     "seal": "75308a758fe1f360970a2b2f5377d90ed2060935e0115d0b3eb6aa405c44e368"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[complement, the dual] p | ~p = True (sealed by its truth table through formal_logic.LOGIC_VERIFY): the law of excluded middle - one of them is.",
+     "kind": "instance",
+     "seal": "d646baf4bb92b09df17b83c3392d71e9009f8ab576c67b29e25a0c27de5600cd"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[double negation, SEALED] ~~p = p (sealed by its truth table through formal_logic.LOGIC_VERIFY): in the two-element algebra a denial denied is the thing itself.",
+     "kind": "instance",
+     "seal": "f0f0c523df13d85a79e535d8ffcb3d23cdcc13ab8de1f28e22cacd94556a67ee"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[commutative, SEALED] p & q = q & p (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "kind": "instance",
+     "seal": "7d19e009f60569bf6a7101837efd7dc08c029c0b13c74006bf0fdb8a00a36066"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[commutative, the dual] p | q = q | p (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "kind": "instance",
+     "seal": "694d46006594fab30c52dfcbade66eec8b3e177a47d016b3da92411decf799c6"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[associative, SEALED] (p & q) & r = p & (q & r) (sealed by its truth table through formal_logic.LOGIC_VERIFY): the grouping does not matter, so a chain of ANDs needs no parentheses.",
+     "kind": "instance",
+     "seal": "beea6e5a501e873ef940e3a44ddd89a744f92dd16955dbea08b143515966a118"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[associative, the dual] (p | q) | r = p | (q | r) (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "kind": "instance",
+     "seal": "8b992a035fae13adfe0d0344c8e4788bc15077c5ba9744235d60ff54039eff5e"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[distributive, SEALED] p & (q | r) = (p & q) | (p & r) (sealed by its truth table through formal_logic.LOGIC_VERIFY): AND distributes over OR, as multiplication over addition.",
+     "kind": "instance",
+     "seal": "d38e36c370ebcbfc277158fdf667c183f9af37dc96249ce85d6c145cc9e422db"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[distributive, the dual] p | (q & r) = (p | q) & (p | r) (sealed by its truth table through formal_logic.LOGIC_VERIFY): OR distributes over AND too - the law arithmetic does NOT have (a + bc is not (a+b)(a+c)). This is where Boolean algebra parts from the algebra of numbers.",
+     "kind": "instance",
+     "seal": "611d66cc5a4b58cb639af164e912c530260b3280e12ceafe728a8c115d283d9c"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[absorption, SEALED] p & (p | q) = p (sealed by its truth table through formal_logic.LOGIC_VERIFY): the second factor is swallowed by the first.",
+     "kind": "instance",
+     "seal": "1576d5211863855b0bee72b1f15c046af4f4904ccd0e9b5c222f8831a74765fe"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[absorption, the dual] p | (p & q) = p (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "kind": "instance",
+     "seal": "4d274728f723c4eb2efa521cc0f8769eb3bb2fc4ef1db07417352ad240c13268"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[De Morgan, SEALED] ~(p & q) = ~p | ~q (sealed by its truth table through formal_logic.LOGIC_VERIFY): the denial of a conjunction is the disjunction of the denials - 'not both' is 'at least one is not'.",
+     "kind": "instance",
+     "seal": "bf721976b7c16218903a1baaba8367baf8e4385c24554e75d3be20b047580a12"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[De Morgan, the dual] ~(p | q) = ~p & ~q (sealed by its truth table through formal_logic.LOGIC_VERIFY): 'neither' is 'not this and not that'.",
+     "kind": "instance",
+     "seal": "16be227e2c500435ad33091a129cf327a966c264ee73308d64d4e3eb2065ddb3"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[modus ponens, SEALED] p, p >> q |= q (sealed by its truth table through formal_logic.LOGIC_VERIFY: no row makes both premises true and the conclusion false). The form every deduction stands on.",
+     "kind": "instance",
+     "seal": "d481d0e4e787ed09bd16d6ca39692ddfecee1f1113d1848dd4658c984e398198"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[modus tollens, SEALED] p >> q, ~q |= ~p (sealed by its truth table through formal_logic.LOGIC_VERIFY): deny the consequent and the antecedent falls - the shape of refutation.",
+     "kind": "instance",
+     "seal": "1773656b31450ec19add148bcc817315cb5c55519c799e6d1f6d87a98f4696d7"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[hypothetical syllogism, SEALED] p >> q, q >> r |= p >> r (sealed by its truth table through formal_logic.LOGIC_VERIFY): implications chain, which is why a proof can be long.",
+     "kind": "instance",
+     "seal": "50cefb744e0268ec2f797f88c1d50b20b0431479b48c268213d57195118e05d3"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[disjunctive syllogism, SEALED] p | q, ~p |= q (sealed by its truth table through formal_logic.LOGIC_VERIFY): eliminate one branch and the other remains - narrowing by elimination.",
+     "kind": "instance",
+     "seal": "4ae4b41e9e156dfae4f9c1b4f2ac064c4ca6dd6f120fadae79a3550385469f08"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[affirming the consequent, SEALED AS A FALLACY] p >> q, q does NOT entail p: the seal records claimed_entailment = false, confirmed by the row p = False, q = True where both premises hold and the conclusion fails. 'If it rained the ground is wet; the ground is wet' does not give rain.",
+     "kind": "instance",
+     "seal": "768f70a2a8fa36e3bffcc1033c5e4bf1f083e8600c1b1d126ed4e9128a853a34"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[denying the antecedent, SEALED AS A FALLACY] p >> q, ~p does NOT entail ~q: sealed with claimed_entailment = false, the counter-row p = False, q = True. The engine seals what the table shows - a fallacy is kept as a fallacy, never dressed as a rule.",
+     "kind": "instance",
+     "seal": "650f17c64989b3574a404c8a8f9e175a8ff8034d8324ff7a323aeaf31d02a6e9"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[NAND is complete: NOT, SEALED] ~p = ~(p & p) (sealed by its truth table through formal_logic.LOGIC_VERIFY): NOT from a single NAND with both inputs tied together - the first step of Sheffer's stroke.",
+     "kind": "instance",
+     "seal": "7350c0bc5669a707869bc1aec1bf94071ca7a4891ac9430cffb6a150bb582f59"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[NAND is complete: AND, SEALED] p & q = ~(~(p & q) & ~(p & q)) (sealed by its truth table through formal_logic.LOGIC_VERIFY): AND is a NAND followed by a NAND-as-NOT - two gates.",
+     "kind": "instance",
+     "seal": "38cd5cf7f77e86267c823148eaab5be06c4f600e5d84ed19f3c38fe0ff308c47"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[NAND is complete: OR, SEALED] p | q = ~(~(p & p) & ~(q & q)) (sealed by its truth table through formal_logic.LOGIC_VERIFY): OR is De Morgan read through NAND - three gates. With NOT, AND and OR all rebuilt, every Boolean function is reachable from NAND alone: the one gate a whole computer can be wired from.",
+     "kind": "instance",
+     "seal": "eea2da4c2ab3eea32e4c86a66f6fd1ea3d6f5d9780570cf5c6bb6fd460952d18"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[NOR is complete: NOT, SEALED] ~p = ~(p | p) (sealed by its truth table through formal_logic.LOGIC_VERIFY): the dual stroke (Peirce's arrow).",
+     "kind": "instance",
+     "seal": "fd87dafa24edc450286cae8c368192dea37ae9398ccad38bbd74d298d264f942"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[NOR is complete: OR, SEALED] p | q = ~(~(p | q) | ~(p | q)) (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "kind": "instance",
+     "seal": "fcaafe2868ea3e068682458c85f3ac56068f264801a7c612654cad3f227942a6"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[NOR is complete: AND, SEALED] p & q = ~(~(p | p) | ~(q | q)) (sealed by its truth table through formal_logic.LOGIC_VERIFY). NOR alone is also complete - the Apollo guidance computer was built from one three-input NOR gate, repeated.",
+     "kind": "instance",
+     "seal": "6cb27b4dc3a0f1d3cd1dd9697066c1ba2ef48a5f77e33d06f138e7872a76b241"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[minimal form, SEALED] (p & q) | (p & ~q) minimizes to p - one product term, and no equivalent sum-of-products has fewer (sealed through formal_logic.minimal_form: Quine-McCluskey prime implicants and an exhaustive minimum cover, exact to four variables). Absorption, read as a circuit: two gates become a wire.",
+     "kind": "instance",
+     "seal": "4e405f6cba1052427e30dd67a6bbeaf47fa80a03ffa53e7d7d611e14f3d3dedf"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[the postulates, CITED] Boole gave logic an algebra - the laws of thought as equations over 0 and 1 (1854); Sheffer showed the whole algebra rests on five independent postulates and that a single operation, the stroke (NAND), suffices to define the rest (1913). The postulate sets are CITED, never sealed: an axiom is chosen, not proven. Every law above is a THEOREM of those postulates, and each one is sealed by the only proof the two-element algebra needs - its truth table.",
+     "kind": "postulate",
+     "source": "G. Boole, The Laws of Thought (1854); H. M. Sheffer, A set of five independent postulates for Boolean algebras, Trans. AMS 14 (1913) 481-488"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[the bound, stated] Every seal here is an exhaustive truth table over at most three variables - eight rows, complete and exact. The minimal_form check decides minimality exactly to FOUR variables (16 minterms, at most 13 prime implicants, an exhaustive cover); at five or more it returns NOT_APPLICABLE with the reason - bounded, never a guess. First-order logic (quantifiers) is not exposed by the verifier and is declined: a miss stays a miss.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py formal_logic",
+     "claim": "[on the one map] Boolean algebra is one algebra with three faces: logic (this stick), circuits (computer_science.logic_gate - the 16 functions of two inputs) and sets (mathematics.set_algebra - union, intersection, complement obey the same laws). One Boolean core backs all three verifiers. Ties the computer-science stick and card_floor_computer_science.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

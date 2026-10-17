@@ -1,0 +1,68 @@
+{
+ "entry": "regev",
+ "rc": 0,
+ "seals": {
+  "330f09dbabd3fa61836772df7463d108ea0faab127ebfbda120265968c911e9c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "shor_factor_21"
+   ]
+  },
+  "6d1d533063b3804e8b9f24623a3786ae346fae99673806ec0dae8254a3365878": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "regev_sqrt_n_2048"
+   ]
+  },
+  "ee87db6ece814b279075cdcb24d95bea0b5b920c8ca9deed50ba860a67152ac8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "shor_factor_15"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_quantum_factoring_shor_and_regev": {
+   "field": "computer_science",
+   "question": "Quantum factoring - Shor and Regev",
+   "references": [
+    "P. W. Shor, SIAM J. Comput. 26 (1997) 1484 (polynomial-time factoring)",
+    "O. Regev, An Efficient Quantum Factoring Algorithm, arXiv:2308.06572 (2023)"
+   ],
+   "statement": "A quantum computer factors integers in polynomial time (Shor 1994), and Regev (2023) improves the circuit to ~n^1.5. The CLASSICAL reduction — order-finding to a gcd — is exact and sealed. What stays open: whether factoring is classically hard (RSA's security is an assumption, not a theorem) and whether a cryptographically-relevant quantum computer can be built. The algorithm is proven on paper; the machine is not.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the quantum-factoring reading (Shor/Regev), 2026-10-06",
+     "claim": "[Shor's classical core - N=15] With a=2, the order of 2 mod 15 is r=4 (2^4 = 16 = 1 mod 15). Then N divides 2^4 - 1 = (2^2 - 1)(2^2 + 1) = 3 * 5 = 15 (sealed) — exactly the difference-of-squares the gcd step exploits: gcd(2^2 - 1, 15)=3, gcd(2^2 + 1, 15)=5. The quantum computer's ONLY job is to find r; this reduction is classical and exact.",
+     "kind": "witness",
+     "seal": "ee87db6ece814b279075cdcb24d95bea0b5b920c8ca9deed50ba860a67152ac8"
+    },
+    {
+     "by": "Narrow Highway - the quantum-factoring reading (Shor/Regev), 2026-10-06",
+     "claim": "[a second - N=21] With a=2, the order of 2 mod 21 is r=6; the half-power gives 2^3 - 1 = 7, and 7 is a factor of 21 (21 = 3 * 7, gcd(2^3+1,21)=gcd(9,21)=3). Sealed. Same mechanism, a different number — found, not guessed.",
+     "kind": "witness",
+     "seal": "330f09dbabd3fa61836772df7463d108ea0faab127ebfbda120265968c911e9c"
+    },
+    {
+     "by": "Narrow Highway - the quantum-factoring reading (Shor/Regev), 2026-10-06",
+     "claim": "[Regev's improvement] Shor's circuit does ~n modular multiplications of n-bit numbers (n = log2 N) -> ~n^2 gates. Regev (2023) generalizes period-finding to d dimensions, needing only ~sqrt(n) multiplications per run -> ~n^1.5 depth, at the cost of ~sqrt(n) runs plus classical lattice post-processing. For RSA-2048, sqrt(2048) = 45.2548 (sealed) vs 2048 — a ~sqrt(n) cut in circuit depth, the practical barrier.",
+     "kind": "witness",
+     "seal": "6d1d533063b3804e8b9f24623a3786ae346fae99673806ec0dae8254a3365878"
+    },
+    {
+     "by": "Narrow Highway - the quantum-factoring reading (Shor/Regev), 2026-10-06",
+     "claim": "[the open questions] Factoring sits in NP intersect coNP and is NOT known to be NP-complete, and NOT proven classically hard — so RSA's security is an ASSUMPTION, not a theorem (ties stick_p_versus_np). And no quantum computer has factored a cryptographically-relevant integer: honest demonstrations reach only tiny N (15, 21); larger 'records' used problem-specific shortcuts, not scalable Shor. The algorithm is proven on paper; the machine is not built. Evidence and theory, never 'RSA is broken today.'",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the quantum-factoring reading (Shor/Regev), 2026-10-06",
+     "claim": "[the thread] Period-finding runs on the Quantum Fourier Transform — the same Fourier structure under the quantum arc here. And the defense is post-quantum LATTICE cryptography (Learning With Errors), founded by Oded Regev — the same person as this improved factoring algorithm: he sharpened the sword and forged the shield. The engine's cryptography verifier checks the number theory; it does not run a quantum circuit. Seal the arithmetic; attribute the algorithms.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

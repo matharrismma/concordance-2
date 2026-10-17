@@ -1,0 +1,65 @@
+{
+ "entry": "bsd_formula",
+ "rc": 0,
+ "seals": {
+  "63611e99d8594a2ecf3e7e25cea892db65ee0127d84ee12a360f5e75756613f7": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "bsd_formula"
+   ]
+  },
+  "ac34fe1ca064aacfe486e872990e82ceda80e1b2d995d9f6f4c5cb7d83bd1557": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "bsd_formula"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_birch_and_swinnerton_dyer_conjecture": {
+   "field": "",
+   "question": "Birch and Swinnerton-Dyer conjecture",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py bsd_formula",
+     "claim": "E = 11a1 (conductor 11), THE FULL FORMULA: L(E,1)/Omega = |Sha| * prod c_p / |T|^2 = 1 * 5 / 5^2 = 1/5 - L(E,1) computed by the approximate functional equation and Omega = 1.2692093043 computed by integration (sealed); the Tamagawa product 5, torsion 5 and |Sha| = 1 cited from Cremona's tables (LMFDB 11.a3). For analytic rank 0 the formula is a theorem for this curve once Sha is known (Kolyvagin 1989); this is a sealed link of a proven case. elliptic_curves.bsd_formula: L(E,1) / Omega = |Sha| * prod c_p / |T|^2 holds for this curve to 0.0001: 0.20000000 = 0.20000000 (L computed by the AFE, Omega = 1",
+     "kind": "instance",
+     "seal": "ac34fe1ca064aacfe486e872990e82ceda80e1b2d995d9f6f4c5cb7d83bd1557"
+    },
+    {
+     "by": "tools/tick.py bsd_formula",
+     "claim": "E = 37a1 (conductor 37), THE FULL FORMULA at rank 1: L'(E,1)/Omega = |Sha| * prod c_p * R / |T|^2 = R = 0.0511114082 - L'(E,1) computed by the approximate functional equation and Omega = 5.9869172925 computed by integration (sealed); the regulator (the canonical height of the generator (0,0)), Tamagawa 1, torsion 1 and |Sha| = 1 cited from Cremona's tables (LMFDB 37.a1). Gross-Zagier 1986 and Kolyvagin 1989 make rank 1 a proven case. elliptic_curves.bsd_formula: L'(E,1) / Omega = |Sha| * prod c_p * R / |T|^2 holds for this curve to 0.0001: 0.05111141 = 0.05111141 (L computed by the AFE, Omeg",
+     "kind": "instance",
+     "seal": "63611e99d8594a2ecf3e7e25cea892db65ee0127d84ee12a360f5e75756613f7"
+    },
+    {
+     "by": "tools/tick.py bsd_formula",
+     "claim": "For analytic rank 0 or 1, BSD's rank statement is a THEOREM: L(E,1) != 0 => rank E(Q) = 0 and Sha(E) finite (Kolyvagin 1989, using Gross-Zagier 1986 and Kolyvagin's Euler system); L(E,1) = 0 with L'(E,1) != 0 => rank 1 and Sha finite. The modularity theorem (Wiles 1995; Breuil-Conrad-Diamond-Taylor 2001) makes L(E,s) entire for every elliptic curve over Q, so the left side always exists.",
+     "kind": "equivalence",
+     "source": "V. Kolyvagin (1989); B. Gross, D. Zagier (1986); A. Wiles (1995); C. Breuil, B. Conrad, F. Diamond, R. Taylor (2001)"
+    },
+    {
+     "by": "tools/tick.py bsd_formula",
+     "claim": "A PROVEN PROPORTION, carried as a bound: at least 66.48% of elliptic curves over Q (ordered by naive height) have rank 0 or 1 and satisfy the Birch and Swinnerton-Dyer rank conjecture (Bhargava-Skinner-Zhang 2014, with Bhargava-Shankar on the average size of Selmer groups and Skinner-Urban / Zhang on the converse to Gross-Zagier-Kolyvagin). The window above the bound - the remaining proportion and every curve of rank >= 2 - stays open.",
+     "kind": "equivalence",
+     "source": "M. Bhargava, C. Skinner, W. Zhang, A majority of elliptic curves over Q satisfy the Birch and Swinnerton-Dyer conjecture (2014, arXiv:1407.1826); M. Bhargava, A. Shankar (2015)"
+    },
+    {
+     "by": "tools/tick.py bsd_formula",
+     "claim": "If Sha(E) is finite, its order is a perfect square (Cassels 1962, the alternating pairing on Sha) - so the formula's |Sha| is never a non-square; the stick's two sealed instances carry |Sha| = 1 = 1^2.",
+     "kind": "equivalence",
+     "source": "J. W. S. Cassels, Arithmetic on curves of genus 1 IV (1962)"
+    },
+    {
+     "by": "tools/tick.py bsd_formula",
+     "claim": "[the surviving window, read] Sealed: the rank for 30 curves of conductor <= 5077 (Kolyvagin/Gross-Zagier carry rank 0 and 1; rank 2 and 3 are reported numerically, no theorem) and now the FULL FORMULA for 11a1 and 37a1 with the period computed and the arithmetic inputs cited. Cited: the rank-0/1 theorem, modularity, the proven >= 66.48% proportion, Cassels' square. Open: every curve of analytic rank >= 2 (389a1, 5077a1 on this stick), the finiteness of Sha in general, and the formula for the remaining proportion. Gaps become wants: Cremona's full tables (Tamagawa numbers, torsion, regulators, |Sha| for every curve of conductor <= 500000) so the formula can be sealed curve by curve; the canonical height, so the regulator is COMPUTED and not cited. Every link sealed or cited; nothing out of thin air; the chain not closed.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

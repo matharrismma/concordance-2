@@ -1,0 +1,68 @@
+{
+ "entry": "units_matter",
+ "rc": 0,
+ "seals": {
+  "79f4c937ce6165eae464c164938724cd73156eb729e8c2281e7ae34687b0f8a1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mph_to_m_per_s"
+   ]
+  },
+  "cc97c21f2df7df1cb6b7435c3dadd984a3485c52b26b0ce090285df4285ae3cf": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "lbf_to_newton"
+   ]
+  },
+  "eca13e35545154a1959be3ea92269eaf4b8b60732105ec5ef9602a42b1ae36a1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "inch_to_metre_exact"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_units_matter": {
+   "field": "physics",
+   "question": "Units matter",
+   "references": [
+    "NASA Mars Climate Orbiter Mishap Investigation Board report (1999)",
+    "BIPM, The International System of Units (SI); the international inch = 0.0254 m (1959)"
+   ],
+   "statement": "A measured value is true only with its unit: a dimensionally-inconsistent claim is false regardless of the digits, and a conversion factor dropped or inverted is a real error. Trigonometry's pure identities aside, physics is unit-bearing, and the engine seals a value WITH its unit, never as a bare number.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the units-matter reading, 2026-10-07",
+     "claim": "[the Mars Climate Orbiter - units cost a mission] In 1999 the $327M orbiter was lost because one team supplied impulse in pound-force-seconds while the navigation software expected newton-seconds. 1 lbf = 4.4482216152605 N (sealed): the same NUMBER was a thrust 4.45x off, the craft dropped too low into the Martian atmosphere and broke apart. The digits were right; the units were not. Units are part of the truth.",
+     "kind": "witness",
+     "seal": "cc97c21f2df7df1cb6b7435c3dadd984a3485c52b26b0ce090285df4285ae3cf"
+    },
+    {
+     "by": "Narrow Highway - the units-matter reading, 2026-10-07",
+     "claim": "[a number is nothing without its unit] 1 international inch = 0.0254 m, EXACTLY by definition (sealed, 1959). A bare '1' is not a length; '1 inch' and '1 metre' are different lengths. The unit carries the physical meaning, and unit definitions are exact.",
+     "kind": "witness",
+     "seal": "eca13e35545154a1959be3ea92269eaf4b8b60732105ec5ef9602a42b1ae36a1"
+    },
+    {
+     "by": "Narrow Highway - the units-matter reading, 2026-10-07",
+     "claim": "[units chain, and every factor counts] 60 mph = 60 * 1609.344 m/mi / 3600 s/h = 26.8224 m/s (sealed). Drop or invert any one conversion factor and the answer is wrong by exactly that factor - carrying units through a calculation is a computation, not a formality.",
+     "kind": "witness",
+     "seal": "79f4c937ce6165eae464c164938724cd73156eb729e8c2281e7ae34687b0f8a1"
+    },
+    {
+     "by": "Narrow Highway - the units-matter reading, 2026-10-07",
+     "claim": "[dimensional analysis is a verifier] The engine treats the unit as part of the claim: a dimensionally-inconsistent statement - adding a length to a time, reporting an energy in momentum units - is FALSE regardless of the digits (physics.verify_dimensional_consistency; the units and si_units verifiers; the 6-constant governance is unit-aware). A value is sealed WITH its unit, never as a bare number.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the units-matter reading, 2026-10-07",
+     "claim": "[our own hard lesson] The engine learned this concretely: a Fable review (2026-10-01) caught it minting a UNIT-LABEL FALSE SEAL - a sealed value carrying the wrong unit - fixed in commit 7debdaf. 'Units matter' is not a slogan here; it is a guardrail written in a caught mistake. A number without its correct unit is not yet true. Ties the constant governance (a discordance indicts the method) and the Fable-review findings.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

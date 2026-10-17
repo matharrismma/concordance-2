@@ -1,0 +1,47 @@
+{
+ "entry": "education",
+ "rc": 0,
+ "seals": {
+  "7740e42784d65ef1d2bf809df6748c4d9028a96e61f529eab743f817b5ae0654": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "forgetting_curve_retention_one_over_e"
+   ]
+  },
+  "feb89a01b34d4f13311374d4647e1ce1861a40a3165faf7ce0c6b284a9076fe3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "flesch_reading_ease_15_wps_1_5_syllables"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_education_how_a_mind_learns_and_is_taught": {
+   "field": "",
+   "question": "Education - how a mind learns and is taught",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py education",
+     "claim": "[memory fades - the forgetting curve, SEALED] Without review, retention falls as e^(-t/S): after one time-constant only 1/e = 0.368 (sealed), about a third, remains. Ebbinghaus measured it on himself. The fix is SPACED repetition and the TESTING effect - recall, not reread - which flatten the curve. Teaching is training the memory. Ties card_floor_the_mind.",
+     "kind": "instance",
+     "seal": "7740e42784d65ef1d2bf809df6748c4d9028a96e61f529eab743f817b5ae0654"
+    },
+    {
+     "by": "tools/tick.py education",
+     "claim": "[text has a reading level - Flesch, SEALED] Readability is measurable: Flesch reading ease = 206.835 - 1.015*(words/sentence) - 84.6*(syllables/word); at 15 words per sentence and 1.5 syllables per word that is 64.7 (sealed), plain standard English. Shorter sentences and words read easier - a formula, not a taste. Ties card_floor_statistics.",
+     "kind": "instance",
+     "seal": "feb89a01b34d4f13311374d4647e1ce1861a40a3165faf7ce0c6b284a9076fe3"
+    },
+    {
+     "by": "tools/tick.py education",
+     "claim": "[on the one map] Education rests on the mind (learning is neural change, memory is storage) and statistics (assessment, item response, the measurement of learning). Teaching is training: present, recall, space, test - the same loop by which any system is taught. Ties card_floor_education.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

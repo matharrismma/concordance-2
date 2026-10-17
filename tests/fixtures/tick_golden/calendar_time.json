@@ -1,0 +1,47 @@
+{
+ "entry": "calendar_time",
+ "rc": 0,
+ "seals": {
+  "70b09c6f51c7f16220b24429ec9b20e9f7ca4cc6a2be38838aa76c30aee08af0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gregorian_mean_year_days"
+   ]
+  },
+  "928f2a2020e2449baf64b9b662fc7dfc8b4c132960f67d1d7f882c9b72afa3f3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "seconds_in_a_day"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_calendar_keeping_time_by_sun_and_number": {
+   "field": "",
+   "question": "The calendar - keeping time by sun and number",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py calendar_time",
+     "claim": "[the day - one rotation, SEALED] A day is one turn of the Earth, divided 24 x 60 x 60 = 86400 seconds (sealed). The division into 24, 60, 60 is Babylonian (base 60); the second is now the SI base unit, fixed by the caesium atom. Ties card_floor_astronomy (the rotation).",
+     "kind": "instance",
+     "seal": "928f2a2020e2449baf64b9b662fc7dfc8b4c132960f67d1d7f882c9b72afa3f3"
+    },
+    {
+     "by": "tools/tick.py calendar_time",
+     "claim": "[the year - one orbit, and the leap rule, SEALED] A tropical year is about 365.2422 days - not whole - so the Gregorian calendar adds 97 leap days every 400 years, averaging 365 + 97/400 = 365.2425 (sealed), off by only 26 seconds a year. The leap rule (every 4, except centuries, except every 400) is number chasing the sun. Ties card_floor_astronomy (the orbit).",
+     "kind": "instance",
+     "seal": "70b09c6f51c7f16220b24429ec9b20e9f7ca4cc6a2be38838aa76c30aee08af0"
+    },
+    {
+     "by": "tools/tick.py calendar_time",
+     "claim": "[on the one map] The calendar rests on astronomy (the day is the rotation, the year the orbit) and metrology (the second, the SI base unit). It is the oldest applied science - reconciling the incommensurable periods of day, month and year by number. Ties card_floor_the_calendar.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

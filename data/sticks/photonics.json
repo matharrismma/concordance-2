@@ -1,0 +1,256 @@
+{
+ "schema": 1,
+ "name": "photonics",
+ "aliases": [
+  "photonics",
+  "waveguide",
+  "fiber_optics",
+  "laser",
+  "v_number"
+ ],
+ "doc": "PHOTONICS - guided, resonant, active and nonlinear light, sealed (issue #11, 2026-10-16: reach, down the\ndomain list). Through photonics.PHOT_VERIFY: the V-number of a step-index fibre (single-mode at 1550 nm, the same\nfibre multimode at 1000 nm - the cutoff at V = 2.405, the first zero of J0), a ring resonator's free spectral\nrange, 40 km of silica at 0.2 dB/km, a lithium-niobate modulator's V_pi, second-harmonic power scaling as the\nsquare, a diode laser above threshold and sealed DARK below it, a grating's first order, Beer-Lambert absorption,\nthe energy of a 500 nm photon through h, and the Compton wavelength and shifts through alpha. The measured\nmaterial constants are CITED; the relations are SEALED. Idempotent.",
+ "seals": [
+  {
+   "key": "v_single_mode",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "core_radius_m": 4.1e-06,
+    "numerical_aperture": 0.12,
+    "wavelength_m": 1.55e-06,
+    "claimed_v_number": 1.994
+   }
+  },
+  {
+   "key": "v_multimode",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "core_radius_m": 4.1e-06,
+    "numerical_aperture": 0.12,
+    "wavelength_m": 1e-06,
+    "claimed_v_number": 3.091
+   }
+  },
+  {
+   "key": "ring_fsr",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "group_index": 4.2,
+    "ring_length_m": 6.28e-05,
+    "claimed_fsr_hz": 1136600000000.0
+   }
+  },
+  {
+   "key": "fiber_loss",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "input_power_dbm": 3.0,
+    "attenuation_db_per_km": 0.2,
+    "length_km": 40.0,
+    "claimed_output_dbm": -5.0
+   }
+  },
+  {
+   "key": "vpi",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "wavelength_m": 1.55e-06,
+    "gap_m": 1e-05,
+    "index": 2.2,
+    "eo_coefficient_m_per_v": 3.08e-11,
+    "length_m": 0.02,
+    "claimed_vpi_v": 2.363
+   }
+  },
+  {
+   "key": "shg",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "reference_fundamental_w": 1.0,
+    "reference_shg_w": 0.01,
+    "test_fundamental_w": 2.0,
+    "claimed_shg_w": 0.04
+   }
+  },
+  {
+   "key": "laser_above",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "threshold_current_a": 0.015,
+    "slope_efficiency_w_per_a": 0.9,
+    "drive_current_a": 0.05,
+    "claimed_output_w": 0.0315
+   }
+  },
+  {
+   "key": "laser_below",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "threshold_current_a": 0.015,
+    "slope_efficiency_w_per_a": 0.9,
+    "drive_current_a": 0.01,
+    "claimed_output_w": 0.0
+   }
+  },
+  {
+   "key": "grating",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "grating_period_m": 3e-06,
+    "order": 1,
+    "wavelength_m": 1.55e-06,
+    "claimed_angle_deg": 31.11
+   }
+  },
+  {
+   "key": "beer_lambert",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "input_intensity": 1.0,
+    "coefficient_per_m": 200.0,
+    "path_length_m": 0.001,
+    "claimed_output_intensity": 0.8187
+   }
+  },
+  {
+   "key": "photon_500nm",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "photon_wavelength_m": 5e-07,
+    "claimed_photon_energy_ev": 2.48
+   }
+  },
+  {
+   "key": "compton_wavelength",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "claimed_compton_wavelength_m": 2.4263e-12
+   }
+  },
+  {
+   "key": "compton_90",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "compton_angle_deg": 90,
+    "claimed_compton_shift_m": 2.4263e-12
+   }
+  },
+  {
+   "key": "compton_180",
+   "domain": "photonics",
+   "artifact": "PHOT_VERIFY",
+   "spec": {
+    "compton_angle_deg": 180,
+    "claimed_compton_shift_m": 4.8526e-12
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Photonics - guided, resonant, active and nonlinear light, sealed",
+   "statement": "Light engineered as a signal obeys closed forms: a mode count V, a resonator's FSR, loss in decibels, a modulator's V_pi, a square law, a threshold, a grating, an exponential, and the photon's E = h c / lambda.",
+   "field": "photonics",
+   "references": [
+    "B. E. A. Saleh & M. C. Teich, Fundamentals of Photonics, 2nd ed. (2007)",
+    "G. P. Agrawal, Fiber-Optic Communication Systems, 4th ed. (2010)",
+    "T. Miya et al., Ultimate low-loss single-mode fibre at 1.55 um, Electron. Lett. 15 (1979) 106",
+    "A. H. Compton, Phys. Rev. 21 (1923) 483; CODATA 2018 lambda_C = 2.42631e-12 m"
+   ],
+   "by": "tools/tick.py photonics",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[single-mode, SEALED] A step-index fibre with core radius 4.1 um and NA 0.12 at 1550 nm has V = 2 pi a NA / lambda = 1.994 (sealed through photonics.PHOT_VERIFY): below 2.405, so exactly one guided mode. 2.405 is the first zero of the Bessel function J0 - the cutoff is a theorem, the fibre is built to sit under it.",
+     "seal": "v_single_mode"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the same fibre, multimode, SEALED] At 1000 nm the same fibre has V = 3.091 (sealed through photonics.PHOT_VERIFY): above cutoff, a second mode propagates. Single-mode is a property of fibre AND wavelength; the cutoff wavelength of this fibre is 2 pi a NA / 2.405 = 1286 nm.",
+     "seal": "v_multimode"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a ring resonator, SEALED] Group index 4.2, circumference 62.8 um: FSR = c / (n_g L) = 1.137 THz (sealed through photonics.PHOT_VERIFY) - the resonances of a silicon microring are spaced by the round-trip time's inverse.",
+     "seal": "ring_fsr"
+    },
+    {
+     "kind": "instance",
+     "claim": "[40 km of silica, SEALED] 3 dBm in, 0.2 dB/km over 40 km: 3 - 8 = -5 dBm out (sealed through photonics.PHOT_VERIFY). 0.2 dB/km at 1550 nm is the floor silica reached in 1979 (Miya et al.) - Rayleigh scattering's limit, which is why the world's traffic travels at that wavelength.",
+     "seal": "fiber_loss"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a lithium-niobate modulator, SEALED] lambda 1550 nm, gap 10 um, n = 2.2, r33 = 30.8 pm/V, electrode 20 mm: V_pi = lambda d / (n^3 r L) = 2.36 V (sealed through photonics.PHOT_VERIFY) - the voltage that shifts the phase by pi, the number every data link is engineered around.",
+     "seal": "vpi"
+    },
+    {
+     "kind": "instance",
+     "claim": "[second harmonic, SEALED] 1 W of fundamental makes 10 mW of second harmonic; 2 W makes 40 mW (sealed through photonics.PHOT_VERIFY): P_2w scales as P_w squared, because two photons become one.",
+     "seal": "shg"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a laser above threshold, SEALED] I_th = 15 mA, slope 0.9 W/A, driven at 50 mA: P = 0.9 x 0.035 = 31.5 mW (sealed through photonics.PHOT_VERIFY). Above threshold the output is linear in the current past it.",
+     "seal": "laser_above"
+    },
+    {
+     "kind": "instance",
+     "claim": "[and below, SEALED DARK] Driven at 10 mA, under threshold: P = 0 (sealed through photonics.PHOT_VERIFY, sealed at zero). Below threshold gain does not beat loss and the device is an LED's faint glow at best, not a laser - the engine seals the dark as dark.",
+     "seal": "laser_below"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a grating, SEALED] Period 3 um, first order, 1550 nm: d sin theta = m lambda gives theta = 31.11 deg (sealed through photonics.PHOT_VERIFY).",
+     "seal": "grating"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Beer-Lambert, SEALED] alpha = 200/m over 1 mm: I = I0 e^(-0.2) = 0.8187 (sealed through photonics.PHOT_VERIFY). Absorption is exponential in the path; gain is the same law with alpha negative.",
+     "seal": "beer_lambert"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a green photon, SEALED] 500 nm carries E = h c / lambda = 2.480 eV (sealed through photonics.PHOT_VERIFY, through h). The energy that decides whether a photon can lift an electron across a gap - 2.48 eV is above silicon's 1.12, so silicon absorbs green and a solar cell works.",
+     "seal": "photon_500nm"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the Compton wavelength, SEALED] lambda_C = h / (m_e c) = 2.4263e-12 m (sealed through photonics.PHOT_VERIFY) = 2 pi alpha a_0 - the electron's length scale, through the fine-structure constant.",
+     "seal": "compton_wavelength"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the 90-degree shift, SEALED] A photon scattered at 90 deg lengthens by exactly lambda_C (sealed through photonics.PHOT_VERIFY): d lambda = lambda_C (1 - cos theta), and cos 90 = 0.",
+     "seal": "compton_90"
+    },
+    {
+     "kind": "instance",
+     "claim": "[backscatter, SEALED] At 180 deg the shift is 2 lambda_C = 4.8526e-12 m (sealed through photonics.PHOT_VERIFY) - the maximum. Compton's 1923 measurement of this shift is where light's particle momentum became fact.",
+     "seal": "compton_180"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the inputs, CITED] 0.2 dB/km (Miya 1979), r33 = 30.8 pm/V for LiNbO3, the group index 4.2 of a silicon waveguide, the slope efficiency and threshold of a diode are MEASURED; the weakly guiding step-index model behind V is an approximation that works for low-contrast fibres. Cited as postulates, inferred not kept; lambda_C is CODATA's and exact to its stated digits.",
+     "source": "Saleh & Teich (2007); Agrawal (2010); Miya et al., Electron. Lett. 15 (1979) 106; CODATA 2018"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Photonics is Maxwell's equations in a guide (card_floor_maxwells_equations: the mode condition, the grating), the photon through h and alpha (card_floor_quantum_mechanics: E = h nu; the alpha stick: lambda_C = 2 pi alpha a_0), and the decibel scale of the fibre-calibration stick. A connective domain: the same forms - wave, periodic, decay, logarithm, power law, threshold - the atlas carries elsewhere, here in glass.",
+     "source": "the one map; card_floor_maxwells_equations, card_floor_quantum_mechanics; the alpha and fiber-calibration sticks"
+    }
+   ]
+  }
+ ]
+}

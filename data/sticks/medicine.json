@@ -1,0 +1,65 @@
+{
+ "schema": 1,
+ "name": "medicine",
+ "aliases": [
+  "medicine",
+  "pharmacology",
+  "epidemiology",
+  "physiology"
+ ],
+ "doc": "MEDICINE - the body measured and mended (Matt, 2026-10-10, down the list). Physiology is biology at the scale\nof organs; pharmacology is chemistry's kinetics (a drug's half-life); epidemiology is statistics on populations\n(the herd-immunity threshold). SEALED: a body-mass index, a three-half-life drug fraction, and the herd-immunity\nthreshold for R0 = 4. Rests on biology, physical chemistry (kinetics) and statistics. Idempotent.",
+ "seals": [
+  {
+   "key": "bmi",
+   "nid": "body_mass_index_kg_over_m_squared",
+   "expr": "70/1.75**2",
+   "value": 22.857142857142858,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "halflife",
+   "nid": "drug_fraction_after_three_half_lives",
+   "expr": "(1/2)**3",
+   "value": 0.125,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "herd",
+   "nid": "herd_immunity_threshold_one_minus_one_over_r0_for_r0_4",
+   "expr": "1 - 1/4",
+   "value": 0.75,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Medicine - the body measured and mended",
+   "by": "tools/tick.py medicine",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[physiology is measured biology, SEALED] The body-mass index is weight over height squared: 70 kg / (1.75 m)^2 = 22.9 (sealed) - one number among the vitals (blood pressure, temperature, the blood panel) that turn a body into readable data. Medicine is biology (the floor below) measured at the scale of organs. Ties card_floor_biology.",
+     "seal": "bmi"
+    },
+    {
+     "kind": "instance",
+     "claim": "[pharmacology is kinetics, SEALED] A drug clears by first-order decay, the same law as radiocarbon: after three half-lives one eighth remains, (1/2)^3 = 0.125 (sealed). Dosing intervals, steady-state levels and toxicity all follow the half-life - chemistry's kinetics, applied to the bloodstream. Ties card_floor_physical_chemistry.",
+     "seal": "halflife"
+    },
+    {
+     "kind": "instance",
+     "claim": "[epidemiology is statistics, SEALED] An outbreak with reproduction number R0 = 4 needs 1 - 1/4 = 0.75, that is 75 percent, immune to stop spreading - the herd-immunity threshold (sealed). Public health is statistics on populations: incidence, trials, confidence intervals. Ties card_floor_statistics and card_floor_biology.",
+     "seal": "herd"
+    },
+    {
+     "kind": "note",
+     "claim": "[the honest edge - decline the clinical call] The engine seals the arithmetic (a BMI, a dose fraction, a threshold); it does NOT diagnose, prescribe, or give personal medical advice - that is a licensed clinical judgment, declined. A miss stays a miss. On the map, medicine rests on biology (physiology), physical chemistry (pharmacokinetics) and statistics (epidemiology). Ties card_floor_medicine.",
+     "source": "the one map; the decline of clinical advice; card_floor_medicine; tools/seed_medicine.py"
+    }
+   ]
+  }
+ ]
+}

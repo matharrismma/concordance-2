@@ -1,0 +1,47 @@
+{
+ "entry": "measurement",
+ "rc": 0,
+ "seals": {
+  "0210513cf8ab4357dcfa79a5c78e56543f1c8166eb075c78f50ed5d25364c5bc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "born_rule_normalization"
+   ]
+  },
+  "d0017c54c09c1194869c87d0212801f4477b22db0ec34cce8736bbabebc59a46": {
+   "axis": "quantum_computing",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_schrodinger_equation": {
+   "field": "",
+   "question": "The Schrodinger equation",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the measurement-problem reading, 2026-10-06",
+     "claim": "[the Born rule - what all must reproduce] For a qubit a|0> + b|1> with (a,b) = (0.6, 0.8), the measured-outcome probabilities are |a|^2 = 0.36 and |b|^2 = 0.64, and they sum to one: 0.6^2 + 0.8^2 = 1 (sealed). Every interpretation of quantum mechanics agrees on THIS arithmetic - the predictions. They differ only on what 'happens' when the measurement is made.",
+     "kind": "witness",
+     "seal": "0210513cf8ab4357dcfa79a5c78e56543f1c8166eb075c78f50ed5d25364c5bc"
+    },
+    {
+     "by": "Narrow Highway - the measurement-problem reading, 2026-10-06",
+     "claim": "[the Born rule itself, sealed as the rule] Not only that the probabilities sum to one, but that EACH outcome's probability equals its squared amplitude: P(i) = |a_i|^2 / Sum_j |a_j|^2. For (a,b) = (0.6, 0.8), P(1) = |0.8|^2 = 0.64 and P(0) = |0.6|^2 = 0.36 (sealed through quantum_computing.born_rule). Probability is amplitude squared - the law the double slit obeys: the paths' amplitudes interfere, and what the detector counts is their squared modulus.",
+     "kind": "witness",
+     "seal": "d0017c54c09c1194869c87d0212801f4477b22db0ec34cce8736bbabebc59a46"
+    },
+    {
+     "by": "Narrow Highway - the measurement-problem reading, 2026-10-06",
+     "claim": "[the interpretations - a Babel, none a fit] Copenhagen (the wavefunction collapses on measurement; instrumentalist), Everett / many-worlds (no collapse; the universal wavefunction branches), de Broglie-Bohm (a deterministic pilot wave, explicitly nonlocal), objective collapse (GRW/Penrose; collapse is a physical process), and relational quantum mechanics (Rovelli - a sealed anchor here; states are relative to the interactor). For standard quantum mechanics these are EMPIRICALLY EQUIVALENT - no experiment yet tells them apart - so the choice is discernment, NOT a fit. The Babel pattern: many likenesses, the outline of what is missing, none crowned. Seal the Born rule; attribute the readings; the meaning stays the open question.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

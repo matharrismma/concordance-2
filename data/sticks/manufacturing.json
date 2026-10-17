@@ -1,0 +1,183 @@
+{
+ "schema": 1,
+ "name": "manufacturing",
+ "aliases": [
+  "manufacturing",
+  "six_sigma",
+  "spc",
+  "process_capability",
+  "cpk"
+ ],
+ "doc": "MANUFACTURING - the quality arithmetic, sealed (issue #11, 2026-10-16: reach, down the domain list). Through\nmanufacturing.MFG_VERIFY: the Six Sigma table (3.4 defects per million is six sigma, 233 is five, 6210 is four,\n66,807 is three), Shewhart's three-sigma control limits, process capability (a centred process sealed capable, an\noff-centre one with the same spread sealed NOT capable - the Cpk lesson), and the root-sum-of-squares tolerance\nstack against the worst case. The 1.5-sigma shift, the 3-sigma limits and the 1.33 threshold are conventions,\nCITED; the arithmetic is SEALED. Idempotent.",
+ "seals": [
+  {
+   "key": "six_sigma",
+   "domain": "manufacturing",
+   "artifact": "MFG_VERIFY",
+   "spec": {
+    "dpmo": 3.4,
+    "claimed_sigma": 6.0
+   }
+  },
+  {
+   "key": "five_sigma",
+   "domain": "manufacturing",
+   "artifact": "MFG_VERIFY",
+   "spec": {
+    "dpmo": 233,
+    "claimed_sigma": 5.0
+   }
+  },
+  {
+   "key": "four_sigma",
+   "domain": "manufacturing",
+   "artifact": "MFG_VERIFY",
+   "spec": {
+    "dpmo": 6210,
+    "claimed_sigma": 4.0
+   }
+  },
+  {
+   "key": "three_sigma",
+   "domain": "manufacturing",
+   "artifact": "MFG_VERIFY",
+   "spec": {
+    "dpmo": 66807,
+    "claimed_sigma": 3.0
+   }
+  },
+  {
+   "key": "control_limits",
+   "domain": "manufacturing",
+   "artifact": "MFG_VERIFY",
+   "spec": {
+    "mean": 100.0,
+    "sigma": 2.0,
+    "k": 3,
+    "claimed_ucl": 106.0,
+    "claimed_lcl": 94.0
+   }
+  },
+  {
+   "key": "capable",
+   "domain": "manufacturing",
+   "artifact": "MFG_VERIFY",
+   "spec": {
+    "usl": 110.0,
+    "lsl": 90.0,
+    "process_mean": 100.0,
+    "process_sigma": 2.0,
+    "claimed_cp_capable": true
+   }
+  },
+  {
+   "key": "not_capable",
+   "domain": "manufacturing",
+   "artifact": "MFG_VERIFY",
+   "spec": {
+    "usl": 110.0,
+    "lsl": 90.0,
+    "process_mean": 106.0,
+    "process_sigma": 2.0,
+    "claimed_cp_capable": false
+   }
+  },
+  {
+   "key": "rss",
+   "domain": "manufacturing",
+   "artifact": "MFG_VERIFY",
+   "spec": {
+    "tolerances": [
+     0.01,
+     0.02,
+     0.015
+    ],
+    "claimed_rss": 0.02693
+   }
+  },
+  {
+   "key": "rss_equal",
+   "domain": "manufacturing",
+   "artifact": "MFG_VERIFY",
+   "spec": {
+    "tolerances": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "claimed_rss": 0.17321
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Manufacturing - sigma, control limits, capability, stack-up",
+   "statement": "Quality is the normal distribution applied to a specification: defects per million map to sigma, limits sit at three sigma, capability is the spec width over six sigma, and independent tolerances add in quadrature.",
+   "field": "manufacturing",
+   "references": [
+    "W. A. Shewhart, Economic Control of Quality of Manufactured Product (1931)",
+    "M. J. Harry & R. Schroeder, Six Sigma (2000) - the 1.5-sigma shift convention",
+    "ISO 22514-2:2013 process capability; V. E. Kane, Process capability indices, J. Qual. Tech. 18 (1986) 41",
+    "ASME Y14.5 and the RSS method (Bender, SAE 1962)"
+   ],
+   "by": "tools/tick.py manufacturing",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[six sigma, SEALED] 3.4 defects per million opportunities is the six-sigma level (sealed through manufacturing.MFG_VERIFY). The number carries Motorola's 1.5-sigma shift: a process whose mean drifts 1.5 sigma still has 4.5 sigma to the nearer limit, and the normal tail beyond 4.5 sigma is 3.4 per million.",
+     "seal": "six_sigma"
+    },
+    {
+     "kind": "instance",
+     "claim": "[five sigma, SEALED] 233 per million (sealed through manufacturing.MFG_VERIFY).",
+     "seal": "five_sigma"
+    },
+    {
+     "kind": "instance",
+     "claim": "[four sigma, SEALED] 6,210 per million (sealed through manufacturing.MFG_VERIFY): one part in 161.",
+     "seal": "four_sigma"
+    },
+    {
+     "kind": "instance",
+     "claim": "[three sigma, SEALED] 66,807 per million (sealed through manufacturing.MFG_VERIFY) - about 6.7 percent defective, the level most unmanaged processes run at. Each sigma is an order of magnitude; the table is the normal distribution's tail read as a ladder.",
+     "seal": "three_sigma"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Shewhart's limits, SEALED] Mean 100, sigma 2: UCL = 106, LCL = 94 (sealed through manufacturing.MFG_VERIFY). Three sigma either side leaves 0.27 percent of a stable process outside - a point beyond the line is a signal, not noise, and the operator looks for a cause (Shewhart 1931).",
+     "seal": "control_limits"
+    },
+    {
+     "kind": "instance",
+     "claim": "[capable, SEALED] Spec 90-110, process centred at 100 with sigma 2: Cp = 20 / 12 = 1.667 and Cpk = 1.667, capable against the 1.33 threshold (sealed through manufacturing.MFG_VERIFY).",
+     "seal": "capable"
+    },
+    {
+     "kind": "instance",
+     "claim": "[not capable, SEALED AS NOT CAPABLE] The same spread centred at 106: Cp is still 1.667 but Cpk = (110 - 106) / 6 = 0.667 - NOT capable, sealed with claimed false (sealed through manufacturing.MFG_VERIFY). Cp measures the spread, Cpk the spread AND the centring; a tight process in the wrong place still makes scrap.",
+     "seal": "not_capable"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a tolerance stack, SEALED] Three parts toleranced 0.010, 0.020 and 0.015: the statistical stack is sqrt(0.0001 + 0.0004 + 0.000225) = 0.02693 (sealed through manufacturing.MFG_VERIFY), against a worst case of 0.045.",
+     "seal": "rss"
+    },
+    {
+     "kind": "instance",
+     "claim": "[equal tolerances, SEALED] Three at 0.1: RSS = 0.1 sqrt 3 = 0.17321 (sealed through manufacturing.MFG_VERIFY) versus 0.3 worst case. Independent errors add in quadrature - the same sqrt N as random walks and measurement means.",
+     "seal": "rss_equal"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the conventions, CITED] The 1.5-sigma shift (Harry & Schroeder), three-sigma limits (Shewhart), the 1.33 capability threshold (Kane 1986, ISO 22514) and RSS stacking all ASSUME a normal, stable, independent process. They work, so a process that meets them is inferred capable, never proven so: a non-normal or drifting process breaks every number above. The engine seals the arithmetic the conventions command and declines the assumption.",
+     "source": "Shewhart (1931); Harry & Schroeder, Six Sigma (2000); Kane, J. Qual. Tech. 18 (1986) 41; ISO 22514-2"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Every number here is the normal distribution's (card_floor_statistics: the tail integral, the sigma, quadrature addition) applied to a drawing's tolerance. The statistics stick holds the distribution; this stick holds the shop floor's use of it.",
+     "source": "the one map; card_floor_statistics; the statistics stick"
+    }
+   ]
+  }
+ ]
+}

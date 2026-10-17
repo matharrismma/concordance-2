@@ -1,0 +1,62 @@
+{
+ "entry": "self_healing_matrix",
+ "rc": 0,
+ "seals": {
+  "96b05ebc77392d3af3a44888429b46df46475a310023944ec34f2a635f9024c6": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hamming_7_4_perfect_code_2_pow_7_minus_4_syndromes_is_8"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_one_path_many_entries_a_self_healing_matrix_not_many_paths": {
+   "field": "",
+   "question": "One path, many entries, a self-healing matrix - not many paths",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py self_healing_matrix",
+     "claim": "[self-healing, SEALED] The Hamming [7,4] code: 2^(7-4) = 8 syndromes (sealed), and 8 = 7 + 1 covers every single-bit error of the 7 bits PLUS the no-error case, each with a unique correction. A corrupted word does not become a new word - it HEALS to the one valid codeword. Many corrupted entries, one path, restored. That is a self-healing matrix in the smallest honest form.",
+     "kind": "instance",
+     "seal": "96b05ebc77392d3af3a44888429b46df46475a310023944ec34f2a635f9024c6"
+    },
+    {
+     "by": "tools/tick.py self_healing_matrix",
+     "claim": "[one path, not many - least action] A particle does not take many paths; it takes the one path of stationary action, and every off-path contribution CANCELS by interference (the framing Veritasium made plain). The alternatives do not survive as paths - they heal away. Same geometry as the capstone: the potentials are real but exactly one actualizes.",
+     "kind": "equivalence",
+     "source": "the principle of least action (stick_the_principle_of_least_action); Feynman's path integral; Veritasium"
+    },
+    {
+     "by": "tools/tick.py self_healing_matrix",
+     "claim": "[many entries = the basin of attraction] From any strayed state there is a way BACK onto the one path, never a second path. In this engine that is literal: ~334 phrasings (entries) resolve to one correct answer (routing); many translations resolve to one invariant meaning (the eigenbasis round-trip). The entries are many; the path is one.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py self_healing_matrix",
+     "claim": "[the gate is the healing operator] A mis-route does not become a wrong answer - it DECLINES at the verifier and re-routes. 0 false positives is the matrix refusing to let a deviation become a path. 're-run = repair' and 'every attempt improves the matrix (gaps -> wants)' are the same self-healing seen over time.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py self_healing_matrix",
+     "claim": "[the narrow way] 'I am the way' (John 14:6) - one way, reachable from anywhere, which is what repentance and grace are: re-entry onto the one path, not the licensing of a second. The Tesla-valve geometry is the mechanism - flow returns to the path and never proliferates outward. It works, so the one is inferred; never proven, never kept as fact.",
+     "kind": "postulate",
+     "source": "John 14:6; project_will_fuel_reality_harness_tesla_valve; the narrow way"
+    },
+    {
+     "by": "tools/tick.py self_healing_matrix",
+     "claim": "[NOT many paths - the barrier carried from the capstone] Many real, realized paths with no single way is the many-worlds excess, already marked on the capstone as the broad way the narrow way passes. 'Many potentials' is the BASIN (entries that heal back), never a fan of destinations. The error would be to read the many as paths rather than as entries.",
+     "kind": "exclusion",
+     "source": "card_floor_the_capstone; H. Everett III (many-worlds), excluded as excess"
+    },
+    {
+     "by": "tools/tick.py self_healing_matrix",
+     "claim": "[on the one map] Refines card_floor_the_capstone: one path, many entries, self-healing. It rests on least action and on the instruments' moat (0 false positives = the healing enforced in code). It closes no chain; the same one-path/self-healing form holding across physics (least action), coding (Hamming), language (routing, the round-trip) and the walk (the narrow way) is itself the fruit.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

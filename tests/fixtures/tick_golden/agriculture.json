@@ -1,0 +1,47 @@
+{
+ "entry": "agriculture",
+ "rc": 0,
+ "seals": {
+  "0fd6a0f7fb42d5d6c6c2ffe40677a9d992b3ca27bc43f2ec820181abde503429": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ammonia_mass_per_mole_n2_haber_bosch_g"
+   ]
+  },
+  "12adf6024cc808cc606722b834ccd753b8abe31b522418a35abc8b71cafb348f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "molar_mass_of_glucose_c6h12o6_g_mol"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_agriculture_soil_sun_and_chemistry_into_food": {
+   "field": "",
+   "question": "Agriculture - soil, sun, and chemistry into food",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py agriculture",
+     "claim": "[fixing nitrogen - Haber-Bosch, SEALED] Plants need nitrogen they cannot take from the air; the Haber-Bosch process makes ammonia, N2 + 3H2 -> 2NH3, 2*17 = 34 g of ammonia per 28 g of nitrogen (sealed). Synthetic fertilizer from this reaction feeds roughly half the world's population - chemistry became bread. Ties card_floor_chemistry.",
+     "kind": "instance",
+     "seal": "0fd6a0f7fb42d5d6c6c2ffe40677a9d992b3ca27bc43f2ec820181abde503429"
+    },
+    {
+     "by": "tools/tick.py agriculture",
+     "claim": "[fixing carbon - photosynthesis, SEALED] A crop builds sugar from air and water: 6 CO2 + 6 H2O -> C6H12O6 + 6 O2, and glucose has molar mass 6*12 + 12*1 + 6*16 = 180 g/mol (sealed). Sunlight drives it; the harvest is stored sunlight. Ties card_floor_biology and card_floor_chemistry.",
+     "kind": "instance",
+     "seal": "12adf6024cc808cc606722b834ccd753b8abe31b522418a35abc8b71cafb348f"
+    },
+    {
+     "by": "tools/tick.py agriculture",
+     "claim": "[on the one map] Agriculture rests on biology (the crop and livestock), chemistry (fertilizer, photosynthesis, the soil's reactions) and ecology (pests, pollinators, the 10 percent rule that makes plants cheaper food than meat). The applied science that turns soil, sun and chemistry into food. Ties card_floor_agriculture.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

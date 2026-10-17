@@ -1,0 +1,52 @@
+{
+ "entry": "morphology",
+ "rc": 0,
+ "seals": {
+  "19fdac907e820adbab7f4b63c5d4c1d013ee36e5216250090f0ccbae9d605e52": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "unhelpful_is_un_2_plus_help_4_plus_ful_3_letters"
+   ]
+  },
+  "57c69a4e71dc8c194680c26acb3cb5f4de1ba343877d702b847a1b70f5549662": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "unbreakable_is_un_2_plus_break_5_plus_able_4_letters"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_morphology_a_word_is_prefix_root_and_suffix": {
+   "field": "",
+   "question": "Morphology - a word is prefix, root, and suffix",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py morphology",
+     "claim": "[strict segmentation, SEALED as letter arithmetic] 'unbreakable' = un-(2) + break(5) + -able(4) = 11 letters (sealed). The live verifier wordcraft.verify_morphology adds the rest: every affix must be in the inventory, the pieces must concatenate exactly, and the root 'break' must be a real word on the pronunciation shelf. Morphology is the root x pattern basis of a word - the same decomposition the engine reads for Hebrew (a root woven through a binyan).",
+     "kind": "instance",
+     "seal": "57c69a4e71dc8c194680c26acb3cb5f4de1ba343877d702b847a1b70f5549662"
+    },
+    {
+     "by": "tools/tick.py morphology",
+     "claim": "[derivation stacks on a root, SEALED] 'unhelpful' = un-(2) + help(4) + -ful(3) = 9 letters (sealed). Derivation composes affixes onto a real root; the meaning is built from the parts.",
+     "kind": "instance",
+     "seal": "19fdac907e820adbab7f4b63c5d4c1d013ee36e5216250090f0ccbae9d605e52"
+    },
+    {
+     "by": "tools/tick.py morphology",
+     "claim": "[the 0-false-positive rule] A segmentation is CONFIRMED only when the affixes are real AND the concatenation is exact AND the root is a real word. A spelling change (happy -> happiness) is NOT plain concatenation and DECLINES; an unknown affix is a MISMATCH. Strict concatenation buys zero false positives at the cost of declining the irregular forms honestly.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py morphology",
+     "claim": "[on the one map - comprehensive linguistics] Morphology is the first gap filled to make linguistics comprehensive (phonology, orthography, etymology, historical sound change, and the Biblical lexicon already hold). It rests with them on the linguistics floor (card_floor_indo_european); syntax stays closed-class only, and deep parsing is declined as the offline floor.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

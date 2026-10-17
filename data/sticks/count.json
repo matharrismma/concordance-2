@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "count",
+ "aliases": [
+  "count"
+ ],
+ "handler": "count",
+ "params": [
+  {
+   "type": "float",
+   "default": 1000000000.0
+  }
+ ],
+ "why_python": "takes arguments"
+}

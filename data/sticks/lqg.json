@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "lqg",
+ "aliases": [
+  "lqg",
+  "quantum_gravity",
+  "gravity",
+  "loop"
+ ],
+ "handler": "lqg",
+ "why_python": "calls verify_derivation itself (3x)"
+}

@@ -1,0 +1,62 @@
+{
+ "entry": "relativity",
+ "rc": 0,
+ "seals": {
+  "935d7abf8067cd243f96cfdf4dc3eeabc0675d7edf775db4e51e71a3f65a675d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "lorentz_factor_gamma_at_0_6c"
+   ]
+  },
+  "d6655078cec4e82432abe190091bb7cdb72d0e96bba29bf3f7d7ea766d1c316b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "electron_rest_energy_e_equals_mc2_mev"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_relativity_many_frames_one_invariant": {
+   "field": "",
+   "question": "Relativity - many frames, one invariant",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py relativity",
+     "claim": "[many frames, one invariant - the Lorentz factor, SEALED] The laws and the speed of light are the same in every inertial frame; observers disagree on when and where, but agree on c and on the invariant interval s^2 = (ct)^2 - x^2. A clock moving at 0.6c runs slow by the Lorentz factor gamma = 1/sqrt(1 - v^2/c^2) = 1/sqrt(1 - 0.36) = 1.25 (sealed) - it ticks 1.25 times slower, and lengths contract by the same factor. Many frames, one invariant truth; the Lorentz transformation is a rotation in spacetime that preserves the interval.",
+     "kind": "instance",
+     "seal": "935d7abf8067cd243f96cfdf4dc3eeabc0675d7edf775db4e51e71a3f65a675d"
+    },
+    {
+     "by": "tools/tick.py relativity",
+     "claim": "[mass and energy are one - E = m c^2, SEALED] The electron's rest energy is m_e c^2 = 0.511 MeV (sealed). Mass and energy are the same thing, and because c^2 is enormous a tiny mass is a vast energy - the Sun shining, the bomb, the mass defect of every nucleus. Another unification: 'many into one'.",
+     "kind": "instance",
+     "seal": "d6655078cec4e82432abe190091bb7cdb72d0e96bba29bf3f7d7ea766d1c316b"
+    },
+    {
+     "by": "tools/tick.py relativity",
+     "claim": "[special relativity came from Maxwell] Maxwell's equations are Lorentz-covariant and make c the same in every frame; reconciling that constancy with mechanics FORCED special relativity. SR is the resolution of the tension Maxwell exposed. Rests on card_floor_maxwells_equations.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py relativity",
+     "claim": "[general relativity - gravity is geometry, already sealed] General relativity says gravity is the curvature of spacetime: mass-energy curves it (the Einstein field equations), and bodies follow geodesics - the equivalence principle. Its tests are sealed on stick_is_gravity_a_force_geometry_decided_by_the_light_that_bends: the 1.75 arcsec deflection of starlight (twice the Newtonian value, Eddington 1919) and the gravitational redshift. GR is a Lagrangian field theory - the Einstein-Hilbert action - so it rests on card_floor_the_lagrangian.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py relativity",
+     "claim": "[the symmetry feeds Noether; mass is rest energy in the Hamiltonian] The symmetry group of relativity - the Poincare group (boosts, rotations, translations) - is a continuous symmetry, so by Noether it gives conserved quantities: energy, momentum, angular momentum, the stress-energy tensor. And E = m c^2 means mass IS rest energy - it enters the Hamiltonian as the energy a body has even at rest. Ties card_floor_noethers_theorem and card_floor_the_hamiltonian.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py relativity",
+     "claim": "[on the one map] Relativity ties the whole physics region: it rests on Maxwell (its origin), the Lagrangian (the Einstein-Hilbert action), Noether (the Poincare symmetry), the Hamiltonian (rest energy), and the capstone (many frames, one invariant truth - the same shape as many potentials, one end). The invariant interval is the 'same end' of special relativity: what every observer agrees on beneath their differing views. Ties card_floor_the_capstone.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

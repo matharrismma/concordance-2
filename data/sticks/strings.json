@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "strings",
+ "aliases": [
+  "strings",
+  "string_theory",
+  "superstring"
+ ],
+ "handler": "strings",
+ "why_python": "calls verify_derivation itself (2x)"
+}

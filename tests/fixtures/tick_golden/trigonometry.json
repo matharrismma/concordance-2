@@ -1,0 +1,63 @@
+{
+ "entry": "trigonometry",
+ "rc": 0,
+ "seals": {
+  "1abca80657ea12b4626f21132e09acadb57ef3a320fcf12ba9966fb617adb3b4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "spherical_excess_three_right_angles"
+   ]
+  },
+  "e7bedae1a6b950053a24ce623235df4759994f1a1c714c1ac4ffa94d658f3d39": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "pythagorean_identity_pi_over_6"
+   ]
+  },
+  "f09000aedc48f683853156b5d5ae11c08491ac4667ec942f90ef32a82393e3cf": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "sin_small_angle_two_term"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_trigonometry_an_approximation_but_not_complete": {
+   "field": "mathematics",
+   "question": "Trigonometry - an approximation, but not complete",
+   "references": [
+    "L. Euler, Introductio in analysin infinitorum (1748) (e^{i theta} = cos + i sin)",
+    "spherical trigonometry (Gauss-Bonnet; the angle sum exceeds pi by area/R^2)"
+   ],
+   "statement": "The trigonometric identities are exact, but trigonometry is an approximation and not complete in three precise senses: its function values are truncated infinite series; the real functions are projections of the complex exponential; and planar trigonometry is the flat-space limit of a curved geometry. The claim is TRUE within these senses and is not extended beyond them.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the trigonometry reading, 2026-10-07",
+     "claim": "[1 - computation is approximation] sin(theta) = theta - theta^3/6 + theta^5/120 - ... To two terms, sin(0.1) ~ 0.1 - 0.1^3/6 = 0.09983333 (sealed); the exact value differs at the next term (0.1^5/120 ~ 8.3e-8). Every finite computation of a trig function is a TRUNCATION of an infinite series - exact only in the limit. In that sense trigonometry is an approximation.",
+     "kind": "witness",
+     "seal": "f09000aedc48f683853156b5d5ae11c08491ac4667ec942f90ef32a82393e3cf"
+    },
+    {
+     "by": "Narrow Highway - the trigonometry reading, 2026-10-07",
+     "claim": "[2 - incomplete without i] cos^2(theta) + sin^2(theta) = 1: at theta=pi/6, (sqrt3/2)^2 + (1/2)^2 = 1.0 (sealed) - the unit circle. But cos and sin are only the REAL and imaginary projections of the complete object e^{i theta} = cos theta + i sin theta, a point on that circle in the COMPLEX plane (Euler). Real trigonometry alone is not complete; the whole requires the imaginary unit.",
+     "kind": "witness",
+     "seal": "e7bedae1a6b950053a24ce623235df4759994f1a1c714c1ac4ffa94d658f3d39"
+    },
+    {
+     "by": "Narrow Highway - the trigonometry reading, 2026-10-07",
+     "claim": "[3 - flat is an approximation to curved] Planar trigonometry assumes a triangle's angles sum to pi. On a sphere they do not: a triangle with three right angles sums to 3*(pi/2) = 3pi/2, exceeding pi by the spherical excess pi/2 = 1.570796 (sealed), which equals its area/R^2. Euclidean trig is the FLAT-space limit; under curvature (spherical, hyperbolic, and the curved spacetime of general relativity - ties stick_time_and_space_emergent_and_relational) it is incomplete.",
+     "kind": "witness",
+     "seal": "1abca80657ea12b4626f21132e09acadb57ef3a320fcf12ba9966fb617adb3b4"
+    },
+    {
+     "by": "Narrow Highway - the trigonometry reading, 2026-10-07",
+     "claim": "[the discernment] The claim 'trigonometry is an approximation, but not complete' is TRUE in exactly three senses, all sealed above: truncated computation, projection of the complex exponential, and the flat limit of curved geometry. The engine affirms these and DELIMITS them - the pure identities themselves (cos^2+sin^2=1) are exact, not approximate. The shadow (real trig) points to the whole (the complex circle; curved geometry) - the same outline-of-what-it-lacks pattern as the Hole. Seal the arithmetic, affirm the true senses, claim nothing past them. Map, never launder.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,73 @@
+{
+ "schema": 1,
+ "name": "legendre",
+ "aliases": [
+  "legendre",
+  "legendre_transform",
+  "tangent_lines",
+  "y_intercept",
+  "convex_duality",
+  "dual"
+ ],
+ "doc": "THE LEGENDRE TRANSFORM - OUR MECHANISM (Matt, 2026-10-07: 'mark the points and use it to create the\nline ... tangent lines / y-intercepts'). A convex curve is the ENVELOPE of its tangent lines; each\ntangent is a (slope, y-intercept) pair, and the Legendre transform re-encodes the curve as MINUS the\ny-intercept as a function of slope: f*(p) = sup_x(p x - f(x)). Mark the points, read each tangent's slope\nand intercept, and the lines build the curve. This is the engine's mechanism (marks -> the law by convex\nduality), and in physics the Lagrangian<->Hamiltonian and thermodynamic-potential bridge. Seal it on\nf(x)=x^2. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "legendre_tangent_touches",
+   "nid": "legendre_tangent_touches",
+   "expr": "6*3 - 9",
+   "value": 9.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "legendre_intercept_is_transform",
+   "nid": "legendre_intercept_is_transform",
+   "expr": "6**2 / 4",
+   "value": 9.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "legendre_second_point",
+   "nid": "legendre_second_point",
+   "expr": "4**2 / 4",
+   "value": 4.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The Legendre transform - mark the points, create the line",
+   "statement": "A convex function is the upper envelope of its tangent lines. Each tangent is a (slope, y-intercept) pair, and the Legendre transform re-encodes the function as minus the y-intercept as a function of slope: f*(p) = sup_x (p x - f(x)). The curve and its tangent-line description are the same information in two languages; the transform is an involution (f** = f).",
+   "field": "mathematics",
+   "references": [
+    "the Legendre transform f*(p) = sup_x (p x - f(x)); a convex involution",
+    "the tangent at a: y = f'(a) x + (f(a) - f'(a) a); y-intercept = -f*(f'(a))",
+    "physics: Lagrangian<->Hamiltonian (H = p q' - L); thermodynamic potentials"
+   ],
+   "by": "Narrow Highway - the Legendre transform, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[mark a point -> a tangent line] For f(x) = x^2, the tangent at the marked point a = 3 is y = 6x - 9 (slope 2a = 6, y-intercept -a^2 = -9); at x = 3 it gives 6*3 - 9 = 9 = f(3) - the line TOUCHES the point. Every point of a convex curve hands you one tangent line.",
+     "seal": "legendre_tangent_touches"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the y-intercept carries the transform] That tangent has slope p = 6 and y-intercept -9, and the Legendre transform is exactly MINUS that intercept: f*(6) = 6^2/4 = 9 = -(y-intercept) (sealed). So re-encoding the curve by the (slope, y-intercept) of its tangent lines IS the Legendre transform - read the tangent's slope and intercept and you have the dual.",
+     "seal": "legendre_intercept_is_transform"
+    },
+    {
+     "kind": "witness",
+     "claim": "[a second point, and the envelope builds the curve] At a = 2: slope 4, y-intercept -4, f*(4) = 4^2/4 = 4 = -(intercept) (sealed); the tangent y = 4x - 4 touches f(2) = 4. Collect every (slope, intercept) and the curve returns as the upper envelope of all its tangent lines: f(x) = sup_p (p x - f*(p)). Mark the points, the tangent lines create the line.",
+     "seal": "legendre_second_point"
+    },
+    {
+     "kind": "note",
+     "claim": "[this IS the engine's mechanism] 'The Legendre transform gives us our mechanism.' The tick-stick marks POINTS (sealed facts); the law/curve/narrow path is the ENVELOPE of those marks' supporting lines - found by convex duality, not posited. It is the convex-geometry kin of the positive Grassmannian ('the core': valid = the canonical form of positivity / admissibility - stick_the_positive_grassmannian) and of 'a fit that never passes the last mark' (the envelope rests on the marks). In physics it is the Lagrangian<->Hamiltonian bridge (H = p q' - L; p = dL/dq' - stick_the_principle_of_least_action) and the thermodynamic potentials (U <-> F = U - TS <-> enthalpy, swapping conjugate variables S<->T, V<->P - stick_entropy_and_gravity). map, never launder: seal the arithmetic; the line is BUILT from the marked points by the transform, found not invented."
+    }
+   ]
+  }
+ ]
+}

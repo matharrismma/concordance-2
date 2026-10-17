@@ -1,0 +1,188 @@
+{
+ "entry": "condensed_matter",
+ "rc": 0,
+ "seals": {
+  "25239edfbdf98c2842bbc6196137cee53c5cdb042c78dcc133fba38ae9cd0110": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "28a861d4447d1f9a4e000f1e18092c5f6ef3cc89b8401dd3410512168a4c87b9": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "36113abb37404788b06cb10fbf3b1434bcb3f29deabcabdb1061d6f7a394aafe": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5c07f114d091193b8b493ca1097815b9eb6b3305f07b337de030380316328a6d": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "6537491592506c3a2781df0c2f3118cd123b1f6168a638719764b7cf45988594": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7f309ef1b4884bdff85d5df53cb5901eed47c3b0e32e1fd50e0f36b044a80829": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "9389b45746030c1a61f61941aafe320e7dab5bbb0b706d1d9ee49072aaa39ca0": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b219ad6e4a7435932e0b1e30fcc7c8ad1ea8a4f5411f0de623b3dc418e1ce797": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "c8fbe0529731035be1a8a23955c10725c0503110e822ff4ed8c9659616d0a85e": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d129a0757863d30848516db17839cf83f26fc951c02f8819dec2b906f106b4d8": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "dcaffe0df98f074520927f8569d476135407bc3e43d569743ad614d2288a735a": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "f9b323c9edfb636fe21097d8b20d5bb202d3d317ec30e13f223576bc57bebefb": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_condensed_matter_the_solid_state_through_alpha_sealed": {
+   "field": "condensed_matter",
+   "question": "Condensed matter - the solid state through alpha, sealed",
+   "references": [
+    "C. Kittel, Introduction to Solid State Physics, 8th ed. (2005), Tables 5.1 and 6.1",
+    "K. von Klitzing, G. Dorda, M. Pepper, Phys. Rev. Lett. 45 (1980) 494",
+    "B. D. Josephson, Phys. Lett. 1 (1962) 251",
+    "CODATA 2018 / the 2019 SI: h and e exact, so R_K and K_J are exact"
+   ],
+   "statement": "The solid state's quantized resistances, lattice diffraction, electron gas and phonon gas are closed-form relations over h, e, alpha, k_B and the lattice.",
+   "ticks": [
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[the resistance quantum, SEALED] R_K = h/e^2 = 25,812.807 ohm (sealed through condensed_matter.CONDMAT_VERIFY), and the same number is mu_0 c / (2 alpha): a quantized Hall plateau is a measurement of the fine-structure constant. Since the 2019 SI fixed h and e, R_K is exact - the ohm is realized by a solid at low temperature in a strong field (von Klitzing 1980).",
+     "kind": "instance",
+     "seal": "36113abb37404788b06cb10fbf3b1434bcb3f29deabcabdb1061d6f7a394aafe"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[the Josephson constant, SEALED] K_J = 2e/h = 483,597.8 GHz/V (sealed through condensed_matter.CONDMAT_VERIFY): a superconducting junction under microwaves steps its voltage in units of h f / 2e - the volt realized by counting. The '2' is the Cooper pair.",
+     "kind": "instance",
+     "seal": "d129a0757863d30848516db17839cf83f26fc951c02f8819dec2b906f106b4d8"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[a Hall plateau, SEALED] At filling factor nu = 2 the Hall resistance is R_K / 2 = 12,906.4 ohm (sealed through condensed_matter.CONDMAT_VERIFY). The plateaus sit at R_K / nu to a part in a billion whatever the sample - topology, not material, fixes the number.",
+     "kind": "instance",
+     "seal": "9389b45746030c1a61f61941aafe320e7dab5bbb0b706d1d9ee49072aaa39ca0"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[Bragg's law, SEALED] Copper K-alpha (1.5406 angstrom) on silicon's (111) planes (d = 3.1356 angstrom): n lambda = 2 d sin theta gives theta = 14.22 deg, 2 theta = 28.44 deg (sealed through condensed_matter.CONDMAT_VERIFY) - the silicon line every diffractometer is calibrated on (NIST SRM 640). The lattice is measured by the wave it reflects.",
+     "kind": "instance",
+     "seal": "7f309ef1b4884bdff85d5df53cb5901eed47c3b0e32e1fd50e0f36b044a80829"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[the Fermi energy of copper, SEALED] With n = 8.47e28 electrons per cubic metre, E_F = (hbar^2/2m)(3 pi^2 n)^(2/3) = 1.12e-18 J = 7.0 eV (sealed through condensed_matter.CONDMAT_VERIFY; Kittel Table 6.1). The conduction electrons fill states up to 7 eV even at absolute zero - a degenerate gas, Pauli's exclusion made macroscopic.",
+     "kind": "instance",
+     "seal": "5c07f114d091193b8b493ca1097815b9eb6b3305f07b337de030380316328a6d"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[and of sodium, SEALED] n = 2.65e28 gives E_F = 5.19e-19 J = 3.24 eV (sealed through condensed_matter.CONDMAT_VERIFY): fewer electrons per volume, a lower sea. The two-thirds power is the density of states in three dimensions.",
+     "kind": "instance",
+     "seal": "dcaffe0df98f074520927f8569d476135407bc3e43d569743ad614d2288a735a"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[Dulong-Petit, SEALED] C = 3R = 24.94 J/(mol K) (sealed through condensed_matter.CONDMAT_VERIFY): at high temperature every atom's three vibrational modes carry k_B each. The classical ceiling the phonon gas rises to - and the law whose failure at low temperature (Einstein 1907, Debye 1912) was an early proof of quanta.",
+     "kind": "instance",
+     "seal": "f9b323c9edfb636fe21097d8b20d5bb202d3d317ec30e13f223576bc57bebefb"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[a phonon's energy, SEALED] At 10 THz (omega = 2 pi x 1e13 rad/s) one phonon carries E = hbar omega = 6.626e-21 J = 41.4 meV (sealed through condensed_matter.CONDMAT_VERIFY): lattice vibration is quantized exactly as light is.",
+     "kind": "instance",
+     "seal": "25239edfbdf98c2842bbc6196137cee53c5cdb042c78dcc133fba38ae9cd0110"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[the Debye temperature of copper, SEALED] omega_D = 4.4906e13 rad/s gives theta_D = hbar omega_D / k_B = 343 K (sealed through condensed_matter.CONDMAT_VERIFY; Kittel Table 5.1). Above theta_D the lattice is classical (Dulong-Petit); below it the heat capacity falls as T^3.",
+     "kind": "instance",
+     "seal": "28a861d4447d1f9a4e000f1e18092c5f6ef3cc89b8401dd3410512168a4c87b9"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[the occupation at hbar omega = k_B T, SEALED] n = 1/(e^1 - 1) = 0.58198 (sealed through condensed_matter.CONDMAT_VERIFY; omega = 3.9279e13 rad/s at 300 K). Bose-Einstein statistics: phonons are bosons, so a mode holds a fractional mean number of quanta, not zero or one.",
+     "kind": "instance",
+     "seal": "6537491592506c3a2781df0c2f3118cd123b1f6168a638719764b7cf45988594"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[the zone boundary, SEALED] A monatomic chain (K = 10 N/m, m = 1e-26 kg, a = 3 angstrom) at k = pi/a vibrates at omega = 2 sqrt(K/m) = 6.3246e13 rad/s (sealed through condensed_matter.CONDMAT_VERIFY): the dispersion omega = 2 sqrt(K/m) |sin(ka/2)| has its maximum at the Brillouin-zone edge, where neighbouring atoms move in antiphase. The chain has a top frequency; the continuum does not.",
+     "kind": "instance",
+     "seal": "c8fbe0529731035be1a8a23955c10725c0503110e822ff4ed8c9659616d0a85e"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[the sound speed, SEALED] The same chain's long-wavelength limit is v = a sqrt(K/m) = 9486.8 m/s (sealed through condensed_matter.CONDMAT_VERIFY): where sin(ka/2) is ka/2 the dispersion is linear and the lattice is an elastic solid.",
+     "kind": "instance",
+     "seal": "b219ad6e4a7435932e0b1e30fcc7c8ad1ea8a4f5411f0de623b3dc418e1ce797"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[the models, CITED] The free-electron gas (Sommerfeld 1928), the Debye phonon gas (1912) and the monatomic chain are MODELS: they work for the simple metals and the simple lattices, so their numbers are inferred, never kept as fact. The measured inputs - n for copper and sodium, theta_D = 343 K, d(111) = 3.1356 angstrom - are cited from the tables.",
+     "kind": "postulate",
+     "source": "Kittel, Introduction to Solid State Physics, 8th ed., Tables 5.1 and 6.1; Sommerfeld, Z. Phys. 47 (1928) 1; Debye, Ann. Phys. 39 (1912) 789"
+    },
+    {
+     "by": "tools/tick.py condensed_matter",
+     "claim": "[on the one map] The solid state stands on quantum mechanics (card_floor_quantum_mechanics: E = hbar omega, the exclusion principle, Bose-Einstein occupation), on thermodynamics (card_floor_thermodynamics: Dulong-Petit, the Debye cutoff), and on the fine-structure constant (the alpha stick: R_K = mu_0 c / 2 alpha). Diffraction is the wave floor of card_floor_materials_science. Where quantum mechanics meets a crystal, alpha becomes a resistance you can measure with a voltmeter.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

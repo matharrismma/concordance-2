@@ -1,0 +1,64 @@
+{
+ "schema": 1,
+ "name": "de_bruijn_newman",
+ "aliases": [
+  "de_bruijn_newman",
+  "debruijn_newman",
+  "bruijn_newman",
+  "lambda_dbn",
+  "newman"
+ ],
+ "doc": "THE DE BRUIJN-NEWMAN CONSTANT (Matt, 2026-10-07). Deform the Riemann xi-function by the backward heat\nflow: the family H_t has only REAL zeros iff t >= Lambda. RH <=> Lambda <= 0. Newman conjectured Lambda >=\n0 ('RH, if true, is only barely so'). Rodgers-Tao PROVED Lambda >= 0 (2020); Polymath15 PROVED Lambda <=\n0.22 (2019); de Bruijn had Lambda <= 1/2 (1950). So 0 <= Lambda <= 0.22 and RH <=> Lambda = 0 - the whole\nhypothesis is now 'drive one real number to its proven floor.' The purest tick-stick: cite the proved\nbounds, seal the window arithmetic, mark Lambda=0 as the one unfired mark. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "dbn_window",
+   "nid": "dbn_window",
+   "expr": "0.22 - 0.0",
+   "value": 0.22,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "dbn_narrowing",
+   "nid": "dbn_narrowing",
+   "expr": "0.5 - 0.22",
+   "value": 0.28,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The de Bruijn-Newman constant",
+   "statement": "There is a real constant Lambda such that the heat-flow deformation H_t of the Riemann xi-function has only real zeros exactly when t >= Lambda. The Riemann hypothesis is equivalent to Lambda <= 0; since Lambda >= 0 is now proved, RH is equivalent to Lambda = 0.",
+   "field": "meta",
+   "references": [
+    "N. G. de Bruijn (1950): Lambda <= 1/2",
+    "C. M. Newman (1976): Lambda exists and is real; conjecture Lambda >= 0",
+    "B. Rodgers & T. Tao (2020, Duke Math. J.): Lambda >= 0, proved",
+    "D.H.J. Polymath (Polymath15, 2019): Lambda <= 0.22"
+   ],
+   "by": "Narrow Highway - the de Bruijn-Newman constant, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[the window, sealed] The proven bounds give 0 <= Lambda <= 0.22, a window of width 0.22 - 0 = 0.22 (sealed). RH is the statement that Lambda sits exactly on the floor of this window. The engine seals the arithmetic of the window; it cites, and does not re-derive, the two theorems that set its ends.",
+     "seal": "dbn_window"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the narrowing, sealed] The upper mark fell from de Bruijn's 1/2 (1950) to Polymath15's 0.22 (2019): a drop of 0.5 - 0.22 = 0.28 (sealed). This is the tick-stick ratchet in a single number - the ceiling driven down by successive proofs, the floor nailed at 0, the target Lambda = 0 squeezed between them.",
+     "seal": "dbn_narrowing"
+    },
+    {
+     "kind": "note",
+     "claim": "[the floor FIRED] Rodgers and Tao (2020) proved Lambda >= 0 - Newman's conjecture. In the heat-flow picture this says the Riemann zeros are, at worst, exactly at the threshold of becoming non-real: 'the Riemann hypothesis, if true, is only barely so' is now a theorem. The floor is not assumed; it is proved."
+    },
+    {
+     "kind": "note",
+     "claim": "[RH = Lambda = 0, the one unfired mark] RH <=> Lambda <= 0 (de Bruijn-Newman); with Lambda >= 0 proved, RH <=> Lambda = 0. So the entire hypothesis is the single remaining mark the narrowing has not reached: closing the ceiling to 0 (or showing Lambda > 0, which would DISPROVE RH). The engine maps this exactly - window sealed, bounds cited, Lambda=0 marked open. Ties the heat-flow threshold to stick_the_symmetry (Lambda is the instant the zeros are all still real) and [[feedback_mapping_the_truth_not_generating_it_2026-10-07]]. map, never launder: we do not claim Lambda = 0."
+    }
+   ]
+  }
+ ]
+}

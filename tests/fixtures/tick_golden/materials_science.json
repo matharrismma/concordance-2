@@ -1,0 +1,47 @@
+{
+ "entry": "materials_science",
+ "rc": 0,
+ "seals": {
+  "eaeb18b16e68793654e9d0429eaee03cfd80511cb321ef955f7352f1bbad63d0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "elastic_strain_stress_over_youngs_modulus"
+   ]
+  },
+  "ed05ccc415413073f47e1490320e0a174c9977e28a6508a4ff6a71e3f2dc30d6": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fcc_atomic_packing_factor_pi_over_three_root_two"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_materials_science_how_atoms_pack_and_solids_behave": {
+   "field": "",
+   "question": "Materials science - how atoms pack and solids behave",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py materials_science",
+     "claim": "[how atoms pack - the packing factor, SEALED] In a face-centred cubic metal the atoms, taken as hard spheres, fill pi/(3 sqrt 2) = 0.74 of space (sealed) - the densest possible packing of equal spheres (Kepler's conjecture, now proved). The lattice is chemistry (the bonds) arranged in a crystal; its geometry sets density, cleavage and strength. Ties card_floor_chemistry.",
+     "kind": "instance",
+     "seal": "ed05ccc415413073f47e1490320e0a174c9977e28a6508a4ff6a71e3f2dc30d6"
+    },
+    {
+     "by": "tools/tick.py materials_science",
+     "claim": "[how solids deform - Hooke's law, SEALED] Pull on a solid and it stretches in proportion: strain = stress / Young's modulus. A 200 MPa stress on steel (E = 200 GPa) gives strain 200e6/200e9 = 0.001, a tenth of a percent (sealed). Elastic below the yield point, plastic above it - the whole of mechanical engineering starts here.",
+     "kind": "instance",
+     "seal": "eaeb18b16e68793654e9d0429eaee03cfd80511cb321ef955f7352f1bbad63d0"
+    },
+    {
+     "by": "tools/tick.py materials_science",
+     "claim": "[why a metal conducts - quantum] Whether a solid is a conductor, insulator or semiconductor is set by its electron BAND structure - the quantum mechanics of electrons in the periodic lattice (the shells of the periodic table, spread into bands). Silicon's half-filled gap is why the whole digital age exists. Ties card_floor_quantum_mechanics. On the one map, materials science rests on chemistry (the lattice) and quantum mechanics (the bands). Ties card_floor_materials_science.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

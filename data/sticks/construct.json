@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "construct",
+ "aliases": [
+  "construct",
+  "constructs",
+  "construct_creation",
+  "coordinates",
+  "invariant"
+ ],
+ "handler": "construct",
+ "why_python": "calls verify_derivation itself (2x)"
+}

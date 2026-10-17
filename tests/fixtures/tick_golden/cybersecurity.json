@@ -1,0 +1,214 @@
+{
+ "entry": "cybersecurity",
+ "rc": 0,
+ "seals": {
+  "01823781081a3b595237f12d296ab2d1e6214796ca91fe4472630da72b929587": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "0da715b9e2f9ea0948dcc719cd6547119c392e34c11e936f7d62aa05c066cad6": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "256f910a782d4558cf7a3d3d96409fd1589c192d013c0999753daa7bc56dcdc4": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "4c2d06e79983abaf6a8dc6f9e2dfa38490c4fe471d984c16c96145f6aa16e0fc": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "51c7c2ce75c035cc7eec841b145e609c71f027908602fdb668cd17c34c4b6d9f": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "64ebcbb55e3fae931d77b15c94a42353af244253d9a957712e955464a9cf5c1b": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "863aa89822a0d314bb0e55cbb1743e193eaa9536485fb645b7c6ded59108204d": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "8a5999a51fc9570c6c991ff1c725f2391cd312c05d1d81fd10f4e31ce75a0094": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "9cf51bbc9e54acf0cbcbca4c53ea77f7b64ccb0351fc619e8b22fbd7fcc645ed": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a4b260a49cea68a786e8fb9aac1d3a34cff876a353b2a1603386f6bc0fa620c9": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b932b3734836aacde01486b2cf5a31e51fcab5730612e1cccc3fa8e9dcfd2fd4": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "be7bb8019ccf0540c1a0c73d43920c1c26e83dc9adcb4c67d402b7be479bc209": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d4fb778c417b18dd1db13329d0516c295255431c4eb301a9182e8fecc5a8bdd2": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "f6256e6e50cda853a02e1d13fff4c8dc2f289b1f9afa29d76bef09e6c37b10bf": {
+   "axis": "cybersecurity",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_cybersecurity_entropy_tls_cvss_subnets_and_ports_sealed": {
+   "field": "cybersecurity",
+   "question": "Cybersecurity - entropy, TLS, CVSS, subnets and ports, sealed",
+   "references": [
+    "NIST SP 800-63B, Digital Identity Guidelines (2017), Appendix A",
+    "RFC 8996 (2021) deprecating TLS 1.0 and 1.1; RFC 8446 (2018) TLS 1.3; RFC 7568 (2015) SSL 3.0",
+    "FIRST, CVSS v3.1 Specification, section 5 (qualitative severity rating scale)",
+    "RFC 3021 (2000) /31 point-to-point links; RFC 6335 (2011) IANA port ranges"
+   ],
+   "statement": "A security claim that rests on a published standard is decided by the standard's own arithmetic or table - entropy, status, band, count, class.",
+   "ticks": [
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[entropy of a random passphrase, SEALED] Sixteen characters drawn uniformly from the 94 printable ASCII symbols carry H = 16 log2(94) = 104.87 bits (sealed through cybersecurity.CYBER_VERIFY). Each symbol is log2(94) = 6.55 bits; the bits add because the draws are independent.",
+     "kind": "instance",
+     "seal": "b932b3734836aacde01486b2cf5a31e51fcab5730612e1cccc3fa8e9dcfd2fd4"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[diceware, SEALED] Six words from a 7776-word list (five dice) carry 6 log2(7776) = 77.55 bits (sealed through cybersecurity.CYBER_VERIFY): 12.9 bits a word. A phrase a person can remember with the strength of a random string.",
+     "kind": "instance",
+     "seal": "4c2d06e79983abaf6a8dc6f9e2dfa38490c4fe471d984c16c96145f6aa16e0fc"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[TLS 1.3, SEALED] TLS 1.3 is 'recommended' (sealed through cybersecurity.CYBER_VERIFY): RFC 8446 (2018) - one round trip, forward secrecy only, the legacy ciphers removed.",
+     "kind": "instance",
+     "seal": "64ebcbb55e3fae931d77b15c94a42353af244253d9a957712e955464a9cf5c1b"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[TLS 1.2, SEALED] TLS 1.2 is 'current' (sealed through cybersecurity.CYBER_VERIFY): still acceptable, widely deployed, with its weak cipher suites disabled.",
+     "kind": "instance",
+     "seal": "a4b260a49cea68a786e8fb9aac1d3a34cff876a353b2a1603386f6bc0fa620c9"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[TLS 1.0, SEALED] TLS 1.0 is 'deprecated' (sealed through cybersecurity.CYBER_VERIFY): RFC 8996 (2021) forbids its negotiation. A protocol does not rot; it is retired by a document with a number.",
+     "kind": "instance",
+     "seal": "9cf51bbc9e54acf0cbcbca4c53ea77f7b64ccb0351fc619e8b22fbd7fcc645ed"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[SSL 3.0, SEALED] SSL 3.0 is 'insecure' (sealed through cybersecurity.CYBER_VERIFY): RFC 7568 (2015), after POODLE showed its CBC padding leaks plaintext.",
+     "kind": "instance",
+     "seal": "256f910a782d4558cf7a3d3d96409fd1589c192d013c0999753daa7bc56dcdc4"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[CVSS 10.0, SEALED] A base score of 10.0 is 'critical' (sealed through cybersecurity.CYBER_VERIFY): the band 9.0-10.0 of CVSS v3.1. Log4Shell (CVE-2021-44228) scored exactly this.",
+     "kind": "instance",
+     "seal": "51c7c2ce75c035cc7eec841b145e609c71f027908602fdb668cd17c34c4b6d9f"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[CVSS 7.5, SEALED] 7.5 is 'high' (sealed through cybersecurity.CYBER_VERIFY): the band 7.0-8.9. Heartbleed (CVE-2014-0160) scored 7.5 on v3 - a memory read, not a code execution, and the scale says so.",
+     "kind": "instance",
+     "seal": "863aa89822a0d314bb0e55cbb1743e193eaa9536485fb645b7c6ded59108204d"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[a /24, SEALED] A /24 has 2^8 - 2 = 254 usable hosts (sealed through cybersecurity.CYBER_VERIFY): one address is the network, one the broadcast.",
+     "kind": "instance",
+     "seal": "f6256e6e50cda853a02e1d13fff4c8dc2f289b1f9afa29d76bef09e6c37b10bf"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[a /16, SEALED] A /16 has 2^16 - 2 = 65,534 (sealed through cybersecurity.CYBER_VERIFY).",
+     "kind": "instance",
+     "seal": "be7bb8019ccf0540c1a0c73d43920c1c26e83dc9adcb4c67d402b7be479bc209"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[a /31, SEALED] A /31 has 2 usable hosts, not 0 (sealed through cybersecurity.CYBER_VERIFY): RFC 3021 lets a point-to-point link use both addresses. The rule has an exception and the exception has a number.",
+     "kind": "instance",
+     "seal": "d4fb778c417b18dd1db13329d0516c295255431c4eb301a9182e8fecc5a8bdd2"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[port 443, SEALED] 443 is a well-known port, 0-1023 (sealed through cybersecurity.CYBER_VERIFY): HTTPS (RFC 2818).",
+     "kind": "instance",
+     "seal": "01823781081a3b595237f12d296ab2d1e6214796ca91fe4472630da72b929587"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[port 8080, SEALED] 8080 is registered, 1024-49151 (sealed through cybersecurity.CYBER_VERIFY): the conventional HTTP alternate.",
+     "kind": "instance",
+     "seal": "0da715b9e2f9ea0948dcc719cd6547119c392e34c11e936f7d62aa05c066cad6"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[port 49152, SEALED] 49152 is the first dynamic port, 49152-65535 (sealed through cybersecurity.CYBER_VERIFY; RFC 6335): the ephemeral range a client is given for the other end of its own connection.",
+     "kind": "instance",
+     "seal": "8a5999a51fc9570c6c991ff1c725f2391cd312c05d1d81fd10f4e31ce75a0094"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[the standards, CITED] The severity bands, the TLS statuses and the port ranges are DECREES - FIRST, the IETF and IANA chose them - so they are cited as postulates, never sealed as theorems. What is sealed is that the lookup was done right. The entropy formula assumes a UNIFORM random choice: NIST SP 800-63B says plainly that user-chosen passwords do not reach it, so H = L log2 N is an upper bound on what a person types, inferred never kept.",
+     "kind": "postulate",
+     "source": "FIRST CVSS v3.1 spec section 5; RFC 8996, 8446, 7568, 3021, 6335; NIST SP 800-63B Appendix A"
+    },
+    {
+     "by": "tools/tick.py cybersecurity",
+     "claim": "[on the one map] Security's arithmetic is information theory (the information-theory stick: entropy is log2 of the choices) and cryptography (card_floor_cryptography: the ciphers TLS carries), laid over the network (card_floor_networking: subnets, ports). The verifier seals the measurable layer and declines the judgment - whether a system is 'secure' is not a number.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,67 @@
+{
+ "entry": "the_lagrangian",
+ "rc": 0,
+ "seals": {
+  "80220383d2b68beb275f11ba1c6a506ceac8be1f51128be4ec242a81ae30cd2b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "snell_critical_angle_sine_n2_over_n1_glass_to_air"
+   ]
+  },
+  "873505da11288889836b4bf7f803c39e89efb9f597d37444d7e0f08796e1f588": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "free_particle_legendre_h_equals_p_qdot_minus_l"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_lagrangian_the_hamiltonian_s_dual_and_the_path": {
+   "field": "",
+   "question": "The Lagrangian - the Hamiltonian's dual and the path",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py the_lagrangian",
+     "claim": "[the Lagrangian is the Hamiltonian's dual, SEALED] They are Legendre transforms of one another: H = sum p q' - L (sealed on stick_the_legendre_transform_mark_the_points_create_the_line). In mechanics, a free particle has L = (1/2) m v^2 (m=2, v=3 gives 9), momentum p = m v = 6, so H = p v - L = 6*3 - 9 = 9 (sealed). H is energy, T + V, the generator of TIME; L is T - V, the generator of the PATH. Two faces of one dynamics.",
+     "kind": "instance",
+     "seal": "873505da11288889836b4bf7f803c39e89efb9f597d37444d7e0f08796e1f588"
+    },
+    {
+     "by": "tools/tick.py the_lagrangian",
+     "claim": "[least action yields the measured laws, SEALED] Fermat's least-time principle (least action for light) gives Snell's law and the critical angle sin(theta_c) = n2/n1 = 1.0/1.5 = 0.667 (sealed), glass to air - the total internal reflection that holds light inside an optical fibre. The variational principle is not a mood; it produces the law you measure.",
+     "kind": "instance",
+     "seal": "80220383d2b68beb275f11ba1c6a506ceac8be1f51128be4ec242a81ae30cd2b"
+    },
+    {
+     "by": "tools/tick.py the_lagrangian",
+     "claim": "[the principle - many paths, one chosen] The Lagrangian's law is delta S = 0: of all conceivable paths, nature takes the one where the action S = integral L dt is stationary. Euler-Lagrange gives Newton's F = ma from L = (1/2) m v^2 - V, and the same one principle gives Maxwell and general relativity. 'Many potentials, one end' as a law of the PATH. Already sealed as stick_the_principle_of_least_action.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_lagrangian",
+     "claim": "[the quantum truth - the path integral] Feynman: a quantum system takes ALL paths, each weighted by e^(iS/hbar); they interfere, and where the action is stationary the phases reinforce (the classical path), elsewhere they cancel; as hbar -> 0 only the least-action path survives. The many paths are real; the one emerges by interference. Ties the capstone (many potentials) and the Hamiltonian (e^(-iHt/hbar)); sealed on stick_the_principle_of_least_action.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_lagrangian",
+     "claim": "[one scalar for all of physics; the relativistic face] The Lagrangian is a single scalar, and the whole Standard Model is DEFINED by its Lagrangian. Unlike the Hamiltonian, which singles out time, the Lagrangian treats space and time together (Lorentz-covariant), so it is the native language of relativity and quantum field theory. Ties card_floor_standard_model.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_lagrangian",
+     "claim": "[the teleological echo, honestly] The action principle reads as purposive: fix the start and the end, and the path between is the one that extremizes the action, as if the end were given. That is a real variational feature and the precise mathematical echo of 'many possibilities but the same end' - stated as the resonance it is, never laundered into a proof of purpose.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_lagrangian",
+     "claim": "[on the one map] The Lagrangian floor joins the Hamiltonian floor as its Legendre dual, and gathers the pieces already sealed - stick_the_principle_of_least_action (least action + the path integral) and stick_the_legendre_transform_mark_the_points_create_the_line (H<->L). It rests on the capstone (the many paths), the solve path (delta S = 0 is an optimization: exclude the non-stationary, converge on the stationary point), and card_floor_standard_model (the Standard Model is a Lagrangian). Ties card_floor_the_lagrangian and card_floor_the_hamiltonian.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

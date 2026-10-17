@@ -1,0 +1,69 @@
+{
+ "entry": "spacetime",
+ "rc": 0,
+ "seals": {
+  "9e7b88c04ac4789ed754bc3a405a6f651d86a8b2f9df348dbe8a9bfe1fafaf0c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "spacetime_invariant_interval"
+   ]
+  },
+  "ae219b9829ee0e72ee8d13aa6a21df6be701836ceed59c49b63f67b0fc9eef24": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "lorentz_factor_0_6c"
+   ]
+  },
+  "eb664fa000cdb988f7988af7de4b9036f02fac714adaaa97274a1941f41ebe97": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "planck_time"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_time_and_space_emergent_and_relational": {
+   "field": "physics",
+   "question": "Time and space - emergent and relational",
+   "references": [
+    "H. Minkowski, Raum und Zeit (1908) (the spacetime interval)",
+    "B. DeWitt, Phys. Rev. 160 (1967) 1113 (the Wheeler-DeWitt equation)",
+    "D. Page & W. Wootters, Phys. Rev. D 27 (1983) 2885 (time from entanglement)"
+   ],
+   "statement": "Is time fundamental or a construct? Relativity makes it dynamical geometry, frame-relative; quantum mechanics makes it a fixed background parameter, not an observable. Quantum gravity, where the universe meets the quantum, comes out timeless (Wheeler-DeWitt) and time appears to EMERGE. The arithmetic of time's relativity is exact; whether time is fundamental is the open question.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the time-and-space reading, 2026-10-07",
+     "claim": "[time is not absolute] A clock moving at v = 0.6c runs slow by the Lorentz factor gamma = 1/sqrt(1 - v^2/c^2) = 1/sqrt(1 - 0.36) = 1.25 (sealed). Time is not a universal given; its rate depends on the frame. The 'now' is a construct of the observer's motion.",
+     "kind": "witness",
+     "seal": "ae219b9829ee0e72ee8d13aa6a21df6be701836ceed59c49b63f67b0fc9eef24"
+    },
+    {
+     "by": "Narrow Highway - the time-and-space reading, 2026-10-07",
+     "claim": "[time and space are ONE - the commonality] What every frame agrees on is not time or space separately but the spacetime interval s^2 = c^2 dt^2 - dx^2. For dt=5, dx=3 (c=1) that is 5^2 - 3^2 = 16 (sealed) - and a boosted observer who measures different dt' and dx' still gets 16. The split into 'time' and 'space' is the frame's construct; the invariant interval is what is real. Time and space are one thing, seen at an angle.",
+     "kind": "witness",
+     "seal": "9e7b88c04ac4789ed754bc3a405a6f651d86a8b2f9df348dbe8a9bfe1fafaf0c"
+    },
+    {
+     "by": "Narrow Highway - the time-and-space reading, 2026-10-07",
+     "claim": "[where the universe meets the quantum] The Planck time t_P = sqrt(hbar G / c^5) = 5.3912e-44 s (sealed from the attested hbar, G, c) - built from the quantum (hbar), gravity (G) and relativity (c). Below it, 'duration' itself is expected to lose meaning; it is the scale at which the universe and the quantum must share one description (ties stick_the_principle_of_least_action and stick_quantum_gravity).",
+     "kind": "witness",
+     "seal": "eb664fa000cdb988f7988af7de4b9036f02fac714adaaa97274a1941f41ebe97"
+    },
+    {
+     "by": "Narrow Highway - the time-and-space reading, 2026-10-07",
+     "claim": "[the problem of time - open] In quantum mechanics time is a fixed EXTERNAL parameter and NOT an observable (there is no time operator conjugate to a bounded-below Hamiltonian - Pauli); position is an observable, time is not - an asymmetry. In relativity time is dynamical geometry. Canonical quantum gravity reconciles them and comes out TIMELESS: the Wheeler-DeWitt equation is H|psi> = 0, the universe's wavefunction carries no t. The leading reading is that time EMERGES - Page-Wootters (time is the correlation/entanglement between a clock subsystem and the rest), Rovelli (relational and thermal time - ties stick_relational_quantum_mechanics), Barbour (timeless physics). So 'time is a construct' is a serious live hypothesis: emergent, not fundamental. Attributed, open - the Hole, from the side of time.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the time-and-space reading, 2026-10-07",
+     "claim": "[the datum - discernment, map never launder] Scripture puts eternity PRIOR and time CREATED: 'from everlasting to everlasting you are God' (Ps 90:2); he 'inhabits eternity' (Isa 57:15); 'I am the Alpha and the Omega' (Rev 22:13); Christ is 'before all things, and in him all things are held together' (Col 1:17). Emergent-time physics is a LIKENESS of created-time - the Creator outside the construct - never its proof. The engine seals the arithmetic (gamma, the interval, t_P), attributes the physics, keeps the question open, and lets Scripture lead; the wrap serves. Borrow the form; launder nothing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

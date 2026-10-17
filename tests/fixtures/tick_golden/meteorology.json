@@ -1,0 +1,47 @@
+{
+ "entry": "meteorology",
+ "rc": 0,
+ "seals": {
+  "48e19ec05c0b568a2344872a5995d4e612642a8fbc4a07af18ed262027d963ed": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "dry_adiabatic_lapse_rate_g_over_cp_c_per_km"
+   ]
+  },
+  "cf1df869036bc271e4c8b8beef918f5c63fc1eb846e0a8ed185d2c5307aa58d4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ideal_gas_molar_volume_at_stp_litres"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_meteorology_the_atmosphere_as_a_heat_engine": {
+   "field": "",
+   "question": "Meteorology - the atmosphere as a heat engine",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py meteorology",
+     "claim": "[air rising cools - the lapse rate, SEALED] A dry air parcel lifted expands and cools at g/cp = 9.8/1005*1000 = 9.75 C per kilometre (sealed). This adiabatic cooling makes clouds, storms and the whole vertical structure of weather - the atmosphere is a heat engine driven by the Sun. Ties card_floor_thermodynamics.",
+     "kind": "instance",
+     "seal": "48e19ec05c0b568a2344872a5995d4e612642a8fbc4a07af18ed262027d963ed"
+    },
+    {
+     "by": "tools/tick.py meteorology",
+     "claim": "[the gas law - a mole fills 22.4 L, SEALED] At standard temperature and pressure a mole of any ideal gas fills RT/P = 8.314*273.15/101325 = 22.4 litres (sealed). Pressure, temperature and volume move together (PV = nRT) - the law behind every barometer and weather balloon. Ties card_floor_thermodynamics.",
+     "kind": "instance",
+     "seal": "cf1df869036bc271e4c8b8beef918f5c63fc1eb846e0a8ed185d2c5307aa58d4"
+    },
+    {
+     "by": "tools/tick.py meteorology",
+     "claim": "[on the one map] Meteorology rests on thermodynamics (the atmospheric heat engine), earth science (the rotating planet - the Coriolis effect, the oceans), and statistics (forecasts are probabilities, and chaos limits them). Ties card_floor_meteorology.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

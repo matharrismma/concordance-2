@@ -1,0 +1,42 @@
+{
+ "entry": "aharonov_bohm",
+ "rc": 0,
+ "seals": {
+  "ee4ef526223747b2c015e10a6e747427d575503c089b972e2273a13c257ba1cf": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "flux_quantum"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_aharonov_bohm_effect": {
+   "field": "physics",
+   "question": "The Aharonov-Bohm effect",
+   "references": [
+    "Y. Aharonov and D. Bohm, Phys. Rev. 115 (1959) 485",
+    "A. Tonomura et al., Phys. Rev. Lett. 56 (1986) 792 (definitive, flux shielded)"
+   ],
+   "statement": "A charged particle's phase is shifted by the electromagnetic potential even in a region where the field is zero; the shift is set by the enclosed flux, a global property, not by any local force.",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the Aharonov-Bohm reading, 2026-10-06",
+     "claim": "The magnetic flux quantum Phi0 = h/(2e) = 2.067833848e-15 Wb, computed from the engine's attested constants (the single-charge quantum h/e = 2*Phi0 = 4.135667697e-15 Wb). The Aharonov-Bohm phase is d(phi) = q*Phi/hbar, periodic in the enclosed flux with period h/e (a 2*pi wrap) and gauge-invariant through the holonomy (contour integral A.dl = Phi) even where B = 0 — an arithmetic fact from the constants.",
+     "kind": "witness",
+     "seal": "ee4ef526223747b2c015e10a6e747427d575503c089b972e2273a13c257ba1cf"
+    },
+    {
+     "by": "Narrow Highway — the Aharonov-Bohm reading, 2026-10-06",
+     "claim": "[the principle] The controlling influence is the GLOBAL potential and topology, not the local field: the particle is moved by a region it never enters. This is the physical witness to the invariant the games triangulate — define the structure (the plane, the ring, the enclosed flux) and you govern the outcome without local force. 'The one who defines the plane defines reality.'",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway — the Aharonov-Bohm reading, 2026-10-06",
+     "claim": "[discernment / the guard] The engine seals that the flux quantum IS h/2e and that the phase law holds — the arithmetic is a fact. It does NOT claim that strategy, a fight, or a game is quantum mechanics. The Aharonov-Bohm FORM (paths, phase, interference, holonomy) is borrowed as an instrument for FINDING likely paths — the tick lines of probability — and never renders a verdict. The games' verifiers remain the only authority on truth. Borrow the form; launder nothing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

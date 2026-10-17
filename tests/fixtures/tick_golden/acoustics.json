@@ -1,0 +1,65 @@
+{
+ "entry": "acoustics",
+ "rc": 0,
+ "seals": {
+  "792182fe35f2db8cc3994e68fd94d71a80e6f300c5e117285fddbc5db21351ad": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "third_harmonic_of_220_hz"
+   ]
+  },
+  "90cdade55796f9d2e9ab2b4d771b8b12eda91b458f6bee81941410e03327ef6d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "thirty_decibels_is_a_thousandfold_power_ratio"
+   ]
+  },
+  "f6710da2b942874eb628a519b9ff2906db3511ba45ce25bdeaba3172283b7b2d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "concert_a_wavelength_in_air_v_over_f_metres"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_acoustics_waves_loudness_and_harmonics": {
+   "field": "",
+   "question": "Acoustics - waves, loudness, and harmonics",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py acoustics",
+     "claim": "[sound is a wave in a medium, SEALED] Sound is a travelling pressure wave, and v = f lambda: at the speed of sound in air (343 m/s), concert A at 440 Hz has wavelength 343/440 = 0.78 m (sealed). Unlike light, sound needs a MEDIUM - no air, no sound - and its speed is set by the medium's stiffness and density. Ties card_floor_chemistry (the medium).",
+     "kind": "instance",
+     "seal": "f6710da2b942874eb628a519b9ff2906db3511ba45ce25bdeaba3172283b7b2d"
+    },
+    {
+     "by": "tools/tick.py acoustics",
+     "claim": "[loudness is logarithmic - the decibel, SEALED] Our ears span a trillion-fold range of intensity, so loudness is measured in decibels, a logarithm: every 10 dB is a tenfold power ratio, so 30 dB is 10^3 = 1000 times the power (sealed). Perception compresses huge ranges into manageable scales - the same logarithm that runs through the whole map. Ties card_floor_the_mind (perception).",
+     "kind": "instance",
+     "seal": "90cdade55796f9d2e9ab2b4d771b8b12eda91b458f6bee81941410e03327ef6d"
+    },
+    {
+     "by": "tools/tick.py acoustics",
+     "claim": "[pitch and timbre - the harmonics, SEALED] Pitch is frequency; a vibrating string or pipe also rings at integer multiples, the harmonic series, and their mix is TIMBRE (why a violin and a flute at the same pitch sound different). The third harmonic of 220 Hz is 3*220 = 660 Hz (sealed). The exact ratios are the harmonics stick; quantized, a sound wave's quanta are PHONONS. Ties card_floor_quantum_mechanics (phonons) and the harmonics stick.",
+     "kind": "instance",
+     "seal": "792182fe35f2db8cc3994e68fd94d71a80e6f300c5e117285fddbc5db21351ad"
+    },
+    {
+     "by": "tools/tick.py acoustics",
+     "claim": "[the Doppler effect - the acoustic redshift] A source moving toward you raises the pitch, away lowers it (the passing siren) - the Doppler effect, because the waves bunch ahead and stretch behind. It is the exact acoustic cousin of the relativistic redshift of light (sealed on the gravity stick, and the basis of cosmic expansion). Same geometry, different medium. Ties card_floor_relativity.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py acoustics",
+     "claim": "[on the one map] Acoustics rests on chemistry (sound needs a material medium), the mind (loudness and pitch are perception - logarithmic), quantum mechanics (phonons, the quanta of lattice vibration, tie to the harmonic oscillator), and relativity (the Doppler effect). The physics of hearing, standing between matter and mind. Ties card_floor_acoustics.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

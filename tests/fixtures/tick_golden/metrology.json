@@ -1,0 +1,47 @@
+{
+ "entry": "metrology",
+ "rc": 0,
+ "seals": {
+  "5c91fd9dc3d9e1ce146ed27f7b4f26842a5ce19cc1c202e2a067617a62cee19c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "speed_of_light_defines_the_metre_m_s"
+   ]
+  },
+  "66195ac2cc1cf2963e82e39a3985147f474b4a3df20d0bfef4c96e4791598b6d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "inch_to_centimetre_exact_cm"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_metrology_measurement_and_the_si": {
+   "field": "",
+   "question": "Metrology - measurement and the SI",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py metrology",
+     "claim": "[units are defined by constants, SEALED] Since 2019 the SI fixes seven constants and builds the units from them: the metre is the distance light travels in 1/299792458 of a second, so c = 299792458 m/s EXACTLY (sealed), the kilogram is fixed by the Planck constant, the second by the caesium frequency. Measurement is anchored to nature's constants, not to artifacts. Ties card_floor_the_instruments and card_floor_quantum_mechanics.",
+     "kind": "instance",
+     "seal": "5c91fd9dc3d9e1ce146ed27f7b4f26842a5ce19cc1c202e2a067617a62cee19c"
+    },
+    {
+     "by": "tools/tick.py metrology",
+     "claim": "[conversion is exact - the inch, SEALED] Units convert by defined factors: 1 inch = 2.54 cm exactly (sealed, the 1959 agreement). Dimensional analysis - tracking the units through a calculation - catches errors and is itself a verifier (a sealed number carries its unit). Ties card_floor_the_instruments.",
+     "kind": "instance",
+     "seal": "66195ac2cc1cf2963e82e39a3985147f474b4a3df20d0bfef4c96e4791598b6d"
+    },
+    {
+     "by": "tools/tick.py metrology",
+     "claim": "[on the one map] Metrology is the ground under every other floor: the 6-constant measure spine (the instruments) governs the domains, and every seal is a number WITH a unit. The SI's move to define units by constants is the same stance as the engine - anchor to the invariant, not the artifact. Ties card_floor_metrology.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

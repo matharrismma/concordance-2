@@ -1,0 +1,48 @@
+{
+ "entry": "gut",
+ "rc": 0,
+ "seals": {
+  "01f0f483fbb8c9cbb0b46cf0a1dc5b60e5592bf5f924f450e26c0dddc9527475": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gut_alpha3_inv_mz"
+   ]
+  },
+  "797ba7b2b97cd9df14f4728225ff42567e0e23def27fc3ec17d335a5e52e5477": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gut_alpha1_inv_mz"
+   ]
+  },
+  "e071aa18199da1f427ecda5f0350c69bdf6d58b9f43259ca5393f33a1a6de902": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gut_alpha2_inv_mz"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_fine_structure_constant": {
+   "field": "",
+   "question": "The fine-structure constant",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the grand-unification reading, 2026-10-06",
+     "claim": "[the three couplings at M_Z] On the GUT-normalised footing the Standard Model's three gauge couplings are, at the Z mass: alpha_3^-1 = 1/alpha_s = 1/0.1179 = 8.48 (strong), alpha_2^-1 = sin^2(theta_W)*alpha^-1 = 0.2312*127.95 = 29.58 (weak), alpha_1^-1 = (3/5)cos^2(theta_W)*alpha^-1 = 59.02 (hypercharge). All three sealed from the cited PDG inputs - the measured starting points of the running.",
+     "kind": "witness",
+     "seal": "01f0f483fbb8c9cbb0b46cf0a1dc5b60e5592bf5f924f450e26c0dddc9527475"
+    },
+    {
+     "by": "Narrow Highway - the grand-unification reading, 2026-10-06",
+     "claim": "[the narrowing and the miss] Run up in energy, the three couplings approach one another near ~1e16 GeV. In the plain Standard Model they MISS - the three lines cross pairwise, not at a single point. In the supersymmetric extension (MSSM) they converge within errors at ~2e16 GeV, alpha_GUT^-1 ~ 24-25. That near-meeting is real EVIDENCE for grand unification, but no proton decay and no superpartner has been seen, so it is unconfirmed: the fit that must never pass the last mark. Seal the couplings; attribute the convergence; it stays open.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

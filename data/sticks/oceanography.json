@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "name": "oceanography",
+ "aliases": [
+  "oceanography",
+  "the_ocean",
+  "marine",
+  "seawater"
+ ],
+ "doc": "OCEANOGRAPHY - the salt sea in motion (Matt, 2026-10-10, down the list). Pressure rises about one atmosphere\nper 10 m of depth; seawater is about 3.5 percent salt. SEALED: the gauge pressure at 100 m and the salinity\nfraction. Rests on earth science (the planet's water), chemistry (dissolved salts) and thermodynamics (currents,\nthe thermocline). Idempotent.",
+ "seals": [
+  {
+   "key": "pressure",
+   "nid": "ocean_gauge_pressure_atm_at_100m",
+   "expr": "100/10",
+   "value": 10.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "salinity",
+   "nid": "mean_seawater_salinity_percent",
+   "expr": "35/1000*100",
+   "value": 3.5000000000000004,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Oceanography - the salt sea in motion",
+   "by": "tools/tick.py oceanography",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the weight of water - pressure with depth, SEALED] Water adds about one atmosphere of pressure every 10 metres, so at 100 m the gauge pressure is 100/10 = 10 atm (sealed), eleven absolute. It is why the deep sea crushes, and why depth is read as pressure. Ties card_floor_earth_science.",
+     "seal": "pressure"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the salt sea, SEALED] Seawater is about 35 grams of salt per kilogram - 35/1000*100 = 3.5 percent (sealed), mostly sodium chloride. Salinity with temperature sets the water's density, and density differences drive the deep thermohaline circulation that moves the planet's heat. Ties card_floor_chemistry and card_floor_thermodynamics.",
+     "seal": "salinity"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Oceanography rests on earth science (the ocean basins and the water cycle), chemistry (dissolved salts and gases), and thermodynamics (currents and the thermocline, a heat engine like the atmosphere). The sea covers 71 percent of the planet and buffers its climate. Ties card_floor_oceanography.",
+     "source": "the one map; thermohaline circulation; card_floor_oceanography; tools/seed_oceanography.py"
+    }
+   ]
+  }
+ ]
+}

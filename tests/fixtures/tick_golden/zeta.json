@@ -1,0 +1,56 @@
+{
+ "entry": "zeta",
+ "rc": 0,
+ "seals": {
+  "a6632bd169abe13b3e20adb532efeb9c5e3fd9cc193f8371a187262f68a5d6b8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "basel_zeta_2"
+   ]
+  },
+  "c830984ab86d94f0d51c1670e6e6f8a11fea2eceb83c6fe56daafb2b988fefed": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "zeta_4"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_zeta_function": {
+   "field": "meta",
+   "question": "The zeta function",
+   "references": [
+    "Euler product zeta(s) = prod_p (1 - p^-s)^-1",
+    "the functional equation zeta(s) = 2^s pi^(s-1) sin(pi s/2) Gamma(1-s) zeta(1-s)",
+    "the explicit formula linking the zeros to the prime counting function"
+   ],
+   "statement": "zeta(s) = sum over n of n^-s = product over primes of (1 - p^-s)^-1. The sum and the product are equal (Euler), which is already the primes written as an analytic function. Its special even values are exact multiples of powers of pi; its nontrivial zeros govern the error term in the distribution of primes.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the zeta function, 2026-10-07",
+     "claim": "[Basel - an exact theorem] zeta(2) = 1 + 1/4 + 1/9 + ... = pi^2/6 = 1.644934066848226 (sealed). Euler, 1735. A sum over the integers equals a closed multiple of pi^2 - the first sign that zeta carries geometry (the pi) inside arithmetic (the sum).",
+     "kind": "witness",
+     "seal": "a6632bd169abe13b3e20adb532efeb9c5e3fd9cc193f8371a187262f68a5d6b8"
+    },
+    {
+     "by": "Narrow Highway - the zeta function, 2026-10-07",
+     "claim": "[the next even value] zeta(4) = pi^4/90 = 1.082323233711138 (sealed). The pattern zeta(2k) = (rational) * pi^2k continues; the ODD values (zeta(3), Apery's constant) have no such closed form known - the function is exactly understood in half its arguments and open in the other, a tick-stick in miniature.",
+     "kind": "witness",
+     "seal": "c830984ab86d94f0d51c1670e6e6f8a11fea2eceb83c6fe56daafb2b988fefed"
+    },
+    {
+     "by": "Narrow Highway - the zeta function, 2026-10-07",
+     "claim": "[the Euler product IS the content] zeta(s) = prod_p (1 - p^-s)^-1 converges for Re(s) > 1; that the sum over ALL integers factors over ONLY the primes is unique factorization made analytic. Every zero of zeta in the critical strip is a correction term in the count of primes - that is why their location (RH) matters.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the zeta function, 2026-10-07",
+     "claim": "[the family - where the analogue is PROVED] The classical zeta is one member of a family: Dirichlet L-functions, Dedekind zetas, the Hasse-Weil zeta of a variety over a finite field (RH there is a THEOREM - stick_finite_field_riemann), and the Selberg zeta of a hyperbolic surface (whose zeros ARE eigenvalues of the self-adjoint Laplacian, so its RH-analogue holds). The classical zeta is the member with no known operator - stick_hilbert_polya. map, never launder: the engine checks these values; it does not claim RH.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

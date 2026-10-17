@@ -1,0 +1,64 @@
+{
+ "entry": "euler_e",
+ "rc": 0,
+ "seals": {
+  "015e968f6f7fc97ba333f6ae47f32263c171fa925fa70cd0abfbec4ebcd920dc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "e_as_compounding_limit"
+   ]
+  },
+  "a4344f49febb1017c27107694a767120db6d882f479f72edfc90fd69c0de01e6": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "e_as_factorial_series"
+   ]
+  },
+  "d93eea5ed5f139279749204e25934e979e5af1c7a659c5be279fd068d728fd00": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "e_is_its_own_derivative"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_e_the_number_of_continuous_growth": {
+   "field": "mathematics",
+   "question": "e - the number of continuous growth",
+   "references": [
+    "e = sum 1/k! = lim (1 + 1/n)^n = 2.718281828...",
+    "d/dx e^x = e^x (its own derivative); e^(i pi) + 1 = 0",
+    "Hermite (1873): e is transcendental"
+   ],
+   "statement": "e = 2.71828... is the base of continuous growth: the sum of the reciprocal factorials, the limit of (1 + 1/n)^n, and the unique function (up to scale) equal to its own derivative. It is the base of the complex exponential, of continuous compounding, of the Gaussian and of Boltzmann entropy, and the base of the natural logarithm. It is transcendental.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - e, the number of continuous growth, 2026-10-07",
+     "claim": "[e as the infinite series] e = sum of 1/k!: eight terms, 1 + 1 + 1/2 + 1/6 + ... + 1/5040 = 2.7182540 (sealed), closing fast on e = 2.7182818. The factorials in the denominators - the gamma function at the integers (stick_higher_dimensional_spheres_and_the_gamma_function) - make it converge ferociously.",
+     "kind": "witness",
+     "seal": "a4344f49febb1017c27107694a767120db6d882f479f72edfc90fd69c0de01e6"
+    },
+    {
+     "by": "Narrow Highway - e, the number of continuous growth, 2026-10-07",
+     "claim": "[e as the limit of compounding] e = lim (1 + 1/n)^n, continuous growth. At n = 1000, 1.001^1000 = 2.71692 (sealed), climbing to e. A unit at 100% interest compounded continuously becomes e - the number that REPLICATION in the limit converges to (stick_god_works_in_multiplication_addition_is_subtraction_through_).",
+     "kind": "witness",
+     "seal": "015e968f6f7fc97ba333f6ae47f32263c171fa925fa70cd0abfbec4ebcd920dc"
+    },
+    {
+     "by": "Narrow Highway - e, the number of continuous growth, 2026-10-07",
+     "claim": "[e is its own derivative] e^x is the one function (up to scale) equal to its own rate of change: d/dx e^x = e^x. Its slope at 0 is 1 - the difference quotient (e^0.001 - 1)/0.001 = 1.0005 (sealed), approaching 1. e is the base at which the growth rate EQUALS the amount: self-reinforcement, the fixed point of calculus (stick_integrals_and_derivatives_the_fundamental_theorem).",
+     "kind": "witness",
+     "seal": "d93eea5ed5f139279749204e25934e979e5af1c7a659c5be279fd068d728fd00"
+    },
+    {
+     "by": "Narrow Highway - e, the number of continuous growth, 2026-10-07",
+     "claim": "[where e lives] e is a hinge of the whole arc: the base of the complex exponential e^(i theta) - multiplication is rotation, the spiral, and e^(i pi) + 1 = 0 (stick_the_complex_field_is_the_physics_of_waves, stick_using_imaginary_numbers_c_completes_r_lift_and_return); the law of continuous growth and decay, so both the Jevons rebound and replication ride e (stick_god_works_in_multiplication..., stick_jevons_paradox); the Gaussian e^(-x^2/2) and Boltzmann's S = k ln W (stick_entropy_and_gravity); and the natural logarithm that inverts it. Transcendental (Hermite 1873) - growth, rotation, and probability are all written in it. map, never launder: seal the arithmetic; e is found as a limit, not chosen.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

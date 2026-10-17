@@ -1,0 +1,92 @@
+{
+ "entry": "change_of_domain",
+ "rc": 0,
+ "seals": {
+  "1b121a1abf76307c7ada2391d8506c7d8a0edbcfe942a99adcd4d03a6a809fc0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fibonacci_matrix_determinant_phi_times_psi"
+   ]
+  },
+  "b014da268653d3c13c68e2477e4f1d2d103d68f5b2e23970d6322d374e731169": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "markov_detailed_balance_lambda_1_eigenvector"
+   ]
+  },
+  "e6fb9e0593b6b05e15f3a2e3b9c16eba6cf45c2a1ae56d9c0936d0ca5e6f6b8d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fourier_convolution_sum_identity_sum_a_times_sum_b"
+   ]
+  },
+  "f2f5ec4ec9bf60937110155ad4fba3a0f51decc1fa22808b63ee70f5838d78da": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "markov_stationary_pi_1"
+   ]
+  },
+  "f73800170429ff5130fbd3386aef8e78ac0f3ff1ffca3d7a3c0dcf4543a7cce2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fibonacci_matrix_trace_phi_plus_psi"
+   ]
+  },
+  "f819c8a31e486a271954741e24887d5c19318f158f7584aeff42e631de2214a2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fibonacci_10_by_binet_in_the_eigenbasis"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_change_of_domain_solve_in_the_eigenbasis_map_back": {
+   "field": "",
+   "question": "Change of domain - solve in the eigenbasis, map back",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py change_of_domain",
+     "claim": "[Fibonacci by the eigenbasis] The recurrence F_n = F_{n-1} + F_{n-2} is the matrix M = [[1,1],[1,0]] applied n times - coupled in the standard basis. M diagonalizes: its eigenvalues are phi = (1+sqrt5)/2 and psi = (1-sqrt5)/2, with trace phi+psi = 1 (sealed) and determinant phi*psi = -1 (sealed). In the eigenbasis the nth power is just phi^n and psi^n - independent scalars - and mapping back gives Binet: F_10 = (phi^10 - psi^10)/sqrt5 = 55 (sealed, an exact integer). The flip turned iteration into a closed form.",
+     "kind": "instance",
+     "seal": "f819c8a31e486a271954741e24887d5c19318f158f7584aeff42e631de2214a2"
+    },
+    {
+     "by": "tools/tick.py change_of_domain",
+     "claim": "[a Markov steady state as the lambda = 1 eigenvector] A two-state chain with rates 0.1 and 0.5 has its stationary distribution at the eigenvector of eigenvalue 1: detailed balance 0.1*(5/6) = 0.5*(1/6), i.e. the difference is 0 (sealed), giving pi_1 = 0.5/(0.1+0.5) = 5/6 (sealed). The long-run behaviour - a hard limit of powers in the standard basis - is one eigenvector in the eigenbasis.",
+     "kind": "instance",
+     "seal": "b014da268653d3c13c68e2477e4f1d2d103d68f5b2e23970d6322d374e731169"
+    },
+    {
+     "by": "tools/tick.py change_of_domain",
+     "claim": "[the Fourier flip] Multiplying (1 + 2x + 3x^2)(1 + x) convolves the coefficients. Convolution is O(n^2) directly and pointwise multiplication in the frequency basis (DFT(a*b) = DFT(a).DFT(b)). A sealed consequence: the convolution's coefficients sum to (sum a)(sum b) = 6*2 = 12 (sealed); the full ifft(fft.fft) = direct-convolution check is run in the verifier. Convolution is multiplication in the frequency domain.",
+     "kind": "instance",
+     "seal": "e6fb9e0593b6b05e15f3a2e3b9c16eba6cf45c2a1ae56d9c0936d0ca5e6f6b8d"
+    },
+    {
+     "by": "tools/tick.py change_of_domain",
+     "claim": "[what it rests on] The spectral theorem: a diagonalizable operator is, in its eigenbasis, a diagonal matrix - the coupled system becomes independent scalars, and any function of the operator is that function applied to each eigenvalue. The flip is EXACT when the eigenbasis exists and is known; the engine verifies A v = lambda v before trusting it. Taken as the frame these flips work in; from their working the method is inferred, never kept as a universal fact - a defective matrix has no such basis, and a problem with no cheap diagonalizing basis is where the barriers bite.",
+     "kind": "postulate",
+     "source": "the spectral theorem; Binet (1843); J. Fourier (1822); the convolution theorem"
+    },
+    {
+     "by": "tools/tick.py change_of_domain",
+     "claim": "[don't blindly apply bra-ket] The flip is a win only when the diagonalizing basis is known and cheap to apply: Fourier is O(n log n), a general diagonalization is O(n^3), and for an NP-complete problem the basis would be exponentially large or exponentially hard to find - the barrier, re-appearing, not evaded. Exact here (structure present: linearity, a symmetry, a modularity); where it is absent, fall through to the get-close approximation with a proven bound.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py change_of_domain",
+     "claim": "[the engine is the Hilbert space] The domains are its subspaces, the verifiers its operators, and the joints where two domains connect (card_floor_millennium, card_floor_the_instruments) are the inner products. Solving is choosing the domain whose best aspect diagonalizes your problem, working there, and mapping back - exact in the eigenbasis (here), approximate by relaxation (get close). This is the transceiver reading: find the carrier, demodulate, read the message.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

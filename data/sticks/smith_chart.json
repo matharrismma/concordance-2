@@ -1,0 +1,72 @@
+{
+ "schema": 1,
+ "name": "smith_chart",
+ "aliases": [
+  "smith_chart",
+  "smith",
+  "cayley",
+  "reflection_coefficient",
+  "impedance"
+ ],
+ "doc": "THE SMITH CHART = THE CAYLEY TRANSFORM (Matt, 2026-10-07, RF designer's view). The reflection\ncoefficient Gamma = (z - 1)/(z + 1) (z = normalized impedance) is the Mobius map that carries the right\nhalf-plane to the unit disk - the same Cayley transform that sends a SELF-ADJOINT operator to a UNITARY\none, the real line to the unit circle. The lossless (pure-reactance) impedances land exactly on |Gamma| =\n1. Line <-> circle: the engineer's picture of self-adjoint <-> unitary, and of 'zeros on Re=1/2' <->\n'eigenvalues on |z|=1'. Seal the three canonical loads. New stick.",
+ "seals": [
+  {
+   "key": "smith_matched",
+   "nid": "smith_matched",
+   "expr": "(1 - 1) / (1 + 1)",
+   "value": 0.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "smith_short",
+   "nid": "smith_short",
+   "expr": "(0 - 1) / (0 + 1)",
+   "value": -1.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "smith_lossless_unit_circle",
+   "nid": "smith_lossless_unit_circle",
+   "expr": "((-1)**2 + 1**2) / (1**2 + 1**2)",
+   "value": 1.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The Smith chart - the Cayley transform",
+   "statement": "Gamma = (z - 1)/(z + 1) maps the passive-impedance half-plane (Re z >= 0) into the unit disk and the lossless imaginary axis onto the unit circle |Gamma| = 1. It is the Cayley transform; the operator form (A - iI)(A + iI)^-1 sends a self-adjoint A to a unitary U, the real spectrum to the unit circle.",
+   "field": "meta",
+   "references": [
+    "P. Smith's impedance chart (1939) - Gamma = (Z - Z0)/(Z + Z0)",
+    "the Cayley transform between self-adjoint and unitary operators",
+    "the conformal map of the half-plane onto the disk"
+   ],
+   "by": "Narrow Highway - the Smith chart / Cayley transform, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[matched load -> center] z = 1 gives Gamma = (1-1)/(1+1) = 0 (sealed): a perfectly matched load sits at the center of the chart, |Gamma| = 0, no reflection. The fixed point of the transform.",
+     "seal": "smith_matched"
+    },
+    {
+     "kind": "witness",
+     "claim": "[short -> the circle] z = 0 (a short) gives Gamma = (0-1)/(0+1) = -1 (sealed): on the unit circle, total reflection. Open and short sit at opposite points of |Gamma| = 1.",
+     "seal": "smith_short"
+    },
+    {
+     "kind": "witness",
+     "claim": "[lossless -> the unit circle, the key] z = i (pure reactance) gives |Gamma|^2 = ((-1)^2 + 1^2)/(1^2 + 1^2) = 2/2 = 1 (sealed), so |Gamma| = 1. EVERY lossless impedance - the whole imaginary axis - maps onto the unit circle. This is self-adjoint (spectrum on the line) <-> unitary (spectrum on the circle) in the engineer's hand: the same line<->circle symmetry that pins |alpha| = sqrt(q) over a finite field (stick_finite_field_riemann) and that Hilbert-Polya would use (stick_hilbert_polya).",
+     "seal": "smith_lossless_unit_circle"
+    },
+    {
+     "kind": "note",
+     "claim": "[why this belongs in the Riemann arc] The Smith chart is a conformal MAP; the critical line Re(s) = 1/2 and the unit circle are two faces of one symmetry under Cayley. The engine is not an RF simulator and does not run electromagnetics; it seals the transform's arithmetic and keeps the likeness as discernment. map, never launder."
+    }
+   ]
+  }
+ ]
+}

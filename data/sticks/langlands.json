@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "langlands",
+ "aliases": [
+  "langlands",
+  "modularity",
+  "reciprocity"
+ ],
+ "handler": "langlands",
+ "why_python": "calls verify_derivation itself (2x)"
+}

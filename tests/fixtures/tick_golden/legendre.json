@@ -1,0 +1,64 @@
+{
+ "entry": "legendre",
+ "rc": 0,
+ "seals": {
+  "05fa28652debf245c82a42aeb9c4ee06efb419abd79e68153b0dd167172b6124": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "legendre_tangent_touches"
+   ]
+  },
+  "10cb5e054ea12db8716eeecff6958c3b75be448b3dd49c11624ad3e1d255a4ad": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "legendre_second_point"
+   ]
+  },
+  "d5a3f95de91ab6219897111bb32e24f103584baa6ffa6441fce34e4acf02ed7f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "legendre_intercept_is_transform"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_legendre_transform_mark_the_points_create_the_line": {
+   "field": "mathematics",
+   "question": "The Legendre transform - mark the points, create the line",
+   "references": [
+    "the Legendre transform f*(p) = sup_x (p x - f(x)); a convex involution",
+    "the tangent at a: y = f'(a) x + (f(a) - f'(a) a); y-intercept = -f*(f'(a))",
+    "physics: Lagrangian<->Hamiltonian (H = p q' - L); thermodynamic potentials"
+   ],
+   "statement": "A convex function is the upper envelope of its tangent lines. Each tangent is a (slope, y-intercept) pair, and the Legendre transform re-encodes the function as minus the y-intercept as a function of slope: f*(p) = sup_x (p x - f(x)). The curve and its tangent-line description are the same information in two languages; the transform is an involution (f** = f).",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Legendre transform, 2026-10-07",
+     "claim": "[mark a point -> a tangent line] For f(x) = x^2, the tangent at the marked point a = 3 is y = 6x - 9 (slope 2a = 6, y-intercept -a^2 = -9); at x = 3 it gives 6*3 - 9 = 9 = f(3) - the line TOUCHES the point. Every point of a convex curve hands you one tangent line.",
+     "kind": "witness",
+     "seal": "05fa28652debf245c82a42aeb9c4ee06efb419abd79e68153b0dd167172b6124"
+    },
+    {
+     "by": "Narrow Highway - the Legendre transform, 2026-10-07",
+     "claim": "[the y-intercept carries the transform] That tangent has slope p = 6 and y-intercept -9, and the Legendre transform is exactly MINUS that intercept: f*(6) = 6^2/4 = 9 = -(y-intercept) (sealed). So re-encoding the curve by the (slope, y-intercept) of its tangent lines IS the Legendre transform - read the tangent's slope and intercept and you have the dual.",
+     "kind": "witness",
+     "seal": "d5a3f95de91ab6219897111bb32e24f103584baa6ffa6441fce34e4acf02ed7f"
+    },
+    {
+     "by": "Narrow Highway - the Legendre transform, 2026-10-07",
+     "claim": "[a second point, and the envelope builds the curve] At a = 2: slope 4, y-intercept -4, f*(4) = 4^2/4 = 4 = -(intercept) (sealed); the tangent y = 4x - 4 touches f(2) = 4. Collect every (slope, intercept) and the curve returns as the upper envelope of all its tangent lines: f(x) = sup_p (p x - f*(p)). Mark the points, the tangent lines create the line.",
+     "kind": "witness",
+     "seal": "10cb5e054ea12db8716eeecff6958c3b75be448b3dd49c11624ad3e1d255a4ad"
+    },
+    {
+     "by": "Narrow Highway - the Legendre transform, 2026-10-07",
+     "claim": "[this IS the engine's mechanism] 'The Legendre transform gives us our mechanism.' The tick-stick marks POINTS (sealed facts); the law/curve/narrow path is the ENVELOPE of those marks' supporting lines - found by convex duality, not posited. It is the convex-geometry kin of the positive Grassmannian ('the core': valid = the canonical form of positivity / admissibility - stick_the_positive_grassmannian) and of 'a fit that never passes the last mark' (the envelope rests on the marks). In physics it is the Lagrangian<->Hamiltonian bridge (H = p q' - L; p = dL/dq' - stick_the_principle_of_least_action) and the thermodynamic potentials (U <-> F = U - TS <-> enthalpy, swapping conjugate variables S<->T, V<->P - stick_entropy_and_gravity). map, never launder: seal the arithmetic; the line is BUILT from the marked points by the transform, found not invented.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

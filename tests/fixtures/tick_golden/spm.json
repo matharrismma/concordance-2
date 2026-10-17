@@ -1,0 +1,96 @@
+{
+ "entry": "spm",
+ "rc": 0,
+ "seals": {
+  "9a9df6a75251eb96b88e09a53d4aee58ed8d4d64228fd5c0ccd06836ab826ac2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "spherical_four_bar_one_dof"
+   ]
+  },
+  "a1def067c800ecb2844abdd4c694dd2736a2cd1da9329108f27bcb92a1f7d62c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "grubler_kutzbach_spherical_lambda_3"
+   ]
+  },
+  "b46bd4fde5fc4ffbd4780df749f0355c399e1113347c180b83491a0750e21421": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "two_quarter_turns_compose_to_120_degrees"
+   ]
+  },
+  "d8a44098fe5c8e0c98561988f69053480652ad4b436863dbf7f9948723bd124e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "agile_eye_cone_solid_angle"
+   ]
+  },
+  "f2fb7d0e797396346d6cde5b6a35d57df26cfea4b888f824532625136f00190f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "grubler_kutzbach_spatial_lambda_6_on_the_same_links"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_spherical_parallel_mechanism_three_motors_one_centre_every_l": {
+   "field": "engineering",
+   "question": "Spherical parallel mechanism - three motors, one centre, every link on a sphere",
+   "references": [
+    "C. Gosselin, J. Angeles, The optimum kinematic design of a spherical three-degree-of-freedom parallel manipulator, ASME J. Mech. Trans. Autom. Des. 111 (1989) 202-207",
+    "C. Gosselin, J.-F. Hamel, The Agile Eye: a high-performance three-degree-of-freedom camera-orienting device, IEEE ICRA (1994)",
+    "C. Gosselin, J. Angeles, Singularity analysis of closed-loop kinematic chains, IEEE Trans. Robot. Autom. 6 (1990) 281-290",
+    "C. Gosselin, J. Sefrioui, M. J. Richard, On the direct kinematics of spherical three-degree-of-freedom parallel manipulators, ASME J. Mech. Des. 116 (1994)",
+    "M. Grubler (1883), K. Kutzbach (1929): the mobility count M = lambda (n - 1 - j) + sum f_i",
+    "L. Euler (1775): every displacement of a sphere about its centre is one rotation about one axis",
+    "J. B. Listing (1845), F. C. Donders (1847): the eye's torsion is fixed by its gaze",
+    "Matthew 6:22; 2 Chronicles 16:9; Ezekiel 1:16-17",
+    "stick_the_clock (the gyrotourbillon); stick_parametrization_of_surfaces (the workspace as an area on the unit sphere)"
+   ],
+   "statement": "Three motors on a base, three two-link legs, one platform, and every joint axis through one centre: every point of every link moves on a sphere about that centre, so the machine lives in the rotation group and its kinematics is spherical trigonometry. Grubler-Kutzbach counts 3 degrees of freedom only with the right motion group (lambda = 3); the spatial formula says -3 and the machine moves - the method decides. Its workspace is a cap on the unit sphere; its three inputs compose into one rotation (Euler); the inverse problem is closed-form and the forward problem is a degree-8 polynomial. The human eye, the gyrotourbillon and Ezekiel's wheel are likenesses.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the spherical parallel mechanism, 2026-10-08",
+     "claim": "[three motors, one centre - the count that works only on the sphere] n = 8 links (base, platform, three proximal, three distal), j = 9 revolute joints, every axis through one centre. Grubler-Kutzbach with lambda = 3 (rotations about that point): M = 3 (8 - 1 - 9) + 9 = 3 (sealed) - three inputs, three degrees of freedom of orientation, no more and no less. A spherical mechanism is a planar mechanism on a sphere of finite radius, and the plane is the sphere with K -> 0 (the surfaces stick).",
+     "kind": "witness",
+     "seal": "a1def067c800ecb2844abdd4c694dd2736a2cd1da9329108f27bcb92a1f7d62c"
+    },
+    {
+     "by": "Narrow Highway - the spherical parallel mechanism, 2026-10-08",
+     "claim": "[the method decides the count - a discordance indicts the method] The spatial formula (lambda = 6) on the same links gives 6 (8 - 1 - 9) + 9 = -3 (sealed): 'overconstrained, immobile'. The mechanism moves. The arithmetic was not wrong; the GROUP was - every axis passes through one point, so the links move in SO(3), not SE(3), and the formula's assumption is what failed. When a formula contradicts a working thing, re-examine the method, never the thing.",
+     "kind": "witness",
+     "seal": "f2fb7d0e797396346d6cde5b6a35d57df26cfea4b888f824532625136f00190f"
+    },
+    {
+     "by": "Narrow Highway - the spherical parallel mechanism, 2026-10-08",
+     "claim": "[one leg, one loop, one freedom] The spherical four-bar - four links, four axes through one centre - has 3 (4 - 1 - 4) + 4 = 1 degree of freedom (sealed), the same count as the planar four-bar: turn the crank and the rocker follows, on a sphere instead of a plane. Spherical trigonometry (the trigonometry stick's third sense) is the whole of its kinematics: cos c = cos a cos b + sin a sin b cos C replaces the planar law of cosines.",
+     "kind": "witness",
+     "seal": "9a9df6a75251eb96b88e09a53d4aee58ed8d4d64228fd5c0ccd06836ab826ac2"
+    },
+    {
+     "by": "Narrow Highway - the spherical parallel mechanism, 2026-10-08",
+     "claim": "[the workspace is a cap on the unit sphere] The Agile Eye (Gosselin & Hamel 1994) orients a camera within a cone of 140 degrees, with +/-30 degrees of torsion, at angular velocities above 1000 degrees per second (cited). That cone is a solid angle 2 pi (1 - cos 70 deg) = 4.1342 steradians (sealed), 32.9% of all directions - a third of the sky. An orientation device's workspace is an AREA on the unit sphere: the parametrization's own integral of sin theta dtheta dphi. Three sticks, one object: the sphere mapped, measured by pi, moved upon.",
+     "kind": "witness",
+     "seal": "d8a44098fe5c8e0c98561988f69053480652ad4b436863dbf7f9948723bd124e"
+    },
+    {
+     "by": "Narrow Highway - the spherical parallel mechanism, 2026-10-08",
+     "claim": "[rotations compose, they do not add] A quarter-turn about x and then a quarter-turn about z: the product [[0,0,1],[1,0,0],[0,1,0]] (x -> y -> z) has trace 0, so cos theta = (0 - 1)/2 and theta = acos(-1/2) = 120 degrees (sealed) about the diagonal (1,1,1)/sqrt 3 - not 180, and the other order gives a different axis. Euler (1775): every orientation is ONE rotation about one axis through the centre, and the three motors compose into exactly that one. The inverse problem (which inputs give this orientation) is closed-form; the forward problem (which orientation do these inputs give) is a degree-8 polynomial with up to eight real poses (Gosselin, Sefrioui & Richard 1994) - the parallel machine's signature: easy to command, hard to predict.",
+     "kind": "witness",
+     "seal": "b46bd4fde5fc4ffbd4780df749f0355c399e1113347c180b83491a0750e21421"
+    },
+    {
+     "by": "Narrow Highway - the spherical parallel mechanism, 2026-10-08",
+     "claim": "[the eye, the clock, Ezekiel's wheel - and the guard] The human eye is a spherical parallel mechanism: six muscles about one centre, three degrees of freedom, and Listing's law gives one of them up - torsion is fixed by gaze - so the eye uses two of three, the SPM with one input held. The gyrotourbillon of the clock stick is a spherical mechanism too: cages turning about axes through the balance's centre. Singularity (Gosselin & Angeles 1990): when the three intermediate axes fall in one plane the platform gains a motion no motor controls - the machine is surest in the middle of its cap and lost at the edge. Scripture: 'The light of the body is the eye' (Mt 6:22); 'the eyes of the LORD run to and fro throughout the whole earth' (2 Chr 16:9) - over a sphere; 'a wheel in the middle of a wheel... they went upon their four sides: and they turned not when they went' (Ezek 1:16-17) - the oldest description we have of motion about one centre in every direction, given as 'the appearance of the wheels' - a LIKENESS, kept as one. GUARDS: Grubler is a count, not a proof of mobility (it fails on paradoxical linkages in both directions; only the arithmetic is sealed); the Agile Eye's figures are cited; the eye and Ezekiel are discernments, never fits. Five numbers sealed; the rest cited.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

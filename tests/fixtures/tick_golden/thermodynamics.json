@@ -1,0 +1,62 @@
+{
+ "entry": "thermodynamics",
+ "rc": 0,
+ "seals": {
+  "16729796ed35691477a8cae5d7f09b5df720b09c04bc428cb4fc97abb5e1f5b5": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "heat_engine_actual_efficiency_work_over_heat_in"
+   ]
+  },
+  "2ab26bd63e4bcaadbc52ce63b973a8e8b0a4be9ead0bef08e1f80383a0c9436f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "carnot_efficiency_bound_1_minus_tc_over_th"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_thermodynamics_the_arrow_and_the_one_end": {
+   "field": "",
+   "question": "Thermodynamics - the arrow and the one end",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py thermodynamics",
+     "claim": "[the second law bounds every engine, SEALED] No heat engine can beat the Carnot efficiency eta = 1 - T_c/T_h. Between 600 K and 300 K that is 1 - 300/600 = 0.5 (sealed): at most half the heat drawn from the hot reservoir can become work, the rest MUST be dumped cold. Not an engineering limit - a law. The second law written as a number you cannot cross.",
+     "kind": "instance",
+     "seal": "2ab26bd63e4bcaadbc52ce63b973a8e8b0a4be9ead0bef08e1f80383a0c9436f"
+    },
+    {
+     "by": "tools/tick.py thermodynamics",
+     "claim": "[the first law, and the bound honoured, SEALED] A real engine takes 100 J of heat and does 40 J of work, so by the first law (energy conserved) it exhausts 60 J: 100 = 40 + 60. Its efficiency is W/Q_h = 40/100 = 0.4 (sealed) - below the Carnot 0.5, exactly as the second law demands. Energy is conserved (first law) AND degraded (second law) in the same stroke.",
+     "kind": "instance",
+     "seal": "16729796ed35691477a8cae5d7f09b5df720b09c04bc428cb4fc97abb5e1f5b5"
+    },
+    {
+     "by": "tools/tick.py thermodynamics",
+     "claim": "[the first law IS Noether's energy] The first law - energy is conserved, dU = dQ - dW - is exactly the conserved energy Noether derives from time-translation symmetry. Thermodynamics' first law rests on the Noether floor: the same invariant, now accounting heat and work. Ties card_floor_noethers_theorem.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py thermodynamics",
+     "claim": "[the second law IS the arrow and the one end] The microscopic laws (Hamilton, Schrodinger) are time-reversible; the second law is where irreversibility ENTERS - entropy never decreases - and that is the arrow of time. It is the engine of 'the story ends the same way': of the vast many microstates, almost all flow to the ONE maximum-entropy macrostate (equilibrium), the end nearly every path reaches. Many microstates, one macrostate - 'many possibilities, the same end' as a law. And it is the one-way geometry itself (the Tesla valve, the diode): heat and time flow one way. Ties card_floor_the_capstone and the Hamiltonian's measurement gap (the arrow, decoherence).",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py thermodynamics",
+     "claim": "[statistical mechanics - many into one] Statistical mechanics is the bridge from the reversible microscopic to the irreversible macroscopic: 10^23 particles, one temperature and one pressure. The one macrostate emerges from the many microstates, counted by Boltzmann's S = k_B ln W (sealed on stick_entropy_and_gravity). The microscopic law is the Hamiltonian; the macrostate is what almost all its trajectories reach. Ties card_floor_the_hamiltonian.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py thermodynamics",
+     "claim": "[entropy IS information] Entropy in joules-per-kelvin and entropy in bits are the same thing: Boltzmann S = k_B ln W, Shannon H = -sum p log p. Landauer's limit - erasing one bit costs at least k_B T ln2 of energy - is the bridge, and where Maxwell's demon is exorcised. Already sealed on stick_entropy_is_never_decreased_only_concentrated_maxwell_s_demon; a black hole's Bekenstein-Hawking entropy (its horizon area) on stick_black_holes and stick_entropy_and_gravity. Ties the information-theory instrument and the black-hole work.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

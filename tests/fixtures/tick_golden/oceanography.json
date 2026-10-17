@@ -1,0 +1,47 @@
+{
+ "entry": "oceanography",
+ "rc": 0,
+ "seals": {
+  "6167b1edee1236fa1b8be125e2666c84e702f14cc3d58aa2ab11955cdb0ee7d1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ocean_gauge_pressure_atm_at_100m"
+   ]
+  },
+  "7cf485a42ac1b7392e1684ef3062f36ea0d892eb0cfbbe69b2c30b9c09c13047": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mean_seawater_salinity_percent"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_oceanography_the_salt_sea_in_motion": {
+   "field": "",
+   "question": "Oceanography - the salt sea in motion",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py oceanography",
+     "claim": "[the weight of water - pressure with depth, SEALED] Water adds about one atmosphere of pressure every 10 metres, so at 100 m the gauge pressure is 100/10 = 10 atm (sealed), eleven absolute. It is why the deep sea crushes, and why depth is read as pressure. Ties card_floor_earth_science.",
+     "kind": "instance",
+     "seal": "6167b1edee1236fa1b8be125e2666c84e702f14cc3d58aa2ab11955cdb0ee7d1"
+    },
+    {
+     "by": "tools/tick.py oceanography",
+     "claim": "[the salt sea, SEALED] Seawater is about 35 grams of salt per kilogram - 35/1000*100 = 3.5 percent (sealed), mostly sodium chloride. Salinity with temperature sets the water's density, and density differences drive the deep thermohaline circulation that moves the planet's heat. Ties card_floor_chemistry and card_floor_thermodynamics.",
+     "kind": "instance",
+     "seal": "7cf485a42ac1b7392e1684ef3062f36ea0d892eb0cfbbe69b2c30b9c09c13047"
+    },
+    {
+     "by": "tools/tick.py oceanography",
+     "claim": "[on the one map] Oceanography rests on earth science (the ocean basins and the water cycle), chemistry (dissolved salts and gases), and thermodynamics (currents and the thermocline, a heat engine like the atmosphere). The sea covers 71 percent of the planet and buffers its climate. Ties card_floor_oceanography.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

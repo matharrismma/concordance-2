@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "grimm_law",
+ "aliases": [
+  "grimm_law",
+  "grimm",
+  "sound_law",
+  "sound_laws"
+ ],
+ "handler": "grimm_law",
+ "why_python": "calls verify_derivation itself (3x)"
+}

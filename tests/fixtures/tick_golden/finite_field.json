@@ -1,0 +1,63 @@
+{
+ "entry": "finite_field",
+ "rc": 0,
+ "seals": {
+  "28e407942b960c2ac246096747321cd8ddb75fa5d8941629538bf984f6733d49": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "frobenius_trace"
+   ]
+  },
+  "4f58588d7bfcc101b1626e633f294a00acc45bcb7cb1bad1078c7eef9c045418": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hasse_bound"
+   ]
+  },
+  "dd3edd18013f669128e66e31c85ac2a6032d82477206eac380e77b1d535b5e81": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "frobenius_modulus_q"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_finite_field_the_weil_riemann_hypothesis": {
+   "field": "meta",
+   "question": "Finite field - the Weil Riemann hypothesis",
+   "references": [
+    "A. Weil, Riemann hypothesis for curves over finite fields (1940s)",
+    "P. Deligne, La conjecture de Weil I (1974) - the general case",
+    "the Hasse bound |a| <= 2 sqrt(q) for elliptic curves"
+   ],
+   "statement": "For a smooth projective curve over F_q, the zeta function's reciprocal roots (Frobenius eigenvalues) satisfy |alpha| = sqrt(q) exactly. Equivalently the zeros lie on Re(s) = 1/2. This is proven - the Riemann hypothesis over finite fields is a theorem, not a conjecture.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Weil RH over finite fields, 2026-10-07",
+     "claim": "[the RH condition, sealed] Take a curve over F_25 with Frobenius eigenvalue alpha = 3 + 4i. Then |alpha|^2 = 3^2 + 4^2 = 25 = q (sealed), so |alpha| = sqrt(25) = 5 = sqrt(q) EXACTLY. That is the finite-field Riemann hypothesis for this curve: the eigenvalue sits on the circle of radius sqrt(q), the mirror image of 'the zero sits on Re = 1/2'. It is not approached; it is pinned.",
+     "kind": "witness",
+     "seal": "dd3edd18013f669128e66e31c85ac2a6032d82477206eac380e77b1d535b5e81"
+    },
+    {
+     "by": "Narrow Highway - the Weil RH over finite fields, 2026-10-07",
+     "claim": "[within the Hasse bound] The trace alpha + alpha-bar = 3 + 3 = 6 (sealed) is real, and |trace| = 6 <= 2 sqrt(q) = 10 (sealed) - the Hasse bound, the q=prime case of Weil, proven by elementary descent. The eigenvalues are forced symmetric about the real axis and bounded by the geometry.",
+     "kind": "witness",
+     "seal": "28e407942b960c2ac246096747321cd8ddb75fa5d8941629538bf984f6733d49"
+    },
+    {
+     "by": "Narrow Highway - the Weil RH over finite fields, 2026-10-07",
+     "claim": "[WHY it fired - the operator exists] Classically RH lacks an operator (stick_hilbert_polya). Over a finite field the operator is REAL: Frobenius acts on the etale cohomology (for a curve, on the Tate module of its Jacobian), and a geometric POSITIVITY - the Hodge index theorem / Castelnuovo-Severi inequality on the surface C x C - forces |alpha| = sqrt(q). Positivity is the same constraint the engine is built on (stick_the_positive_grassmannian - 'the core'). Where the symmetry has an operator, mapping is proving - exactly the point.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Weil RH over finite fields, 2026-10-07",
+     "claim": "[the classical gap, named] This does NOT prove the classical RH; the integers are not a curve over a finite field, and no cohomology/operator is known for them (the 'field with one element' F_1 program seeks exactly that). The engine seals this concrete Frobenius arithmetic and marks the gap to scale. map, never launder: a proved analogue is a signpost, never the thing itself (ties [[project_babel_scattered_pieces_appointed_assembly_2026-08-01]]).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

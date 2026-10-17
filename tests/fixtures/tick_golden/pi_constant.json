@@ -1,0 +1,121 @@
+{
+ "entry": "pi_constant",
+ "rc": 0,
+ "seals": {
+  "23585939df1d0ad47d63de0661cc0064dbc5bb5e67cdd7f68ee4331db70d0a29": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "archimedes_lower_gap_223_over_71"
+   ]
+  },
+  "2614cb1044e3d17d0db5fa25e46fafb7ce4d68896ef939bec48a807fa5380e58": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "machin_identity"
+   ]
+  },
+  "822eefda38c7cd3c50d1642e57f4c27dc772d03c0295baae7cdf9ab5abb93c07": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "molten_sea_gap_at_stated_precision"
+   ]
+  },
+  "97db80069bda2fa5c0d4ffa9b9149d100f9f8fcc4f285388708178ce511ccb0d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "leibniz_series_ten_terms"
+   ]
+  },
+  "af0b9911938bf064e1880a8dd978b7bb08549a2244676838547924483e66a498": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "euler_identity_real_part"
+   ]
+  },
+  "b35578afb4c7ec1e58333ad9eb7fe5d4f64d5973f05a14fddadfc99ee2a254ef": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gaussian_integral_is_sqrt_pi"
+   ]
+  },
+  "b51fd382d7c31e871d326dae110dd190de88849fc921883be8d6c17cc279b7ea": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "archimedes_upper_gap_22_over_7"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_pi_the_constant_of_the_circle_is_the_constant_of_rotation": {
+   "field": "mathematics",
+   "question": "Pi - the constant of the circle is the constant of rotation",
+   "references": [
+    "Archimedes, Measurement of a Circle (c. 250 BC): 223/71 < pi < 22/7 by the 96-gon",
+    "J. Machin (1706): pi/4 = 4 atan(1/5) - atan(1/239), 100 digits by hand",
+    "Madhava (c. 1400), J. Gregory (1671), G. W. Leibniz (1676): the arctangent series",
+    "J. H. Lambert (1768): pi is irrational; F. Lindemann (1882): pi is transcendental",
+    "L. Euler, Introductio in analysin infinitorum (1748): e^(i pi) + 1 = 0",
+    "the Gaussian integral (Laplace 1812): int exp(-x^2) dx = sqrt pi",
+    "1 Kings 7:23; 2 Chronicles 4:2; Proverbs 8:27",
+    "src/concordance/verifiers/base.py - stated_precision: the claim's own figures set the bar"
+   ],
+   "statement": "Pi was never found; it was fenced. Archimedes narrowed it between 223/71 and 22/7 by elimination; Machin's identity is exact and its series carried the digits; the obvious series is true and useless (error ~ 1/N). The molten sea's 30 cubits round 10 is a one-figure measure of a vessel, judged at its stated precision: to one figure pi is 3 - neither the charge nor the gematria trick survives. Pi appears where there is no circle (the Gaussian integral, Stirling, Coulomb) because it is the constant of rotation; e^(i pi) = -1 is the half-turn. Irrational and transcendental by cited theorem: no fraction ends it and no compass squares the circle.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - pi, fenced not found, 2026-10-08",
+     "claim": "[Archimedes fenced pi by elimination - the first tick-stick] With a 96-gon inside and outside the circle: 223/71 < pi < 22/7. The upper gap 22/7 - pi = 0.0012645 (sealed) is positive: pi is below the fence. He never 'found' pi; he narrowed where it could be - a window 1/497 wide, with the truth inside. That is this engine's method, 2,270 years old.",
+     "kind": "witness",
+     "seal": "b51fd382d7c31e871d326dae110dd190de88849fc921883be8d6c17cc279b7ea"
+    },
+    {
+     "by": "Narrow Highway - pi, fenced not found, 2026-10-08",
+     "claim": "[the lower fence] pi - 223/71 = 0.0007476 > 0 (sealed): the second post of Archimedes' window. Two bounds and the truth between them; a window, not a value - the surviving interval is the honest statement, and every later digit only narrowed it.",
+     "kind": "witness",
+     "seal": "23585939df1d0ad47d63de0661cc0064dbc5bb5e67cdd7f68ee4331db70d0a29"
+    },
+    {
+     "by": "Narrow Highway - pi, fenced not found, 2026-10-08",
+     "claim": "[Machin's identity - exact, not approximate] pi = 16 atan(1/5) - 4 atan(1/239) = 3.141592653589794 (sealed as an identity through the evaluator's own arctangent, not as a decimal). With its series Machin computed 100 digits by hand in 1706; the same shape carried pi to the billions. An identity is a road; the digits are mileposts.",
+     "kind": "witness",
+     "seal": "2614cb1044e3d17d0db5fa25e46fafb7ce4d68896ef939bec48a807fa5380e58"
+    },
+    {
+     "by": "Narrow Highway - pi, fenced not found, 2026-10-08",
+     "claim": "[why the obvious series is useless] Leibniz: pi = 4 (1 - 1/3 + 1/5 - ...). Ten terms give 3.0418 (sealed), off by 0.0998 ~ 1/10: the error after N terms is about 1/N, so six digits cost a million terms. A true series can be a bad tool - convergence is a RATE. The Monte Carlo stick's 1/sqrt N is the same lesson from the other side.",
+     "kind": "witness",
+     "seal": "97db80069bda2fa5c0d4ffa9b9149d100f9f8fcc4f285388708178ce511ccb0d"
+    },
+    {
+     "by": "Narrow Highway - pi, fenced not found, 2026-10-08",
+     "claim": "[the molten sea - a measure, judged at its stated precision] 1 Kings 7:23: ten cubits from brim to brim, a line of thirty cubits round about. 30/10 = 3, and |pi - 3| = 0.1416 (sealed) is inside the half-unit (0.5) of a figure stated to the ones place. 'Ten' and 'thirty' are one-figure measures of a vessel; to one figure, pi IS 3 - the same rule the front door applies to '9.81'. So the engine refuses both charges: not 'the Bible says pi = 3' (the text states a measurement, not a constant), and not the letter-count trick (a 111/106 ratio 'recovering' 3.1416 - gematria is refused here by rule). Seal the arithmetic; attribute the pattern; claim nothing past the figures.",
+     "kind": "witness",
+     "seal": "822eefda38c7cd3c50d1642e57f4c27dc772d03c0295baae7cdf9ab5abb93c07"
+    },
+    {
+     "by": "Narrow Highway - pi, fenced not found, 2026-10-08",
+     "claim": "[pi where there is no circle] int exp(-x^2) dx from -oo to oo = sqrt pi = 1.772454 (sealed through the integral itself). The bell curve's area is pi's square root; pi is in Stirling's sqrt(2 pi n), in Coulomb's 1/(4 pi eps0), in h-bar = h/(2 pi) - anywhere a rotation or a sum over all directions hides. The Gaussian stick's kernel, the entropy stick's Stirling and the Fourier stick's phase all carry it.",
+     "kind": "witness",
+     "seal": "b35578afb4c7ec1e58333ad9eb7fe5d4f64d5973f05a14fddadfc99ee2a254ef"
+    },
+    {
+     "by": "Narrow Highway - pi, fenced not found, 2026-10-08",
+     "claim": "[five constants in one line] Re(e^(i pi)) = -1 (sealed): e^(i pi) + 1 = 0 - Euler, 1748: growth (e), rotation (i), the turn (pi), one and zero. pi is the half-turn; the Fourier stick's rotation is 2 pi per cycle; the surfaces stick's 4 pi R^2 is the sphere seen from every direction. The constant of the circle is the constant of rotation, which is why it is everywhere.",
+     "kind": "witness",
+     "seal": "af0b9911938bf064e1880a8dd978b7bb08549a2244676838547924483e66a498"
+    },
+    {
+     "by": "Narrow Highway - pi, fenced not found, 2026-10-08",
+     "claim": "[what pi is not, and the guard] Irrational (Lambert 1768) and transcendental (Lindemann 1882): no fraction ends it and no compass-and-straightedge construction squares the circle - the construct stick's ruler stops here. Both are theorems proved elsewhere and CITED here; this stick seals only arithmetic and does not pretend a proof it did not run. Scripture: 'he set a compass upon the face of the depth' (Prov 8:27) - the circle drawn; the molten sea measured (1 Kgs 7:23, 2 Chr 4:2). GUARDS: the molten sea is a measure to one figure, never a value of pi; the gematria route is refused; pi's digits are not a message (seal the arithmetic, attribute the pattern). Seven seals; the rest cited. Ties: surfaces (4 pi R^2), spm (the cone's solid angle), fourier, gaussian, e, construct, monte_carlo, trigonometry.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

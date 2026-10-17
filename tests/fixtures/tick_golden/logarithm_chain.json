@@ -1,0 +1,131 @@
+{
+ "entry": "logarithm_chain",
+ "rc": 0,
+ "seals": {
+  "21971e7bb8c779894d68f0b664b8309ae40d0476a5159bcc7925459bb9053122": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "entropy_of_one_fair_coin_log_2"
+   ]
+  },
+  "2ea7a0ff9b69de0ff81217f7e4aaa309382c9f80aa0cd8ed8d621f5102aee3e6": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "li_1000_minus_the_prime_count"
+   ]
+  },
+  "480b19e6f2a09ff1ff4bde17b8b21d9ec68c7b814ce8bdcf19a063d385d57684": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "digits_of_2_to_the_64"
+   ]
+  },
+  "ebf0f865c7a814eda75db0b01b69fe5fb1a072f36e98a8a67ce2a4c480408b19": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "law_of_the_wall_u_plus_at_y_plus_100"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_birch_and_swinnerton_dyer_conjecture": {
+   "field": "",
+   "question": "Birch and Swinnerton-Dyer conjecture",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py logarithm_chain",
+     "claim": "[the logarithm, cited] The height of a rational point is the logarithm of the size of its coordinates (Weil 1929), made quadratic by Neron and Tate (1965); the regulator cited on 37a1, R = 0.0511, is a determinant of those logarithms, and Gross-Zagier ties L'(E, 1) to the height of a Heegner point. The logarithm is how the conjecture measures its points.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_hodge_conjecture": {
+   "field": "",
+   "question": "Hodge conjecture",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py logarithm_chain",
+     "claim": "[the logarithm, cited] Mixed Hodge theory is built on forms with logarithmic poles, dz/z (Deligne, Theorie de Hodge II, 1971), and the monodromy of a degenerating family enters through its logarithm (Schmid 1973). The logarithmic differential is the one form the theory cannot do without.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_navier_stokes_existence_and_smoothness": {
+   "field": "",
+   "question": "Navier-Stokes existence and smoothness",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py logarithm_chain",
+     "claim": "[the logarithm, sealed] The law of the wall (von Karman 1930): in a turbulent boundary layer the velocity profile is logarithmic in the distance from the wall, u+ = (1/kappa) ln(y+) + B. With the constants as commonly stated, kappa = 0.41 and B = 5.0, at y+ = 100 this gives u+ = 16.2321 (sealed; the constants are inputs, not derived). The one logarithm turbulence is known to obey, beside the power law of the cascade.",
+     "kind": "witness",
+     "seal": "ebf0f865c7a814eda75db0b01b69fe5fb1a072f36e98a8a67ce2a4c480408b19"
+    }
+   ]
+  },
+  "stick_p_versus_np": {
+   "field": "",
+   "question": "P versus NP",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py logarithm_chain",
+     "claim": "[the logarithm, sealed] The length of the input is the logarithm of the number: 2^64 has floor(log10(2^64)) + 1 = 20 digits (sealed). 'Polynomial time' means polynomial in that length - Cobham 1965, Edmonds 1965 - so the whole question is posed on a logarithmic ruler: a number N is written in log N symbols, and an algorithm polynomial in N is exponential in its input.",
+     "kind": "witness",
+     "seal": "480b19e6f2a09ff1ff4bde17b8b21d9ec68c7b814ce8bdcf19a063d385d57684"
+    }
+   ]
+  },
+  "stick_poincare_conjecture": {
+   "field": "",
+   "question": "Poincare conjecture",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py logarithm_chain",
+     "claim": "[the logarithm, sealed] Perelman's first paper is titled the entropy formula, and his W functional is a log-Sobolev inequality: the entropy minus the integral of u log u, in the line that runs Boltzmann 1877 (S = k log W) to Shannon 1948 (H = -sum p log p). The unit of that measure is the entropy of one fair coin, log 2 = 0.693147 nats = 1 bit (sealed). The logarithm is the measure the closing mark's monotone quantity is built from.",
+     "kind": "witness",
+     "seal": "21971e7bb8c779894d68f0b664b8309ae40d0476a5159bcc7925459bb9053122"
+    }
+   ]
+  },
+  "stick_riemann_hypothesis": {
+   "field": "",
+   "question": "Riemann hypothesis",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py logarithm_chain",
+     "claim": "[the logarithm, sealed] Gauss read the prime count off his log tables and guessed li(x); at x = 1000 the logarithmic integral is li(1000) = 177.609658 and the count is pi(1000) = 168 (counted here), so li overshoots by 9.609658 (sealed). The Riemann hypothesis is exactly a bound on that overshoot: |pi(x) - li(x)| < sqrt(x) log(x) / (8 pi) for x >= 2657 (Schoenfeld, cited on this stick). The logarithm is the ruler the whole question is measured with - log zeta, N(T), li(x).",
+     "kind": "witness",
+     "seal": "2ea7a0ff9b69de0ff81217f7e4aaa309382c9f80aa0cd8ed8d621f5102aee3e6"
+    }
+   ]
+  },
+  "stick_yang_mills_existence_and_mass_gap": {
+   "field": "",
+   "question": "Yang-Mills existence and mass gap",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py logarithm_chain",
+     "claim": "[the logarithm, cited] The coupling runs as one over the logarithm of the scale - Gell-Mann and Low's renormalization group (1954), asymptotic freedom (Gross-Wilczek, Politzer 1973); alpha_s from M_Z to 10 GeV at one loop is sealed on this stick. The mass gap is the scale where that logarithm runs out.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

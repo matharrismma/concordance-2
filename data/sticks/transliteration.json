@@ -1,0 +1,58 @@
+{
+ "schema": 1,
+ "name": "transliteration",
+ "aliases": [
+  "transliteration",
+  "romanization",
+  "romanize"
+ ],
+ "doc": "TRANSLITERATION - romanizing the original tongue (Matt, 2026-10-10: comprehensive linguistics,\nstep 2). A Greek word maps by a fixed deterministic scheme to Latin letters; a claimed\nromanization is SEALED through linguistics.LING_VERIFY. Greek only (it writes its vowels);\nHebrew declines pending vowel pointing. Idempotent.",
+ "seals": [
+  {
+   "key": "logos",
+   "domain": "linguistics",
+   "artifact": "LING_VERIFY",
+   "spec": {
+    "original": "λόγος",
+    "romanization_claim": "logos"
+   }
+  },
+  {
+   "key": "theos",
+   "domain": "linguistics",
+   "artifact": "LING_VERIFY",
+   "spec": {
+    "original": "θεός",
+    "romanization_claim": "theos"
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Transliteration - romanizing the original tongue",
+   "by": "tools/tick.py transliteration",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[Greek -> Latin, SEALED] 'logos' (lambda-omicron-gamma-omicron-sigma) romanizes by a fixed scheme (eta->e, omega->o, upsilon->y, breathing stripped), sealed through linguistics.LING_VERIFY. The romanization is deterministic: a wrong claim can never match.",
+     "seal": "logos"
+    },
+    {
+     "kind": "instance",
+     "claim": "[another, SEALED] 'theos' (theta-epsilon-omicron-sigma) -> 'theos' (sealed).",
+     "seal": "theos"
+    },
+    {
+     "kind": "note",
+     "claim": "[0 false positives, honest about scheme] The check CONFIRMS only an exact match to the engine's scheme; a DIFFERENT valid romanization is a mismatch against THIS scheme, not a false claim, and the verdict says so. Hebrew DECLINES - its romanization depends on vowel pointing that running text omits.",
+     "source": "src/concordance/verifiers/linguistics.py verify_romanization"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map - comprehensive linguistics, step 2] Transliteration broadens the linguistics domain BEYOND Strong's: a general romanizer, not only a lexicon lookup. It rests on the linguistics floor (card_floor_indo_european) with phonology, morphology and etymology; semantic relations and closed-class POS are next.",
+     "source": "card_floor_indo_european; the linguistics coverage map"
+    }
+   ]
+  }
+ ]
+}

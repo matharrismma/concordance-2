@@ -1,0 +1,47 @@
+{
+ "entry": "optics",
+ "rc": 0,
+ "seals": {
+  "7ae58933549e620c019ca5c173c1efcc12a9092bfadbc284dc96a8493b9a678f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "thin_lens_image_distance_f10_do30"
+   ]
+  },
+  "d8eb55e758ee21a1ad1a74717f4c32d1752b12b96edb809957440616831b2c5e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "speed_of_light_in_glass_c_over_n_1_5"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_optics_how_light_bends_focuses_and_slows": {
+   "field": "",
+   "question": "Optics - how light bends, focuses, and slows",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py optics",
+     "claim": "[lenses focus - the thin-lens equation, SEALED] A converging lens of focal length 10 cm, with an object at 30 cm, forms an image at 1/(1/10 - 1/30) = 15 cm (sealed). The thin-lens equation 1/f = 1/do + 1/di governs every camera, eye and telescope; magnification is the ratio of the distances. Optics is geometry applied to Maxwell's light.",
+     "kind": "instance",
+     "seal": "7ae58933549e620c019ca5c173c1efcc12a9092bfadbc284dc96a8493b9a678f"
+    },
+    {
+     "by": "tools/tick.py optics",
+     "claim": "[light slows in matter, SEALED] Light travels at c in vacuum but c/n in a medium: in glass (n = 1.5) that is 299792458/1.5 = 2.0e8 m/s (sealed). The slowing is refraction - why a straw looks bent, why a prism splits colours (n depends on wavelength), and, at the critical angle, why an optical fibre holds light (sealed on the Lagrangian). Ties card_floor_maxwells_equations.",
+     "kind": "instance",
+     "seal": "d8eb55e758ee21a1ad1a74717f4c32d1752b12b96edb809957440616831b2c5e"
+    },
+    {
+     "by": "tools/tick.py optics",
+     "claim": "[the photon - optics is also quantum] A beam is also a stream of photons (E = hf, sealed on the quantum floor); the photoelectric effect, lasers and the quantum of light live here. Classical rays and quantum photons are the two faces of the same light. On the one map, optics rests on Maxwell (light is an electromagnetic wave) and quantum mechanics (the photon). Ties card_floor_optics.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

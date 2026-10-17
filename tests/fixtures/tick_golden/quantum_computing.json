@@ -1,0 +1,47 @@
+{
+ "entry": "quantum_computing",
+ "rc": 0,
+ "seals": {
+  "35be8ae61193b500dada8ada9feb5e4e6bafd4510b3e7ebe126e7baf3bb4bdd8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "grover_search_steps_sqrt_of_a_million"
+   ]
+  },
+  "632eaf43e522a946dff3d84040d9fce52ce72fbe8b233afd63b0a428f2b30dcb": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ten_qubit_state_space_two_to_the_tenth"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_quantum_computing_qubits_and_superposition": {
+   "field": "",
+   "question": "Quantum computing - qubits and superposition",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py quantum_computing",
+     "claim": "[the exponential state space, SEALED] A qubit is a superposition of 0 and 1, so n qubits carry 2^n amplitudes at once: 10 qubits hold 2^10 = 1024 (sealed), 300 qubits more amplitudes than there are atoms in the universe. The promise and the difficulty both live in that exponential. Ties card_floor_quantum_mechanics (superposition).",
+     "kind": "instance",
+     "seal": "632eaf43e522a946dff3d84040d9fce52ce72fbe8b233afd63b0a428f2b30dcb"
+    },
+    {
+     "by": "tools/tick.py quantum_computing",
+     "claim": "[the speedup is interference, SEALED] A quantum computer is not just parallel - you must make the wrong answers INTERFERE away. Grover's algorithm searches an unsorted million in about sqrt(1000000) = 1000 steps (sealed), not a million; Shor's factors in polynomial time, which is why it threatens RSA. Ties card_floor_computer_science and card_floor_cryptography.",
+     "kind": "instance",
+     "seal": "35be8ae61193b500dada8ada9feb5e4e6bafd4510b3e7ebe126e7baf3bb4bdd8"
+    },
+    {
+     "by": "tools/tick.py quantum_computing",
+     "claim": "[on the one map] Quantum computing rests on quantum mechanics (superposition and entanglement are the resource) and computer science (it is still computation, with its own complexity class, BQP). It does not break computability - only, for a few problems, the cost. Ties card_floor_quantum_computing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

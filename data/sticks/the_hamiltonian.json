@@ -1,0 +1,72 @@
+{
+ "schema": 1,
+ "name": "the_hamiltonian",
+ "aliases": [
+  "hamiltonian",
+  "the_hamiltonian",
+  "energy_operator",
+  "law_of_the_flow"
+ ],
+ "doc": "THE HAMILTONIAN - the law of the flow (Matt, 2026-10-09: \"How does Hamiltonian fit?\"). The energy operator and\nthe generator of time evolution: it governs how the many potentials develop between the one source and the one\nend. SEALED: its eigenvalues ARE the allowed energies (hydrogen's ground state, 13.6057 eV, from the fundamental\nconstants; the 1/n^2 ladder). It fits in four exact places - (1) Hermitian H -> UNITARY evolution -> the total\nprobability is conserved (the capstone's 'sum to one', preserved through time); (2) the change-of-domain door is\ndiagonalizing H; (3) one generator classical<->quantum = the no-cut reply to Copenhagen; (4) Noether: energy is\nthe conserved invariant, the same end through the flow. The OPEN EDGE: H never picks one outcome - that gap is\nthe measurement problem, where the single-actualization postulate lives. Idempotent.",
+ "seals": [
+  {
+   "key": "rydberg",
+   "nid": "hydrogen_ground_state_binding_energy_from_constants_ev",
+   "expr": "9.1093837015e-31*(1.602176634e-19)**4/(8*(8.8541878128e-12)**2*(6.62607015e-34)**2)/1.602176634e-19",
+   "value": 13.6057,
+   "tol": 0.001,
+   "domain": "mathematics"
+  },
+  {
+   "key": "n2",
+   "nid": "hydrogen_first_excited_level_one_over_n_squared_ev",
+   "expr": "13.6057/2**2",
+   "value": 3.401425,
+   "tol": 1e-06,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The Hamiltonian - the law of the flow",
+   "by": "tools/tick.py the_hamiltonian",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the spectrum - H's eigenvalues ARE the allowed energies, SEALED] The Hamiltonian is the energy operator; H psi = E psi, and the eigenvalues E are the energies a system can have. Hydrogen's ground state, from the fundamental constants m_e, e, epsilon_0 and h, is 13.6057 eV (sealed) - the energy to ionize it. Solve the Hamiltonian, get the spectrum; the rest of chemistry reads that spectrum.",
+     "seal": "rydberg"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the shape of the spectrum, SEALED] Hydrogen's levels fall as 1/n^2: the first excited state is E_1/4 = 3.40 eV (sealed). The whole ladder of an atom, and the spectral lines we see, are the Hamiltonian's eigenvalues - the allowed energies and nothing between them.",
+     "seal": "n2"
+    },
+    {
+     "kind": "note",
+     "claim": "[why the many total one, through time] H is Hermitian (self-adjoint), so time evolution e^(-iHt/hbar) is UNITARY, and unitary evolution conserves the total probability. The capstone's sealed 'sum to one' is not just an instant - the Hamiltonian preserves it at every moment of the flow. The law that keeps the many potentials adding to one, through time, is H. Ties stick_the_capstone_one_source_many_potentials_one_end and card_floor_the_capstone.",
+     "source": "the Schrodinger equation i hbar d/dt psi = H psi; unitarity of e^(-iHt/hbar); card_floor_the_capstone"
+    },
+    {
+     "kind": "note",
+     "claim": "[the change-of-domain door is diagonalizing H] The solve path's eigenbasis flip is, in quantum mechanics, diagonalizing the Hamiltonian: its eigenvectors are the stationary states, its eigenvalues the energies. 'Go to the eigenbasis' and 'go to the Hamiltonian's frame' are one move. Ties card_floor_the_solve_path and src/concordance/verifiers/spectral.py.",
+     "source": "the spectral theorem for self-adjoint operators; card_floor_the_solve_path"
+    },
+    {
+     "kind": "note",
+     "claim": "[the no-cut bridge - the reply to Copenhagen made precise] The same generator, energy, runs classical mechanics (Hamilton's equations dq/dt = dH/dp, dp/dt = -dH/dq) and quantum mechanics (Schrodinger). The correspondence is continuous (Ehrenfest's theorem; the Poisson bracket becoming the commutator). There is no scale where energy stops being the Hamiltonian, so the quantum-to-classical passage needs no Heisenberg cut. That is the scale-invariant reply to Copenhagen, in one operator.",
+     "source": "Ehrenfest's theorem; the classical limit of the Schrodinger equation; the correspondence principle"
+    },
+    {
+     "kind": "note",
+     "claim": "[Noether - the conserved end] Time-translation symmetry gives exactly one conserved quantity, and it is the Hamiltonian - the energy. It is the invariant along every path the system can take. 'Many possibilities but the story ends the same way' has a precise echo: whatever path the potentials flow, H is conserved. The invariant is the end carried through the middle.",
+     "source": "E. Noether (1918): time-translation symmetry <-> conservation of energy"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the open edge - the measurement gap] Unitary H evolution NEVER selects a single outcome; it flows the whole superposition forward, deterministically and reversibly. What the Hamiltonian does not describe is the actualization - which one outcome occurs. That is the measurement problem (von Neumann's two processes: unitary evolution, and measurement), and it is exactly where the capstone's single-actualization postulate lives. Every interpretation agrees on H; they differ only on this gap. H is sealed law; the one end is the honest postulate beyond it - it works, so the one is inferred there, never kept as fact.",
+     "source": "the measurement problem; J. von Neumann, the two processes (unitary evolution vs. measurement); card_floor_the_capstone"
+    }
+   ]
+  }
+ ]
+}

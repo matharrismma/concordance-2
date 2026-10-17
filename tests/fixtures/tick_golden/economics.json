@@ -1,0 +1,92 @@
+{
+ "entry": "economics",
+ "rc": 0,
+ "seals": {
+  "2ccb751b6b35e16f8f85b6ee38577af491b2029ee27abc7e2157163ab6933dec": {
+   "axis": "economics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "747bf3bdeec54fa8df814a3f339012ddd88ab2acb3f22ea8b96f718a9847b80a": {
+   "axis": "economics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "905826aa3cedd415ec9d0d7ede51f554645eae9163e1a4abdbe30f81f1a7eb90": {
+   "axis": "economics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "de5489e5f901ef8b3acc74aee1db0ca7e7e2048f478f9451c8300b43d3f2ce00": {
+   "axis": "economics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "e08885fa1b3dbae17c06fa5b0b8794090513612236d3735eccc82f87cef2f4af": {
+   "axis": "economics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_economics_the_finance_arithmetic_verified_and_sealed": {
+   "field": "",
+   "question": "Economics - the finance arithmetic, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py economics",
+     "claim": "[compound interest] $1000 at 5% compounded monthly for 10 years grows to A = P(1 + r/n)^(nt) = 1000(1 + 0.05/12)^120 = $1647.01 (sealed through economics.ECON_VERIFY). Interest on interest - the engine of saving and of debt.",
+     "kind": "instance",
+     "seal": "e08885fa1b3dbae17c06fa5b0b8794090513612236d3735eccc82f87cef2f4af"
+    },
+    {
+     "by": "tools/tick.py economics",
+     "claim": "[the rule of 72] At 7%, money doubles in about 72/7 = 10.3 years (sealed) - the mental shortcut for the doubling time, accurate to the half-year here.",
+     "kind": "instance",
+     "seal": "2ccb751b6b35e16f8f85b6ee38577af491b2029ee27abc7e2157163ab6933dec"
+    },
+    {
+     "by": "tools/tick.py economics",
+     "claim": "[present value] $1000 due in 3 years, discounted at 5%, is worth PV = FV/(1+r)^t = $863.84 today (sealed). The time value of money: a dollar later is worth less than a dollar now.",
+     "kind": "instance",
+     "seal": "de5489e5f901ef8b3acc74aee1db0ca7e7e2048f478f9451c8300b43d3f2ce00"
+    },
+    {
+     "by": "tools/tick.py economics",
+     "claim": "[price elasticity] A 10% fall in quantity against a 5% rise in price is PED = (-10)/(5) = -2.0 (sealed) - demand is elastic: quantity moves more than price.",
+     "kind": "instance",
+     "seal": "747bf3bdeec54fa8df814a3f339012ddd88ab2acb3f22ea8b96f718a9847b80a"
+    },
+    {
+     "by": "tools/tick.py economics",
+     "claim": "[GDP per capita] $21 trillion over 331 million people is $63,444 per person (sealed) - the measure divided by the people it is spread across.",
+     "kind": "instance",
+     "seal": "905826aa3cedd415ec9d0d7ede51f554645eae9163e1a4abdbe30f81f1a7eb90"
+    },
+    {
+     "by": "tools/tick.py economics",
+     "claim": "[the model it assumes] These are accounting identities and definitions, true by arithmetic. The wider theory (supply and demand, rational actors, ceteris paribus) is a MODEL - it works often enough to reason with, so its conclusions are inferred, never kept as fact; the engine seals the arithmetic and declines the forecast.",
+     "kind": "postulate",
+     "source": "standard public-domain finance formulas; economics.ECON_VERIFY"
+    },
+    {
+     "by": "tools/tick.py economics",
+     "claim": "[what is declined] Asset valuations, market direction, interest-rate moves, policy outcomes and any forecast are DECLINED, cited or left as a want - not investment advice, and a miss stays a miss. The engine certifies the computation, not the prediction.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,64 @@
+{
+ "entry": "entropy_gravity",
+ "rc": 0,
+ "seals": {
+  "87d4fba807d175e349c10a86a29bc2374aa628506f81f0e2b7ed710a833db60d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "eg_schwarzschild_sun_m"
+   ]
+  },
+  "c86614b2295e7b630646861af838fff48cf7bbdfe86d6cdd5c660a17050433fc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "eg_area_law_quarter"
+   ]
+  },
+  "ea04524e61ffeed7dee05bf133503d5c25c9022ecf620a0efe3b37c6632eb697": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "eg_hawking_temp_sun_K"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_entropy_and_gravity": {
+   "field": "meta",
+   "question": "Entropy and gravity",
+   "references": [
+    "Bekenstein-Hawking entropy S = A / (4 l_P^2)",
+    "Hawking temperature T = hbar c^3 / (8 pi G M k_B)",
+    "Jacobson (1995): Einstein equations from thermodynamics; entropic gravity"
+   ],
+   "statement": "A black hole carries entropy equal to a quarter of its horizon area in Planck units (S = A/4), and a Hawking temperature T = hbar c^3 / (8 pi G M k_B). Entropy scaling with AREA rather than volume is the holographic clue; the temperature joins quantum theory, relativity, gravity and thermodynamics in one quantity. Einstein's equations can be derived from delta Q = T dS.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - entropy and gravity, 2026-10-07",
+     "claim": "[entropy lives on the AREA, not the volume] Bekenstein-Hawking: a black hole's entropy is a quarter of its horizon area in Planck units, S = A / (4 l_P^2) - the coefficient is 1/4 = 0.25 (sealed). Entropy scaling with AREA, not volume, is the holographic clue: the information sits on the boundary.",
+     "kind": "witness",
+     "seal": "c86614b2295e7b630646861af838fff48cf7bbdfe86d6cdd5c660a17050433fc"
+    },
+    {
+     "by": "Narrow Highway - entropy and gravity, 2026-10-07",
+     "claim": "[the horizon that carries it] The Schwarzschild radius r_s = 2 G M / c^2; for one solar mass that is 2954.1 m (sealed) ~ 2.95 km. The entropy is this sphere's area over four - gravity written as information on a surface.",
+     "kind": "witness",
+     "seal": "87d4fba807d175e349c10a86a29bc2374aa628506f81f0e2b7ed710a833db60d"
+    },
+    {
+     "by": "Narrow Highway - entropy and gravity, 2026-10-07",
+     "claim": "[quantum + gravity + thermodynamics in one number] The Hawking temperature T = hbar c^3 / (8 pi G M k_B); for one solar mass it is 6.168e-08 K (sealed) - built from hbar (quantum), c (relativity), G (gravity) and k_B (thermodynamics) at once. A black hole is a thermodynamic object; that is the bridge between entropy and gravity.",
+     "kind": "witness",
+     "seal": "ea04524e61ffeed7dee05bf133503d5c25c9022ecf620a0efe3b37c6632eb697"
+    },
+    {
+     "by": "Narrow Highway - entropy and gravity, 2026-10-07",
+     "claim": "[the claim, held as a likeness] Jacobson (1995) DERIVED Einstein's equations from delta Q = T dS applied to local horizons - gravity as an equation of state; Verlinde and others push 'entropic / emergent gravity.' The engine seals the thermodynamic arithmetic (area law, horizon, Hawking temperature) and CITES these results; it does NOT claim gravity IS entropy - that is a hypothesis and a likeness, the outline of a unification not yet sealed. Ties the emergent-structure thread (stick_time_and_space_emergent_and_relational). map, never launder.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

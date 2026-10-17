@@ -1,0 +1,70 @@
+{
+ "entry": "double_slit",
+ "rc": 0,
+ "seals": {
+  "7064a971904d66ef53767688c6dc23d88d8f5685ad35b9eff9fa6127ab1be4c2": {
+   "axis": "optics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b968869cbb4ce4c14a9a9f38fca212e0725e36cd7b27941c8de5313d31d32eb8": {
+   "axis": "optics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d0017c54c09c1194869c87d0212801f4477b22db0ec34cce8736bbabebc59a46": {
+   "axis": "quantum_computing",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_double_slit_experiment": {
+   "field": "optics",
+   "question": "The double-slit experiment",
+   "references": [
+    "T. Young, Experiments and calculations relative to physical optics, Bakerian Lecture (1804)",
+    "C. Joensson, Elektroneninterferenzen an mehreren kuenstlich hergestellten Feinspalten, Z. Phys. 161 (1961) 454",
+    "A. Tonomura et al., Demonstration of single-electron buildup of an interference pattern, Am. J. Phys. 57 (1989) 117"
+   ],
+   "statement": "Light (and matter) through two slits makes an interference pattern - the wave signature; yet it arrives in discrete hits whose probabilities are the squared amplitudes - the Born rule; and a single electron fired one at a time still builds the fringes - wave-particle duality. One source, many potential paths, one outcome observed.",
+   "ticks": [
+    {
+     "by": "tools/tick.py double_slit",
+     "claim": "[the wave signature] Two slits lit by one source make bright and dark fringes spaced Dy = lambda L / d; for lambda = 500 nm, d = 0.1 mm, L = 1 m, Dy = 5 mm (sealed through optics.double_slit). Interference - the mark of a wave.",
+     "kind": "instance",
+     "seal": "b968869cbb4ce4c14a9a9f38fca212e0725e36cd7b27941c8de5313d31d32eb8"
+    },
+    {
+     "by": "tools/tick.py double_slit",
+     "claim": "[the measured outcome - the Born rule] Each arrival is a discrete hit; the probability of an outcome is its squared amplitude, P(i) = |a_i|^2 / Sum|a_j|^2. For (a,b) = (0.6, 0.8), P(1) = 0.64 (sealed through quantum_computing.born_rule). Probability is amplitude squared.",
+     "kind": "instance",
+     "seal": "d0017c54c09c1194869c87d0212801f4477b22db0ec34cce8736bbabebc59a46"
+    },
+    {
+     "by": "tools/tick.py double_slit",
+     "claim": "[wave-particle duality] Matter interferes too: an electron has wavelength lambda = h/p. For an electron at 1e6 m/s, lambda = 7.27e-10 m (sealed through optics.de_broglie) - and fired one at a time, single electrons still build the pattern. The particle goes through as a wave of possibility.",
+     "kind": "instance",
+     "seal": "7064a971904d66ef53767688c6dc23d88d8f5685ad35b9eff9fa6127ab1be4c2"
+    },
+    {
+     "by": "tools/tick.py double_slit",
+     "claim": "[the ground] The arithmetic is sealed: the fringe spacing, the squared-amplitude probabilities, the matter wavelength. That each particle's path is INDETERMINATE until measured - a superposition of both slits - is the reading the evidence forces; it is inferred, carried, not kept as fact. The capstone pattern: one source, many potentials, one end.",
+     "kind": "postulate",
+     "source": "optics.double_slit; quantum_computing.born_rule; the measurement stick"
+    },
+    {
+     "by": "tools/tick.py double_slit",
+     "claim": "[declined] WHAT happens at the measurement - collapse, branching, pilot wave - is not sealed here; the interpretations are an empirically-equivalent Babel, charted on stick_the_schrodinger_equation. The engine seals the predictions, not the metaphysics.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

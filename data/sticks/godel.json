@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "godel",
+ "aliases": [
+  "godel",
+  "goedel",
+  "incompleteness"
+ ],
+ "handler": "godel",
+ "why_python": "calls verify_derivation itself (2x)"
+}

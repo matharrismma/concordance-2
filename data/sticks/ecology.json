@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "name": "ecology",
+ "aliases": [
+  "ecology",
+  "ecosystems",
+  "the_biosphere",
+  "food_web"
+ ],
+ "doc": "ECOLOGY - energy and number in the living world (Matt, 2026-10-10, down the list). Energy drops about tenfold\neach trophic level (the 10 percent rule); a logistic population grows fastest at half its carrying capacity.\nSEALED: the trophic transfer and the fastest-growth point. Rests on biology (populations), statistics (dynamics)\nand earth science (habitat). Idempotent.",
+ "seals": [
+  {
+   "key": "trophic",
+   "nid": "trophic_ten_percent_rule_kcal",
+   "expr": "1000*0.1",
+   "value": 100.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "logistic",
+   "nid": "logistic_fastest_growth_at_half_carrying_capacity",
+   "expr": "1000/2",
+   "value": 500.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Ecology - energy and number in the living world",
+   "by": "tools/tick.py ecology",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[energy up the food chain - the 10 percent rule, SEALED] Only about a tenth of the energy at one trophic level reaches the next: 1000 kcal of plants feed 1000*0.1 = 100 kcal of herbivores (sealed), and 10 of carnivores. This is why food chains are short and top predators rare - the second law, paid at every step. Ties card_floor_biology and card_floor_thermodynamics.",
+     "seal": "trophic"
+    },
+    {
+     "kind": "instance",
+     "claim": "[how populations grow - the logistic, SEALED] A population grows fastest not when largest but at HALF its carrying capacity: for K = 1000, the peak growth is at 1000/2 = 500 (sealed). Logistic growth (and predator-prey cycles) is the arithmetic of number in the wild. Ties card_floor_statistics.",
+     "seal": "logistic"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Ecology rests on biology (the organisms and the tree of life), statistics (population dynamics, sampling), and earth science (climate and habitat). It is the accounting of energy and number across the living world. Ties card_floor_ecology.",
+     "source": "the one map; trophic dynamics; the logistic equation; card_floor_ecology; tools/seed_ecology.py"
+    }
+   ]
+  }
+ ]
+}

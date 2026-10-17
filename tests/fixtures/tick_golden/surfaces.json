@@ -1,0 +1,106 @@
+{
+ "entry": "surfaces",
+ "rc": 0,
+ "seals": {
+  "13d53d736431ae063ec9582fb809b0abdfa3eabdf38c06ca0ad8a90b3882f262": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "earth_area_from_latitude_longitude"
+   ]
+  },
+  "376518a6e7bb401cba28db87cbad311949d53d5e1abdd3cf2e79b7e8b71f1540": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "parametrized_point_lands_on_the_sphere"
+   ]
+  },
+  "6cfd2747ebcb1ee9698df1e97c23216379e7f09f3636891ab6fba53d330d5205": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "torus_gauss_curvature_outer_equator"
+   ]
+  },
+  "77df588ba295525d55533157193d5af87f6884c79b41158f82ea29e8faf4a889": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gauss_bonnet_sphere_total_curvature"
+   ]
+  },
+  "d025d64f728088e3b7d04fcfe487febec6e0f1cd141708de080a5559a060c223": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "monge_patch_area_factor"
+   ]
+  },
+  "e415c80ad377e5c37c787b45e405133f40f3ac2bd427e8ce2bca34e0edd9e72f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "torus_area_pappus"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_parametrization_of_surfaces_the_map_that_carries_a_measure_a": {
+   "field": "mathematics",
+   "question": "Parametrization of surfaces - the map that carries a measure and a curvature",
+   "references": [
+    "C. F. Gauss, Disquisitiones generales circa superficies curvas (1827): the Theorema Egregium",
+    "Pappus of Alexandria, Collection VII (c. AD 320): the centroid theorems (the torus's area and volume)",
+    "G. Monge, Application de l'analyse a la geometrie (1807): the graph z = f(x, y) as a surface",
+    "O. Bonnet (1848); Gauss-Bonnet: int K dA = 2 pi chi",
+    "L. E. J. Brouwer (1912): no nowhere-zero tangent field on S^2 - no single chart covers the sphere",
+    "Isaiah 40:22; Job 38:5; Proverbs 8:27; Psalm 104:2"
+   ],
+   "statement": "A surface is reached through a map r(u, v) from flat parameters onto the curved thing. The map carries a measure - the area element sqrt(EG - F^2) - and a curvature K, and the curvature is intrinsic: an inhabitant can measure it from inside (Gauss). Latitude and longitude are the parameters we live on; the Earth's 510 million km^2 is the map's own integral. Total curvature is a topological count (Gauss-Bonnet). No single chart covers the sphere: a parametrization is a map, never the territory.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the parametrization of surfaces, 2026-10-08",
+     "claim": "[the map carries a measure - the Earth from latitude and longitude] r(theta, phi) = R (sin theta cos phi, sin theta sin phi, cos theta); |r_theta x r_phi| = R^2 sin theta; integrated over the patch, 4 pi R^2. With R = 6371 km that is 510,064,472 km^2 (sealed) - the 510 million km^2 in every atlas comes out of the parametrization's own area element. Lines of latitude and longitude ARE the parameters (u, v): the map we live on.",
+     "kind": "witness",
+     "seal": "13d53d736431ae063ec9582fb809b0abdfa3eabdf38c06ca0ad8a90b3882f262"
+    },
+    {
+     "by": "Narrow Highway - the parametrization of surfaces, 2026-10-08",
+     "claim": "[the map lands on the surface] At theta = pi/3, phi = pi/4: x^2 + y^2 + z^2 = (sqrt3/2 * sqrt2/2)^2 * 2 + (1/2)^2 = 1.0 (sealed). Every parameter pair lands exactly on the sphere: a parametrization does not approximate the surface, it NAMES its points. Two parameters for a two-dimensional thing - the dimension is counted by the map.",
+     "kind": "witness",
+     "seal": "376518a6e7bb401cba28db87cbad311949d53d5e1abdd3cf2e79b7e8b71f1540"
+    },
+    {
+     "by": "Narrow Highway - the parametrization of surfaces, 2026-10-08",
+     "claim": "[a surface built by sweeping a circle - the torus] r(u, v) = ((R + r cos v) cos u, (R + r cos v) sin u, r sin v); area 4 pi^2 R r: with R = 3, r = 1 that is 118.435 (sealed). Pappus, fourth century: the area is the circle's circumference 2 pi r times the distance 2 pi R its centre travels. The parametrization turns a 1,700-year-old theorem into a two-line integral.",
+     "kind": "witness",
+     "seal": "e415c80ad377e5c37c787b45e405133f40f3ac2bd427e8ce2bca34e0edd9e72f"
+    },
+    {
+     "by": "Narrow Highway - the parametrization of surfaces, 2026-10-08",
+     "claim": "[curvature from the map - and it changes sign] On the torus K = cos v / (r (R + r cos v)): at the outer equator K = 1/(r(R+r)) = 0.25 (sealed), at the inner equator -1/(r(R-r)) = -0.5 - sphere-like outside, saddle-like inside, and over the whole torus it cancels to 0 = 2 pi chi, chi = 0 (the topology stick's Euler characteristic). Gauss's Theorema Egregium: K depends only on E, F, G - an inhabitant measures it from WITHIN. We are a measure (the clock stick): the curvature of the world is readable from inside it.",
+     "kind": "witness",
+     "seal": "6cfd2747ebcb1ee9698df1e97c23216379e7f09f3636891ab6fba53d330d5205"
+    },
+    {
+     "by": "Narrow Highway - the parametrization of surfaces, 2026-10-08",
+     "claim": "[a graph is a surface too - the Monge patch] z = f(x, y) gives dA = sqrt(1 + f_x^2 + f_y^2) dx dy; for z = 3x + 4y the factor is sqrt 26 = 5.0990 (sealed): the tilted plane holds 5.099 times the area of its shadow. Every function of two variables is a parametrized surface, and the Jacobian is its measure - the same object as the determinant that scales every change of variables.",
+     "kind": "witness",
+     "seal": "d025d64f728088e3b7d04fcfe487febec6e0f1cd141708de080a5559a060c223"
+    },
+    {
+     "by": "Narrow Highway - the parametrization of surfaces, 2026-10-08",
+     "claim": "[Gauss-Bonnet closes the sphere] int K dA = (1/R^2)(4 pi R^2) = 4 pi = 12.566371 (sealed) = 2 pi * 2: the total curvature of ANY surface shaped like a sphere is 4 pi, however it is dented. The measure is local (the parametrization); the total is a count (the topology). The metric is read point by point; the shape is an integer.",
+     "kind": "witness",
+     "seal": "77df588ba295525d55533157193d5af87f6884c79b41158f82ea29e8faf4a889"
+    },
+    {
+     "by": "Narrow Highway - the parametrization of surfaces, 2026-10-08",
+     "claim": "[the map, and the guard] No single chart covers the sphere: at the poles sin theta = 0 and the lat-long area element vanishes - the MAP fails exactly where the territory does not. An atlas is several charts with their overlaps agreed (Brouwer: no smooth nowhere-zero field lives on S^2). The first fundamental form (E, F, G) is the same object as the metric g_mu_nu of the spacetime stick: general relativity is the parametrization of a four-surface, and the trigonometry stick's third sense (flat is the limit of curved) is K -> 0. Scripture: 'he that sitteth upon the circle of the earth' (Isa 40:22); 'Who hath laid the measures thereof... who hath stretched the line upon it?' (Job 38:5); 'when he set a compass upon the face of the depth' (Prov 8:27); 'who stretchest out the heavens like a curtain' (Ps 104:2) - a surface, measured, stretched. GUARDS: a parametrization is a chart, never the surface; curvature-from-inside is physics, a person reading his world from within is a discernment, never a fit. Six numbers sealed; the rest cited. Ties: trigonometry (sense 3), topology (chi), clock (the observer as measure), gamma (hyperspheres), pi (4 pi R^2), spm (the workspace is an area on the unit sphere).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

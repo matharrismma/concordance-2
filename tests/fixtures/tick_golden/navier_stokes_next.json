@@ -1,0 +1,136 @@
+{
+ "entry": "navier_stokes_next",
+ "rc": 0,
+ "seals": {
+  "4b0f74eb2c0adb91ff78adffc38246c405216d951592858ecf06e40be5075b53": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "kolmogorov_length_nu_1e_6_epsilon_1_in_m"
+   ]
+  },
+  "7c484c692459ec56404bab11a6052a66ee8cb211dbbb87e61da6f7f7f9bf786d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "reynolds_number_u_1_l_1_nu_1e_6"
+   ]
+  },
+  "c9a87a48c3942b02bf16558ff1db0eae0cc29cbe3de237757e86735b0d9faabf": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "the_critical_lebesgue_exponent_equals_the_dimension_one_plus_zero"
+   ]
+  },
+  "db65a3faff9c2fd1d49a9a138e5e249f62551178b0f0e3fa4eda6f3104716f21": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "poiseuille_flux_per_unit_width_g_100_h_0_01_mu_1e_3"
+   ]
+  },
+  "e5bb8ace7a16891c0a5b7c8852e6ba58cd901b4bbb2f04f30d064c1f229cc6ca": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "taylor_green_energy_fraction_nu_0_01_t_5"
+   ]
+  },
+  "e62897aa56daa9a4aaea4aa058ebbae4bd3be073fd42339aadde34bec534f1ce": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "leray_blow_up_exponent_from_scaling"
+   ]
+  },
+  "fbaa9159c4fbcbbd80f6bb954bab67bdaf07749e3cec4cd231d96a12e495034a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "energy_identity_on_taylor_green_one_plus_zero"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_navier_stokes_existence_and_smoothness": {
+   "field": "",
+   "question": "Navier-Stokes existence and smoothness",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[an exact solution, sealed] The Taylor-Green vortex u = (cos x sin y, -sin x cos y) e^(-2 nu t) solves the incompressible equations exactly in 2D; |k|^2 = 2, so its energy decays as e^(-4 nu t): at nu = 0.01, t = 5 the fraction left is e^(-0.2) = 0.81873 (sealed). A smooth solution for all time, with every digit checkable - the kind of link the stick is built from.",
+     "kind": "instance",
+     "seal": "e5bb8ace7a16891c0a5b7c8852e6ba58cd901b4bbb2f04f30d064c1f229cc6ca"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[the energy identity holds on it exactly] dE/dt = -2 nu Z with the enstrophy Z = |k|^2 E = 2E: -4 nu E = -2 nu (2E), the difference judged as 1 + 0 = 1 (sealed). The energy inequality is the one estimate every weak solution obeys (Leray); on an exact solution it is an equality.",
+     "kind": "instance",
+     "seal": "fbaa9159c4fbcbbd80f6bb954bab67bdaf07749e3cec4cd231d96a12e495034a"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[Poiseuille, the flow a pipe fitter uses] Between plates 2h apart under pressure gradient G, u(y) = (G/2 mu)(h^2 - y^2) and the flux per unit width is 2 G h^3 / (3 mu): G = 100 Pa/m, h = 1 cm, mu = 1 mPa s gives 0.0667 m^2/s (sealed). Steady, exact, smooth, and in every plumbing handbook.",
+     "kind": "instance",
+     "seal": "db65a3faff9c2fd1d49a9a138e5e249f62551178b0f0e3fa4eda6f3104716f21"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[Kolmogorov's smallest eddy] eta = (nu^3 / epsilon)^(1/4): water (nu = 10^-6 m^2/s) dissipating 1 W/kg has eta = 31.6 micrometres (sealed). The cascade ends where viscosity wins; a singularity would have to hide below every such scale, and the dissonance stick's supercritical scaling says 3D leaves it room.",
+     "kind": "instance",
+     "seal": "4b0f74eb2c0adb91ff78adffc38246c405216d951592858ecf06e40be5075b53"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[Leray's rate, from scaling alone] u_lambda(x,t) = lambda u(lambda x, lambda^2 t): time scales as lambda^2 and velocity as lambda, so if a solution blows up at T* then sup|u| >= c (T* - t)^(-1/2), exponent (2 - 1)/2 = 1/2 (sealed; Leray 1934). Any singularity must grow at least this fast - a bound on how a failure could look, not a failure.",
+     "kind": "instance",
+     "seal": "e62897aa56daa9a4aaea4aa058ebbae4bd3be073fd42339aadde34bec534f1ce"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[the critical space is L^3 in 3D] The L^p norm is scale-invariant exactly when p = d: 3 - 3 = 0 (sealed as 1 + 0 = 1). The endpoint regularity criterion lives there (Escauriaza-Seregin-Sverak 2003: a solution bounded in L^3 cannot blow up); the energy space L^2 sits below it, which is the whole difficulty.",
+     "kind": "instance",
+     "seal": "c9a87a48c3942b02bf16558ff1db0eae0cc29cbe3de237757e86735b0d9faabf"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[the Reynolds number names the regime] Re = U L / nu = 1 * 1 / 10^-6 = 10^6 (sealed): a metre of water at a metre per second is far past the transition to turbulence, where the cascade runs and the question is asked.",
+     "kind": "instance",
+     "seal": "7c484c692459ec56404bab11a6052a66ee8cb211dbbb87e61da6f7f7f9bf786d"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[the postulate it builds on] The incompressible Navier-Stokes equations: a fluid is a continuum, obeys Newton's second law element by element, and its stress is pressure plus a viscous part linear in the rate of strain (Stokes 1845). Not kept as a fact: every pipe, wing, pump and weather forecast works under them, and from that working the truth is inferred - never proven, never kept as fact.",
+     "kind": "postulate",
+     "source": "C.-L. Navier (1822); G. G. Stokes, On the theories of the internal friction of fluids in motion (1845)"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[proven links] Leray 1934: a weak solution with finite energy exists for all time for any finite-energy data in 3D (uniqueness and smoothness are what is open). Ladyzhenskaya 1959: in 2D the solution is unique and smooth for all time - the 2D problem is CLOSED. Fujita-Kato 1964: in 3D, small data in H^(1/2) give a global smooth solution - the small-data problem is CLOSED. The open window is 3D, large data.",
+     "kind": "equivalence",
+     "source": "J. Leray, Acta Math. 63 (1934); O. A. Ladyzhenskaya (1959); H. Fujita, T. Kato, Arch. Rational Mech. Anal. 16 (1964)"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[the bound on where a singularity could be] Caffarelli-Kohn-Nirenberg 1982: for a suitable weak solution the singular set in space-time has one-dimensional parabolic Hausdorff measure zero - a singularity, if any, cannot fill a curve. Beale-Kato-Majda 1984: blow-up at T* happens if and only if the integral of the maximum vorticity up to T* is infinite - the one quantity to watch. Ladyzhenskaya-Prodi-Serrin: u in L^p_t L^q_x with 2/p + 3/q <= 1 (q > 3) forces smoothness; Escauriaza-Seregin-Sverak 2003 closed the endpoint q = 3.",
+     "kind": "equivalence",
+     "source": "L. Caffarelli, R. Kohn, L. Nirenberg, Comm. Pure Appl. Math. 35 (1982); J. T. Beale, T. Kato, A. Majda, Comm. Math. Phys. 94 (1984); L. Escauriaza, G. Seregin, V. Sverak (2003)"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[a road closed] Tao 2016: an averaged version of the 3D equations, which obeys the same energy identity and the same scaling, has a smooth solution that blows up in finite time. So no argument that uses only the energy identity, the scaling and the general shape of the nonlinearity can prove regularity - a proof must use finer structure of the true equations. The energy method alone is excluded.",
+     "kind": "exclusion",
+     "source": "T. Tao, Finite time blowup for an averaged three-dimensional Navier-Stokes equation, J. Amer. Math. Soc. 29 (2016)"
+    },
+    {
+     "by": "tools/tick.py navier_stokes_next",
+     "claim": "[the surviving window, read] Sealed: exact solutions and the identities on them, the scaling exponents, the dissipation scale. Proven (cited): existence of weak solutions (Leray), 2D closed (Ladyzhenskaya), small data closed (Fujita-Kato), the singular set at most one-dimensional and of measure zero (CKN), the blow-up criteria (BKM, LPS, ESS). Excluded: the energy method alone (Tao). Open: 3D, large data, the Clay statement (Fefferman 2000) - either global smooth solutions exist for every smooth finite-energy datum, or one datum blows up. Gaps become wants: the sources above for inclusion; a numerical solver (spectral, on the torus) so a candidate datum's vorticity integral - the BKM quantity - can be WATCHED and sealed, not just cited. Every link sealed or cited; nothing out of thin air; the chain not closed.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

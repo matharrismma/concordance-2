@@ -1,0 +1,69 @@
+{
+ "entry": "bombelli",
+ "rc": 0,
+ "seals": {
+  "5c3a2e9e42cf9b1b6119054d3026b39de981d7d209527ae9e4730c9cc0a5761f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "bombelli_cube_real_part"
+   ]
+  },
+  "980140f1965d4f221b90ee66693eb55951f6e44333791c35c8fbe947f60497d4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "bombelli_real_root"
+   ]
+  },
+  "da00395572f7d772906288f059545882d7ad1610494a8b7a2d41df93703cf0a5": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "bombelli_cube_imag_part"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_complex_numbers_bombelli_and_the_square_root_of_minus_one": {
+   "field": "mathematics",
+   "question": "Complex numbers - Bombelli and the square root of minus one",
+   "references": [
+    "R. Bombelli, L'Algebra (1572) - rules for +/- sqrt(-1) ('piu di meno')",
+    "Cardano's casus irreducibilis: real roots reached through complex intermediates",
+    "(a+bi)^3 = (a^3 - 3ab^2) + (3a^2 b - b^3) i"
+   ],
+   "statement": "The real cubic x^3 = 15x + 4 has the real root 4, but Cardano's formula reaches it only through sqrt(-121). Bombelli (1572) saw that 2 + sqrt(-121) = (2+i)^3 and 2 - sqrt(-121) = (2-i)^3, so the sum (2+i)+(2-i) = 4: the imaginary parts cancel and the real answer survives. sqrt(-1) is the necessary road to a real truth, which is why it was kept.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - complex numbers / Bombelli, 2026-10-07",
+     "claim": "[the real root, sealed] x = 4 solves x^3 = 15x + 4: 4^3 - 15*4 - 4 = 0 (sealed). A plain real root - no imaginaries in the question or the answer.",
+     "kind": "witness",
+     "seal": "980140f1965d4f221b90ee66693eb55951f6e44333791c35c8fbe947f60497d4"
+    },
+    {
+     "by": "Narrow Highway - complex numbers / Bombelli, 2026-10-07",
+     "claim": "[reached only through sqrt(-1) - Bombelli's insight] Cardano gives this root as cbrt(2 + sqrt(-121)) + cbrt(2 - sqrt(-121)). Bombelli saw 2 + sqrt(-121) = (2+i)^3, whose real part is 2^3 - 3*2*1^2 = 2 (sealed) and whose imaginary part is 3*2^2*1 - 1^3 = 11 (sealed) - i.e. (2+i)^3 = 2 + 11i = 2 + sqrt(-121). So x = (2+i) + (2-i) = 4: the imaginary parts cancel, the real root emerges. The sqrt(-1) is not optional - it is the only road to the real answer.",
+     "kind": "witness",
+     "seal": "5c3a2e9e42cf9b1b6119054d3026b39de981d7d209527ae9e4730c9cc0a5761f"
+    },
+    {
+     "by": "Narrow Highway - complex numbers / Bombelli, 2026-10-07",
+     "claim": "[the imaginary part carries the cancellation] Im((2+i)^3) = 11 (sealed) = +sqrt(121), and Im((2-i)^3) = -11; they are equal and opposite, so they vanish in the sum while the real parts (2 and 2) add to 4. The imaginary unit does real work and then disappears.",
+     "kind": "witness",
+     "seal": "da00395572f7d772906288f059545882d7ad1610494a8b7a2d41df93703cf0a5"
+    },
+    {
+     "by": "Narrow Highway - complex numbers / Bombelli, 2026-10-07",
+     "claim": "[what Bombelli did] L'Algebra (1572): the first systematic rules for +/- sqrt(-1), legitimizing imaginary numbers because they WORKED - delivering real solutions to real cubics no real-only method could reach. i = sqrt(-1) entered mathematics as a necessary tool, not a mysticism (Leibniz later called it 'that amphibian between being and non-being'). It is a construct we created because reality's answers demanded it (ties stick_construct_creation).",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - complex numbers / Bombelli, 2026-10-07",
+     "claim": "[the FLOOR of the whole arc - a chain that began with a floor] Complex numbers are the floor under this session's arc: e^(i*theta) (Euler), the roots of unity on the unit circle (stick_dirichlet_s_theorem_think_of_polar_coordinates, stick_fibonacci), the critical line 1/2 + i*gamma (stick_the_zeta_function), self-adjoint <-> unitary via the Cayley/Smith transform (stick_the_smith_chart_the_cayley_transform), and the complex amplitudes of quantum mechanics (stick_the_standard_model_chain_where_two_trees_connect). Bombelli (1572) is the ROOT of that chain: Bombelli -> Euler -> Gauss (the complex plane) -> Riemann (complex analysis). A chain that began with a floor, and -1, through its square root, is where it starts (ties [[project_chains_from_a_floor_where_two_trees_connect_2026-10-07]]). map, never launder: the engine seals the real arithmetic that sqrt(-1) makes reachable.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

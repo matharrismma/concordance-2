@@ -1,0 +1,9 @@
+{
+ "schema": 1,
+ "name": "alpha",
+ "aliases": [
+  "alpha"
+ ],
+ "handler": "alpha",
+ "why_python": "calls verify_derivation itself (1x)"
+}

@@ -1,0 +1,92 @@
+{
+ "entry": "law",
+ "rc": 0,
+ "seals": {
+  "0092f94e370cece9947525a38507ee299238a58dc9f2c495cb7c5f8d4c445653": {
+   "axis": "law",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5c83c5754862ca97d16ded07800751bf74fce7bd8946e6e9fc8c83b7d1118078": {
+   "axis": "law",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5e89be2b384540a8f5fdb57c8200ad318afd4318e2f6a68992d4b06d3b62e602": {
+   "axis": "law",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "81aa46e3d0d08a74ea1b5be733a0570e42e521ab6acf9ad12b71c799d98ddcb1": {
+   "axis": "law",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d27e9d08a5ed93088955c1fdc57051a38e0cc77212f575b1e16d754d42455764": {
+   "axis": "law",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_law_structural_checks_on_public_domain_us_law_sealed": {
+   "field": "",
+   "question": "Law - structural checks on public-domain US law, sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py law",
+     "claim": "[a contract's elements] Offer, acceptance, consideration, capacity and legality - all five present makes a structurally valid contract (sealed through law.LAW_VERIFY). The checklist, not the judgment of a court.",
+     "kind": "instance",
+     "seal": "5c83c5754862ca97d16ded07800751bf74fce7bd8946e6e9fc8c83b7d1118078"
+    },
+    {
+     "by": "tools/tick.py law",
+     "claim": "[the age to serve - President] The Constitution sets 35 as the minimum for President (Art. II sec 1); age 36 meets it (sealed).",
+     "kind": "instance",
+     "seal": "d27e9d08a5ed93088955c1fdc57051a38e0cc77212f575b1e16d754d42455764"
+    },
+    {
+     "by": "tools/tick.py law",
+     "claim": "[Senator] 30 is the minimum for a Senator (Art. I sec 3); age 30 meets it exactly (sealed).",
+     "kind": "instance",
+     "seal": "0092f94e370cece9947525a38507ee299238a58dc9f2c495cb7c5f8d4c445653"
+    },
+    {
+     "by": "tools/tick.py law",
+     "claim": "[FLSA overtime] 48 hours at $20 regular: 8 hours over 40, paid at time-and-a-half, is 8 x 20 x 1.5 = $240 overtime (sealed). The arithmetic of the Fair Labor Standards Act.",
+     "kind": "instance",
+     "seal": "81aa46e3d0d08a74ea1b5be733a0570e42e521ab6acf9ad12b71c799d98ddcb1"
+    },
+    {
+     "by": "tools/tick.py law",
+     "claim": "[the Miranda warning] All four elements present - the right to silence, the use against you, the right to an attorney, and appointment if you cannot afford one (sealed). The completeness of the warning, checked.",
+     "kind": "instance",
+     "seal": "5e89be2b384540a8f5fdb57c8200ad318afd4318e2f6a68992d4b06d3b62e602"
+    },
+    {
+     "by": "tools/tick.py law",
+     "claim": "[the frame, and its hard edge] These are STRUCTURAL and arithmetic checks on US federal, public-domain and constitutional text. They are NOT legal advice. Whether a contract is enforceable, how a statute applies to the facts, how a court would rule - all of that is interpretation, and the engine does not do it.",
+     "kind": "postulate",
+     "source": "US Constitution; Fair Labor Standards Act; Miranda v. Arizona (1966); law.LAW_VERIFY"
+    },
+    {
+     "by": "tools/tick.py law",
+     "claim": "[what is declined, loudly] Legal interpretation, the application of law to particular facts, case outcomes, state and local law, and anything that would be advice are DECLINED - consult a licensed attorney. The engine certifies the structure, never the counsel.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

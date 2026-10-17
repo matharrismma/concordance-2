@@ -1,0 +1,86 @@
+{
+ "schema": 1,
+ "name": "electromagnetism",
+ "aliases": [
+  "electromagnetism",
+  "em",
+  "electromagnetism_and_geometry",
+  "field_geometry",
+  "maxwell_geometry"
+ ],
+ "doc": "ELECTROMAGNETISM AND GEOMETRY (Matt, 2026-10-08). Maxwell's equations are geometry: the field is a\n2-form F, Faraday's law and the no-monopole law are dF = 0, Ampere-Maxwell and Gauss's law are d*F = J;\nthe inverse square IS the sphere (flux conserved through 4 pi r^2); c falls out of two vacuum constants\n(1/sqrt(mu0 eps0)); the vacuum has an impedance Z0 = sqrt(mu0/eps0); and the invariance of that c forced\nthe geometry of spacetime itself (Lorentz, Minkowski) - E and B are one antisymmetric tensor. Seal the\nfour numbers; map, never launder. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "light_from_mu0_eps0",
+   "nid": "light_from_mu0_eps0",
+   "expr": "1 / ((1.25663706212 * 10 ** (-6)) * (8.8541878128 * 10 ** (-12))) ** 0.5",
+   "value": 299792458.00000656,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "inverse_square_is_the_sphere",
+   "nid": "inverse_square_is_the_sphere",
+   "expr": "(1 / 2) ** 2",
+   "value": 0.25,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "impedance_of_free_space",
+   "nid": "impedance_of_free_space",
+   "expr": "((1.25663706212 * 10 ** (-6)) / (8.8541878128 * 10 ** (-12))) ** 0.5",
+   "value": 376.73031366686166,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "lorentz_factor_from_invariant_c",
+   "nid": "lorentz_factor_from_invariant_c",
+   "expr": "1 / (1 - 0.6 ** 2) ** 0.5",
+   "value": 1.25,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Electromagnetism and geometry",
+   "statement": "Maxwell's equations are geometry. The field is a 2-form F: dF = 0 and d*F = J are the whole theory in two lines of exterior calculus. The inverse square is the sphere; c falls out of the vacuum's two constants; the vacuum has an impedance; and the invariance of that c forced the geometry of spacetime itself - E and B are one tensor, mixed by a boost.",
+   "field": "physics",
+   "references": [
+    "Maxwell 1865, A Dynamical Theory of the Electromagnetic Field: c = 1/sqrt(mu0 eps0)",
+    "Gauss's law as flux conservation through a closed surface (4 pi r^2)",
+    "Z0 = sqrt(mu0/eps0) = 376.73 ohm; Lorentz 1904, Einstein 1905, Minkowski 1908",
+    "F = dA on a U(1) bundle; the Aharonov-Bohm phase as holonomy"
+   ],
+   "by": "Narrow Highway - electromagnetism and geometry, 2026-10-08",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[c falls out of the vacuum's two constants] Maxwell computed the speed of his waves from two laboratory constants and found light: 1/sqrt(mu0 eps0) = 299792458 m/s (sealed), which is c = 299,792,458 m/s to the precision of the listed values. In the 2018 SI eps0 is DEFINED through mu0 and c, so the circle closes exactly - not a coincidence, a geometry: light is the vacuum's own ratio.",
+     "seal": "light_from_mu0_eps0"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the inverse square IS the sphere] Double the distance from a charge and the field falls to (1/2)^2 = 0.25 (sealed) - because the flux through a closed surface is conserved and a sphere's area is 4 pi r^2. Gauss's law is not a separate fact about charge; it is the geometry of three-dimensional space. The 4 pi in alpha = e^2 / (4 pi eps0 hbar c) is this same sphere (the alpha stick).",
+     "seal": "inverse_square_is_the_sphere"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the vacuum has a shape] sqrt(mu0 / eps0) = 376.730314 ohm (sealed) - the impedance of free space, the fixed ratio of E to H in every plane wave. It is the number every transmission line and the Smith chart normalize against (the smith_chart stick): the Mobius geometry of reflection is measured from this one point.",
+     "seal": "impedance_of_free_space"
+    },
+    {
+     "kind": "witness",
+     "claim": "[EM forced the geometry of spacetime] Maxwell's c is the same in every frame; the only geometry that keeps it so is Lorentz/Minkowski. At v = 0.6c, gamma = 1 / sqrt(1 - 0.36) = 1.25 (sealed). E and B are not two fields but one antisymmetric tensor F_mu_nu; a boost mixes them, as a rotation mixes x and y. Relativity was not added to electromagnetism - it was found inside it.",
+     "seal": "lorentz_factor_from_invariant_c"
+    },
+    {
+     "kind": "note",
+     "claim": "[Maxwell IS geometry - the full map] F = dA: the field is the curvature of a U(1) connection A. dF = 0 (Faraday's law + no magnetic monopoles) and d*F = J (Ampere-Maxwell + Gauss) are the entire theory - div and curl (the vector_calculus stick) are its native operators, and Faraday's lines of force were the first physical field drawn as geometry rather than action at a distance. Maxwell's displacement current was added by thought, not experiment, because the geometry demanded closure: without it there are no waves. The Aharonov-Bohm phase (the aharonov_bohm stick) is the holonomy of A around a loop - pure geometry, a phase with no force on the path. The Poynting vector S = E x B is an oriented area. Guard: map, never launder. The engine's one-way geometry (diode, airlock, an append-only seal) is a LIKENESS to a connection whose holonomy cannot be undone - a discernment, never a fit; nothing here is authored, the four numbers are sealed and the rest is cited."
+    }
+   ]
+  }
+ ]
+}

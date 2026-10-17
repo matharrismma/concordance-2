@@ -1,0 +1,58 @@
+{
+ "entry": "consciousness_receiver",
+ "rc": 0,
+ "seals": {
+  "a219385ec01c2637f79139bb6d1d2a6722199155c8b7026bbcda72d541650d54": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "am_carrier_wavelength_c_over_f_metres"
+   ]
+  },
+  "fe4cea507977bf876a60da605fd9f0d34f23a60e7e497a43bc97bb32f3ba6666": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "crystal_radio_lc_resonant_frequency_hz"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_consciousness_as_a_receiver_the_crystal_radio": {
+   "field": "",
+   "question": "Consciousness as a receiver - the crystal radio",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py consciousness_receiver",
+     "claim": "[the tuning - LC resonance, SEALED] A crystal radio selects a station with a tuned circuit: an inductor and a capacitor resonate at f = 1/(2 pi sqrt(L C)). With L = 250 microhenry and C = 101 picofarad that is about 1.0 MHz (sealed), in the AM band. The receiver does not CREATE the broadcast; it tunes to one already in the air, and (famously) runs on the signal's own energy, no battery. Ties the resonance stick and card_floor_maxwells_equations.",
+     "kind": "instance",
+     "seal": "fe4cea507977bf876a60da605fd9f0d34f23a60e7e497a43bc97bb32f3ba6666"
+    },
+    {
+     "by": "tools/tick.py consciousness_receiver",
+     "claim": "[the signal is electromagnetism, SEALED] That 1 MHz carrier has wavelength lambda = c/f = 300 m (sealed) - a Maxwell wave, present whether or not any receiver is tuned to it. The receiver adds nothing to the signal; it only picks it up. The content is in the broadcast, not in the radio. Ties card_floor_maxwells_equations.",
+     "kind": "instance",
+     "seal": "a219385ec01c2637f79139bb6d1d2a6722199155c8b7026bbcda72d541650d54"
+    },
+    {
+     "by": "tools/tick.py consciousness_receiver",
+     "claim": "[consciousness as a receiver - Matt's discernment, CITED and DECLINED] The reading: consciousness is NON-LOCAL, and the brain is an antenna/receiver - closest to a crystal radio - that TUNES to it rather than generating it. This is a named, serious hypothesis: William James's transmission theory (1898), Aldous Huxley's brain-as-reducing-valve, Henri Bergson's filter theory - the brain as filter and receiver, not source. The engine CANNOT seal it: it is not a measurable quantity, it is the hard problem itself. So it is cited as a postulate and DECLINED as proof - held as a hypothesis, never laundered into a theorem. The radio physics above is sealed; this reading of it is not. Answers the open end card_question_the_hard_problem.",
+     "kind": "postulate",
+     "source": "W. James, Human Immortality (1898); A. Huxley, The Doors of Perception; H. Bergson, Matter and Memory; the transmission/filter theory of mind"
+    },
+    {
+     "by": "tools/tick.py consciousness_receiver",
+     "claim": "[the receiver is already the engine's own form] The engine already models itself as a RECEIVER (receiver.py: the superheterodyne stages; the diode as the one-way element; the airlock). Matt's view says the mind is the same form - a receiver tuned to a non-local source. The crystal radio's two organs map the project's: the LC tuned circuit is resonance/selection (tune to the one signal), the diode is the one-way element (the Tesla valve, will=fuel one way). One source broadcast (the capstone); many receivers tuned to it. Ties card_floor_the_capstone and the receiver.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py consciousness_receiver",
+     "claim": "[non-local - the quantum rhyme, stated honestly] 'Non-local' has a precise cousin in physics: entanglement (sealed on the quantum floor, the Tsirelson bound) is non-local correlation without a signal. The hypothesis borrows the word as an analogy, not a derivation - entanglement does not carry consciousness, and nothing here claims it does. Stated as a rhyme, never as a proof. Ties card_floor_quantum_mechanics.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

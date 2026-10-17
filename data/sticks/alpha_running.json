@@ -1,0 +1,10 @@
+{
+ "schema": 1,
+ "name": "alpha_running",
+ "aliases": [
+  "alpha_running",
+  "running"
+ ],
+ "handler": "alpha_running",
+ "why_python": "calls verify_derivation itself (1x)"
+}

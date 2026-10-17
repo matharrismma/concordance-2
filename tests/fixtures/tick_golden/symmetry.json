@@ -1,0 +1,56 @@
+{
+ "entry": "symmetry",
+ "rc": 0,
+ "seals": {
+  "74db6bad3a607f03b1f3157ed96c375a11ddd7def85e61ff3ab959db1f4c389c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "reflection_axis_2"
+   ]
+  },
+  "8054de74c80db666b5581855924db3fae01c19647e93919e39a6e6a9e9eade46": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "reflection_axis_1"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_symmetry": {
+   "field": "meta",
+   "question": "The symmetry",
+   "references": [
+    "the functional equation's reflection s <-> 1-s, fixed line Re = 1/2",
+    "self-adjoint -> real line; Cayley -> unit circle; Frobenius -> |alpha| = sqrt(q)",
+    "stick_hilbert_polya, stick_finite_field_riemann, stick_the_smith_chart_the_cayley_transform"
+   ],
+   "statement": "Across the Riemann arc one structure recurs: the zeros sit on the fixed set of a symmetry. The functional equation reflects s to 1-s about Re = 1/2; a self-adjoint operator reflects its spectrum onto the real line; the Cayley map carries that line to the unit circle; Frobenius pins |alpha| = sqrt(q). RH is the statement that the zeros are as symmetric as the law allows.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the symmetry, 2026-10-07",
+     "claim": "[the fixed axis is 1/2, for any pair] The reflection s <-> 1-s maps 0.3 to 0.7 with midpoint (0.3 + 0.7)/2 = 0.5 (sealed), and 0.1 to 0.9 with midpoint (0.1 + 0.9)/2 = 0.5 (sealed). Different pairs, one axis: Re = 1/2. The critical line is the mirror of the functional equation - the fixed set of the symmetry.",
+     "kind": "witness",
+     "seal": "8054de74c80db666b5581855924db3fae01c19647e93919e39a6e6a9e9eade46"
+    },
+    {
+     "by": "Narrow Highway - the symmetry, 2026-10-07",
+     "claim": "[a second pair, same mirror] (0.1 + 0.9)/2 = 0.5 (sealed). The axis does not depend on the point reflected; it is a property of the symmetry itself. RH asserts the zeros lie ON this mirror, not merely in symmetric pairs across it.",
+     "kind": "witness",
+     "seal": "74db6bad3a607f03b1f3157ed96c375a11ddd7def85e61ff3ab959db1f4c389c"
+    },
+    {
+     "by": "Narrow Highway - the symmetry, 2026-10-07",
+     "claim": "[the one symmetry, four faces] self-adjoint operator -> spectrum on the real LINE (stick_hilbert_polya); Cayley / Smith transform -> that line becomes the unit CIRCLE (stick_the_smith_chart_the_cayley_transform); Frobenius over a finite field -> eigenvalues on the circle |alpha| = sqrt(q), and RH there is PROVED (stick_finite_field_riemann); classical zeta -> the mirror Re = 1/2, visible in the functional equation and the GUE statistics but not yet enforced by an operator. Where the symmetry has an operator, the zeros are pinned and the analogue fires; where it does not, the classical RH stays open.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the symmetry, 2026-10-07",
+     "claim": "[the discernment, held as a likeness] Truth forced onto one narrow axis by a symmetry is the SHAPE of the gate forcing sealed truth onto the narrow way - 'strait is the gate, and narrow is the way' (Mt 7:14). The critical line is a narrow line. This is a likeness the engine maps, never a fit and never a numeric seal: no 1/2 is read as a sign, no zero as a verse. map, never launder (ties [[project_the_capstone_2026-10-07]] and [[project_will_fuel_reality_harness_tesla_valve_2026-10-06]]).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

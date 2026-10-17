@@ -1,0 +1,257 @@
+{
+ "schema": 1,
+ "name": "chess",
+ "aliases": [
+  "chess",
+  "checkmate",
+  "stalemate",
+  "perft"
+ ],
+ "doc": "CHESS - the rules decide (issue #11, 2026-10-16: reach, down the domain list). A claim about a position is\ncomputed by the Laws of Chess, never judged: the classic mates (fool's, scholar's, smothered, back-rank) SEALED as\ncheckmate, a king-and-queen stalemate SEALED as stalemate and as not-check, move legality SEALED both ways (a\nlegal push, an illegal one sealed as illegal, en passant, castling), and the material count. All through\nchess.CHESS_VERIFY over the perft-proven move generator. The Laws and the piece values are CITED; the verdicts\nare SEALED. Idempotent.",
+ "seals": [
+  {
+   "key": "fools_mate",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3",
+    "claim": "checkmate",
+    "claimed": true
+   }
+  },
+  {
+   "key": "scholars_mate",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4",
+    "claim": "checkmate",
+    "claimed": true
+   }
+  },
+  {
+   "key": "smothered_mate",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "6rk/5Npp/8/8/8/8/8/6K1 b - - 0 1",
+    "claim": "checkmate",
+    "claimed": true
+   }
+  },
+  {
+   "key": "back_rank_mate",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1",
+    "claim": "checkmate",
+    "claimed": true
+   }
+  },
+  {
+   "key": "stalemate",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1",
+    "claim": "stalemate",
+    "claimed": true
+   }
+  },
+  {
+   "key": "stalemate_not_check",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1",
+    "claim": "check",
+    "claimed": false
+   }
+  },
+  {
+   "key": "start_not_check",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "claim": "check",
+    "claimed": false
+   }
+  },
+  {
+   "key": "start_not_mate",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "claim": "checkmate",
+    "claimed": false
+   }
+  },
+  {
+   "key": "e2e4_legal",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "claim": "legal_move",
+    "claimed": true,
+    "move": "e2e4"
+   }
+  },
+  {
+   "key": "e2e5_illegal",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "claim": "legal_move",
+    "claimed": false,
+    "move": "e2e5"
+   }
+  },
+  {
+   "key": "en_passant",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "rnbqkbnr/pp2pppp/8/2ppP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3",
+    "claim": "legal_move",
+    "claimed": true,
+    "move": "e5d6"
+   }
+  },
+  {
+   "key": "castling",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1",
+    "claim": "legal_move",
+    "claimed": true,
+    "move": "e1g1"
+   }
+  },
+  {
+   "key": "material_start",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+    "claim": "material",
+    "claimed_balance": 0
+   }
+  },
+  {
+   "key": "material_scholar",
+   "domain": "chess",
+   "artifact": "CHESS_VERIFY",
+   "spec": {
+    "fen": "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4",
+    "claim": "material",
+    "claimed_balance": 1
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Chess - the rules decide: mate, stalemate, legality, material",
+   "statement": "A claim about a chess position is decided by the Laws of Chess applied to the position - computed by the move generator, never judged.",
+   "field": "chess",
+   "references": [
+    "FIDE Laws of Chess (2023), Articles 1-5",
+    "F.-A. D. Philidor, Analyse du jeu des Echecs (1749) - the smothered mate",
+    "src/concordance/chess.py - the perft-proven move generator (tests/test_chess.py)"
+   ],
+   "by": "tools/tick.py chess",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[fool's mate, SEALED] 1.f3 e5 2.g4 Qh4# - White to move is checkmated (sealed through chess.CHESS_VERIFY). The shortest possible mate: two pawn moves open the diagonal to the king and nothing can interpose.",
+     "seal": "fools_mate"
+    },
+    {
+     "kind": "instance",
+     "claim": "[scholar's mate, SEALED] 1.e4 e5 2.Bc4 Nc6 3.Qh5 Nf6 4.Qxf7# - Black is checkmated (sealed through chess.CHESS_VERIFY): the queen on f7 is guarded by the bishop on c4, the king has no flight square.",
+     "seal": "scholars_mate"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the smothered mate, SEALED] King h8, rook g8, pawns g7 h7; a white knight lands on f7 and it is mate (sealed through chess.CHESS_VERIFY). The king is smothered by its own pieces - Philidor's pattern (1749), the oldest named mate in the literature.",
+     "seal": "smothered_mate"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the back-rank mate, SEALED] King g8 behind its three pawns, a rook arrives on a8: mate (sealed through chess.CHESS_VERIFY). The pawns that shielded the king are the wall that traps it.",
+     "seal": "back_rank_mate"
+    },
+    {
+     "kind": "instance",
+     "claim": "[stalemate, SEALED] Black king h8, white queen f7, white king g6, Black to move: stalemate (sealed through chess.CHESS_VERIFY). Every square the king could reach is attacked and no other piece exists - no legal move, so the game is drawn (Laws 5.2.1).",
+     "seal": "stalemate"
+    },
+    {
+     "kind": "instance",
+     "claim": "[stalemate is not check, SEALED] In the same position check is FALSE - sealed with claimed = false (sealed through chess.CHESS_VERIFY). Stalemate needs both: no legal move AND the king not attacked. The second condition is what separates a draw from a mate; the engine seals the negative as a negative.",
+     "seal": "stalemate_not_check"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the start position is quiet, SEALED] From the initial position White is not in check (claimed = false, sealed through chess.CHESS_VERIFY).",
+     "seal": "start_not_check"
+    },
+    {
+     "kind": "instance",
+     "claim": "[and not mated, SEALED] Nor checkmated (claimed = false, sealed through chess.CHESS_VERIFY): twenty legal moves exist.",
+     "seal": "start_not_mate"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a legal move, SEALED] e2e4 is legal from the start (sealed through chess.CHESS_VERIFY): a pawn may advance two squares from its starting rank (Laws 3.7.2).",
+     "seal": "e2e4_legal"
+    },
+    {
+     "kind": "instance",
+     "claim": "[an illegal move, SEALED AS ILLEGAL] e2e5 is NOT legal - sealed with claimed = false (sealed through chess.CHESS_VERIFY). Three squares is not a pawn move; the generator lists the twenty legal moves and this is not among them. A miss stays a miss.",
+     "seal": "e2e5_illegal"
+    },
+    {
+     "kind": "instance",
+     "claim": "[en passant, SEALED] After 1.e4 c5 2.e5 d5 the capture e5xd6 is legal (sealed through chess.CHESS_VERIFY): a pawn that just advanced two squares may be taken as if it had moved one (Laws 3.7.4.1), on that move only.",
+     "seal": "en_passant"
+    },
+    {
+     "kind": "instance",
+     "claim": "[castling, SEALED] In the 'kiwipete' position White may castle kingside, e1g1 (sealed through chess.CHESS_VERIFY): king and rook unmoved, squares between empty, no square the king crosses attacked (Laws 3.8.2). The position's perft(2) = 2039 is the standard that proves the generator.",
+     "seal": "castling"
+    },
+    {
+     "kind": "instance",
+     "claim": "[material, SEALED] At the start the material balance is 0 (sealed through chess.CHESS_VERIFY): both sides hold 8 + 6 + 6 + 10 + 9 = 39 points on the 1/3/3/5/9 scale.",
+     "seal": "material_start"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a pawn up, SEALED] After scholar's mate White is +1 (sealed through chess.CHESS_VERIFY): the f7 pawn was the capture. The count is a convention; the capture is a fact.",
+     "seal": "material_scholar"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the Laws, CITED] The FIDE Laws of Chess are the postulate set: how each piece moves, check, checkmate, stalemate, en passant, castling. They are chosen rules, cited and never sealed; every verdict above is a theorem of them, computed exhaustively over the legal moves. The piece values 1/3/3/5/9 are a convention of the literature, not a law.",
+     "source": "FIDE Laws of Chess (2023); the 1/3/3/5/9 scale (standard literature convention)"
+    },
+    {
+     "kind": "note",
+     "claim": "[the bound, stated] The verifier decides what is TRUE of a position - mate, stalemate, legality, material - by exhaustive legal-move generation, proven by perft (start: 20 / 400 / 8902; kiwipete: 2039 at depth 2). It never plays, evaluates, or recommends a move: what the best move is lies outside the closed set and is declined.",
+     "source": "src/concordance/chess.py; tests/test_chess.py (perft counts)"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Strategy has three witnesses here: game theory (the abstract equilibrium), the body under pressure (the combat grammar), and chess - the one where perfect information makes optimal literally computable, so it is the calibration rig for the other two. Ties the game-theory stick and card_floor_the_mind; the search tree is card_floor_computer_science.",
+     "source": "the one map; the game-theory stick; card_floor_the_mind, card_floor_computer_science"
+    }
+   ]
+  }
+ ]
+}

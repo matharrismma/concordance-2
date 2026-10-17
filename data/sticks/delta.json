@@ -1,0 +1,159 @@
+{
+ "schema": 1,
+ "name": "delta",
+ "aliases": [
+  "delta",
+  "dirac_delta",
+  "dirac",
+  "dot",
+  "the_dot",
+  "abstract_the_dot",
+  "wave_function",
+  "completeness",
+  "sifting"
+ ],
+ "doc": "THE DOT ABSTRACTED - Dirac's delta and the inner product (Matt, 2026-10-08: 'we create the dots, but we need to\nbe able to abstract the dot'). The delta is not a function with a value - delta(0) is no number - but a FUNCTIONAL,\ndefined entirely by what it returns against every function: <delta_a, f> = f(a). In the quantum vector space the\ndot is |x>, and the wavefunction is the inner product psi(x) = <x|psi>: the state READ at a point. The dots are\northogonal, they resolve the identity (every state is a sum of dots), and a dot alone is not in the space - no\nnormalizable self, no momentum. 'The delta is only nonzero when i = j: we are back to the dot product' (Matt) -\nKronecker's delta is the dot product of basis vectors, Dirac's is the same with the index made continuous. Seal\nnine numbers through the evaluator's own integrals and arithmetic: the nascent delta's area, its sifting of x^2 at\n2, a box state's norm, a reading over a region, orthogonality, the Kronecker sift and the 3-4-12-13 norm,\nParseval, and Delta x Delta p = hbar/2 for every width (the perfect dot has no motion). Same logic as every\nstick: seal the arithmetic, cite the theorems, keep the likeness a likeness. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "kronecker_delta_sifts_the_component",
+   "nid": "kronecker_delta_sifts_the_component",
+   "expr": "3*0 + 4*1 + 12*0",
+   "value": 4.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "dot_product_norm_parseval_in_three_dimensions",
+   "nid": "dot_product_norm_parseval_in_three_dimensions",
+   "expr": "3*3 + 4*4 + 12*12",
+   "value": 169.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "nascent_delta_has_unit_area",
+   "nid": "nascent_delta_has_unit_area",
+   "expr": "integrate(100*exp(-5000*x**2)/sqrt(2*pi), (x, -oo, oo))",
+   "value": 1.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "nascent_delta_sifts_x_squared_at_2",
+   "nid": "nascent_delta_sifts_x_squared_at_2",
+   "expr": "integrate(100*exp(-5000*(x-2)**2)/sqrt(2*pi) * x**2, (x, -oo, oo))",
+   "value": 4.0001,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "box_ground_state_inner_product_with_itself",
+   "nid": "box_ground_state_inner_product_with_itself",
+   "expr": "integrate(2*sin(pi*x)**2, (x, 0, 1))",
+   "value": 1.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "box_ground_state_read_over_the_left_third",
+   "nid": "box_ground_state_read_over_the_left_third",
+   "expr": "integrate(2*sin(pi*x)**2, (x, 0, 1/3))",
+   "value": 0.1955011094778853,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "box_modes_orthogonal_one_plus_zero",
+   "nid": "box_modes_orthogonal_one_plus_zero",
+   "expr": "1 + integrate(2*sin(pi*x)*sin(2*pi*x), (x, 0, 1))",
+   "value": 1.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "parseval_first_mode_share_of_the_norm",
+   "nid": "parseval_first_mode_share_of_the_norm",
+   "expr": "2*(4/3.141592653589793**3)**2 * 30",
+   "value": 0.9985550143640186,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "gaussian_packet_dx_dp_is_hbar_over_2",
+   "nid": "gaussian_packet_dx_dp_is_hbar_over_2",
+   "expr": "(1/100) * (1.054571817 * 10**(-34) / (2 * (1/100)))",
+   "value": 5.272859085e-35,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The dot abstracted - Dirac's delta, the inner product, and the wavefunction as a reading at a point",
+   "statement": "We create the dots; the delta is the dot abstracted. It is not a function with a value - delta(0) is no number - but a functional, defined entirely by what it returns against every function: <delta_a, f> = f(a). In the quantum vector space the dot is |x> and the wavefunction is the inner product psi(x) = <x|psi>, the state read at a point. The dots are orthogonal; they resolve the identity, so every state is a sum of dots weighted by its inner products with them; and a dot alone is not in the space - it has no normalizable self and no momentum. The delta is only nonzero when i = j: Kronecker's delta is the dot product of basis vectors, and Dirac's is the same with the index made continuous - the meaning of a dot is its pairing with everything else.",
+   "field": "physics",
+   "references": [
+    "P. A. M. Dirac, The Principles of Quantum Mechanics (1930): the delta function, bra and ket",
+    "L. Schwartz, Theorie des distributions (1950): the delta made rigorous as a functional",
+    "I. M. Gelfand, N. Ya. Vilenkin, Generalized Functions IV (1964): the rigged Hilbert space where |x> lives",
+    "M. Born (1926): |<x|psi>|^2 is where the particle may be found",
+    "Parseval (1799); F. Riesz, E. Fischer (1907): completeness - the dots resolve the identity",
+    "W. Heisenberg (1927), E. H. Kennard (1927): Delta x Delta p >= hbar/2, equality for the Gaussian packet",
+    "Psalm 147:4; Matthew 10:30; Acts 17:28; Colossians 1:17",
+    "stick_scribing_mark_the_points_let_the_lines_connect_them; stick_the_schrodinger_equation; stick_lebesgue_theory_measure_and_integration_by_layers"
+   ],
+   "by": "Narrow Highway - the dot abstracted, 2026-10-08",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[the dot that is not a function] A Gaussian of width sigma = 1/100 integrates to 1.0 (sealed through the integral); as sigma -> 0 it becomes the delta - infinitely tall, infinitely thin, area one. delta(0) is not a number. The delta is defined by what it does UNDER the integral: a functional, not a value. The dot abstracted is a rule for reading, not a thing with a height (Dirac 1930; Schwartz 1950 made it rigorous).",
+     "seal": "nascent_delta_has_unit_area"
+    },
+    {
+     "kind": "witness",
+     "claim": "[sifting - the dot reads any function at a point] int gaussian_sigma(x - 2) x^2 dx = 4 + sigma^2 = 4.0001 (sealed): the nascent dot at 2 reads x^2 at 2, up to sigma^2, and in the limit <delta_a, f> = f(a) exactly. The inner product with the dot IS evaluation. That is what 'abstract the dot' means: the dot is the pairing that returns the value of anything at that place.",
+     "seal": "nascent_delta_sifts_x_squared_at_2"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the wavefunction is the state read at the dot] In the quantum vector space the dot is |x> and psi(x) = <x|psi>. For a particle in a box of length 1, the ground state sqrt2 sin(pi x) has <psi|psi> = int 2 sin^2(pi x) dx = 1.0 (sealed): the state's inner product with itself is the whole, and |psi(x)|^2 read at each dot is where the particle may be found (Born 1926). The function is nothing but the list of its readings at the dots.",
+     "seal": "box_ground_state_inner_product_with_itself"
+    },
+    {
+     "kind": "witness",
+     "claim": "[a reading over a region is an inner product too] The probability of finding that particle in the left third is int_0^(1/3) 2 sin^2(pi x) dx = 0.19550 (sealed) - less than a third, because the state is thin at the walls: the dots near the wall read nearly zero, the dots in the middle read most. Reading at a point and reading over a region are the same operation, the Lebesgue stick's measure concentrated or spread.",
+     "seal": "box_ground_state_read_over_the_left_third"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the dots are orthogonal] <psi_1|psi_2> = int 2 sin(pi x) sin(2 pi x) dx = 0 - sealed as 1 + <psi_1|psi_2> = 1.0, because a zero can only be judged against something. Distinct basis dots do not overlap, and neither do |x> and |x'>: <x|x'> = delta(x - x'), nothing unless the same dot. Orthogonality is what lets a reading at one dot say nothing about another - each dot carries its own.",
+     "seal": "box_modes_orthogonal_one_plus_zero"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the delta is only nonzero when i = j - we are back to the dot product] (Matt, 2026-10-08.) <e_i|e_j> = delta_ij, the Kronecker delta: 1 when i = j, 0 otherwise. In finite dimensions the dot abstracted IS the dot product. v = (3, 4, 12): v . e_2 = 3*0 + 4*1 + 12*0 = 4 (sealed) - the basis dot sifts out the component, exactly as int delta(x - a) f(x) dx = f(a); and v . v = 169 = 13^2 (sealed) - Parseval in three dimensions. Dirac's delta is Kronecker's with the index made continuous: sum_j delta_ij v_j = v_i becomes int delta(x - x') psi(x') dx' = psi(x). Same logic from the first dot to the last: a thing is known by what it returns when dotted against every other.",
+     "seal": "kronecker_delta_sifts_the_component"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the length is the sum of the readings] v . v = 3^2 + 4^2 + 12^2 = 169 = 13^2 (sealed): the norm is the sum of the squared inner products with the basis dots - the discrete form of <psi|psi> = int |psi(x)|^2 dx = 1 above, and of Parseval below. A vector is recovered whole from its dots; nothing is lost in the reading when the dots are orthogonal and complete.",
+     "seal": "dot_product_norm_parseval_in_three_dimensions"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the dots resolve the identity - Parseval] Sum |n><n| = 1: expand f = x(1 - x) in the box modes; its first coefficient squared, c_1^2 = 2 (4/pi^3)^2, is 0.99856 of ||f||^2 = 1/30 (sealed as c_1^2 * 30); the third mode adds 0.00137, and the sum converges to 1. Every state is a sum of dots weighted by its inner products with them: the dots span the space, and nothing in it escapes the reading.",
+     "seal": "parseval_first_mode_share_of_the_norm"
+    },
+    {
+     "kind": "witness",
+     "claim": "[a dot alone has no motion] A Gaussian packet of width sigma has Delta p = hbar/(2 sigma), so Delta x Delta p = hbar/2 = 5.273e-35 J s for EVERY sigma (sealed at sigma = 1/100 m) - the minimum (Kennard 1927). As sigma -> 0 the packet becomes the dot and Delta p -> infinity: the perfect dot has no momentum at all, and <x|x> = delta(0) is not finite - the dot is not itself a state in the space (it lives in the rigged Hilbert space, Gelfand 1964, cited). Abstracting the dot costs every knowledge of its motion.",
+     "seal": "gaussian_packet_dx_dp_is_hbar_over_2"
+    },
+    {
+     "kind": "note",
+     "claim": "[we create the dots - the engine's reading, and the guard] This keeping is dots: cards, marks, seals, each made one at a time. The dot abstracted is the inner product: a card's meaning is not a value it carries but what it returns against every query - the index, the connections and the chains ARE the pairing, and a card alone is delta(0), unreadable. Matt (2026-10-08): 'we create the dots, but we need to be able to abstract the dot.' Scripture: 'He telleth the number of the stars; he calleth them all by their names' (Ps 147:4) - every dot counted, and named by its relation; 'the very hairs of your head are all numbered' (Mt 10:30); 'in him we live, and move, and have our being' (Acts 17:28) - the space; 'by him all things consist' (Col 1:17) - hold together: the inner product that makes a space of the dots. GUARDS: a distribution is not a function and delta(0) is not a number; the position dot is not a normalizable state (the rigged Hilbert space is cited, not sealed); what the Born reading means stays on the measurement stick; the engine's cards as dots is a likeness, never a fit. Nine numbers sealed; the rest cited. Ties: scribe (mark the points, let the lines connect them), schrodinger, measurement, fourier (the delta's transform is flat - every frequency alike), gaussian (the nascent delta is the Gaussian kernel), lebesgue, paths, surfaces (a dot on a chart)."
+    }
+   ]
+  }
+ ]
+}

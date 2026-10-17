@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "name": "soil_science",
+ "aliases": [
+  "soil_science",
+  "soil",
+  "pedology",
+  "the_soil"
+ ],
+ "doc": "SOIL SCIENCE - the living skin of the land (Matt, 2026-10-10, down the list). Soil is mineral, water, air and\norganic matter in rough proportion, alive with microbes, holding nutrients by a carbon-to-nitrogen balance.\nSEALED: the composition of an ideal loam summing to 100 percent, and the soil carbon-to-nitrogen ratio. Rests on\nchemistry (minerals and nutrients), earth science (weathering, the parent rock) and biology (the microbes and\nroots). Idempotent.",
+ "seals": [
+  {
+   "key": "composition",
+   "nid": "ideal_loam_composition_percent_sum",
+   "expr": "45+25+25+5",
+   "value": 100,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "cn",
+   "nid": "soil_carbon_to_nitrogen_ratio",
+   "expr": "10/1",
+   "value": 10.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Soil science - the living skin of the land",
+   "by": "tools/tick.py soil_science",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[what soil is made of, SEALED] An ideal loam is about 45 percent mineral, 25 percent water, 25 percent air and 5 percent organic matter - 45+25+25+5 = 100 (sealed). Half of soil is pore space (water and air); that is what roots breathe and drink. Ties card_floor_earth_science (weathered rock) and card_floor_chemistry.",
+     "seal": "composition"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the carbon-nitrogen balance, SEALED] Soil organic matter sits near a carbon-to-nitrogen ratio of about 10 to 1 (sealed); microbes decompose fast when the ratio is low and tie up nitrogen when it is high. The fertility of the soil is this living chemistry. Ties card_floor_biology and card_floor_chemistry.",
+     "seal": "cn"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Soil is the thin living skin where rock, water, air and life meet: it rests on chemistry (the mineral nutrients and pH), earth science (the parent rock weathered over deep time) and biology (the microbes, fungi and roots). Lose it and agriculture fails. Ties card_floor_soil_science.",
+     "source": "the one map; soil composition; the C:N ratio; card_floor_soil_science; tools/seed_soil_science.py"
+    }
+   ]
+  }
+ ]
+}

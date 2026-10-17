@@ -1,0 +1,70 @@
+{
+ "entry": "symphony",
+ "rc": 0,
+ "seals": {
+  "18faef80ca176decb4aebb396b242ac080def790968ac75466bac47da10af406": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "syntonic_comma"
+   ]
+  },
+  "524f716e158d4fded3cc4d949de2a907e67b536047cdd996c7b0b00659138564": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "equal_tempered_fifth"
+   ]
+  },
+  "f010a3ecfd69dcd93a53d44f8743bfbd8624ef0fbbd42ed6cc718f7706903393": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "pythagorean_comma"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_symphony": {
+   "field": "music",
+   "question": "The symphony",
+   "references": [],
+   "statement": "Music is a refined system whose narrow window is coherence — what sounds whole. Many independent voices concorded into one body; tension sought and resolved; a form that, once heard, feels inevitable.",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the symphony, the coherence witness, 2026-10-07",
+     "claim": "The harmonic basis is exact ratio: the octave 2:1, the perfect fifth 3:2. Twelve pure fifths overshoot seven octaves by the Pythagorean comma (3/2)^12 / 2^7 = 1.0136432647705 — so the scale cannot be both pure and closed. Equal temperament is the calibration that distributes the comma evenly: the semitone is 2^(1/12) = 1.0594630944 and twelve of them close the octave at exactly 2. An arithmetic fact; the reason every key is playable.",
+     "kind": "witness",
+     "seal": "f010a3ecfd69dcd93a53d44f8743bfbd8624ef0fbbd42ed6cc718f7706903393"
+    },
+    {
+     "by": "Narrow Highway — the symphony, the coherence witness, 2026-10-07",
+     "claim": "[the principle] The symphony is the one-body pattern made audible: counterpoint is many independent voices, each whole, concorded into one body under one movement (1 Cor 12, etheto) — not a swarm of soloists and not a unison. Tension is sought so it can be resolved; the theme is stated, developed, and returned; the form feels inevitable because every part serves the whole. This is the COHERENCE axis the generals and the games do not reach.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway — the symphony, the coherence witness, 2026-10-07",
+     "claim": "[the guard] The engine seals the ratios and the comma — the arithmetic is a fact. It does NOT pronounce what is beautiful or that life obeys sonata form; the coherence the symphony witnesses is a principle we GATHER, never a verdict the engine renders. Borrow the form; launder nothing.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway — the symphony, the coherence witness, 2026-10-07",
+     "claim": "[a second comma] The syntonic comma, 81/80 = 1.012500, is the gap between the Pythagorean major third (81/64, four fifths up) and the pure just third (5/4). A second place the pure ratios refuse to close — a tuning that makes thirds pure throws the fifths off, and one that makes fifths pure throws the thirds off. Sealed; the ear hears the trade.",
+     "kind": "witness",
+     "seal": "18faef80ca176decb4aebb396b242ac080def790968ac75466bac47da10af406"
+    },
+    {
+     "by": "Narrow Highway — the symphony, the coherence witness, 2026-10-07",
+     "claim": "[the distributed comma] Equal temperament pays the debt evenly: the tempered fifth is 2^(7/12) = 1.498307, about 1.955 cents flat of the pure 3/2 = 1.5 — too small to offend, spread across all twelve so every key is equally in tune and equally, slightly, out. Sealed. Temperament is a CALIBRATION, not a cure.",
+     "kind": "witness",
+     "seal": "524f716e158d4fded3cc4d949de2a907e67b536047cdd996c7b0b00659138564"
+    },
+    {
+     "by": "Narrow Highway — the symphony, the coherence witness, 2026-10-07",
+     "claim": "[the comma cannot be closed, only distributed] The deepest coherence law: no tuning is simultaneously pure and closed — the commas cannot be eliminated, only spread. Perfect coherence is unreachable WITHIN the system; the honest move is to distribute the gap so the whole stays playable. It is the audible kin of Godel (a system cannot close itself from the inside) and of the Hole: the window of what-sounds-whole is narrow, the closure never total, and the beauty is the wise compromise — many voices into one body, the four-into-one the forces and Langlands also seek, heard rather than proven. Narrowing is evidence, never a perfect proof.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

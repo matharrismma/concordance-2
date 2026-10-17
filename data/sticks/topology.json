@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "topology",
+ "aliases": [
+  "topology",
+  "euler",
+  "euler_characteristic",
+  "polyhedron_formula",
+  "genus"
+ ],
+ "handler": "topology",
+ "why_python": "calls verify_derivation itself (5x)"
+}

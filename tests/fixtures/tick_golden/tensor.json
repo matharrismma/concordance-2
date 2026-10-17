@@ -1,0 +1,119 @@
+{
+ "entry": "tensor",
+ "rc": 0,
+ "seals": {
+  "0039da78fd6f60b54bbb3b3d5d7084704a19dd14f27840a0acc0d7c2a172c26b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "tensor_trace_invariant_under_rotation"
+   ]
+  },
+  "27f8dc70d9ce086d9113a391834d8e5d03524067186000d5723d29df97cec3ea": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "tensor_determinant_invariant"
+   ]
+  },
+  "3c5b522a146f2fc32c23c13d763b68c07a4b63628038970184e79af1a9924ec6": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "metric_tensor_jacobian_in_polar_coordinates"
+   ]
+  },
+  "5df933cde4c3e572ef17dcd70a8f0f8389bfe54780cdd7faa440157588f36cf1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "principal_axis_eigenvalue"
+   ]
+  },
+  "d49efa57c356cfeb936c967a651fae71e1ba800010e7372587bf814a719d990d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "the_city_measured_on_three_axes"
+   ]
+  },
+  "d6fcb3e6885d8bb7b2b07932ca1603e05b13227c2a0e336b951812f31802a069": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "einstein_constant_8piG_over_c4"
+   ]
+  },
+  "fd7bd13b982b7f266fbfe96f277fa402f2e309f15382a8610e18b2327c9ea739": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "metric_tensor_area_element_on_the_sphere"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_tensors_how_the_data_is_arranged_inside_the_bubbles_componen": {
+   "field": "mathematics",
+   "question": "Tensors - how the data is arranged inside the bubbles: components in every frame, invariants in none",
+   "references": [
+    "G. Ricci-Curbastro, T. Levi-Civita, Methodes de calcul differentiel absolu (1900): the tensor calculus",
+    "C. F. Gauss (1827): the first fundamental form - the metric tensor of a surface",
+    "A. Einstein (1915): G_mu_nu = (8 pi G / c^4) T_mu_nu",
+    "A. Cauchy (1822): the stress tensor and its principal axes",
+    "Isaiah 40:12; Colossians 1:16-17; Revelation 21:16",
+    "stick_every_matrix_is_a_rotation_and_a_stretch; stick_joined_bubbles; stick_parametrization_of_surfaces"
+   ],
+   "statement": "A tensor has components in every frame and invariants in none of them: rotate the frame and the components change while the trace, the determinant and the eigenvalues do not. The metric tensor is the grid inside a sphere - the square root of its determinant is the area element; a symmetric tensor's eigenvectors are the most efficient vectors; Einstein's equation says the data inside the bubble shapes the bubble. The data inside each domain is arranged this way: indices are the grid's axes, components are the cards, and the invariants are what every reading in every frame must agree on - the counts, the norms, the seals.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08",
+     "claim": "[components change, the invariants do not] T = [[3,1],[1,2]] rotated by 30 degrees has diagonal entries 3.616 and 1.384 - both changed - and their sum is 5 (sealed, as the full rotated expression), the same as 3 + 2 before the turn. The determinant 3*2 - 1*1 = 5 (sealed) is the same in every frame too. A tensor is the thing that stays; the components are the frame's shadow of it.",
+     "kind": "witness",
+     "seal": "0039da78fd6f60b54bbb3b3d5d7084704a19dd14f27840a0acc0d7c2a172c26b"
+    },
+    {
+     "by": "Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08",
+     "claim": "[the determinant stays] det T = 5 (sealed) under every rotation: the area the tensor's map carries is frame-free. Two invariants of a 2x2 symmetric tensor - trace and determinant - fix both eigenvalues, so the whole shape is known from two frame-free numbers.",
+     "kind": "witness",
+     "seal": "27f8dc70d9ce086d9113a391834d8e5d03524067186000d5723d29df97cec3ea"
+    },
+    {
+     "by": "Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08",
+     "claim": "[the most efficient vectors are the principal axes] The eigenvalues of T are (5 +- sqrt5)/2: the larger, 3.6180 (sealed), is the stretch along the principal axis. Cauchy's stress tensor, the inertia tensor, the covariance of a cloud of points: in each, the eigenvectors are the axes along which the data is simplest - the svd stick's most efficient vectors, now as a tensor's own frame.",
+     "kind": "witness",
+     "seal": "5df933cde4c3e572ef17dcd70a8f0f8389bfe54780cdd7faa440157588f36cf1"
+    },
+    {
+     "by": "Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08",
+     "claim": "[the grid inside the sphere is a tensor] The metric of the unit sphere is g = diag(1, sin^2 theta); at theta = 60 degrees sqrt(det g) = sin 60 = 0.8660 (sealed) - exactly the area element R^2 sin theta the surfaces stick sealed. The coordinates inside a bubble come WITH their measure: the tensor says how far apart two components are, in every direction, at every point.",
+     "kind": "witness",
+     "seal": "fd7bd13b982b7f266fbfe96f277fa402f2e309f15382a8610e18b2327c9ea739"
+    },
+    {
+     "by": "Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08",
+     "claim": "[the same tensor in flat polar coordinates] g = diag(1, r^2): at r = 2, sqrt(det g) = 2 (sealed) - the Jacobian r of polar coordinates, dA = r dr dtheta. Change the grid and the metric tensor changes its components to keep the same distances: that is what it is for.",
+     "kind": "witness",
+     "seal": "3c5b522a146f2fc32c23c13d763b68c07a4b63628038970184e79af1a9924ec6"
+    },
+    {
+     "by": "Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08",
+     "claim": "[the data inside shapes the bubble] Einstein 1915: G_mu_nu = (8 pi G / c^4) T_mu_nu, and the constant is 2.0766e-43 per newton (sealed) - small, which is why the bubble of spacetime barely bends under anything short of a star. The stress-energy tensor is the data arranged inside; the curvature tensor is the bubble's answer. The arrangement is not decoration: it is what the bubble becomes.",
+     "kind": "witness",
+     "seal": "d6fcb3e6885d8bb7b2b07932ca1603e05b13227c2a0e336b951812f31802a069"
+    },
+    {
+     "by": "Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08",
+     "claim": "[a city measured on three axes] 'The length and the breadth and the height of it are equal' (Rev 21:16): twelve thousand furlongs each way, 12000^3 = 1.728e+12 cubic furlongs (sealed) - a thing measured on every axis at once, which is what a rank-3 array is. The measure is given; the meaning is not claimed here.",
+     "kind": "witness",
+     "seal": "d49efa57c356cfeb936c967a651fae71e1ba800010e7372587bf814a719d990d"
+    },
+    {
+     "by": "Narrow Highway - tensors, the arrangement inside the bubbles, 2026-10-08",
+     "claim": "[how we arrange the data, and the guard] Inside each domain the data is a tensor: the indices are the grid's axes (shelf, class, item; token; surface), the components are the cards, and the invariants are what every reading in every frame must agree on - counts, norms, seals, the number of a card's connections. The keeping as measured on 2026-10-08 is a sparse card-by-token-by-shelf array with 30.0 million nonzero entries over 882,022 cards and 124 shelves (docs/OUR_FORM_MEASURED_2026-10-08.md). A spherical matrix rotates its components; a stretch would distort them; the invariants are the meaning. Scripture: 'Who hath measured the waters in the hollow of his hand, and meted out heaven with the span... and weighed the mountains in scales' (Isa 40:12) - measure on every axis; 'by him all things consist' (Col 1:17) - hold together: the metric. GUARDS: Einstein's equation is cited physics; the city's cube is a measure given, not a claim about its meaning; the keeping-as-tensor is a description of a data structure, not a theorem. Seven numbers sealed; the rest cited. Ties: svd, bubbles, surfaces, spacetime, delta.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,64 @@
+{
+ "entry": "yang_mills",
+ "rc": 0,
+ "seals": {
+  "14e5227e81072579c4e5bf4a8eaa5798e16ed9993c5b7734edd821718210ecbb": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ym_yukawa_range_fm"
+   ]
+  },
+  "8347796380c992161dfe716cfc81139d0595e5f0381b524eb6f83a749299ecc4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ym_mass_gap_spectral"
+   ]
+  },
+  "d9400c549bafe3ec48e9d5442c7e3d45aa5d6d2ca4807320c7705906522e539a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ym_qcd_beta0_nf6"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_yang_mills_the_mass_gap_is_a_measure": {
+   "field": "meta",
+   "question": "Yang-Mills - the mass gap is a measure",
+   "references": [
+    "the Clay Millennium problem: Yang-Mills existence and mass gap",
+    "Yukawa (1935): range = hbar c / (m c^2); asymptotic freedom (GWP 1973)",
+    "lattice QCD glueball spectra; the gap as E1 - E0"
+   ],
+   "statement": "For a compact simple gauge group, does a quantum Yang-Mills theory exist on R^4 with a mass gap Delta > 0 - a strictly positive lightest excitation above the vacuum? The gap is a measured spectral quantity: it fixes the range of the force and explains why the strong interaction is short-range while the massless photon's reach is infinite.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Yang-Mills mass gap, 2026-10-07",
+     "claim": "[the gap IS a measured spectral difference] A mass gap is the distance from the vacuum (energy 0) to the first excited state: Delta = E1 - E0. On the lattice the lightest glueball sits near 1.73 GeV, so Delta = 1.73 - 0 = 1.73 GeV (sealed) - a measured number, exactly as you said: the mass gap is a measure.",
+     "kind": "witness",
+     "seal": "8347796380c992161dfe716cfc81139d0595e5f0381b524eb6f83a749299ecc4"
+    },
+    {
+     "by": "Narrow Highway - Yang-Mills mass gap, 2026-10-07",
+     "claim": "[the gap sets a measurable range] A massive mediator gives a Yukawa force of range hbar c / (m c^2). For the pion (139.57 MeV): 197.327 MeV*fm / 139.57 MeV = 1.4138 fm (sealed) - the measured ~1.4 fm range of the nuclear force, Yukawa's 1935 prediction. Delta > 0 is why the strong force is short-range, unlike the massless photon.",
+     "kind": "witness",
+     "seal": "14e5227e81072579c4e5bf4a8eaa5798e16ed9993c5b7734edd821718210ecbb"
+    },
+    {
+     "by": "Narrow Highway - Yang-Mills mass gap, 2026-10-07",
+     "claim": "[why a gap is plausible - asymptotic freedom, proven] The one-loop QCD beta coefficient is b0 = 11 - (2/3) n_f; for 6 flavors b0 = 11 - 4 = 7 (sealed) > 0, so the coupling grows at long distance (Gross-Wilczek-Politzer 1973, Nobel 2004). That proven sign is what makes confinement and a positive gap expected.",
+     "kind": "witness",
+     "seal": "d9400c549bafe3ec48e9d5442c7e3d45aa5d6d2ca4807320c7705906522e539a"
+    },
+    {
+     "by": "Narrow Highway - Yang-Mills mass gap, 2026-10-07",
+     "claim": "[the open mark] Yang-Mills existence AND a mass gap on R^4 for a compact simple gauge group is OPEN (Clay Millennium). Proven/measured: asymptotic freedom; lattice glueball spectra; the gap computed numerically on the lattice. The engine seals the measured range, the spectral difference, and the beta sign; it does NOT construct the theory or prove Delta > 0. The mass gap is a gap in the spectrum of a self-adjoint Hamiltonian - the same structure as stick_the_hilbert_polya_conjecture. map, never launder.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

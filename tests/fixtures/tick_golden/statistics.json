@@ -1,0 +1,70 @@
+{
+ "entry": "statistics",
+ "rc": 0,
+ "seals": {
+  "977753c6390f3ddf5b7486457d59e156a2566816db25b2e74acf4cb01f8a0936": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "standard_error_sigma_over_sqrt_n_clt"
+   ]
+  },
+  "9f26131fac4b895664808e4a0a7fa29fba6549e734e186841fe741133c43120d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "standard_deviation_of_a_sample"
+   ]
+  },
+  "db0dbd4c4b785fc5601f07ef865c3cb3b36c1b19d1eb4c012733f042cc0ec25e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "z_score_x_minus_mu_over_sigma"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_statistics_the_normal_law_and_the_method_of_science": {
+   "field": "",
+   "question": "Statistics - the normal law and the method of science",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py statistics",
+     "claim": "[describe - the standard deviation, SEALED] For the sample {2,4,4,4,5,5,7,9} the mean is 5 and the standard deviation is sqrt(((9+1+1+1+0+0+4+16)/8)) = 2 (sealed) - the typical distance from the mean, the ruler of spread. Mean and standard deviation are the first thing data tells you.",
+     "kind": "instance",
+     "seal": "9f26131fac4b895664808e4a0a7fa29fba6549e734e186841fe741133c43120d"
+    },
+    {
+     "by": "tools/tick.py statistics",
+     "claim": "[standardize - the z-score, SEALED] A value of 7 in that sample is z = (7-5)/2 = 1 (sealed) - one standard deviation above the mean. The z-score puts every measurement on one common scale, and under the normal law about 68 percent of data fall within z = +/- 1, 95 percent within +/- 2.",
+     "kind": "instance",
+     "seal": "db0dbd4c4b785fc5601f07ef865c3cb3b36c1b19d1eb4c012733f042cc0ec25e"
+    },
+    {
+     "by": "tools/tick.py statistics",
+     "claim": "[the central limit theorem - the standard error, SEALED] Average n measurements and the uncertainty of the mean shrinks as the standard error sigma/sqrt(n): for sigma = 2 and n = 4 it is 2/sqrt(4) = 1 (sealed). More data, a tighter estimate - and the average tends to the normal law whatever the original shape. Many noisy measurements converge to one estimate.",
+     "kind": "instance",
+     "seal": "977753c6390f3ddf5b7486457d59e156a2566816db25b2e74acf4cb01f8a0936"
+    },
+    {
+     "by": "tools/tick.py statistics",
+     "claim": "[the central limit theorem - many into one shape] Sum or average enough independent things - whatever their individual distributions - and the result tends to the SAME bell curve, the normal law. It is why the normal is everywhere, and it is the capstone's shape again: many possibilities converging to one form. Ties card_floor_the_capstone.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py statistics",
+     "claim": "[the method of every empirical science] Statistics is how a claim is TESTED against noisy data: a hypothesis, a test statistic, a p-value, a confidence interval. Hardy-Weinberg is its biology face (sealed on the biology floor); measurement error is its physics face; it is the discipline that turns data into a verdict - the same job the engine does deterministically. Ties card_floor_biology and card_floor_the_instruments.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py statistics",
+     "claim": "[on the one map] Statistics rests on the instruments (the probability machinery), the capstone (the central limit theorem is many-into-one, and a distribution integrates to one), and biology (the method of empirical science). The formal domain that lets every other domain test itself against measurement. Ties card_floor_statistics.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

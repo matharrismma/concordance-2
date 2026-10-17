@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "name": "optics",
+ "aliases": [
+  "optics",
+  "lenses",
+  "refraction",
+  "the_lens"
+ ],
+ "doc": "OPTICS - how light bends, focuses, and slows (Matt, 2026-10-10, down the list). Light is a Maxwell wave that\nslows in matter (v = c/n) and bends at boundaries (refraction); lenses focus it by the thin-lens equation\n1/f = 1/do + 1/di. SEALED: the image distance of a thin lens, and the speed of light in glass. Rests on Maxwell\n(light is electromagnetism) and quantum mechanics (the photon). Idempotent.",
+ "seals": [
+  {
+   "key": "lens",
+   "nid": "thin_lens_image_distance_f10_do30",
+   "expr": "1/(1/10 - 1/30)",
+   "value": 14.999999999999996,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "glass",
+   "nid": "speed_of_light_in_glass_c_over_n_1_5",
+   "expr": "299792458/1.5",
+   "value": 199861638.66666666,
+   "tol": 1e-06,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Optics - how light bends, focuses, and slows",
+   "by": "tools/tick.py optics",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[lenses focus - the thin-lens equation, SEALED] A converging lens of focal length 10 cm, with an object at 30 cm, forms an image at 1/(1/10 - 1/30) = 15 cm (sealed). The thin-lens equation 1/f = 1/do + 1/di governs every camera, eye and telescope; magnification is the ratio of the distances. Optics is geometry applied to Maxwell's light.",
+     "seal": "lens"
+    },
+    {
+     "kind": "instance",
+     "claim": "[light slows in matter, SEALED] Light travels at c in vacuum but c/n in a medium: in glass (n = 1.5) that is 299792458/1.5 = 2.0e8 m/s (sealed). The slowing is refraction - why a straw looks bent, why a prism splits colours (n depends on wavelength), and, at the critical angle, why an optical fibre holds light (sealed on the Lagrangian). Ties card_floor_maxwells_equations.",
+     "seal": "glass"
+    },
+    {
+     "kind": "note",
+     "claim": "[the photon - optics is also quantum] A beam is also a stream of photons (E = hf, sealed on the quantum floor); the photoelectric effect, lasers and the quantum of light live here. Classical rays and quantum photons are the two faces of the same light. On the one map, optics rests on Maxwell (light is an electromagnetic wave) and quantum mechanics (the photon). Ties card_floor_optics.",
+     "source": "the photon; wave-particle duality of light; card_floor_maxwells_equations; card_floor_quantum_mechanics"
+    }
+   ]
+  }
+ ]
+}

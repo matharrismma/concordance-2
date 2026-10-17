@@ -1,0 +1,47 @@
+{
+ "entry": "nuclear_physics",
+ "rc": 0,
+ "seals": {
+  "7292557c68674288514b249c8bfdd1e414e9913ea69e2787c1bee4af1f7c5ece": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "energy_per_atomic_mass_unit_mev"
+   ]
+  },
+  "7b260aa1e1d142b67274b37548a1f8c6b59d26dde8da8d87f7d3677547f1d5c4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fraction_remaining_after_four_half_lives"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_nuclear_physics_binding_decay_and_the_strong_force": {
+   "field": "",
+   "question": "Nuclear physics - binding, decay, and the strong force",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py nuclear_physics",
+     "claim": "[mass is energy - the amu, SEALED] One atomic mass unit of mass converts to 931.5 MeV of energy (sealed, by E = mc^2) - the currency of nuclear binding. A nucleus weighs LESS than its parts; the missing mass (the mass defect) is the binding energy that holds it, and releasing it is what fission and fusion do. Ties card_floor_relativity.",
+     "kind": "instance",
+     "seal": "7292557c68674288514b249c8bfdd1e414e9913ea69e2787c1bee4af1f7c5ece"
+    },
+    {
+     "by": "tools/tick.py nuclear_physics",
+     "claim": "[decay on a clock, SEALED] An unstable nucleus decays by a fixed half-life: after four of them (1/2)^4 = 0.0625, one sixteenth, remains (sealed). Alpha, beta and gamma decay follow this one exponential law (the same as pharmacokinetics and radiocarbon) - and alpha decay happens by quantum tunnelling. Ties card_floor_quantum_mechanics.",
+     "kind": "instance",
+     "seal": "7b260aa1e1d142b67274b37548a1f8c6b59d26dde8da8d87f7d3677547f1d5c4"
+    },
+    {
+     "by": "tools/tick.py nuclear_physics",
+     "claim": "[the strong force binds it] The nucleus is packed protons and neutrons that electrically REPEL; what holds them is the strong force (the residue of the gluon force between quarks, on the Standard Model floor), strong but short-ranged. Binding energy peaks at iron - why fusion powers stars up to iron and fission powers reactors down to it. On the one map, nuclear physics rests on the Standard Model, relativity and quantum mechanics. Ties card_floor_nuclear_physics.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

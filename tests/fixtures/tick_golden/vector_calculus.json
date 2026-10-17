@@ -1,0 +1,64 @@
+{
+ "entry": "vector_calculus",
+ "rc": 0,
+ "seals": {
+  "95aa93a3a4c3240bf0c665519c3fa9149d19cee5716334f0ce84cd6f727e79f9": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "divergence_theorem_flux"
+   ]
+  },
+  "ba9915deaa267295e7ff00b9d1143f162fc7f87e3a6e1bd0c08d8a8646727d63": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "divergence_source"
+   ]
+  },
+  "de3043a702ab243789c0170a77eef68a507ff18c23f92eae77b68cb1505bb76a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "curl_rotation"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_divergence_and_curl_invert_to_find_the_center": {
+   "field": "mathematics",
+   "question": "Divergence and curl - invert to find the center",
+   "references": [
+    "the Helmholtz decomposition: F = -grad(phi) + curl(A)",
+    "Gauss's divergence theorem: flux through a closed surface = integral of div",
+    "Maxwell: div E = rho/eps0 (the source); Navier-Stokes: vorticity = curl of v"
+   ],
+   "statement": "Divergence measures the net outflow at a point (a source if positive, a sink if negative); curl measures circulation (the axis of a vortex). A field is reconstructed from its divergence and curl (Helmholtz), and the divergence theorem turns a measurement on a boundary into the source enclosed - so mapping the field lets you invert to its center.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - divergence, curl, and the center, 2026-10-07",
+     "claim": "[divergence finds the source] The divergence is the net outflow at a point. For the radial field F = (x, y, z), div F = dx/dx + dy/dy + dz/dz = 1+1+1 = 3 (sealed): a uniform source, the field streaming outward from a center. Positive divergence marks a source, negative a sink.",
+     "kind": "witness",
+     "seal": "ba9915deaa267295e7ff00b9d1143f162fc7f87e3a6e1bd0c08d8a8646727d63"
+    },
+    {
+     "by": "Narrow Highway - divergence, curl, and the center, 2026-10-07",
+     "claim": "[curl finds the rotation] The curl is circulation. For the rotation field F = (-y, x, 0), the z-component of the curl is dFy/dx - dFx/dy = 1 - (-1) = 2 (sealed): the vorticity, twice the angular velocity. Its axis is the center of the vortex.",
+     "kind": "witness",
+     "seal": "de3043a702ab243789c0170a77eef68a507ff18c23f92eae77b68cb1505bb76a"
+    },
+    {
+     "by": "Narrow Highway - divergence, curl, and the center, 2026-10-07",
+     "claim": "[invert to find the center - the divergence theorem] Gauss: the flux of a field out through a closed surface equals the divergence (the source) enclosed. For the radial unit field through the unit sphere the flux is 4*pi = 12.5664 (sealed). So a measurement on the BOUNDARY inverts to the SOURCE inside - you find the center from the outflow. (Helmholtz: reconstruct the whole field from its div and curl by solving Poisson equations; the centers are where div and curl concentrate.)",
+     "kind": "witness",
+     "seal": "95aa93a3a4c3240bf0c665519c3fa9149d19cee5716334f0ce84cd6f727e79f9"
+    },
+    {
+     "by": "Narrow Highway - divergence, curl, and the center, 2026-10-07",
+     "claim": "[where it lives in the arc] Divergence and curl ARE Maxwell's equations (stick_maxwell_s_equations_and_superconductivity: div E = rho/eps0 locates the charge - the source; div B = 0, no monopoles; curl E and curl B the circulation) and Navier-Stokes (vorticity = curl of the velocity, div v = 0 for incompressible flow - stick_navier_stokes_dissonance_and_dispersion). 'Map the field, then invert to find the center' is the engine's triangulation move written in vector calculus: measure the effects (div, curl) on the boundary, invert to the cause (the center). map, never launder: seal the arithmetic; the center is FOUND by inversion, not posited.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

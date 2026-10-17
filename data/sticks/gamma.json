@@ -1,0 +1,81 @@
+{
+ "schema": 1,
+ "name": "gamma",
+ "aliases": [
+  "gamma",
+  "gamma_function",
+  "hyperspheres",
+  "n_ball",
+  "spheres",
+  "higher_dimensional_spheres"
+ ],
+ "doc": "HIGHER-DIMENSIONAL SPHERES AND THE GAMMA FUNCTION (Matt, 2026-10-07). Gamma extends the factorial to\nall dimensions (Gamma(n+1)=n!), the unique log-convex curve THROUGH the factorial points - the line the\nscribe draws. It gives the volume of the unit n-ball, V_n = pi^(n/2)/Gamma(n/2+1), which PEAKS at\ndimension 5 and then falls to zero: the factorial in the denominator outruns pi^(n/2), so high-dimensional\nspace is mostly empty, its volume fleeing to the thin shell near the boundary. Seal Gamma=factorial,\nGamma(1/2)=sqrt(pi), and the volume peak. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "gamma_is_factorial",
+   "nid": "gamma_is_factorial",
+   "expr": "4 * 3 * 2 * 1",
+   "value": 24.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "gamma_half_is_sqrt_pi",
+   "nid": "gamma_half_is_sqrt_pi",
+   "expr": "3.141592653589793 ** 0.5",
+   "value": 1.7724538509055159,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "unit_5ball_volume_max",
+   "nid": "unit_5ball_volume_max",
+   "expr": "8 * 3.141592653589793 ** 2 / 15",
+   "value": 5.263789013914324,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "unit_6ball_volume",
+   "nid": "unit_6ball_volume",
+   "expr": "3.141592653589793 ** 3 / 6",
+   "value": 5.167712780049969,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Higher-dimensional spheres and the gamma function",
+   "statement": "The gamma function extends the factorial to every real and complex argument (Gamma(n+1) = n!) - the unique log-convex curve through the factorial points. It gives the volume of the unit n-ball, V_n = pi^(n/2)/Gamma(n/2+1), which rises to a maximum at dimension 5 and then falls to zero: the factorial eventually outruns the power of pi, and high-dimensional volume flees to the thin shell near the boundary.",
+   "field": "mathematics",
+   "references": [
+    "Gamma(n+1) = n!; Bohr-Mollerup: the unique log-convex interpolation",
+    "Gamma(1/2) = sqrt(pi); volume of the unit n-ball V_n = pi^(n/2)/Gamma(n/2+1)",
+    "the unit-ball volume peaks at n=5, then tends to 0 (concentration of measure)"
+   ],
+   "by": "Narrow Highway - the gamma function and n-spheres, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[Gamma is the line through the factorial points] Gamma extends the factorial to all dimensions: Gamma(n+1) = n!, so Gamma(5) = 4*3*2*1 = 24 (sealed). At the integers it IS the factorial; between them it is the unique log-convex curve through those points (Bohr-Mollerup) - the canonical LINE connecting the factorial points, exactly 'mark the points, let the line connect them' (stick_scribing_mark_the_points_let_the_lines_connect_them). It is what lets dimension be continuous.",
+     "seal": "gamma_is_factorial"
+    },
+    {
+     "kind": "witness",
+     "claim": "[Gamma(1/2) = sqrt(pi) - the half-integer, the Gaussian, the odd dimensions] Gamma(1/2) = sqrt(pi) = 1.772454 (sealed). The factorial of one-half is the square root of pi - a value only the gamma function can state - and it is why the Gaussian integral is sqrt(pi) and why odd-dimensional sphere volumes carry sqrt(pi).",
+     "seal": "gamma_half_is_sqrt_pi"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the unit ball's volume PEAKS at dimension 5, then vanishes] V_n = pi^(n/2)/Gamma(n/2+1). The largest unit ball of all is the 5-ball: V_5 = 8 pi^2/15 = 5.2638 (sealed), and already V_6 = pi^3/6 = 5.1677 (sealed) is smaller. Beyond dimension 5 the volume only decreases, tending to 0 as n grows - the factorial in the denominator outruns pi^(n/2). High-dimensional space is mostly empty; its volume flees to the thin shell near the boundary (concentration of measure).",
+     "seal": "unit_5ball_volume_max"
+    },
+    {
+     "kind": "note",
+     "claim": "[where it lives in the arc] The gamma function marries pi and the factorial and lets DIMENSION be a continuous variable - the interpolation that is 'the line through the points' (stick_scribing..., stick_the_legendre_transform...). It is woven into the Riemann zeta functional equation (the completed xi carries Gamma(s/2) pi^(-s/2)), part of the symmetry that pins the zeros to the line (stick_the_symmetry, stick_the_zeta_function); its Gamma(1/2) = sqrt(pi) is the same sqrt(pi) as the Gaussian and the high-dimensional concentration of measure (stick_lebesgue_theory...); and the dimension-FREE 1/sqrt(N) of Monte Carlo (stick_monte_carlo) is a blessing against exactly the curse this function describes. map, never launder: seal the arithmetic; the gamma is the found interpolation, not an imposed curve."
+    }
+   ]
+  }
+ ]
+}
