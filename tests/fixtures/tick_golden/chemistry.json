@@ -1,0 +1,66 @@
+{
+ "entry": "chemistry",
+ "rc": 0,
+ "seals": {
+  "224a3a0cab823eb02c33f4020a9fec0c298d390a0057c5027ec7a29e1bb950f0": {
+   "axis": "chemistry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "88e2dd5ebcfdc64538621ef8f170dc58d8b5995f69213d292609638d06ac6045": {
+   "axis": "chemistry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a4f5b07fe9fe11a14bff2710d8891e627d70f6d871c77687e66c3f9503776113": {
+   "axis": "chemistry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_chemistry_reactions_and_solutions_verified_and_sealed": {
+   "field": "",
+   "question": "Chemistry - reactions and solutions, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py chemistry_stick",
+     "claim": "[a balanced equation] 2 H2 + O2 -> 2 H2O: four H and two O on each side, charge balanced (sealed through chemistry.CHEM_VERIFY) - conservation of mass, the first law of the reaction.",
+     "kind": "instance",
+     "seal": "a4f5b07fe9fe11a14bff2710d8891e627d70f6d871c77687e66c3f9503776113"
+    },
+    {
+     "by": "tools/tick.py chemistry_stick",
+     "claim": "[spontaneity] For liquid water's formation, dH = -285.8 kJ/mol and dS = -163.2 J/mol/K; at 298 K, dG = dH - T dS < 0, so the reaction is spontaneous (sealed) - the second law deciding direction.",
+     "kind": "instance",
+     "seal": "224a3a0cab823eb02c33f4020a9fec0c298d390a0057c5027ec7a29e1bb950f0"
+    },
+    {
+     "by": "tools/tick.py chemistry_stick",
+     "claim": "[acidity] pH 3.0 is acidic (sealed): pH below 7 is acid, above is base, 7 neutral - the logarithm of the hydrogen-ion concentration.",
+     "kind": "instance",
+     "seal": "88e2dd5ebcfdc64538621ef8f170dc58d8b5995f69213d292609638d06ac6045"
+    },
+    {
+     "by": "tools/tick.py chemistry_stick",
+     "claim": "[the ground] Conservation of mass and charge, and the laws of thermodynamics - sealed where applied. The detailed mechanism of a reaction is a model, inferred from evidence, not kept as fact.",
+     "kind": "postulate",
+     "source": "chemistry.CHEM_VERIFY; the laws of thermodynamics"
+    },
+    {
+     "by": "tools/tick.py chemistry_stick",
+     "claim": "[declined] Reaction mechanisms beyond the balance, toxicity, dosage and safety judgments are declined - the engine seals the stoichiometry and the sign of dG, not the clinical call.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

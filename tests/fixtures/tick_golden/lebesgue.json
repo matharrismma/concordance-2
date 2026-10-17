@@ -1,0 +1,69 @@
+{
+ "entry": "lebesgue",
+ "rc": 0,
+ "seals": {
+  "0baf4453cacc339db26d53ce3a033511e8c2ee850d11ae3a4bcb17395e11d6f9": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "measure_zero_cover"
+   ]
+  },
+  "41e34ee2e054fcd6b626b01c3198e26c10410ff8aa978bd4fb952ae906575124": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "lebesgue_dirichlet_integral"
+   ]
+  },
+  "d3c940c510b8ecbd04f4fcd756db73e7383bc1f6a34f30cf306e2ba85a61e4c3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "probability_is_a_measure"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_lebesgue_theory_measure_and_integration_by_layers": {
+   "field": "mathematics",
+   "question": "Lebesgue theory - measure, and integration by layers",
+   "references": [
+    "H. Lebesgue (1902): measure and the integral by layers",
+    "a countable set has measure zero; the Dirichlet function is Lebesgue-integrable",
+    "Kolmogorov: probability is a measure of mass 1; expectation = integral X dP"
+   ],
+   "statement": "Lebesgue integration partitions the range of a function and weights each value by the MEASURE of the set where the function takes it. This integrates functions Riemann cannot, makes sense of 'almost everywhere' (a property that holds except on a set of measure zero), and is the setting for Fourier analysis (the L^2 space) and probability (a measure of total mass one).",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Lebesgue theory, 2026-10-07",
+     "claim": "[Lebesgue integrates where Riemann fails - the Dirichlet function] Partition the RANGE, not the domain. For 1_Q on [0,1] (1 on rationals, 0 on irrationals) the Lebesgue integral is 1*mu(Q) + 0*mu(irrationals) = 1*0 + 0*1 = 0 (sealed), because the rationals have measure ZERO. Riemann cannot integrate this at all - its upper and lower sums never meet. Measuring the SET where f takes each value succeeds where partitioning the domain fails.",
+     "kind": "witness",
+     "seal": "41e34ee2e054fcd6b626b01c3198e26c10410ff8aa978bd4fb952ae906575124"
+    },
+    {
+     "by": "Narrow Highway - Lebesgue theory, 2026-10-07",
+     "claim": "[a countable set has measure zero] Cover the n-th rational with an interval of length eps/2^n; the total is eps*(1/2 + 1/4 + 1/8 + ...) -> eps (the geometric sum reaches 0.96875 after five terms, sealed, climbing to 1). Since eps is arbitrary, the rationals - dense as they are - have measure zero. This is where 'almost everywhere' is born: a claim can hold except on a negligible set.",
+     "kind": "witness",
+     "seal": "0baf4453cacc339db26d53ce3a033511e8c2ee850d11ae3a4bcb17395e11d6f9"
+    },
+    {
+     "by": "Narrow Highway - Lebesgue theory, 2026-10-07",
+     "claim": "[probability IS a measure] A probability is a measure of total mass 1 (Kolmogorov). For a fair die, P(even) = mu({2,4,6}) = 3/6 = 0.5 (sealed), and expectation is the Lebesgue integral of X dP. This is exactly why Monte Carlo (stick_monte_carlo) estimates an integral and why the law of large numbers is a theorem about a measure.",
+     "kind": "witness",
+     "seal": "d3c940c510b8ecbd04f4fcd756db73e7383bc1f6a34f30cf306e2ba85a61e4c3"
+    },
+    {
+     "by": "Narrow Highway - Lebesgue theory, 2026-10-07",
+     "claim": "[use it where it fits - the arc] Lebesgue theory, with its Monotone and Dominated Convergence theorems (swap a limit and an integral - the backbone no Riemann integral provides), is the proper home of: FOURIER (the L^2 space, where the transform is an isometry - Parseval: energy in time = energy in frequency - stick_the_complex_field_is_the_physics_of_waves); PROBABILITY and Monte Carlo (stick_monte_carlo); the 'almost everywhere' behind the Navier-Stokes partial-regularity result (the singular set has Hausdorff dimension <= 1, a measure-small statement - stick_navier_stokes_dissonance_and_dispersion); and the Hausdorff dimension of a fractal (stick_the_mandelbrot_set). It also completes the calculus floor (stick_integrals_and_derivatives_the_fundamental_theorem).",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - Lebesgue theory, 2026-10-07",
+     "claim": "[map, never launder] 'Use it where you can': the engine already leans on measure-theoretic ideas - the Monte Carlo error bar is a statement about a probability measure, and the tick-stick's honest refusal is a kind of 'holds almost everywhere, with the exceptional set marked.' We seal the canonical arithmetic (the Dirichlet integral, the measure-zero cover, probability as a measure) and map the concept onto the arc; we do not claim to have built a measure-theoretic engine. map, never launder.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

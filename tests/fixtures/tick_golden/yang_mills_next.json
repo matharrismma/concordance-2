@@ -1,0 +1,123 @@
+{
+ "entry": "yang_mills_next",
+ "rc": 0,
+ "seals": {
+  "0bb7cfdc0e6dcb85357bdd8d310bfb3d0f6c9137925167483cf2c7cb702da50b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "pure_gauge_one_loop_beta_coefficient_b0_11"
+   ]
+  },
+  "2370bad4abe7cd813bba2824f06377e9a7ed0fa48b799a60b79d3a1e6bb8a579": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "alpha_s_run_from_m_z_to_10_gev_one_loop_nf_5"
+   ]
+  },
+  "2a7c6288ec8c63fded68ca938598a32aa76edba5ee79f3b3cad2771a37c54fe3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "qcd_string_tension_440_mev_squared_in_newtons"
+   ]
+  },
+  "7dea9317b856cf1f4dd098848c6178dd23802945e3faea7a78917edd620e6c39": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "glueball_0pp_compton_wavelength_fm_from_1730_mev"
+   ]
+  },
+  "9d1be712816d3ffa1fc8e3aee986a0d236b0a87cf3dc638171556fcda2c14dd7": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "nonperturbative_weight_exp_minus_8pi2_over_g2_at_alpha_s_m_z"
+   ]
+  },
+  "d960c618e7fa3d37b60e37f6d1eb1f5dfcf6c6a8e8e8a9414f73c0a291dee1fd": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "pure_gauge_two_loop_beta_coefficient_b1_102"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_yang_mills_existence_and_mass_gap": {
+   "field": "",
+   "question": "Yang-Mills existence and mass gap",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[the beta function, pure gauge] b0 = 11 - (2/3) n_f = 11 and b1 = 102 - (38/3) n_f = 102 for SU(3) with no quarks (sealed): both positive, so the coupling falls with energy - asymptotic freedom, PROVEN at one loop by Gross-Wilczek and Politzer (1973) and the reason the theory is defined at short distance at all.",
+     "kind": "instance",
+     "seal": "0bb7cfdc0e6dcb85357bdd8d310bfb3d0f6c9137925167483cf2c7cb702da50b"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[b1 = 102]",
+     "kind": "instance",
+     "seal": "d960c618e7fa3d37b60e37f6d1eb1f5dfcf6c6a8e8e8a9414f73c0a291dee1fd"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[the coupling runs, sealed] At one loop with five flavours, alpha_s(10 GeV) = alpha_s(M_Z) / (1 + alpha_s b0/(2 pi) ln(10/M_Z)) = 0.1731 from 0.1180 (sealed; the world average alpha_s(M_Z) = 0.1180 cited from the PDG). The coupling grows toward low energy, which is where a gap must form and where the series stops being usable.",
+     "kind": "instance",
+     "seal": "2370bad4abe7cd813bba2824f06377e9a7ed0fa48b799a60b79d3a1e6bb8a579"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[why perturbation theory cannot see the gap] The natural nonperturbative weight e^(-8 pi^2 / g^2) at alpha_s(M_Z) is e^(-53.25) = 7.5e-24 (sealed). Every derivative of that function vanishes at g = 0: it is invisible to every order of the expansion in g. A mass gap, if it exists, is of this kind - the series, asymptotic in any case, cannot produce it. This is the road closed below.",
+     "kind": "instance",
+     "seal": "9d1be712816d3ffa1fc8e3aee986a0d236b0a87cf3dc638171556fcda2c14dd7"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[the string between two quarks] The lattice string tension sqrt(sigma) = 440 MeV gives sigma = (0.44 GeV)^2 / (hbar c) = 0.98 GeV/fm = 1.57e5 N (sealed) - about sixteen tonnes-force, constant with distance. A linear potential is what a gapped, confining theory looks like from outside; the lattice measures it (Wilson's area law, proven at strong coupling).",
+     "kind": "instance",
+     "seal": "2a7c6288ec8c63fded68ca938598a32aa76edba5ee79f3b3cad2771a37c54fe3"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[the gap as a length] The lightest glueball, 0++ at 1730 MeV on the lattice (Morningstar-Peardon 1999, cited), has Compton wavelength hbar c / m = 0.114 fm (sealed): the range below which the pure gauge field's lowest excitation lives. A gap of this size is what the Clay statement asks to be proven to survive the continuum limit.",
+     "kind": "instance",
+     "seal": "7dea9317b856cf1f4dd098848c6178dd23802945e3faea7a78917edd620e6c39"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[the postulate it builds on - what 'existence' means] A quantum Yang-Mills theory on R^4 EXISTS when its Euclidean correlation functions satisfy the Osterwalder-Schrader axioms (reflection positivity, Euclidean invariance, clustering, regularity) and so reconstruct a Hilbert space with a Hamiltonian obeying the Wightman axioms; the MASS GAP is Delta > 0 between the vacuum and the next spectral point. Not kept as a fact: the lattice theory works under them at every finite spacing, and from that working the truth of the continuum statement is inferred - never proven, never kept as fact.",
+     "kind": "postulate",
+     "source": "K. Osterwalder, R. Schrader (1973, 1975); A. Jaffe, E. Witten, Quantum Yang-Mills theory (Clay Mathematics Institute, 2000)"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[proven links] Asymptotic freedom (Gross-Wilczek 1973; Politzer 1973): the beta function is negative for b0 > 0 - PROVEN, the theory's ultraviolet behaviour is under control. The LATTICE theory has a mass gap and confines at strong coupling (Osterwalder-Seiler 1978, building on Wilson 1974's area law by cluster expansion) - PROVEN, for every finite lattice spacing in the strong-coupling regime. The open link is the continuum limit: lattice spacing to zero with the gap staying open - which is the weak-coupling regime, where the proof does not reach.",
+     "kind": "equivalence",
+     "source": "D. J. Gross, F. Wilczek, Phys. Rev. Lett. 30 (1973); H. D. Politzer, Phys. Rev. Lett. 30 (1973); K. Osterwalder, E. Seiler, Ann. Phys. 110 (1978); K. G. Wilson, Phys. Rev. D 10 (1974)"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[measured, carried as a measurement] The lattice glueball spectrum: 0++ at 1730(50)(80) MeV, 2++ at 2400(25)(120) MeV in pure SU(3) gauge theory extrapolated to the continuum (Morningstar-Peardon 1999; Chen et al. 2006). A measurement with an error bar, not a theorem: it is the gap SEEN, at the precision the lattice states. Balaban's renormalization-group program (1980s) constructs the ultraviolet limit in finite volume - a partial continuum result, cited.",
+     "kind": "equivalence",
+     "source": "C. J. Morningstar, M. Peardon, Phys. Rev. D 60 (1999); Y. Chen et al., Phys. Rev. D 73 (2006); T. Balaban, Comm. Math. Phys. (1984-1989)"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[a road closed] No finite order of perturbation theory produces a mass gap: the gap scales as e^(-8 pi^2 / (b0 g^2)) (the dimensional transmutation of Lambda_QCD), a function with every derivative zero at g = 0, and the perturbative series is asymptotic (Dyson 1952). A proof must be nonperturbative - constructive field theory, the lattice with a controlled continuum limit, or a method not yet written.",
+     "kind": "exclusion",
+     "source": "F. J. Dyson, Phys. Rev. 85 (1952); A. Jaffe, E. Witten (2000), section on the problem's difficulty"
+    },
+    {
+     "by": "tools/tick.py yang_mills_next",
+     "claim": "[the surviving window, read] Sealed: the beta coefficients, the running coupling, the nonperturbative weight, the string tension, the glueball's length. Proven (cited): asymptotic freedom; the lattice gap and confinement at strong coupling. Measured (cited): the lattice glueball mass with its error bar. Excluded: perturbation theory to every order. Open: EXISTENCE in the Osterwalder-Schrader sense on R^4 and the gap surviving the continuum limit for any compact simple group. Gaps become wants: the cited texts for inclusion; the FLAG review's lattice compilation; a strong-coupling-expansion calculator so the lattice gap at a stated coupling is COMPUTED here, not only cited. Every link sealed or cited; nothing out of thin air; the chain not closed.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

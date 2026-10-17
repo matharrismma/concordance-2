@@ -1,0 +1,161 @@
+{
+ "entry": "exercise_science",
+ "rc": 0,
+ "seals": {
+  "49aa0715361f0f95696049a366a603ae3392642592efd091e8f8ed28fe9720ab": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "4b0b8de2b49827c1b89ff55ae02ab4d43a0738abb1137231915c7580c72344a5": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "594e8c229b1a01266c4a4367042658d442a76be9b83e817ab35967ed93fba404": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "6744359bce410ecdcfcec6bc5552452497f3739029f176e2845c99c45e429fb1": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "80358633087158549398979443d977a10ffc92b6612e4810727d03884ccd6222": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "80e737d6740f010a13e20b0647e66bff3f1e8267d8df87d35f5e620ef00f28ef": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "9ec02423f1d66f78d42b566581d15f12f8f04279dbaeae1b13c6832d951fc2ce": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d7b5b025b1f5746aef5cf04f90e9282ee42afcfe325d8c7071ed4052f42c045d": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "eb8066bf8cb86f7e81cece793f88e6929f377d0fdd76ffb32db7f7f2c3fac2ee": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "ef69dc5f0007cb22a3dde6e1648d0c6ffc3e130030a72a1eb6968af039d315cd": {
+   "axis": "exercise_science",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_exercise_science_mets_calories_and_heart_rate_zones_sealed": {
+   "field": "exercise_science",
+   "question": "Exercise science - METs, calories and heart-rate zones, sealed",
+   "references": [
+    "B. E. Ainsworth et al., 2011 Compendium of Physical Activities, Med. Sci. Sports Exerc. 43 (2011) 1575",
+    "H. Tanaka, K. D. Monahan, D. R. Seals, Age-predicted maximal heart rate revisited, J. Am. Coll. Cardiol. 37 (2001) 153",
+    "M. J. Karvonen, E. Kentala, O. Mustala, Ann. Med. Exp. Biol. Fenn. 35 (1957) 307"
+   ],
+   "statement": "Energy cost and training intensity are arithmetic over three measured inputs: the activity's MET, the body's mass, and the heart's range.",
+   "ticks": [
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[running at 6 mph, SEALED] 9.8 MET (sealed through exercise_science.EX_VERIFY; Compendium code 12050). One MET is resting metabolism, 3.5 mL of oxygen per kg per minute; a ten-minute mile is nearly ten times rest.",
+     "kind": "instance",
+     "seal": "80358633087158549398979443d977a10ffc92b6612e4810727d03884ccd6222"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[walking at 3 mph, SEALED] 3.3 MET (sealed through exercise_science.EX_VERIFY): a brisk walk is moderate intensity, the 3-6 MET band the guidelines name.",
+     "kind": "instance",
+     "seal": "6744359bce410ecdcfcec6bc5552452497f3739029f176e2845c99c45e429fb1"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[sitting quietly, SEALED] 1.3 MET (sealed through exercise_science.EX_VERIFY): awake and still is a third above sleep's 0.95.",
+     "kind": "instance",
+     "seal": "d7b5b025b1f5746aef5cf04f90e9282ee42afcfe325d8c7071ed4052f42c045d"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[a half-hour run, SEALED] 9.8 MET x 70 kg x 0.5 h = 343 kcal (sealed through exercise_science.EX_VERIFY): one MET-hour per kilogram is about one kilocalorie, so the product is the energy.",
+     "kind": "instance",
+     "seal": "594e8c229b1a01266c4a4367042658d442a76be9b83e817ab35967ed93fba404"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[an hour's walk, SEALED] 3.3 x 70 x 1 = 231 kcal (sealed through exercise_science.EX_VERIFY). The same hour, the same body, a third of the energy - intensity is what the MET measures.",
+     "kind": "instance",
+     "seal": "49aa0715361f0f95696049a366a603ae3392642592efd091e8f8ed28fe9720ab"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[maximum heart rate at 30, SEALED] 208 - 0.7 x 30 = 187 bpm (sealed through exercise_science.EX_VERIFY; Tanaka 2001).",
+     "kind": "instance",
+     "seal": "9ec02423f1d66f78d42b566581d15f12f8f04279dbaeae1b13c6832d951fc2ce"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[at 40, SEALED] 208 - 28 = 180 bpm (sealed through exercise_science.EX_VERIFY) - where the old '220 - age' also says 180; the two lines cross at 40 and part on either side.",
+     "kind": "instance",
+     "seal": "ef69dc5f0007cb22a3dde6e1648d0c6ffc3e130030a72a1eb6968af039d315cd"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[at 60, SEALED] 208 - 42 = 166 bpm (sealed through exercise_science.EX_VERIFY); '220 - age' would say 160. Tanaka's shallower slope was fit to older adults the old rule underestimated.",
+     "kind": "instance",
+     "seal": "eb8066bf8cb86f7e81cece793f88e6929f377d0fdd76ffb32db7f7f2c3fac2ee"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[a Karvonen zone at 30, SEALED] Resting 60, maximum 187, reserve 127: the 50-70 percent zone is 60 + 0.5 x 127 = 124 to 60 + 0.7 x 127 = 149 bpm (sealed through exercise_science.EX_VERIFY). Karvonen (1957) scales the RESERVE, not the maximum, so a fit heart with a low resting rate trains in a wider band.",
+     "kind": "instance",
+     "seal": "4b0b8de2b49827c1b89ff55ae02ab4d43a0738abb1137231915c7580c72344a5"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[at 50, SEALED] Resting 70, maximum 173, reserve 103: 60-80 percent is 132 to 152 bpm (sealed through exercise_science.EX_VERIFY).",
+     "kind": "instance",
+     "seal": "80e737d6740f010a13e20b0647e66bff3f1e8267d8df87d35f5e620ef00f28ef"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[the inputs, CITED] A MET value is a population mean from the Compendium (Ainsworth 2011); the maximal heart rate 208 - 0.7 age is a regression across 351 studies with a standard deviation near 10 bpm (Tanaka 2001); 1 MET = 3.5 mL O2/kg/min = 1 kcal/kg/h is a convention. They work, so the numbers above are inferred from them, never kept as fact about one person - a measured VO2max or a stress test replaces the estimate. The engine seals the arithmetic and declines the prescription.",
+     "kind": "postulate",
+     "source": "Ainsworth et al., MSSE 43 (2011) 1575; Tanaka et al., JACC 37 (2001) 153; Karvonen et al. (1957)"
+    },
+    {
+     "by": "tools/tick.py exercise_science",
+     "claim": "[on the one map] The body at work is nutrition's ledger spent (card_floor_nutrition: the kilocalorie), physiology measured (card_floor_medicine: the heart's rate and reserve), and biology's metabolism (card_floor_biology: oxygen to work). Ties the nutrition and medicine sticks.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

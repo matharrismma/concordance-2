@@ -1,0 +1,62 @@
+{
+ "entry": "hermitian_operators",
+ "rc": 0,
+ "seals": {
+  "0039c65ab9fe6b8266cfc0867d981530fa317e46927022bc00fcade9dbd7324e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hermitian_matrix_2112_eigenvalue_min"
+   ]
+  },
+  "6441f9ef2676699d9fc453d504fde2919b85e2979ba7a262b87339b75964510a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hermitian_matrix_2112_eigenvalue_max"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_hermitian_operators_real_eigenvalues_the_observables": {
+   "field": "",
+   "question": "Hermitian operators - real eigenvalues, the observables",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py hermitian_operators",
+     "claim": "[real eigenvalues - why observables are Hermitian, SEALED] A Hermitian operator has REAL eigenvalues. The Hermitian matrix [[2,1],[1,2]] has eigenvalues (4 +/- sqrt(16 - 12))/2 = 3 and 1 (both sealed, both real). This is THE reason every observable - energy, position, momentum, spin - is a Hermitian operator: a measurement returns a real number, and Hermiticity guarantees the spectrum is real. The eigenvalues are the values a measurement can return.",
+     "kind": "instance",
+     "seal": "6441f9ef2676699d9fc453d504fde2919b85e2979ba7a262b87339b75964510a"
+    },
+    {
+     "by": "tools/tick.py hermitian_operators",
+     "claim": "[the second real eigenvalue, SEALED] The same matrix's other eigenvalue is 1 (sealed). Two real eigenvalues, and (because the matrix is Hermitian) eigenvectors that are orthogonal - a complete basis. A spin measurement is exactly this: a 2x2 Hermitian operator with two real eigenvalues (up and down).",
+     "kind": "instance",
+     "seal": "0039c65ab9fe6b8266cfc0867d981530fa317e46927022bc00fcade9dbd7324e"
+    },
+    {
+     "by": "tools/tick.py hermitian_operators",
+     "claim": "[the three properties, and where each already lives] A Hermitian (self-adjoint) operator A = A-dagger has: (1) real eigenvalues - the measured values (above); (2) an orthonormal eigenbasis, by the spectral theorem - which IS the change-of-domain door on the solve path and the Hamiltonian's stationary states; (3) it generates unitary evolution, e^{iA} unitary, so a Hermitian Hamiltonian gives e^{-iHt/hbar} that conserves probability (the capstone's 'sum to one'). Ties card_floor_the_hamiltonian, card_floor_the_solve_path, card_floor_quantum_mechanics.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py hermitian_operators",
+     "claim": "[the reading rotates, never distorts] Observables are Hermitian operators; the unitaries that are their exponentials are ROTATIONS between eigenbases that leave the physics unchanged - the engine's own 'spherical matrix: the reading rotates, never distorts'. A change of basis re-expresses the same state; the eigenvalues, the real facts, do not move. The observable is the invariant; the frame is free.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py hermitian_operators",
+     "claim": "[Hilbert-Polya - the bridge to Riemann] If the nontrivial zeros of the Riemann zeta function were the eigenvalues of a Hermitian operator, they would be forced REAL - and that is exactly the Riemann Hypothesis (the zeros on the critical line). That is the Hilbert-Polya conjecture (stick_hilbert_polya; card_floor_riemann). So Hermitian operators tie the quantum region to the deepest open problem in mathematics: RH as a statement that a certain operator is Hermitian. Ties card_floor_riemann.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py hermitian_operators",
+     "claim": "[on the one map] Hermitian operators are the formal object under the whole quantum region: observables (real spectra), the eigenbasis door, unitary evolution and the Born rule all rest on them. Charted onto the quantum-mechanics floor. Ties card_floor_quantum_mechanics.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,57 @@
+{
+ "entry": "standard_model_content",
+ "rc": 0,
+ "seals": {
+  "31646ab1318c88a39c53a8bf6e92d7ef1e4be099c2456d41ab4c8f24d05b6242": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "number_of_gluons_dim_su3_n_squared_minus_one"
+   ]
+  },
+  "35f939aa01a57f481e131d79f14510c9c924d0518fb4a71a92b5fbd358d2124b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "proton_charge_from_quark_charges_uud"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_standard_model_gauge_forces_and_quarks": {
+   "field": "",
+   "question": "The Standard Model - gauge forces and quarks",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py standard_model_content",
+     "claim": "[the whole from fractional parts - the quark model, SEALED] The proton is three quarks, up-up-down, with fractional charges +2/3, +2/3, -1/3 that sum to exactly 2/3 + 2/3 - 1/3 = 1 (sealed) - the integer charge of the proton from thirds. The neutron (up-down-down) sums to 0. Hadrons are made of quarks whose odd fractional charges always add to whole numbers; the fractions are never seen alone (confinement).",
+     "kind": "instance",
+     "seal": "35f939aa01a57f481e131d79f14510c9c924d0518fb4a71a92b5fbd358d2124b"
+    },
+    {
+     "by": "tools/tick.py standard_model_content",
+     "claim": "[the gauge group - 8 gluons of colour, SEALED] The strong force is the SU(3) gauge theory, and a gauge group SU(N) has N^2 - 1 force carriers: SU(3) gives 3^2 - 1 = 8 gluons (sealed). The Standard Model is SU(3) x SU(2) x U(1) - the strong force, the weak force and electromagnetism, three of the four forces written as gauge theories on one footing.",
+     "kind": "instance",
+     "seal": "31646ab1318c88a39c53a8bf6e92d7ef1e4be099c2456d41ab4c8f24d05b6242"
+    },
+    {
+     "by": "tools/tick.py standard_model_content",
+     "claim": "[what it unifies - three of the four, the first rungs of the one force] The electroweak (SU(2) x U(1)) is the proven unification - the Weinberg angle is sealed on stick_the_one_force and on the capstone - and the strong force SU(3) joins it in the Standard Model. Twelve matter particles (6 quarks, 6 leptons), the force carriers (the photon, the W and Z, 8 gluons), and the Higgs that gives them mass. The most tested theory in physics, and the first three rungs of 'the one force'. Ties card_floor_the_capstone and stick_the_one_force.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py standard_model_content",
+     "claim": "[it IS quantum field theory - quantum mechanics married to relativity] The Standard Model is a quantum field theory: quantum mechanics made consistent with special relativity. Its particles are excitations of fields; its gauge symmetries, by Noether, give its conserved charges. It sits exactly where quantum mechanics and relativity meet. What it leaves out is GRAVITY - the open frontier, quantum gravity. Ties card_floor_quantum_mechanics and card_floor_relativity.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py standard_model_content",
+     "claim": "[on the one map - the hub] The Standard-Model floor (card_floor_standard_model) already exists as the electroweak confluence where the two trees meet (Maxwell and Fermi at Weinberg), and Maxwell, Noether, relativity and quantum mechanics all REST on it. This stick charts the gauge content and the quark model onto that floor - the hub of the physics region, named in full. Ties card_floor_standard_model.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

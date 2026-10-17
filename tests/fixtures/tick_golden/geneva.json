@@ -1,0 +1,120 @@
+{
+ "entry": "geneva",
+ "rc": 0,
+ "seals": {
+  "0627da06f05af4f88764996c3fe22c89739d284dce3fa699926eb0fa39d3bbf4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "difference_engine_seventh_difference"
+   ]
+  },
+  "1c16d7c972250b40155a2f816105ae55580df6e5ad39863abdc1d5163896ac3d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "geneva_pin_radius_tangential_entry"
+   ]
+  },
+  "3b68d81b28952bb714bdcbebf5ca8dba23589b63e06ff49c869e339aff423f07": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "projector_pulldown_time_24_fps"
+   ]
+  },
+  "86d3ff29125212bf38fab0c93e1221713139f3c41f1110a266f639a2e604712d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "antikythera_metonic_ratio_minus_the_sky"
+   ]
+  },
+  "8d09801a274f6d2f1d2b7ad41a04864aca0f373343e8319985c4e402874f9c0e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "geneva_four_slot_engaged_angle"
+   ]
+  },
+  "b7669591bd6b94df420c9ec7695597f2a26db7c6e747099dede24cdf9580508a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "four_geneva_wheels_count_a_byte"
+   ]
+  },
+  "fbbe793eda737ca62c3eb56bbde1417996d5e0e813c70a33deeaf975dc423ff8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "geneva_four_slot_dwell_fraction"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_a_mechanical_computer_the_geneva_drive_continuous_turned_dis": {
+   "field": "engineering",
+   "question": "A mechanical computer - the Geneva drive: continuous turned discrete, the mechanism is the computation",
+   "references": [
+    "the Geneva drive / Maltese cross: the stop-work of Swiss watchmaking; the intermittent sprocket of the film projector",
+    "T. Freeth et al., Decoding the ancient Greek astronomical calculator known as the Antikythera Mechanism, Nature 444 (2006) 587-591",
+    "Meton of Athens (432 BC): 235 synodic months = 19 years",
+    "C. Babbage, On the Mathematical Powers of the Calculating Engine (1837); Difference Engine No. 2 (built 1991, Science Museum, London)",
+    "B. Pascal, the Pascaline (1642): the sautoir carry",
+    "Genesis 1:14; Ecclesiastes 3:1; Psalm 90:12; Daniel 2:21; Ezekiel 1:16",
+    "docs/TICK_STICK.md - a stick is a counter: one sealed mark, one index"
+   ],
+   "statement": "A Geneva drive turns continuous rotation into intermittent motion: one pin, one slot, one index per revolution, a locking disc holding the wheel still between - a continuous input made discrete, a counter in brass. A mechanical computer is exactly this: components whose geometry is the computation. The Antikythera mechanism carried the Metonic cycle in teeth to two hours in nineteen years; Babbage tabulated seventh-degree polynomials by addition alone; four Geneva wheels count a byte. The dwell is where the work is done; the lock makes it one-way. The tick-stick is a Geneva: one sealed mark, one index, dwell between.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08",
+     "claim": "[one pin, one slot, one index - continuous made discrete] A 4-slot Geneva: each index turns the wheel 360/4 = 90 degrees, and the pin is in a slot for 180 - 360/4 = 90 degrees of the driver's turn (sealed); for an n-slot wheel, 180 - 360/n. A continuous input produces a staircase: the quantizer, the sampler, the counter - the analog-to-digital converter's brass ancestor.",
+     "kind": "witness",
+     "seal": "8d09801a274f6d2f1d2b7ad41a04864aca0f373343e8319985c4e402874f9c0e"
+    },
+    {
+     "by": "Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08",
+     "claim": "[the dwell is where the work is done] For the other 270 degrees the locking disc holds the wheel still: the dwell fraction is 1/2 + 1/4 = 0.75 of the cycle (sealed; 1/2 + 1/n in general). Move, hold, read: every computer has this shape, and the clock stick's escapement is the Geneva's cousin - lock, release, lock. The work is done in the hold.",
+     "kind": "witness",
+     "seal": "fbbe793eda737ca62c3eb56bbde1417996d5e0e813c70a33deeaf975dc423ff8"
+    },
+    {
+     "by": "Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08",
+     "claim": "[a frame exists only in the dwell] A film projector at 24 frames per second with a 4-slot Geneva pulls each frame down in 1/(24 * 4) = 10.4 ms (sealed) and holds it still for the other 31.2 ms while the shutter opens. The picture is the hold; the motion is the gap between pictures.",
+     "kind": "witness",
+     "seal": "3b68d81b28952bb714bdcbebf5ca8dba23589b63e06ff49c869e339aff423f07"
+    },
+    {
+     "by": "Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08",
+     "claim": "[zero impact - the geometry of a clean index] For the pin to enter the slot along the slot's own direction the crank radius must be C sin(180/n deg): for n = 4, C sin 45 = 0.7071 C (sealed). Enter tangentially or hammer the wheel - the geometry decides whether the mechanism lasts. And the locking disc makes it one-way: between indexes the wheel cannot be back-driven. The ratchet, the diode, the Tesla valve: one-way geometry, and the tick-stick's rule that a miss stays a miss.",
+     "kind": "witness",
+     "seal": "1c16d7c972250b40155a2f816105ae55580df6e5ad39863abdc1d5163896ac3d"
+    },
+    {
+     "by": "Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08",
+     "claim": "[the Antikythera mechanism computed the sky with teeth] c. 100 BC: 235 synodic months = 19 years (Meton). The gear train's ratio 235/19 against the sky's 365.2422/29.530589 differs by 0.000154 months per year (sealed) - about 2.1 hours in nineteen years. A gear ratio is a rational number and the sky is not; the mechanism maps the truth to the precision its teeth allow, and the tooth count states that precision. 'Let them be for signs, and for seasons, and for days, and years' (Gen 1:14) - the lights were given to be computed.",
+     "kind": "witness",
+     "seal": "86d3ff29125212bf38fab0c93e1221713139f3c41f1110a266f639a2e604712d"
+    },
+    {
+     "by": "Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08",
+     "claim": "[Babbage - a polynomial by addition alone] The second difference of n^2 is (16 - 9) - (9 - 4) = 2, constant; the seventh difference of any seventh-degree polynomial is 7! times its leading coefficient, and 7! = 5040 (sealed). Difference Engine No. 2 tabulates seventh-degree polynomials to 31 digits with no multiplication at all: add, carry, repeat. The method of differences is this engine's own principle - a hard function reduced to a chain of simple verified steps, no oracle in the loop.",
+     "kind": "witness",
+     "seal": "0627da06f05af4f88764996c3fe22c89739d284dce3fa699926eb0fa39d3bbf4"
+    },
+    {
+     "by": "Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08",
+     "claim": "[intermittent motion counts - four wheels, one byte] A 4-slot Geneva turns once per four turns of its driver: a divide-by-four. Four in a chain count 4^4 = 256 states (sealed) - one byte in brass, two centuries before the transistor; Pascal's 1642 carry and the odometer are the decimal version. A mechanical computer is discrete components orchestrated by geometry: the vacuum-tube computer's principle, and this engine's - every verifier a gear, the gate a pin, the carry only when a seal engages.",
+     "kind": "witness",
+     "seal": "b7669591bd6b94df420c9ec7695597f2a26db7c6e747099dede24cdf9580508a"
+    },
+    {
+     "by": "Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08",
+     "claim": "[the tick-stick is a Geneva - and the guard] A stick advances only when a pin enters a slot: one sealed mark, one index; between marks, dwell. The ledger's chain is the locking disc (no back-driving: a miss stays a miss); the deploy gate is the pin that must enter tangentially or the index is refused. Scripture: 'To every thing there is a season, and a time to every purpose' (Eccl 3:1) - dwell and index; 'teach us to number our days' (Ps 90:12) - a counter; 'he changeth the times and the seasons' (Dan 2:21); 'a wheel in the middle of a wheel' (Ezek 1:16). GUARDS: the Geneva is a likeness of the engine, not its mechanism (the engine is software; its components are verifiers; the brass is a discernment); the Antikythera's gear counts are the reconstruction's (Freeth 2006), cited; seven numbers sealed, the rest cited. Ties: clock (escapement), spm (one centre), fourier (sampling), laplace and monte_carlo (discrete against continuous), diagrams (the schematic), the vacuum-tube computer (systems.py is the map).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

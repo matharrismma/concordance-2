@@ -1,0 +1,270 @@
+{
+ "entry": "linear_algebra",
+ "rc": 0,
+ "seals": {
+  "0bcb6e4a09c577ff253903c38cb1d4814c80835117560002f157405acb1cdf86": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "0d6003622d0def26396044749400aeaf5365e9cc6caa365b7d65e47674955314": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "10c967414087277b2e7880712a7658b7a2d76b423cf8d1c914f192316bb21fe1": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "1331d4483240ced880bc46f6c65f5ff7434e8e46e96bf267a4fca780aa19e9bf": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "2b478dc82c84eb1c4588b59eb8ede28808cfa0d1accc46133e248f93c804351b": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "3286e151a7a9dd6973042c9ea6d2cd91036994cb142a7ae4e2f49c38769aa8c8": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "371751e16a43b746a5e52a95af4c2cae4058d9c9be76e3d29388d3f15c45aaa5": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5f9685385b146970348c6066605201cb2b83d0be79ccf8e72a1995754f53354a": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "80d177ac5d9d865a70b5018371fd7018934894a552c0455f046cdbb727b45c2e": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "922de4f028eee2c8dab32d99c0e37bb5494211a87b29808e388e549aece81fa8": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a8b8b0dd40516a1b1432c112a3ddce1781ba924fc8fcb975a0f2d943bf702c03": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "ab31d123b3c6836ace2b2ac34c97e4cfea85ac53f09ca019b07f2ac8363d3aaa": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "abf996efaf2f05a126f5dd6dc2009e0004d5562047585459313907f1eb1fdca7": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "adf72520318821c22e8725ce4c3b781c2947ad2ef8b2d3112187b7823ed3eacc": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "c5f882b271c6dcf40ab8bc146c838b96109f7112881beb93c5866e0f1ab64db2": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "c6733de5bd74f5dd19cf5f917e34665e53fd22b6e418d7f56d939ac8f381a765": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d036d9a15af0b787ee60356244f3a2c375fd634cb7c762ae0d09ce6e28f26576": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "ef872e3a7fcbcbb612d832660df88c2b42e0d22366be8bfcfce5c91b7c9da594": {
+   "axis": "linear_algebra",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_linear_algebra_vectors_and_matrices_computed_and_sealed": {
+   "field": "linear_algebra",
+   "question": "Linear algebra - vectors and matrices, computed and sealed",
+   "references": [
+    "G. Strang, Introduction to Linear Algebra, 5th ed. (2016)",
+    "A. Cayley, A memoir on the theory of matrices, Phil. Trans. R. Soc. 148 (1858) 17",
+    "J. W. Gibbs & E. B. Wilson, Vector Analysis (1901) - the dot and cross products"
+   ],
+   "statement": "Every claim about vectors and matrices is decided by the arithmetic of the vector space axioms: products, norms, angles, determinants, eigenvalues, inverses, solutions.",
+   "ticks": [
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[the dot product, SEALED] (1,2,3) . (4,5,6) = 4 + 10 + 18 = 32 (sealed through linear_algebra.LIN_VERIFY): the sum of the componentwise products - a number from two vectors, zero when they are perpendicular.",
+     "kind": "instance",
+     "seal": "80d177ac5d9d865a70b5018371fd7018934894a552c0455f046cdbb727b45c2e"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[the cross product, SEALED] i x j = k (sealed through linear_algebra.LIN_VERIFY): the right-hand rule, a vector perpendicular to both.",
+     "kind": "instance",
+     "seal": "10c967414087277b2e7880712a7658b7a2d76b423cf8d1c914f192316bb21fe1"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[it anticommutes, SEALED] j x i = -k (sealed through linear_algebra.LIN_VERIFY). Reverse the order and the sign flips - the cross product is not commutative, and the engine seals both orders rather than assume one.",
+     "kind": "instance",
+     "seal": "c5f882b271c6dcf40ab8bc146c838b96109f7112881beb93c5866e0f1ab64db2"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[3-4-5, SEALED] |(3,4)| = 5 (sealed through linear_algebra.LIN_VERIFY): Pythagoras as a norm.",
+     "kind": "instance",
+     "seal": "c6733de5bd74f5dd19cf5f917e34665e53fd22b6e418d7f56d939ac8f381a765"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[2-3-6-7, SEALED] |(2,3,6)| = sqrt(4 + 9 + 36) = 7 (sealed through linear_algebra.LIN_VERIFY): the theorem in three dimensions, an integer again.",
+     "kind": "instance",
+     "seal": "0bcb6e4a09c577ff253903c38cb1d4814c80835117560002f157405acb1cdf86"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[orthogonal, SEALED] The angle between (1,0) and (0,1) is 90 deg (sealed through linear_algebra.LIN_VERIFY): cos theta = a.b / |a||b| = 0.",
+     "kind": "instance",
+     "seal": "0d6003622d0def26396044749400aeaf5365e9cc6caa365b7d65e47674955314"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[45 degrees, SEALED] Between (1,1) and (1,0): cos theta = 1 / sqrt 2, theta = 45 deg (sealed through linear_algebra.LIN_VERIFY).",
+     "kind": "instance",
+     "seal": "2b478dc82c84eb1c4588b59eb8ede28808cfa0d1accc46133e248f93c804351b"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[a product, SEALED] [[1,2],[3,4]] [[5,6],[7,8]] = [[19,22],[43,50]] (sealed through linear_algebra.LIN_VERIFY): row times column.",
+     "kind": "instance",
+     "seal": "d036d9a15af0b787ee60356244f3a2c375fd634cb7c762ae0d09ce6e28f26576"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[the reverse product, SEALED] [[5,6],[7,8]] [[1,2],[3,4]] = [[23,34],[31,46]] (sealed through linear_algebra.LIN_VERIFY) - a different matrix. AB is not BA: matrix multiplication is not commutative, and composition of transformations does not care which you did first only when they happen to commute.",
+     "kind": "instance",
+     "seal": "5f9685385b146970348c6066605201cb2b83d0be79ccf8e72a1995754f53354a"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[a determinant, SEALED] det [[1,2],[3,4]] = 1 x 4 - 2 x 3 = -2 (sealed through linear_algebra.LIN_VERIFY): the signed area the matrix maps the unit square to; negative means it flips orientation.",
+     "kind": "instance",
+     "seal": "abf996efaf2f05a126f5dd6dc2009e0004d5562047585459313907f1eb1fdca7"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[determinants multiply, SEALED] det(AB) = det [[19,22],[43,50]] = 950 - 946 = 4 = (-2)(-2) (sealed through linear_algebra.LIN_VERIFY): det(AB) = det A det B, the area scaling composes.",
+     "kind": "instance",
+     "seal": "a8b8b0dd40516a1b1432c112a3ddce1781ba924fc8fcb975a0f2d943bf702c03"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[singular, SEALED] det [[1,2],[2,4]] = 0 (sealed through linear_algebra.LIN_VERIFY): the rows are dependent, the square is flattened to a line, no inverse exists.",
+     "kind": "instance",
+     "seal": "adf72520318821c22e8725ce4c3b781c2947ad2ef8b2d3112187b7823ed3eacc"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[the trace, SEALED] tr [[1,2],[3,4]] = 5 (sealed through linear_algebra.LIN_VERIFY): the diagonal sum, which equals the sum of the eigenvalues.",
+     "kind": "instance",
+     "seal": "922de4f028eee2c8dab32d99c0e37bb5494211a87b29808e388e549aece81fa8"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[a symmetric matrix, SEALED] The eigenvalues of [[2,1],[1,2]] are 1 and 3 (sealed through linear_algebra.LIN_VERIFY), real, as a symmetric matrix's always are - with eigenvectors (1,-1) and (1,1), perpendicular.",
+     "kind": "instance",
+     "seal": "ab31d123b3c6836ace2b2ac34c97e4cfea85ac53f09ca019b07f2ac8363d3aaa"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[a rotation, SEALED] The eigenvalues of the 90-degree rotation [[0,-1],[1,0]] are +i and -i (sealed through linear_algebra.LIN_VERIFY): no real vector keeps its direction under a quarter turn, so the eigenvalues leave the real line and sit on the unit circle. The characteristic polynomial is lambda^2 + 1.",
+     "kind": "instance",
+     "seal": "ef872e3a7fcbcbb612d832660df88c2b42e0d22366be8bfcfce5c91b7c9da594"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[an inverse, SEALED] [[1,2],[3,4]]^-1 = [[-2,1],[1.5,-0.5]] (sealed through linear_algebra.LIN_VERIFY: A times the claimed inverse is the identity). The 2x2 formula: swap the diagonal, negate the off-diagonal, divide by the determinant.",
+     "kind": "instance",
+     "seal": "1331d4483240ced880bc46f6c65f5ff7434e8e46e96bf267a4fca780aa19e9bf"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[a rotation's inverse is its transpose, SEALED] [[0,-1],[1,0]]^-1 = [[0,1],[-1,0]] (sealed through linear_algebra.LIN_VERIFY): an orthogonal matrix undoes itself by transposition, because rotating back is rotating the other way.",
+     "kind": "instance",
+     "seal": "371751e16a43b746a5e52a95af4c2cae4058d9c9be76e3d29388d3f15c45aaa5"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[a solved system, SEALED] [[1,2],[3,4]] x = (5,11) has x = (1,2) (sealed through linear_algebra.LIN_VERIFY: A x reproduces b). Two equations, two unknowns, a nonzero determinant - exactly one answer.",
+     "kind": "instance",
+     "seal": "3286e151a7a9dd6973042c9ea6d2cd91036994cb142a7ae4e2f49c38769aa8c8"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[the axioms, CITED] A vector space is eight axioms over a field (closure, associativity, commutativity of addition, zero, negatives, and the two distributive and two scalar laws); a matrix is a linear map written in a basis (Cayley 1858). Cited, never sealed - every computation above is a theorem of them, decided by arithmetic.",
+     "kind": "postulate",
+     "source": "Strang, Introduction to Linear Algebra (2016); Cayley, Phil. Trans. 148 (1858) 17"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[the bound, stated] The verifier rests on numpy, the optional math extra: on a stdlib-only box it returns NOT_APPLICABLE and never a false result, so this stick is minted where numpy lives. Exact comparisons are at 1e-6 relative; a half-degree window on angles.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py linear_algebra",
+     "claim": "[on the one map] Linear algebra is the grammar of the change of domain (the change-of-domain stick: an eigenbasis is the axis where a matrix is diagonal), of the SVD (rotation, stretch, rotation), of tensors (the invariants under a change of basis), and of quantum mechanics (card_floor_quantum_mechanics: a Hermitian matrix's real eigenvalues are the observables; a unitary's unit-circle eigenvalues are the phases - the rotation sealed above is the simplest). Where two domains connect, there is a matrix between them.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

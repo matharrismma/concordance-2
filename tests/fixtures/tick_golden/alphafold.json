@@ -1,0 +1,64 @@
+{
+ "entry": "alphafold",
+ "rc": 0,
+ "seals": {
+  "1d9dacfc45a6f2a68ae5448943c950736298de230823a99a074269ab19ce8b07": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "a_100_residue_chain_at_3_states_each_is_3_pow_100_conformations"
+   ]
+  },
+  "eee626d966ed09b28cab781dd1f1cf77c4e97d918be6710d5f58ac385543399f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "a_pentapeptide_from_20_amino_acids_is_20_pow_5_sequences"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_alphafold_and_protein_folding_the_self_healing_matrix_in_bio": {
+   "field": "",
+   "question": "AlphaFold and protein folding - the self-healing matrix in biology",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py alphafold",
+     "claim": "[Levinthal, SEALED] A 100-residue chain with ~3 states per residue has 3^100 ~ 5e47 conformations (sealed). Random search over them would outlast the universe, yet a protein folds in microseconds - so folding is NOT a search over many paths; it is a FUNNEL to ONE native state. Many entries (conformations), one path (the fold).",
+     "kind": "instance",
+     "seal": "1d9dacfc45a6f2a68ae5448943c950736298de230823a99a074269ab19ce8b07"
+    },
+    {
+     "by": "tools/tick.py alphafold",
+     "claim": "[sequence space, SEALED] From the 20 amino acids a 5-residue chain already has 20^5 = 3,200,000 sequences (sealed) - the explosion AlphaFold reads a structure out of.",
+     "kind": "instance",
+     "seal": "eee626d966ed09b28cab781dd1f1cf77c4e97d918be6710d5f58ac385543399f"
+    },
+    {
+     "by": "tools/tick.py alphafold",
+     "claim": "[Anfinsen - the self-healing] The native structure is determined by the sequence, and a denatured protein REFOLDS to the same native state (Anfinsen's thermodynamic hypothesis, Nobel 1972). That IS the self-healing matrix in biology: perturb it, it returns to the one native minimum - the same shape as stick_one_path_many_entries_a_self_healing_matrix_not_many_paths.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py alphafold",
+     "claim": "[AlphaFold - the one fold is determined and findable] AlphaFold (DeepMind, CASP14 2020) predicts the native structure from sequence to near-atomic accuracy - strong evidence the sequence determines ONE native fold and that the funnel's bottom is findable. The fruit confirms the principle: one path, reached from many entries.",
+     "kind": "equivalence",
+     "source": "J. Jumper et al., Highly accurate protein structure prediction with AlphaFold, Nature (2021); CASP14 (2020)"
+    },
+    {
+     "by": "tools/tick.py alphafold",
+     "claim": "[fuel, not core] AlphaFold is a LEARNED model. The engine does NOT fold proteins in its deterministic core and will not GENERATE a structure - that is fuel (BYOM / JEPA: strip the best for the fuel, never the core). We seal the determinate parts (the counts, Anfinsen's refolding as empirical) and CITE the model's result; we keep the principle, not the predictor.",
+     "kind": "exclusion",
+     "source": "project_byom_bring_your_own_model; project_jepa_strip_the_best_for_the_fuel"
+    },
+    {
+     "by": "tools/tick.py alphafold",
+     "claim": "[on the one map] Rests on biology (card_floor_biology) and physical chemistry (free energy); links to the self-healing matrix (the principle) and the capstone (one path). Protein folding is the biology witness that reality is a self-healing matrix - one native state, many entries, it refolds.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

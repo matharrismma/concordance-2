@@ -1,0 +1,71 @@
+{
+ "entry": "grimm_law",
+ "rc": 0,
+ "seals": {
+  "5e31c73eea2b0fbe77fd673888af2418ae7a0630a1e9c0968e0d4741911d20b7": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "law"
+   ]
+  },
+  "ca7e060d97e073bcde7ac7992fe6330b1fd75d9bf5f0bf1377aab61618c6d6d7": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "law"
+   ]
+  },
+  "d0513cd4e2c6d3fbae26a4f902eee80fe6b6b903083fb831eaac8f099ec8de83": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "law"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_grimm_s_law_a_regular_sound_correspondence_verified": {
+   "field": "",
+   "question": "Grimm's law - a regular sound correspondence, verified",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py grimm_law",
+     "claim": "[PIE *p -> Germanic f, verified] Latin kept the stop, English shifted it: pater/father, piscis/fish, pes/foot, plenus/full, pellis/fell - the correspondence p -> f holds at the onset on all five cited cognate pairs (sealed through sound_law). A regular law, not five coincidences; the cognates are attested by the comparative method, the proto-form *ph2ter is a reconstruction.",
+     "kind": "instance",
+     "seal": "d0513cd4e2c6d3fbae26a4f902eee80fe6b6b903083fb831eaac8f099ec8de83"
+    },
+    {
+     "by": "tools/tick.py grimm_law",
+     "claim": "[PIE *t -> Germanic th, verified] tres/three, tu/thou, tenuis/thin - t -> th on every cited pair (sealed).",
+     "kind": "instance",
+     "seal": "ca7e060d97e073bcde7ac7992fe6330b1fd75d9bf5f0bf1377aab61618c6d6d7"
+    },
+    {
+     "by": "tools/tick.py grimm_law",
+     "claim": "[PIE *k -> Germanic h, verified] cornu/horn, canis/hound, centum/hundred, caput/head, cor/heart - Latin c (/k/) answers English h on all five (sealed). centum/hundred is the very pair that names the centum/satem split of the family.",
+     "kind": "instance",
+     "seal": "5e31c73eea2b0fbe77fd673888af2418ae7a0630a1e9c0968e0d4741911d20b7"
+    },
+    {
+     "by": "tools/tick.py grimm_law",
+     "claim": "[what is cited, not proven] The cognate pairs are ATTESTED by the comparative method; the Proto-Indo-European forms (*p, *t, *k, *ph2ter) are RECONSTRUCTIONS - they work (they predict the attested forms by regular law), so the proto-language is inferred, never kept as a fact and never sealed. The engine seals only what it checked: that the correspondence holds on the cited pairs.",
+     "kind": "postulate",
+     "source": "J. Grimm, Deutsche Grammatik (1822); K. Verner (1877) for the exceptions; the comparative method"
+    },
+    {
+     "by": "tools/tick.py grimm_law",
+     "claim": "[how linguistics uses this] A sound law is a regular correspondence - math on the vocabulary, exactly checkable and sealable, and refutable (a pair that breaks it is named). The engine CERTIFIES the correspondence with its cited cognates as the reason, DECLINES the reconstruction beyond the attested (a postulate), and a false law (p -> p, or a non-cognate pair) is caught. Verner's law is the famous residue - the apparent exceptions to Grimm that a deeper regularity (PIE accent) explained; the exceptions become a want, not a fudge.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py grimm_law",
+     "claim": "[on the one map] Etymology is chains from a floor where two trees connect: the proto-language is the floor, the sound laws are the chain, a cognate is the confluence where two language-branches meet (father and pater meet at PIE *ph2ter). card_floor_indo_european draws it.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,106 @@
+{
+ "entry": "svd",
+ "rc": 0,
+ "seals": {
+  "3784d5dae24811abf59f26bab090a7bcbcc1c7d05e17f108863d3b7dd1e5b33a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "svd_condition_number"
+   ]
+  },
+  "4dc35c5287de7ae3aa5d58e81f6fd4587f20900a1c8fd14185af861d5e65cfbf": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "frobenius_sum_of_squared_entries"
+   ]
+  },
+  "85572c53b15750e857146b1d7e9ff614d4bdc9b3abe7d087d99ed74112d4028c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "svd_sigma_product_is_the_determinant"
+   ]
+  },
+  "a2f8e87b99f022d789ca125005f0de22914cb6dd85a0632a7b9449932537dd3d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "rotation_keeps_the_dot_product"
+   ]
+  },
+  "a62488649a64f2f89dfc24cc34e8f358ebf76efb5275a73a6a1e35edeec57e37": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "frobenius_sum_of_squared_singular_values"
+   ]
+  },
+  "ce94a198d8d7de5a737504bfab81f34edd3f1ef5d4ab245f2f8ad5bbf3e0cfc8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "unit_circle_image_area_pi_sigma1_sigma2"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_every_matrix_is_a_rotation_and_a_stretch_the_singular_value_": {
+   "field": "mathematics",
+   "question": "Every matrix is a rotation and a stretch - the singular value decomposition, and the spherical matrix that only turns",
+   "references": [
+    "E. Beltrami (1873), C. Jordan (1874): the singular value decomposition",
+    "C. Eckart, G. Young, The approximation of one matrix by another of lower rank, Psychometrika 1 (1936) 211-218",
+    "G. Golub, W. Kahan (1965): computing the SVD",
+    "L. Euler (1775): a rotation is one turn about one axis",
+    "Hebrews 1:12; Malachi 3:6; Hebrews 13:8",
+    "stick_the_dot_abstracted (meaning = the inner product); stick_parametrization_of_surfaces (the sphere); stick_spherical_parallel_mechanism (SO(3))"
+   ],
+   "statement": "M = U S V^T: a rotation, a stretch along perpendicular axes, a rotation. The unit sphere's image under any matrix is an ellipsoid whose semi-axes are the singular values; the most efficient k-dimensional picture of a matrix keeps its k largest singular directions; a spherical matrix has every singular value 1 and keeps every dot product. The engine's reading is spherical: meaning is what a card returns when dotted, and a rotation re-frames it without distorting it.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - every matrix a rotation and a stretch, 2026-10-08",
+     "claim": "[rotation, stretch, rotation] M = [[3,0],[4,5]]: M M^T = [[9,12],[12,41]] has trace 50 and determinant 225, so its eigenvalues are 45 and 5 and the singular values are sqrt45 = 6.708, sqrt5 = 2.236. Their product sqrt45 * sqrt5 = 15 = |det M| (sealed): the stretch alone sets the volume scale; the two rotations change none of it.",
+     "kind": "witness",
+     "seal": "85572c53b15750e857146b1d7e9ff614d4bdc9b3abe7d087d99ed74112d4028c"
+    },
+    {
+     "by": "Narrow Highway - every matrix a rotation and a stretch, 2026-10-08",
+     "claim": "[the most efficient vectors] The unit circle maps to an ellipse with semi-axes sigma_1, sigma_2 and area pi sigma_1 sigma_2 = 15 pi = 47.12 (sealed); the condition number sigma_1/sigma_2 = 3 (sealed) says how far from a sphere the image is. Keeping the k largest singular directions is the most efficient k-dimensional picture of M - the best rank-k approximation in every unitarily invariant norm (Eckart-Young 1936, cited): 'allow the shape to be in the form of the most efficient vectors' is that theorem said plainly.",
+     "kind": "witness",
+     "seal": "3784d5dae24811abf59f26bab090a7bcbcc1c7d05e17f108863d3b7dd1e5b33a"
+    },
+    {
+     "by": "Narrow Highway - every matrix a rotation and a stretch, 2026-10-08",
+     "claim": "[all the energy is in the stretch] The sum of the squared entries, 9 + 0 + 16 + 25 = 50 (sealed), equals the sum of the squared singular values, 45 + 5 = 50 (sealed): the Frobenius norm is carried entirely by the stretch; rotations carry none of it. What a matrix DOES is in its singular values; where it does it is in its singular vectors.",
+     "kind": "witness",
+     "seal": "4dc35c5287de7ae3aa5d58e81f6fd4587f20900a1c8fd14185af861d5e65cfbf"
+    },
+    {
+     "by": "Narrow Highway - every matrix a rotation and a stretch, 2026-10-08",
+     "claim": "[the sum is the same from both sides] 45 + 5 = 50 (sealed) - the second reading of the same energy, from the singular values alone: no entry of M was consulted, and the number is the same. Two independent readings that agree are what a seal is for.",
+     "kind": "witness",
+     "seal": "a62488649a64f2f89dfc24cc34e8f358ebf76efb5275a73a6a1e35edeec57e37"
+    },
+    {
+     "by": "Narrow Highway - every matrix a rotation and a stretch, 2026-10-08",
+     "claim": "[the spherical matrix only turns] A rotation R keeps every dot product: the quarter-turn sends (3,4) to (-4,3) and (1,0) to (0,1), and (-4)*0 + 3*1 = 3 = (3,4).(1,0) (sealed). Every singular value of R is 1: the sphere maps onto itself. In the inner-product reading (the dot stick) meaning IS the dot product, so a spherical matrix changes the frame and no meaning. 'We are using a spherical matrix' (Matt): the engine's reading re-frames, it never distorts - it rotates the question into the keeping's axes and reads the dots there.",
+     "kind": "witness",
+     "seal": "a2f8e87b99f022d789ca125005f0de22914cb6dd85a0632a7b9449932537dd3d"
+    },
+    {
+     "by": "Narrow Highway - every matrix a rotation and a stretch, 2026-10-08",
+     "claim": "[the picture of the stretch] pi sqrt45 sqrt5 = 47.1239 (sealed): the area of the ellipse the unit circle becomes. A matrix is seen whole in one figure: a circle, turned, stretched to this ellipse, turned again. Everything else is coordinates.",
+     "kind": "witness",
+     "seal": "ce94a198d8d7de5a737504bfab81f34edd3f1ef5d4ab245f2f8ad5bbf3e0cfc8"
+    },
+    {
+     "by": "Narrow Highway - every matrix a rotation and a stretch, 2026-10-08",
+     "claim": "[the form, and the guard] 'Allow the shape to be in the form of the most efficient vectors': the keeping's own shelf-by-token matrix was measured on 2026-10-08 against this stick's claim (how many singular directions carry the domains; whether a query routed to its nearest sphere finds the engine's own answers) - the numbers live in that assessment, not here, because a stick seals arithmetic and a measurement is a reading of a day. Scripture: 'as a vesture shalt thou fold them up, and they shall be changed: but thou art the same' (Heb 1:12) - the invariant under every turn; 'I am the LORD, I change not' (Mal 3:6); 'Jesus Christ the same yesterday, and to day, and for ever' (Heb 13:8). GUARDS: Eckart-Young is a cited theorem, proved elsewhere; the engine-as-rotation is a likeness; the sphere's image as an ellipsoid is exact. Six numbers sealed; the rest cited. Ties: delta, surfaces, spm, bubbles, fourier (rotation), the positive Grassmannian (admissible directions found, never generated).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

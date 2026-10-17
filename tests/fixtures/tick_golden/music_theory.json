@@ -1,0 +1,66 @@
+{
+ "entry": "music_theory",
+ "rc": 0,
+ "seals": {
+  "485615cfb78b1e4ed7feb50b658353b98be9a9b45cf87b98a55ad190facc5ffb": {
+   "axis": "music_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "61d2e19baf83a366ae8ea8304f5c4f267467c455d5b17664b0bea1e3d34c295f": {
+   "axis": "music_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7cd7cb0d1252854da445257d3163e3050731148a5a267289ac30e4694b9d28d8": {
+   "axis": "music_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_music_theory_intervals_and_tuning_verified_and_sealed": {
+   "field": "",
+   "question": "Music theory - intervals and tuning, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py music_theory_stick",
+     "claim": "[the perfect fifth] C to G is 7 semitones (sealed through music_theory.MUS_VERIFY) - the interval whose frequency ratio is 3:2, the most consonant after the octave.",
+     "kind": "instance",
+     "seal": "61d2e19baf83a366ae8ea8304f5c4f267467c455d5b17664b0bea1e3d34c295f"
+    },
+    {
+     "by": "tools/tick.py music_theory_stick",
+     "claim": "[the octave] 440 Hz to 880 Hz is the ratio 2:1, an octave (sealed) - the same note, one register up; doubling the frequency.",
+     "kind": "instance",
+     "seal": "485615cfb78b1e4ed7feb50b658353b98be9a9b45cf87b98a55ad190facc5ffb"
+    },
+    {
+     "by": "tools/tick.py music_theory_stick",
+     "claim": "[concert pitch] MIDI note 69 is 440 Hz, the A above middle C (sealed) - the reference the whole orchestra tunes to, under equal temperament f = 440 * 2^((n-69)/12).",
+     "kind": "instance",
+     "seal": "7cd7cb0d1252854da445257d3163e3050731148a5a267289ac30e4694b9d28d8"
+    },
+    {
+     "by": "tools/tick.py music_theory_stick",
+     "claim": "[the ground] The harmonic series is exact ratio (octave 2:1, fifth 3:2) - sealed on the harmonics stick; equal temperament is the compromise that pays the Pythagorean comma evenly so every key is playable, a tuning CHOICE, not a law of nature.",
+     "kind": "postulate",
+     "source": "the harmonic series; J. S. Bach's well-tempered compromise; music_theory.MUS_VERIFY; the harmonics stick"
+    },
+    {
+     "by": "tools/tick.py music_theory_stick",
+     "claim": "[declined] Whether a chord is beautiful, a melody good, a performance moving - taste is not measured here; the engine seals the intervals and the tuning arithmetic.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

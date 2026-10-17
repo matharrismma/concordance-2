@@ -1,0 +1,113 @@
+{
+ "entry": "get_close",
+ "rc": 0,
+ "seals": {
+  "1c3345d743dfee540d618e3a2ea436dccb3993761fe6f1d59e96e7ea38d3217a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "get_close_ln(1.1)_slack_true_value_inside"
+   ]
+  },
+  "4fa643ec96fdfaa220b64935fa41b1242ee7d3bf7ecd4cbd88acfa66b834e270": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "get_close_sqrt(26)_estimate"
+   ]
+  },
+  "79108d3697e73a640c53803e9e5f06a7d433a77e1deac635fd282b6ae908f052": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "get_close_exp(0.1)_error_bound"
+   ]
+  },
+  "79651b0a104feb10f5b5192d4bec6bb836768b6d79b4f28d314c42b2a7c6ef86": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "get_close_ln(1.1)_error_bound"
+   ]
+  },
+  "7f86bbf1e9158528969585bd2cd0f685e9aef13636253f338806a7d6649c5dc3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "get_close_exp(0.1)_slack_true_value_inside"
+   ]
+  },
+  "8e5d7259953e5dd298aeda91daf746ee0e5cea750578d46ca39c54ae8ff896ac": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "get_close_sqrt(26)_slack_true_value_inside"
+   ]
+  },
+  "9f4b6a3469ebd469c37611329ec44184cb45d127427cb5d3098173d598b854fb": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "get_close_ln(1.1)_estimate"
+   ]
+  },
+  "bbc69f06916950bdb033f0efce3bf6852bf6c578c926271920961e0939dc758e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "get_close_sqrt(26)_error_bound"
+   ]
+  },
+  "ce0dc046e8dac67fa94a6a637ca0d3c2bd48ddd7a3c0f063e6869d46afb7b4a3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "get_close_exp(0.1)_estimate"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_get_fairly_close_with_a_proven_bound": {
+   "field": "",
+   "question": "Get fairly close, with a proven bound",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py get_close",
+     "claim": "[the anchor and one step, sealed] sqrt(26) anchored at sqrt(25) = 5: estimate 5 + (1/2*1/5)(26-25) = 5.1 (sealed), Taylor error bound (sup|f''|)(1)^2/2 = (1/(4*25^1.5))/2 = 0.001 (sealed). The true sqrt(26) = 5.09902 lies inside [5.099, 5.101] - the slack 0.001 - |5.1 - sqrt(26)| = 2.0e-5 is sealed POSITIVE, so the bound provably holds. One evaluation at the anchor, not a search.",
+     "kind": "instance",
+     "seal": "8e5d7259953e5dd298aeda91daf746ee0e5cea750578d46ca39c54ae8ff896ac"
+    },
+    {
+     "by": "tools/tick.py get_close",
+     "claim": "[a second] exp(0.1) anchored at exp(0) = 1: estimate 1 + 1*(0.1) = 1.1 (sealed), error bound exp(0.1)(0.1)^2/2 = 0.00553 (sealed). True exp(0.1) = 1.10517 inside; slack 3.5e-4 sealed positive.",
+     "kind": "instance",
+     "seal": "7f86bbf1e9158528969585bd2cd0f685e9aef13636253f338806a7d6649c5dc3"
+    },
+    {
+     "by": "tools/tick.py get_close",
+     "claim": "[a third] ln(1.1) anchored at ln(1) = 0: estimate 0 + 1*(0.1) = 0.1 (sealed), error bound (1)(0.1)^2/2 = 0.005 (sealed). True ln(1.1) = 0.09531 inside; slack 3.1e-4 sealed positive.",
+     "kind": "instance",
+     "seal": "1c3345d743dfee540d618e3a2ea436dccb3993761fe6f1d59e96e7ea38d3217a"
+    },
+    {
+     "by": "tools/tick.py get_close",
+     "claim": "[what it rests on] The error bound is Taylor's theorem with the Lagrange remainder: for f twice differentiable, |f(x) - (f(x0) + f'(x0)(x - x0))| <= (sup|f''| on the interval)(x - x0)^2/2. It is a theorem, so the bound holds whenever the supplied curvature bound is a true sup - the engine computes it exactly for the elementary functions, and takes it as given otherwise; from its working the estimate's trustworthiness is inferred, never the exact value kept as fact.",
+     "kind": "postulate",
+     "source": "Taylor's theorem with the Lagrange form of the remainder; B. Taylor (1715), J.-L. Lagrange (1797)"
+    },
+    {
+     "by": "tools/tick.py get_close",
+     "claim": "[0 false positives] The door never calls a thing close that is not: a closeness claim 'f(x) within e of v' is CONFIRMED only when the true value (for a known function) or the bounded estimate lies in [v-e, v+e]; a claim with too small an e is a MISMATCH. The bound is checked, never assumed - a 'fairly close' answer always carries how close.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py get_close",
+     "claim": "[the set path's approximation step] The barriers (card_floor_p_vs_np) say an exact answer cannot always be found by rule; this is the rule for getting close. Anchor on a solved neighbour or an easy surrogate (relax the hard constraint, keep the first term), take one bounded step, seal the gap. Refinement tightens the bound only if the decision needs it; most of the time fairly close, with a proven bound, is the answer and you stop. The proposer stays free; the bound carries the certainty.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

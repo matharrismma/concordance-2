@@ -1,0 +1,29 @@
+{
+ "entry": "bsd",
+ "rc": 0,
+ "seals": {
+  "ea3a1e78a75e4ca1e8a306c0a31a30747ee90afdc700c1a23df4bcb07bcd7027": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "l_value"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_birch_and_swinnerton_dyer_conjecture": {
+   "field": "",
+   "question": "Birch and Swinnerton-Dyer conjecture",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py bsd",
+     "claim": "E = 11a1 (conductor 11): L(E,1) ≠ 0 computed by the approximate functional equation; analytic rank 0 ⇒ rank E(Q) = 0 (Kolyvagin 1989); BSD's rank statement holds for E",
+     "kind": "instance",
+     "seal": "ea3a1e78a75e4ca1e8a306c0a31a30747ee90afdc700c1a23df4bcb07bcd7027"
+    }
+   ]
+  }
+ }
+}

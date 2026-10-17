@@ -1,0 +1,55 @@
+{
+ "entry": "construct",
+ "rc": 0,
+ "seals": {
+  "00a306b5b3807e8e133c1e29e6f7f5e0d2f744b08a05aa86922242de1a82469f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "base_notation_invariant"
+   ]
+  },
+  "7a25ec51b62737ae4d39ac530fbfa6de54202947a2eb32ebfc1bf48661a69b68": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "rotation_invariant_length"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_construct_creation": {
+   "field": "meta",
+   "question": "Construct creation",
+   "references": [
+    "the invariants of a coordinate transformation (Euclidean / Lorentz)",
+    "positional notation: a quantity is base-independent (ties the no-gematria guard)"
+   ],
+   "statement": "We create constructs - coordinate frames, units, number bases, time coordinates - to grasp reality. Each is a real tool and a map, never the territory. The arithmetic of what is invariant (and so real) versus what is chosen (and so a construct) is exact; the discipline is to keep the two apart.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the construct-creation reading, 2026-10-07",
+     "claim": "[a coordinate is a construct; the invariant is real] Rotate the axes 90 degrees and the point (3, 4) is relabelled (-4, 3) - different numbers - yet its length is unchanged: (-4)^2 + 3^2 = 25 = 3^2 + 4^2 (sealed). We CREATE the frame; the invariant (length, interval, distance) is what is real. The construct is the map we draw, not the territory.",
+     "kind": "witness",
+     "seal": "7a25ec51b62737ae4d39ac530fbfa6de54202947a2eb32ebfc1bf48661a69b68"
+    },
+    {
+     "by": "Narrow Highway - the construct-creation reading, 2026-10-07",
+     "claim": "[a notation is a construct] The same quantity is 255 in base ten and FF in base sixteen: FF = 15*16 + 15 = 255 (sealed). The base is a created notation; the quantity is invariant. This is exactly why the engine refuses gematria - a digit string is a construct, never a law (ties the no-gematria guard; the '137' is the reciprocal of a measured number, not a scripture of digits).",
+     "kind": "witness",
+     "seal": "00a306b5b3807e8e133c1e29e6f7f5e0d2f744b08a05aa86922242de1a82469f"
+    },
+    {
+     "by": "Narrow Highway - the construct-creation reading, 2026-10-07",
+     "claim": "[the principle - construct creation] Time is a construct (emergent - stick_time_and_space_emergent_and_relational), units are chosen (stick_units_matter), notation is chosen, coordinates are chosen (here). Each is a real instrument for grasping reality and a MAP, never the thing mapped. The engine is itself a vast construct-creation - the keeping, the sticks, the gate, the map - every frame CHECKED against reality and kept as a map: found and sealed where it verifies, never mistaken for the territory. Map, never launder.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the construct-creation reading, 2026-10-07",
+     "claim": "[the datum - what is NOT a construct] We make the map; we did not make the territory. The Creator and the created order are not our constructs: 'The heavens declare the glory of God' (Ps 19:1); his invisible attributes are 'clearly seen, being understood through the things that are made' (Rom 1:20). Our construct-creation is a creature modelling a reality it did not author - and the invariant behind every frame, the Logos in whom all things hold together (Col 1:17), is not a construct but the ground the constructs serve. Scripture leads; the construct serves; remove the ground and the map is calibrated to nothing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

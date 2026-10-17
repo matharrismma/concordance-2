@@ -1,0 +1,57 @@
+{
+ "entry": "dirichlet",
+ "rc": 0,
+ "seals": {
+  "62e5801660f6a1a730b184334e83cac172c7f76fe53205b93bce969cc130c204": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "character_on_unit_circle"
+   ]
+  },
+  "bde74cafaa38d2f1f52bd5223afc826bbb2c22685a50ede01f9d0d6636f56618": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "roots_of_unity_sum_zero"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_dirichlet_s_theorem_think_of_polar_coordinates": {
+   "field": "meta",
+   "question": "Dirichlet's theorem - think of polar coordinates",
+   "references": [
+    "Dirichlet (1837): primes in arithmetic progressions",
+    "Dirichlet L-function L(s, chi) = prod_p (1 - chi(p) p^-s)^-1",
+    "orthogonality of characters on (Z/dZ)* - a finite Fourier transform",
+    "the crux L(1, chi) != 0 for non-principal chi"
+   ],
+   "statement": "For gcd(a,d)=1 there are infinitely many primes congruent to a modulo d, equidistributed among the phi(d) coprime residue classes. The proof uses Dirichlet characters, whose values are roots of unity - points on the unit circle, pure phase - and the non-vanishing L(1, chi) != 0 for non-principal chi.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Dirichlet's theorem / polar coordinates, 2026-10-07",
+     "claim": "[the character lives on the unit circle - the polar-coordinate hint] A Dirichlet character maps each residue to a root of unity: modulus exactly 1, radius fixed, only the angle varies. The primitive cube root omega = e^(2 pi i/3) has |omega|^2 = (-1/2)^2 + (sqrt3/2)^2 = 0.5^2 + 0.75 = 1 (sealed). In polar coordinates r = 1 and chi is pure phase - which is why the right picture is polar, not Cartesian.",
+     "kind": "witness",
+     "seal": "62e5801660f6a1a730b184334e83cac172c7f76fe53205b93bce969cc130c204"
+    },
+    {
+     "by": "Narrow Highway - Dirichlet's theorem / polar coordinates, 2026-10-07",
+     "claim": "[orthogonality = unit vectors summing around the circle] The cube roots satisfy 1 + omega + omega^2 = 0; the real part is 1 + (-1/2) + (-1/2) = 0 (sealed) and the imaginary parts cancel by conjugate symmetry. n equally spaced unit arrows sum to the center. Dirichlet isolates the class a (mod d) by exactly this cancellation - summing a non-principal character over a period gives zero. It is a Fourier transform on the group (Z/dZ)*, i.e. harmonic analysis on the circle.",
+     "kind": "witness",
+     "seal": "bde74cafaa38d2f1f52bd5223afc826bbb2c22685a50ede01f9d0d6636f56618"
+    },
+    {
+     "by": "Narrow Highway - Dirichlet's theorem / polar coordinates, 2026-10-07",
+     "claim": "[the crux, cited not reproved] The theorem turns on L(1, chi) != 0 for every non-principal character; that single non-vanishing keeps each residue class's density of primes positive. The engine seals the root-of-unity arithmetic and CITES Dirichlet's theorem - it does not re-derive the non-vanishing. The L-functions L(s, chi) are the zeta family's siblings (stick_the_zeta_function); GRH is the same critical line Re = 1/2 for all of them.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - Dirichlet's theorem / polar coordinates, 2026-10-07",
+     "claim": "[the same circle as the whole arc] The character values on the unit circle are the SAME circle as the Smith/Cayley |Gamma| = 1 (stick_the_smith_chart_the_cayley_transform), the finite-field |alpha| = sqrt(q) (stick_finite_field_riemann), and the self-adjoint <-> unitary spectrum (stick_hilbert_polya). The dual of an abelian symmetry group lives on the circle: rotations, roots of unity, polar coordinates. This is stick_the_symmetry wearing its harmonic-analysis face. map, never launder: a point at angle 2 pi k / n is geometry, never a sign to be read.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

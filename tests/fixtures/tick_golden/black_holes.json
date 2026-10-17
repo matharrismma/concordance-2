@@ -1,0 +1,91 @@
+{
+ "entry": "black_holes",
+ "rc": 0,
+ "seals": {
+  "0b716ec00b700c2db5abcf28dff9ac71449fbf4fbdc673533bed515802edf09f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "photon_sphere_of_a_solar_mass_black_hole_three_gm_over_c2_m"
+   ]
+  },
+  "3a14ec5dc43fbd75c7570e5763f6f2b3ea370bba8bf7329d2e9e5086725a535b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "bekenstein_hawking_entropy_solar_mass_over_kb_is_horizon_area_over_4_planck_areas"
+   ]
+  },
+  "82e9fcc56433d99701115bd6ac44282d3f6214c5154ca709a2b550f643ebdcfc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "innermost_stable_circular_orbit_six_gm_over_c2_m"
+   ]
+  },
+  "96f8f80bada348421b53a715aba8d70bf7f533a7d7b874d03a66a340eda74b2c": {
+   "axis": "astronomy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "f5ba2123452d2b49831fb2cae03091b9db17b46ef7d3cc83adecbf367910ae83": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hawking_temperature_of_a_solar_mass_black_hole_kelvin"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_black_holes_the_four_constant_confluence_verified_and_sealed": {
+   "field": "",
+   "question": "Black holes - the four-constant confluence, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py black_holes",
+     "claim": "[the horizon] The Schwarzschild radius r_s = 2 G M / c^2: the Sun, if squeezed inside 2954 m (2.95 km), becomes a black hole (sealed through astronomy.ASTRO_VERIFY) - the radius at which the escape velocity reaches the speed of light. The Earth's would be 9 mm.",
+     "kind": "instance",
+     "seal": "96f8f80bada348421b53a715aba8d70bf7f533a7d7b874d03a66a340eda74b2c"
+    },
+    {
+     "by": "tools/tick.py black_holes",
+     "claim": "[it has a temperature] Hawking: a black hole radiates as a body at T = hbar c^3 / (8 pi G M k_B). For a solar mass that is 6.17e-8 K (sealed) - far colder than the 2.7 K of space, so it absorbs more than it emits; big black holes barely evaporate, and the lifetime scales as M^3, nearly eternal. The quantum (hbar) gives gravity a temperature.",
+     "kind": "instance",
+     "seal": "f5ba2123452d2b49831fb2cae03091b9db17b46ef7d3cc83adecbf367910ae83"
+    },
+    {
+     "by": "tools/tick.py black_holes",
+     "claim": "[entropy is AREA, not volume] The Bekenstein-Hawking entropy is the horizon area in Planck units, over four: S / k_B = A / (4 l_P^2) = pi r_s^2 / l_P^2 = 1.05e77 for the Sun (sealed) - more entropy than all the ordinary matter that could form it. Entropy scaling with AREA, not volume, is the holographic principle: the information of a region lives on its boundary. This single formula holds G, c, hbar and k_B at once - gravity, relativity, the quantum and thermodynamics in one number.",
+     "kind": "instance",
+     "seal": "3a14ec5dc43fbd75c7570e5763f6f2b3ea370bba8bf7329d2e9e5086725a535b"
+    },
+    {
+     "by": "tools/tick.py black_holes",
+     "claim": "[where light orbits] The photon sphere sits at 1.5 r_s = 3 G M / c^2 = 4431 m - the radius at which light itself can orbit (the bright ring in the Event Horizon Telescope image); the innermost stable circular orbit for matter is at 3 r_s = 6 G M / c^2 = 8862 m, the inner edge of an accretion disk (both sealed).",
+     "kind": "instance",
+     "seal": "0b716ec00b700c2db5abcf28dff9ac71449fbf4fbdc673533bed515802edf09f"
+    },
+    {
+     "by": "tools/tick.py black_holes",
+     "claim": "[the frame, and its hard edge] These follow from general relativity plus quantum field theory on curved spacetime - the SEMICLASSICAL approximation. It works (it predicts Hawking radiation and the area law), so its truth is inferred there, never kept as fact. At the singularity general relativity breaks down and a full theory of quantum gravity is UNKNOWN - that is the open frontier, not a sealed result.",
+     "kind": "postulate",
+     "source": "K. Schwarzschild (1916); J. Bekenstein (1973); S. Hawking (1974-75); 't Hooft & Susskind, holography"
+    },
+    {
+     "by": "tools/tick.py black_holes",
+     "claim": "[the confluence on the one map] A black hole is the node where four trees meet: gravity (grav_scale), relativity (rela_scale, c), the quantum (the Planck scale, planck_scale) and thermodynamics/information (the entropy and information-theory sticks; entropy = area in BITS). It ties to stick_quantum_gravity and stick_entropy_and_gravity. The Bekenstein-Hawking formula is the single most famous equation uniting all four fundamental constants.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py black_holes",
+     "claim": "[what is declined - the open questions] The INFORMATION PARADOX (does evaporation destroy information, violating quantum unitarity? the firewall, ER=EPR, the island formula) is OPEN - the engine does not adjudicate it. What lies inside the horizon is not observable; the singularity is where the model fails. These are declined or carried as the postulate's edge - a miss stays a miss.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

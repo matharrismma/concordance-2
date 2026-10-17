@@ -1,0 +1,52 @@
+{
+ "entry": "transliteration",
+ "rc": 0,
+ "seals": {
+  "6e6c0f91138f0356ff13f0bc42926c86b652e6f4bf19fe7c301e9321a49f2bcd": {
+   "axis": "linguistics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d78066c8bdea9af8840ad6054b4b5c9b152d235308f75bb5f2d8deae9401160c": {
+   "axis": "linguistics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_transliteration_romanizing_the_original_tongue": {
+   "field": "",
+   "question": "Transliteration - romanizing the original tongue",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py transliteration",
+     "claim": "[Greek -> Latin, SEALED] 'logos' (lambda-omicron-gamma-omicron-sigma) romanizes by a fixed scheme (eta->e, omega->o, upsilon->y, breathing stripped), sealed through linguistics.LING_VERIFY. The romanization is deterministic: a wrong claim can never match.",
+     "kind": "instance",
+     "seal": "d78066c8bdea9af8840ad6054b4b5c9b152d235308f75bb5f2d8deae9401160c"
+    },
+    {
+     "by": "tools/tick.py transliteration",
+     "claim": "[another, SEALED] 'theos' (theta-epsilon-omicron-sigma) -> 'theos' (sealed).",
+     "kind": "instance",
+     "seal": "6e6c0f91138f0356ff13f0bc42926c86b652e6f4bf19fe7c301e9321a49f2bcd"
+    },
+    {
+     "by": "tools/tick.py transliteration",
+     "claim": "[0 false positives, honest about scheme] The check CONFIRMS only an exact match to the engine's scheme; a DIFFERENT valid romanization is a mismatch against THIS scheme, not a false claim, and the verdict says so. Hebrew DECLINES - its romanization depends on vowel pointing that running text omits.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py transliteration",
+     "claim": "[on the one map - comprehensive linguistics, step 2] Transliteration broadens the linguistics domain BEYOND Strong's: a general romanizer, not only a lexicon lookup. It rests on the linguistics floor (card_floor_indo_european) with phonology, morphology and etymology; semantic relations and closed-class POS are next.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

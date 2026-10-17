@@ -1,0 +1,70 @@
+{
+ "entry": "quantum_mechanics",
+ "rc": 0,
+ "seals": {
+  "2a2909e6c3a00d80eb780a23fb281f0c93ada58e843076567658cb54b6fb06d1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "reduced_planck_constant_quantum_of_action_js"
+   ]
+  },
+  "5133d06c69528588cb5efe9d7f0c454848875a103080fcfeb5d911ff4955d619": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "tsirelson_bound_chsh_quantum_correlation"
+   ]
+  },
+  "9b9712b7fcaf3183b84a14d60f66aead22365540448cc0a39fd40638301f4b70": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "green_photon_energy_e_equals_hf_ev"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_quantum_mechanics_the_quantum_and_its_limits": {
+   "field": "",
+   "question": "Quantum mechanics - the quantum and its limits",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py quantum_mechanics",
+     "claim": "[the quantum of action, SEALED] The quantum is real and discrete: the quantum of action is hbar = h/(2 pi) = 1.0546e-34 J s (sealed). Action, angular momentum and energy come in units set by it; where it matters the world is granular, not continuous. It is also the floor of uncertainty - the smallest the product of two complementary spreads can be.",
+     "kind": "instance",
+     "seal": "2a2909e6c3a00d80eb780a23fb281f0c93ada58e843076567658cb54b6fb06d1"
+    },
+    {
+     "by": "tools/tick.py quantum_mechanics",
+     "claim": "[light comes in lumps - E = hf, SEALED] A photon of green light (5.45e14 Hz) carries E = hf = 2.25 eV (sealed). Planck and Einstein: radiation is quantized, energy in discrete quanta. The sharp spectrum of every atom - hydrogen's 13.6 eV, sealed on the Hamiltonian - is this discreteness; the photon is the electromagnetic field quantized. Ties card_floor_maxwells_equations.",
+     "kind": "instance",
+     "seal": "9b9712b7fcaf3183b84a14d60f66aead22365540448cc0a39fd40638301f4b70"
+    },
+    {
+     "by": "tools/tick.py quantum_mechanics",
+     "claim": "[the world is not locally real - entanglement, SEALED] An entangled pair is ONE state, not two; measuring one instantly fixes the other. Bell proved no locally-real theory can match quantum predictions: the CHSH correlation is capped at 2 for any local-realist world, but quantum mechanics reaches 2 sqrt(2) = 2.83 (sealed, the Tsirelson bound), and experiment sides with 2.83 (Aspect; the 2022 Nobel). Many parts, one indivisible state - 'one source, states of that force' at the deepest level. No faster-than-light signal passes, so it still answers to relativity.",
+     "kind": "instance",
+     "seal": "5133d06c69528588cb5efe9d7f0c454848875a103080fcfeb5d911ff4955d619"
+    },
+    {
+     "by": "tools/tick.py quantum_mechanics",
+     "claim": "[the framework the physics region lives in] Quantum mechanics is not a floor beside the others; it is the framework they inhabit. Superposition, the Born rule and the measurement gap are on the capstone; the Schrodinger equation and unitary evolution on the Hamiltonian; the path integral on the Lagrangian; gauge symmetry giving charge on Noether and Maxwell; the Born rule and the interpretations on stick_the_schrodinger_equation. This floor gathers them and adds quantization, uncertainty and entanglement. Ties card_floor_the_capstone, card_floor_the_hamiltonian, card_floor_the_lagrangian.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py quantum_mechanics",
+     "claim": "[the uncertainty principle - a proven limit, not an ignorance] Position and momentum cannot both be sharp: Delta x Delta p >= hbar/2. This is not a failure of measurement - a particle does not HAVE a sharp position and momentum at once, because they are non-commuting observables ([x, p] = i hbar). A proven limit, FOUND in the structure: the physical cousin of the engine's own refusal to assert beyond what it can check. Ties card_floor_the_instruments (the moat - decline what cannot be known).",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py quantum_mechanics",
+     "claim": "[on the one map] The superposition is many potentials (capstone); the discrete spectrum is the Hamiltonian's eigenvalues; entanglement is 'one source, states of that force'; the uncertainty bound is a found limit like the engine's decline. Quantum mechanics is the native tongue of the whole physics region. Married to relativity it becomes quantum field theory (the Standard Model); their UNFINISHED marriage with gravity is the open frontier (quantum gravity). Ties card_floor_relativity and card_floor_standard_model.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

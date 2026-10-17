@@ -1,0 +1,68 @@
+{
+ "entry": "the_hamiltonian",
+ "rc": 0,
+ "seals": {
+  "63cd4932f9267484474df2839f14165a462e6e8695545c9c237fd80a5cffc27c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hydrogen_first_excited_level_one_over_n_squared_ev"
+   ]
+  },
+  "7889bb2cd42fc2fbc9bec2ee9975241de131fc4951ea02823714d22081081394": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hydrogen_ground_state_binding_energy_from_constants_ev"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_hamiltonian_the_law_of_the_flow": {
+   "field": "",
+   "question": "The Hamiltonian - the law of the flow",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py the_hamiltonian",
+     "claim": "[the spectrum - H's eigenvalues ARE the allowed energies, SEALED] The Hamiltonian is the energy operator; H psi = E psi, and the eigenvalues E are the energies a system can have. Hydrogen's ground state, from the fundamental constants m_e, e, epsilon_0 and h, is 13.6057 eV (sealed) - the energy to ionize it. Solve the Hamiltonian, get the spectrum; the rest of chemistry reads that spectrum.",
+     "kind": "instance",
+     "seal": "7889bb2cd42fc2fbc9bec2ee9975241de131fc4951ea02823714d22081081394"
+    },
+    {
+     "by": "tools/tick.py the_hamiltonian",
+     "claim": "[the shape of the spectrum, SEALED] Hydrogen's levels fall as 1/n^2: the first excited state is E_1/4 = 3.40 eV (sealed). The whole ladder of an atom, and the spectral lines we see, are the Hamiltonian's eigenvalues - the allowed energies and nothing between them.",
+     "kind": "instance",
+     "seal": "63cd4932f9267484474df2839f14165a462e6e8695545c9c237fd80a5cffc27c"
+    },
+    {
+     "by": "tools/tick.py the_hamiltonian",
+     "claim": "[why the many total one, through time] H is Hermitian (self-adjoint), so time evolution e^(-iHt/hbar) is UNITARY, and unitary evolution conserves the total probability. The capstone's sealed 'sum to one' is not just an instant - the Hamiltonian preserves it at every moment of the flow. The law that keeps the many potentials adding to one, through time, is H. Ties stick_the_capstone_one_source_many_potentials_one_end and card_floor_the_capstone.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_hamiltonian",
+     "claim": "[the change-of-domain door is diagonalizing H] The solve path's eigenbasis flip is, in quantum mechanics, diagonalizing the Hamiltonian: its eigenvectors are the stationary states, its eigenvalues the energies. 'Go to the eigenbasis' and 'go to the Hamiltonian's frame' are one move. Ties card_floor_the_solve_path and src/concordance/verifiers/spectral.py.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_hamiltonian",
+     "claim": "[the no-cut bridge - the reply to Copenhagen made precise] The same generator, energy, runs classical mechanics (Hamilton's equations dq/dt = dH/dp, dp/dt = -dH/dq) and quantum mechanics (Schrodinger). The correspondence is continuous (Ehrenfest's theorem; the Poisson bracket becoming the commutator). There is no scale where energy stops being the Hamiltonian, so the quantum-to-classical passage needs no Heisenberg cut. That is the scale-invariant reply to Copenhagen, in one operator.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_hamiltonian",
+     "claim": "[Noether - the conserved end] Time-translation symmetry gives exactly one conserved quantity, and it is the Hamiltonian - the energy. It is the invariant along every path the system can take. 'Many possibilities but the story ends the same way' has a precise echo: whatever path the potentials flow, H is conserved. The invariant is the end carried through the middle.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_hamiltonian",
+     "claim": "[the open edge - the measurement gap] Unitary H evolution NEVER selects a single outcome; it flows the whole superposition forward, deterministically and reversibly. What the Hamiltonian does not describe is the actualization - which one outcome occurs. That is the measurement problem (von Neumann's two processes: unitary evolution, and measurement), and it is exactly where the capstone's single-actualization postulate lives. Every interpretation agrees on H; they differ only on this gap. H is sealed law; the one end is the honest postulate beyond it - it works, so the one is inferred there, never kept as fact.",
+     "kind": "postulate",
+     "source": "the measurement problem; J. von Neumann, the two processes (unitary evolution vs. measurement); card_floor_the_capstone"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,66 @@
+{
+ "entry": "probability",
+ "rc": 0,
+ "seals": {
+  "2635ae9636f443b3373d2d6326f16b9156c7f3a1f492028ce24f5042970ade22": {
+   "axis": "probability",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "876958ed0e6c4502e8b6e6d69b474a2d037d3959e335c2c36acc11c84d5a5af7": {
+   "axis": "probability",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "afafa0c5f8a818947458016ce6026b37bfe86fe7265786e2c8b8f32891303797": {
+   "axis": "probability",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_probability_the_distributions_verified_and_sealed": {
+   "field": "",
+   "question": "Probability - the distributions, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py probability_stick",
+     "claim": "[the fair die] E[X] = sum p_i x_i = (1+2+3+4+5+6)/6 = 3.5 (sealed through probability.PROB_VERIFY) - the expected value, the balance point of the distribution.",
+     "kind": "instance",
+     "seal": "876958ed0e6c4502e8b6e6d69b474a2d037d3959e335c2c36acc11c84d5a5af7"
+    },
+    {
+     "by": "tools/tick.py probability_stick",
+     "claim": "[ten fair coins] P(exactly 5 heads) = C(10,5)(1/2)^10 = 0.24609 (sealed) - the binomial, the law of repeated yes/no trials.",
+     "kind": "instance",
+     "seal": "2635ae9636f443b3373d2d6326f16b9156c7f3a1f492028ce24f5042970ade22"
+    },
+    {
+     "by": "tools/tick.py probability_stick",
+     "claim": "[its mean] E[Binom(10, 0.5)] = n p = 5 (sealed) - half the flips, on average.",
+     "kind": "instance",
+     "seal": "afafa0c5f8a818947458016ce6026b37bfe86fe7265786e2c8b8f32891303797"
+    },
+    {
+     "by": "tools/tick.py probability_stick",
+     "claim": "[the ground] Kolmogorov's axioms: a probability is a measure of total mass one. The theorems are sealed; what the numbers MEAN for a single future event is the open question of interpretation (frequentist vs Bayesian), carried, not kept as fact.",
+     "kind": "postulate",
+     "source": "A. Kolmogorov (1933); probability.PROB_VERIFY"
+    },
+    {
+     "by": "tools/tick.py probability_stick",
+     "claim": "[declined] Whether a model's probabilities are the RIGHT ones for the world is a modelling judgment, not sealed here; the engine certifies the probability arithmetic.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

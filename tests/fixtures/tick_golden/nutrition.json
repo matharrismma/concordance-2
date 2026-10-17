@@ -1,0 +1,47 @@
+{
+ "entry": "nutrition",
+ "rc": 0,
+ "seals": {
+  "5dc48e867f140dc5b7997db395e144f45b650508941e807581086ba505c7dd7d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fat_energy_density_over_carbohydrate_nine_over_four"
+   ]
+  },
+  "b58ea7d66fb64affaf6b5cd118b5eb732e8b7cc51d36337580c245af651bd6ea": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "meal_calories_atwater_50c_20p_10f"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_nutrition_the_body_s_fuel_counted": {
+   "field": "",
+   "question": "Nutrition - the body's fuel, counted",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py nutrition",
+     "claim": "[counting the fuel - the Atwater factors, SEALED] Food energy is carbohydrate and protein at 4 kcal/g and fat at 9: a meal of 50 g carb, 20 g protein and 10 g fat is 50*4 + 20*4 + 10*9 = 370 kcal (sealed). The calorie is heat - what the food releases when burned - so nutrition is thermodynamics in the body. Ties card_floor_chemistry.",
+     "kind": "instance",
+     "seal": "b58ea7d66fb64affaf6b5cd118b5eb732e8b7cc51d36337580c245af651bd6ea"
+    },
+    {
+     "by": "tools/tick.py nutrition",
+     "claim": "[why fat is rich, SEALED] Fat packs 9/4 = 2.25 times the energy of carbohydrate per gram (sealed), which is why the body stores energy as fat and why fatty foods are calorie-dense. The same oxidation chemistry that runs a flame runs metabolism. Ties card_floor_biology.",
+     "kind": "instance",
+     "seal": "5dc48e867f140dc5b7997db395e144f45b650508941e807581086ba505c7dd7d"
+    },
+    {
+     "by": "tools/tick.py nutrition",
+     "claim": "[on the one map] Nutrition rests on chemistry (metabolism is oxidation, and the calorie is heat), biology (the body that burns and stores it), and medicine (diet and health). The engine seals the arithmetic of energy and macronutrients; it does not prescribe a diet - that is a clinical call, declined. Ties card_floor_nutrition.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

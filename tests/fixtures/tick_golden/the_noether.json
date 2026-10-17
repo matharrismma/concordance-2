@@ -1,0 +1,63 @@
+{
+ "entry": "the_noether",
+ "rc": 0,
+ "seals": {
+  "3373fc54416b74980fbbd8318a2d9fbdd63cd4c8ebd56ae4124455bc45bdd418": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "momentum_conservation_inelastic_collision_final_speed_m_s"
+   ]
+  },
+  "5ff5905c017dca1220164396f4816e807914c602fc974ef9b9f03ecdd9e1074b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "angular_momentum_conservation_skater_spin_up_rad_s"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_noether_s_theorem_every_symmetry_a_conservation_law": {
+   "field": "",
+   "question": "Noether's theorem - every symmetry a conservation law",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py the_noether",
+     "claim": "[space-translation symmetry -> momentum conserved, SEALED] The laws are the same here as there; Noether forces momentum to be conserved. A 2 kg mass at 3 m/s strikes a 1 kg mass at rest and they stick: momentum is conserved, so the final speed is (2*3 + 1*0)/(2+1) = 2 m/s (sealed). The symmetry predicts the outcome - you never had to measure it, the invariance decided it.",
+     "kind": "instance",
+     "seal": "3373fc54416b74980fbbd8318a2d9fbdd63cd4c8ebd56ae4124455bc45bdd418"
+    },
+    {
+     "by": "tools/tick.py the_noether",
+     "claim": "[rotational symmetry -> angular momentum conserved, SEALED] The laws are the same in every direction; Noether forces angular momentum L = I omega to be conserved. A skater with moment of inertia 4 spinning at 1 rad/s pulls her arms in to 0.5: omega = (4*1)/0.5 = 8 rad/s (sealed) - she spins eight-fold faster for the fourth of the inertia. The symmetry is why.",
+     "kind": "instance",
+     "seal": "5ff5905c017dca1220164396f4816e807914c602fc974ef9b9f03ecdd9e1074b"
+    },
+    {
+     "by": "tools/tick.py the_noether",
+     "claim": "[the theorem - every continuous symmetry a conservation law] Emmy Noether (1918): for every continuous symmetry of the action there is a conserved quantity, and conversely. Time-translation -> energy; space-translation -> momentum; rotation -> angular momentum; the phase (gauge) symmetry of the wavefunction -> electric charge; the Standard Model's gauge symmetries -> its conserved currents. The deepest structural theorem in physics: it says WHY the conservation laws hold.",
+     "kind": "equivalence",
+     "source": "E. Noether, Invariante Variationsprobleme (1918)"
+    },
+    {
+     "by": "tools/tick.py the_noether",
+     "claim": "[the seam between the two floors] Noether lives on the action (Lagrangian) side - it is a statement about symmetries of the action - and the quantity it produces from time-symmetry is exactly the Hamiltonian, the energy. So Noether is the seam between the two floors just built: the Lagrangian's symmetries PRODUCE the Hamiltonian's conserved energy. Ties card_floor_the_lagrangian and card_floor_the_hamiltonian.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_noether",
+     "claim": "[found, never decreed - and the 'same end'] Conservation laws are not arbitrary rules we impose; they are FOUND, compelled as the necessary shadow of a symmetry. You do not postulate conservation of energy - it is forced by the laws not changing in time. That is the engine's own stance (found, never generated), and the precise form of 'many possibilities but the story ends the same': the conserved quantity is the invariant carried unchanged through every path, the same at the end as at the beginning. Ties card_floor_the_capstone.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py the_noether",
+     "claim": "[the constancy of the law - resonance, stated honestly] The symmetry Noether needs is the constancy of the law: the same yesterday, today and tomorrow; the same here and everywhere. Scripture's image of that constancy - 'I am the LORD, I change not' (Malachi 3:6); 'Jesus Christ the same yesterday, and today, and for ever' (Hebrews 13:8) - is the theological resonance of time-translation symmetry. The physics is the theorem; the Scripture is the README it rhymes with. Stated as resonance, never laundered one into the other.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

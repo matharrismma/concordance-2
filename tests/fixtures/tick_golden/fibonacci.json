@@ -1,0 +1,85 @@
+{
+ "entry": "fibonacci",
+ "rc": 0,
+ "seals": {
+  "422e68f821244378ebec29860400981142bdac85e2b25e95fb9f053c06d3d864": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "phi_squared"
+   ]
+  },
+  "750d11634d2d4aeb35e56753fe131c993efe9d6412a8af4b8ab279ab35086982": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "binet_f10"
+   ]
+  },
+  "82d96ec3bc2f6fdd81e5f0d89df1fcf91ad961498378e37fc8eb8131580186bb": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "phi_is_two_cos_36"
+   ]
+  },
+  "8dd5491d6638411bb466ade7071cb550121560b5df46737ed6bf68527b20ab4b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "golden_det"
+   ]
+  },
+  "b568e403c9450e3a4802b60dd6274c50034acd239bf958e677db5f08ca2fbd92": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "golden_trace"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_fibonacci": {
+   "field": "meta",
+   "question": "Fibonacci",
+   "references": [
+    "Binet's formula F(n) = (phi^n - psi^n)/sqrt5",
+    "the Q-matrix [[1,1],[1,0]] with eigenvalues phi, psi",
+    "phi = 2 cos(pi/5): the regular pentagon and the fifth roots of unity",
+    "phi = [1;1,1,1,...], the slowest-converging continued fraction"
+   ],
+   "statement": "The Fibonacci recurrence F(n+1)=F(n)+F(n-1) is the symmetric matrix Q=[[1,1],[1,0]]; its real eigenvalues are phi=(1+sqrt5)/2 and psi=(1-sqrt5)/2, the roots of x^2=x+1, with trace 1 and determinant -1. Binet's formula gives the exact term; phi = 2 cos(36 deg) ties it to the fifth roots of unity.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Fibonacci, 2026-10-07",
+     "claim": "[the eigenvalue relation] phi^2 = 2.618033988749895 = phi + 1 (sealed): phi solves x^2 = x + 1, the characteristic equation of the Fibonacci matrix. The whole sequence is powers of one number that reproduces itself plus one.",
+     "kind": "witness",
+     "seal": "422e68f821244378ebec29860400981142bdac85e2b25e95fb9f053c06d3d864"
+    },
+    {
+     "by": "Narrow Highway - Fibonacci, 2026-10-07",
+     "claim": "[the self-adjoint spectrum] The symmetric Q = [[1,1],[1,0]] has trace phi + psi = 1.000000 (sealed) and det phi*psi = -1.000000 (sealed), so its eigenvalues are exactly phi and psi - both REAL, because Q is self-adjoint. The growth rate of Fibonacci is the dominant real eigenvalue of a self-adjoint operator: Hilbert-Polya's mechanism (stick_hilbert_polya) in two dimensions.",
+     "kind": "witness",
+     "seal": "b568e403c9450e3a4802b60dd6274c50034acd239bf958e677db5f08ca2fbd92"
+    },
+    {
+     "by": "Narrow Highway - Fibonacci, 2026-10-07",
+     "claim": "[Binet - the exact closed form fires] (phi^10 - psi^10)/sqrt5 = 55.000000 = F(10) = 55 (sealed). An integer sequence written exactly as the difference of two irrational powers over sqrt5 - a proved fit, not an open one. The psi^n term decays (|psi| < 1), which is why F(n) is the nearest integer to phi^n/sqrt5.",
+     "kind": "witness",
+     "seal": "750d11634d2d4aeb35e56753fe131c993efe9d6412a8af4b8ab279ab35086982"
+    },
+    {
+     "by": "Narrow Highway - Fibonacci, 2026-10-07",
+     "claim": "[the pentagon - the polar tie] phi = 2 cos(36 deg) = 2 cos(pi/5) = 1.618033988749895 (sealed). The golden ratio is the geometry of the fifth roots of unity - the diagonal-to-side ratio of the regular pentagon. Same unit circle and roots of unity as Dirichlet's characters (stick_dirichlet_s_theorem_think_of_polar_coordinates): five-fold symmetry IS phi.",
+     "kind": "witness",
+     "seal": "82d96ec3bc2f6fdd81e5f0d89df1fcf91ad961498378e37fc8eb8131580186bb"
+    },
+    {
+     "by": "Narrow Highway - Fibonacci, 2026-10-07",
+     "claim": "[the discipline this one demands - REFUSE the numerology] The golden ratio is the biggest magnet for 'sacred geometry' and gematria. The engine seals only the mathematics above and reads phi as NO kind of sign. Where phi appears in nature - phyllotaxis, sunflower spirals - the reason is DYNAMICAL: phi = [1;1,1,1,...] is the 'most irrational' number, the hardest to approximate by rationals, so growth at angle 2 pi / phi never resonates and packs evenly. That is an optimization, not a code. map, never launder (ties [[project_numbers_bases_triangulation_2026-06-13]] - seal the arithmetic, attribute the pattern, never a number as scripture; and stick_construct_creation - Zeckendorf's theorem makes the Fibonacci numbers a base, a notation we choose, not a hidden meaning).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

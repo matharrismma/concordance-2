@@ -1,0 +1,122 @@
+{
+ "entry": "real_estate",
+ "rc": 0,
+ "seals": {
+  "063c3deae084a2abcaf9ca46d401c65d47812938267cab47543129779ae1259b": {
+   "axis": "real_estate",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5af693dee58da0e163a1f3e218bcedd463fc18e09a7df1692ab7ee941361dc6e": {
+   "axis": "real_estate",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "8c981fa99d0b0adf8d32c4f858408b731158a0d63605862ee82fc8457028abe7": {
+   "axis": "real_estate",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "aedff628ad2d6af3d57330f4f8facbdc4f80874395ca7ebad43ebf1f1607be72": {
+   "axis": "real_estate",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "bc3512d0302f42b1dd9bd2d260d4c35af622bc5ed9762b3d6d07eaa97ced4e33": {
+   "axis": "real_estate",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "c3579c5f13432d0ab2e577450f8bf6bb0d8600c4e0a58356e90925dac1de7f10": {
+   "axis": "real_estate",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "df5faf955557c18bd6f3c6c4cea53ff91584bab989331f8b543e96888dc25ac2": {
+   "axis": "real_estate",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_real_estate_mortgage_cap_rate_ltv_and_coverage_sealed": {
+   "field": "real_estate",
+   "question": "Real estate - mortgage, cap rate, LTV and coverage, sealed",
+   "references": [
+    "The annuity (amortization) formula M = P r (1+r)^n / ((1+r)^n - 1) - a geometric series, public domain",
+    "Appraisal Institute, The Appraisal of Real Estate, 15th ed. (2020) - income capitalization",
+    "Fannie Mae Selling Guide B2-1.2: the 80 percent LTV line for mortgage insurance"
+   ],
+   "statement": "Property finance is the annuity formula and five ratios: payment, NOI over value, price over rent, loan over value, NOI over debt service, rent over value.",
+   "ticks": [
+    {
+     "by": "tools/tick.py real_estate",
+     "claim": "[a 30-year mortgage, SEALED] $300,000 at 6.5 percent over 360 months: M = P r (1+r)^n / ((1+r)^n - 1) with r = 0.065/12 gives $1,896.20 a month (sealed through real_estate.RE_VERIFY). The annuity formula is the sum of a geometric series: the loan equals the present value of the payments.",
+     "kind": "instance",
+     "seal": "aedff628ad2d6af3d57330f4f8facbdc4f80874395ca7ebad43ebf1f1607be72"
+    },
+    {
+     "by": "tools/tick.py real_estate",
+     "claim": "[the same loan over 15 years, SEALED] 180 months: $2,613.32 (sealed through real_estate.RE_VERIFY) - 38 percent more a month, but $392,000 less interest over the life of the loan (6.5 percent: $382,633 interest at 30 years against $170,398 at 15). Time is the lender's price.",
+     "kind": "instance",
+     "seal": "bc3512d0302f42b1dd9bd2d260d4c35af622bc5ed9762b3d6d07eaa97ced4e33"
+    },
+    {
+     "by": "tools/tick.py real_estate",
+     "claim": "[cap rate, SEALED] NOI $24,000 on a $400,000 property is 6.0 percent (sealed through real_estate.RE_VERIFY): the unlevered yield the income capitalization approach prices on.",
+     "kind": "instance",
+     "seal": "c3579c5f13432d0ab2e577450f8bf6bb0d8600c4e0a58356e90925dac1de7f10"
+    },
+    {
+     "by": "tools/tick.py real_estate",
+     "claim": "[gross rent multiplier, SEALED] $300,000 over $24,000 of annual rent is 12.5 (sealed through real_estate.RE_VERIFY): years of gross rent in the price, before expenses.",
+     "kind": "instance",
+     "seal": "df5faf955557c18bd6f3c6c4cea53ff91584bab989331f8b543e96888dc25ac2"
+    },
+    {
+     "by": "tools/tick.py real_estate",
+     "claim": "[loan-to-value, SEALED] $240,000 on $300,000 appraised is 80 percent (sealed through real_estate.RE_VERIFY): the line at which conventional lenders stop requiring mortgage insurance.",
+     "kind": "instance",
+     "seal": "063c3deae084a2abcaf9ca46d401c65d47812938267cab47543129779ae1259b"
+    },
+    {
+     "by": "tools/tick.py real_estate",
+     "claim": "[debt-service coverage, SEALED] NOI $24,000 over $22,755 of annual debt service is 1.055 (sealed through real_estate.RE_VERIFY): the income covers the payments with 5.5 percent to spare - below the 1.25 most lenders want.",
+     "kind": "instance",
+     "seal": "8c981fa99d0b0adf8d32c4f858408b731158a0d63605862ee82fc8457028abe7"
+    },
+    {
+     "by": "tools/tick.py real_estate",
+     "claim": "[gross rental yield, SEALED] $18,000 of rent on a $400,000 property is 4.5 percent (sealed through real_estate.RE_VERIFY).",
+     "kind": "instance",
+     "seal": "5af693dee58da0e163a1f3e218bcedd463fc18e09a7df1692ab7ee941361dc6e"
+    },
+    {
+     "by": "tools/tick.py real_estate",
+     "claim": "[the conventions, CITED] 80 percent LTV (Fannie Mae), a 1.25 DSCR floor, a 'good' cap rate - these are lender and market conventions, chosen and changeable, cited never sealed. The annuity formula is a theorem; the ratios are definitions; what a property is WORTH is a forecast and is declined. Nothing here is investment advice.",
+     "kind": "postulate",
+     "source": "Fannie Mae Selling Guide B2-1.2; Appraisal Institute (2020); src/concordance/verifiers/real_estate.py"
+    },
+    {
+     "by": "tools/tick.py real_estate",
+     "claim": "[on the one map] Property finance is the economics floor's time value of money (card_floor_economics; the economics stick: present value, compound interest) with the compounding of e (the e stick: (1 + r/n)^n) applied to one asset class. The same annuity formula prices a bond, a pension and a car loan.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

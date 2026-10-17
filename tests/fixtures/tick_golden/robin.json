@@ -1,0 +1,34 @@
+{
+ "entry": "robin",
+ "rc": 0,
+ "seals": {
+  "a9a7556688b2d2d294f393771d58ea073ea796bf5f766b41082c440caa1314b3": {
+   "axis": "number_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "robin"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_riemann_hypothesis": {
+   "field": "",
+   "question": "Riemann hypothesis",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the elimination reading, 2026-10-05",
+     "claim": "No zero of zeta lies off the critical line by way of a Robin (divisor-sum) counterexample at n <= 1,000,000: the sieve finds none in (5040, 1,000,000] (closest approach n=10,080, sigma/(e^gamma n lnln n) = 0.985819 < 1). RH cannot fail by this route below 1,000,000 — a second, independent tool narrowing the window, by elimination.",
+     "kind": "witness",
+     "seal": "a9a7556688b2d2d294f393771d58ea073ea796bf5f766b41082c440caa1314b3"
+    },
+    {
+     "by": "Narrow Highway — the elimination reading, 2026-10-05",
+     "claim": "[by elimination] The Riemann stick is charted by what RH is NOT. Directly: the two independent zero counts agree to height 1e7, so NO zero lies off the line below it. Through the divisor sum (Robin): no counterexample to n=1,000,000. A counterexample to RH, if one exists, must therefore evade every eliminated region at once — the surviving window is where RH remains untested, and each tool narrows it.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

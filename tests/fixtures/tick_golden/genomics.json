@@ -1,0 +1,111 @@
+{
+ "entry": "genomics",
+ "rc": 0,
+ "seals": {
+  "4778e8ffd7bf089bb207115e05fc6010d2abc789982217dec57fb686be3b32bb": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "hardy_weinberg_sum_p_sq_two_pq_q_sq_equals_one"
+   ]
+  },
+  "4e53ccd241320694ae7b03f4eb9643ff9d058ad1a2a49d3cd783c7211a47db44": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "genetic_code_number_of_codons_four_cubed"
+   ]
+  },
+  "75b65e420c047af61df3ea3101780871d3e19cc8779b42d2d09acffeffffdb53": {
+   "axis": "genetics",
+   "overall": "PASS",
+   "verifiers": [
+    "g"
+   ]
+  },
+  "86fa4887ed36dc43376fc36eef6e7779dc5bf4ec0b624931932b83233557fde1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "genetic_code_sense_codons_sixty_four_minus_three_stops"
+   ]
+  },
+  "af297e25ecf9eb55a95900bcdcc1bb532d400b6eabc7ec93da13b97cfca8be28": {
+   "axis": "biology",
+   "overall": "PASS",
+   "verifiers": [
+    "g"
+   ]
+  },
+  "e2b603bb1d2495604113a0a0c5fc5c2b4616eb16e48d28f36d33315e3436e9a1": {
+   "axis": "genetics",
+   "overall": "PASS",
+   "verifiers": [
+    "g"
+   ]
+  },
+  "e598baa5935b56e570aff61054c58de85de5a85fdeb0ec7e9b3355a368698192": {
+   "axis": "genetics",
+   "overall": "PASS",
+   "verifiers": [
+    "g"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_genomics_the_genetic_code_verified_and_sealed": {
+   "field": "",
+   "question": "Genomics - the genetic code, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py genomics",
+     "claim": "[the code counted] Three bases, four letters: 4^3 = 64 codons (sealed), of which 61 are sense and 3 are stop (TAA, TAG, TGA) - 64 - 3 = 61 (sealed). Sixty-one sense codons map onto twenty amino acids, so the code is degenerate: leucine, serine and arginine have six codons each; methionine and tryptophan have one. The redundancy sits in the third base - the wobble.",
+     "kind": "instance",
+     "seal": "4e53ccd241320694ae7b03f4eb9643ff9d058ad1a2a49d3cd783c7211a47db44"
+    },
+    {
+     "by": "tools/tick.py genomics",
+     "claim": "[translation, verified] ATG -> Met (sealed through the genetics verifier): the start codon, and the only codon for methionine. The reading begins here.",
+     "kind": "instance",
+     "seal": "e2b603bb1d2495604113a0a0c5fc5c2b4616eb16e48d28f36d33315e3436e9a1"
+    },
+    {
+     "by": "tools/tick.py genomics",
+     "claim": "[the only one] TGG -> Trp (sealed): tryptophan is the one amino acid with a single codon - which is why a mutation in it is rarely silent.",
+     "kind": "instance",
+     "seal": "75b65e420c047af61df3ea3101780871d3e19cc8779b42d2d09acffeffffdb53"
+    },
+    {
+     "by": "tools/tick.py genomics",
+     "claim": "[a whole reading frame] ATG GCC TAA translates to Met-Ala-stop, the protein 'MA*' (sealed through the verifier): start, one residue, stop - transcription and translation run as a checkable chain, DNA -> mRNA -> protein, the central dogma.",
+     "kind": "instance",
+     "seal": "e598baa5935b56e570aff61054c58de85de5a85fdeb0ec7e9b3355a368698192"
+    },
+    {
+     "by": "tools/tick.py genomics",
+     "claim": "[Hardy-Weinberg, verified] With allele frequencies p = 0.6, q = 0.4, the genotype frequencies are p^2 + 2pq + q^2 = 0.36 + 0.48 + 0.16 = 1 (sealed), so in a population of 1000 the counts 360 : 480 : 160 are in equilibrium - run through the biology verifier (chi-square = 0, sealed). The law that says a population not evolving keeps its allele frequencies.",
+     "kind": "instance",
+     "seal": "af297e25ecf9eb55a95900bcdcc1bb532d400b6eabc7ec93da13b97cfca8be28"
+    },
+    {
+     "by": "tools/tick.py genomics",
+     "claim": "[what is cited, not proven] The genetic code is NEAR-universal, not universal - mitochondria and some lineages read a few codons differently; the engine seals table 1 (the standard code) and names the variant table where one applies. Ancestral gene sequences are RECONSTRUCTIONS, like a proto-language - postulates, cited, never sealed. The code's origin is open science.",
+     "kind": "postulate",
+     "source": "NCBI translation table 1 (public domain); F. Crick, the central dogma (1958); G. Hardy, W. Weinberg (1908)"
+    },
+    {
+     "by": "tools/tick.py genomics",
+     "claim": "[how genomics uses this] The deterministic layer - the code, complementarity, GC content, reading frames, Mendelian and Hardy-Weinberg ratios - is exactly checkable, sealed, and refutable (a wrong codon or a broken equilibrium is caught). The INTERPRETIVE layer - gene function, genotype-to-phenotype, clinical significance - is declined, cited, or left as a want; a miss stays a miss. The engine certifies the sequence arithmetic, not the meaning of the gene.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py genomics",
+     "claim": "[on the one map] Phylogeny is the comparative method for genes: the tree of life is chains from a floor where two trees connect - LUCA the floor, the three domains the branches, a homologous gene the confluence where lineages meet (the small-subunit ribosomal RNA is in every cell, as 'father' is in every Indo-European branch). card_floor_tree_of_life draws it.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

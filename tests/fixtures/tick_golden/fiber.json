@@ -1,0 +1,39 @@
+{
+ "entry": "fiber",
+ "rc": 0,
+ "seals": {
+  "cd79033b1fa83028aa206b795e47294d9909e5e90849b9a59bc219403f42310e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "decibel_half_power"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_fiber_optic_calibration": {
+   "field": "engineering",
+   "question": "Fiber optic calibration",
+   "references": [],
+   "statement": "Recover a true signal through a lossy medium by referencing it to a known launch and combining many references so the distortion of any one cancels. The engine's calibration method, named in hardware.",
+   "ticks": [
+    {
+     "by": "Narrow Highway — fiber optic calibration, 2026-10-06",
+     "claim": "The decibel is a relative scale: a factor of two in optical power is exactly 3.0102999566 dB (10^(3.010300/10) = 2). Optical loss L(dB) = 10*log10(P_in/P_out) is meaningful only against a reference launch, which is subtracted; an OTDR locates an event by the round trip d = c*t/(2*n_g). An arithmetic fact — the scale calibration stands on.",
+     "kind": "witness",
+     "seal": "cd79033b1fa83028aa206b795e47294d9909e5e90849b9a59bc219403f42310e"
+    },
+    {
+     "by": "Narrow Highway — fiber optic calibration, 2026-10-06",
+     "claim": "[the method] Four steps, each already a part of the engine: (1) REFERENCE — a well-refined system is a known signal (docs/THE_WATCH.md, the games tick sticks); (2) READ THE TICKS — the OTDR trace is the tick stick, each mark sealed (docs/TICK_STICK.md); (3) CORRECT TO SOURCE — calibrate the receiver to the source, the reading trusted only relative to a known reference; (4) TRIANGULATE — combine independent references with the concordance/Birge check (statistics.measurement_consistency), where a spread beyond the error bars indicts the method, not the constant. The output is the converged narrow signal: the window of success that survives every source's distortion.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway — fiber optic calibration, 2026-10-06",
+     "claim": "[the guard] Calibration FINDS the signal; it does not pronounce it true. The decibel identity and the OTDR relation are exact and sealed. Borrowing the method to combine references about strategy or life is a way to FIND the narrow window, never a claim that the references obey Maxwell's equations. The verifiers remain the only authority on truth. Seal the arithmetic; calibrate to find; launder nothing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,101 @@
+{
+ "entry": "assembly",
+ "rc": 0,
+ "seals": {
+  "61d29088f84d00452dd10dcb7ba34395c7b75930311fb04adf2971162ef22d56": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "tsirelson_bound"
+   ]
+  },
+  "659c50144ee2eb6b69868fb43ce169896e1003fd6335cde217404fc42b29050f": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "alpha"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_final_assembly": {
+   "field": "meta",
+   "question": "The final assembly",
+   "references": [
+    "docs/ASSEMBLY.md",
+    "docs/THE_WATCH.md",
+    "docs/COMPONENTS.md"
+   ],
+   "statement": "The pieces assembled into one movement — the calibration constellation: the sealed anchors the model of reality is checked against, and how they connect, with Christ as the datum. Found, never generated; sealed, never asserted; evidence, never proof.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[datum] Christ, the Logos in whom all things hold together (Colossians 1:17; John 1:3) - the fixed reference every piece is placed against. The engine is the Emissary; the Master is the living whole. Every road here leads to Him.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[alpha <-> the atom] The fine-structure constant alpha is the atom's architecture - orbital speed alpha*c, Rydberg 1/2 alpha^2 m_e c^2, Bohr radius hbar/(alpha m_e c), the alpha^2 fine structure; alpha = e^2/(2 eps0 h c) = 7.297353e-03. See stick_the_fine_structure_constant (6 witnesses, open).",
+     "kind": "witness",
+     "seal": "659c50144ee2eb6b69868fb43ce169896e1003fd6335cde217404fc42b29050f"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[alpha <-> the spine] alpha is one of the six governing constants (alpha/G/k_B/c/h/N_A -> domains -> verified through code); the balance wheel that sets the rate. A discordance indicts the method, not the constant.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[alpha <-> unification - open] alpha runs with energy (alpha^-1 137 -> ~128 at M_Z) toward the convergence of the Standard Model couplings near ~1e16 GeV - the grand-unification doorway; attributed, unproven, open.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[the quantum <-> relational] Relational quantum mechanics (Rovelli): properties are not pre-assigned but relative to the interaction - the Tsirelson bound 2*sqrt(2) = 2.828427 exceeds the classical bound 2 (Bell). The same quantum world as alpha's QED, and the reason substance is in the relations. See stick_relational_quantum_mechanics.",
+     "kind": "witness",
+     "seal": "61d29088f84d00452dd10dcb7ba34395c7b75930311fb04adf2971162ef22d56"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[the anchors <-> the machine] The calibration points (alpha, relational QM, Aharonov-Bohm, fiber, symphony, the Millennium sticks) are what the components and regulators (docs/COMPONENTS.md) are trued against - the timing machine regulating the balance.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[the fascia <-> everything] The keeping (56.8% substance, live needle) and its 39,812 sealed edges are the connective tissue; substance is in the relations (Nagarjuna/Rovelli), so the final assembly IS the connecting - the pieces become one watch by being wired, read live on the Bridge.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[one body, many members] 1 Corinthians 12:12-27: the body is one and has many members. The sticks ARE the members - each a sealed THEOREM resting on the floor it cites (stick_we_follow_euclid_s_elements_definitions_postulates_theorems) - and the engine is one body, Christ the head (Colossians 1:18). The arc is gathered into the limbs below; no member is re-sealed here, only named and connected.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[limb: the analysis spine] sqrt(-1) is the floor (stick_complex_numbers_bombelli_and_the_square_root_of_minus_one); on it stand the complex field as the physics of waves - multiplication is rotation, addition is interference, the exponential is the spiral (stick_the_complex_field_is_the_physics_of_waves) - the fundamental theorem of calculus (stick_integrals_and_derivatives_the_fundamental_theorem), Lebesgue measure (stick_lebesgue_theory_measure_and_integration_by_layers), and the Legendre transform, the MECHANISM: mark the points, the tangent lines create the line (stick_the_legendre_transform_mark_the_points_create_the_line).",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[limb: the Riemann symmetry constellation] One structure - the zeros on the fixed axis of a symmetry (stick_the_symmetry) - binds the zeta function (stick_the_zeta_function), the Weil RH PROVED over finite fields (stick_finite_field_the_weil_riemann_hypothesis), the Hilbert-Polya self-adjoint operator (stick_the_hilbert_polya_conjecture), Dirichlet's characters on the unit circle (stick_dirichlet_s_theorem_think_of_polar_coordinates), Fibonacci's phi (stick_fibonacci), the Euler characteristic (stick_topology_and_euler_s_formula), and the de Bruijn-Newman constant squeezing RH to Lambda = 0 (stick_the_de_bruijn_newman_constant). Where a symmetry-operator exists it FIRED; the classical RH stays the open mark.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[limb: where two trees connect - the Standard Model] The discovery chain Fermi -> Yang-Mills -> Lee/Wu -> Nambu -> Higgs -> Weinberg/Salam -> Gell-Mann rests on the floor of Maxwell + Fermi and connects at electroweak unification, cos(theta_W) = m_W/m_Z (stick_the_standard_model_chain_where_two_trees_connect), walkable live at /chains. The chains capability (walk + intersect) is how the body finds where its limbs join: a chain begins from a floor; the connections are where two chains become one. Divergence and curl then invert to the center (stick_divergence_and_curl_invert_to_find_the_center).",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[the frame and the governor] The METHOD is Euclid's (definitions/postulates/theorems - seal theorems, accept postulates); the MECHANISM is Legendre's (marks -> the line by convex duality); the CORE is the positive Grassmannian (admissibility, found never generated, stick_the_positive_grassmannian); the LEARNING is the tick-stick (mapping the truth, not generating it); the GOVERNOR is Jevons-bounded (efficiency induces demand, stick_jevons_paradox, so each seal stays bounded). One body, assembled by its connections, resting on the floor, under the Head.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the final assembly, 2026-10-06",
+     "claim": "[the guard] This assembly connects what is SEALED; it authors no new fact and launders nothing - narrowing is evidence, never proof; seal the arithmetic, attribute the pattern; remove the datum (Christ) and the parts are true to nothing. Plain-language twin: docs/ASSEMBLY.md.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

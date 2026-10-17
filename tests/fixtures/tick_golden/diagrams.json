@@ -1,0 +1,123 @@
+{
+ "entry": "diagrams",
+ "rc": 0,
+ "seals": {
+  "36c5ec25483153f04899ca5c6d98fbb2357f34cdf2d91d51110d561fd8cec1dd": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "feynman_loop_count_vertex_correction"
+   ]
+  },
+  "4388579b8719d5cfc4f208eb08cb357d1aeb72c2b26d4f49688e6520d02aae63": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "three_loop_sum_electron_anomaly"
+   ]
+  },
+  "5f6889d3c7279bb016a3e632d038871b6b7452efff0e0d05d76a969e2047ecd1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "rc_schematic_corner_frequency"
+   ]
+  },
+  "60eecb4ebf8cb10c7d1db15c0a4a03ba64d386baa9122dd6a2cd101e97399c09": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "schwinger_one_loop_alpha_over_2pi"
+   ]
+  },
+  "71193387dee0bce87312fcbc4d58144304fb8b2686f185d5f3e1d8ee477b3e37": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "two_loop_class_petermann_sommerfield"
+   ]
+  },
+  "7509420e5343bb4a44e7d7b3e3b310481f7fe6205480fe0d3efab6d90948c021": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "wick_pairings_of_six_fields"
+   ]
+  },
+  "fc1f58a42498ed90c2ffa88b0da7c3858d90984427dacff9f86f51d922f04d33": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "wheatstone_bridge_independent_meshes"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_feynman_diagrams_are_schematics_the_drawing_is_the_computati": {
+   "field": "physics",
+   "question": "Feynman diagrams are schematics - the drawing is the computation",
+   "references": [
+    "R. P. Feynman, Space-Time Approach to Quantum Electrodynamics, Phys. Rev. 76 (1949) 769-789",
+    "J. Schwinger, On Quantum-Electrodynamics and the Magnetic Moment of the Electron, Phys. Rev. 73 (1948) 416",
+    "A. Petermann (1957), C. M. Sommerfield (1957): the two-loop coefficient -0.328478965",
+    "S. Laporta, E. Remiddi, Phys. Lett. B 379 (1996) 283: the three-loop coefficient 1.181241456; T. Aoyama, T. Kinoshita, M. Nio (2012-2019): four and five loops",
+    "D. Hanneke, S. Fogwell, G. Gabrielse, Phys. Rev. Lett. 100 (2008) 120801: a_e = 0.00115965218073(28)",
+    "F. J. Dyson, Divergence of perturbation theory in quantum electrodynamics, Phys. Rev. 85 (1952) 631",
+    "G. C. Wick, The evaluation of the collision matrix, Phys. Rev. 80 (1950) 268",
+    "G. Kirchhoff (1847): the loop and node laws; the cycle rank B - N + 1",
+    "Habakkuk 2:2; Exodus 25:40; 1 Chronicles 28:19",
+    "src/concordance/systems.py and site/bridge.html - the engine's own schematic"
+   ],
+   "statement": "A Feynman diagram is a schematic: lines are components (propagators), vertices are junctions (couplings), and the amplitude is read off the drawing by fixed rules the way a netlist is read off a circuit. One drawing gives 99.85% of the electron's magnetic moment; three classes of drawings land on the measurement to four parts in a hundred million; each vertex costs sqrt(alpha), so the series narrows. The loop count L = I - V + 1 is the same cycle rank as a circuit's mesh count: a Feynman diagram and a schematic are one graph. Dyson: the series is asymptotic - the drawing is a faithful map, term by term, never a closed form.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Feynman diagrams as schematics, 2026-10-08",
+     "claim": "[one drawing, one number - Schwinger 1948] The simplest correction to the electron's magnetism is one diagram: a photon thrown across the vertex. Its value is alpha/(2 pi) = 0.00116141 (sealed) against the measured anomaly 0.00115965: one drawing gives 100.15%. Feynman's rules assign a factor to every line and every junction; multiply them, integrate the loop, and the amplitude is READ off the picture - a schematic that computes.",
+     "kind": "witness",
+     "seal": "60eecb4ebf8cb10c7d1db15c0a4a03ba64d386baa9122dd6a2cd101e97399c09"
+    },
+    {
+     "by": "Narrow Highway - Feynman diagrams as schematics, 2026-10-08",
+     "claim": "[why the series narrows - each vertex costs sqrt alpha] The two-loop class (seven diagrams; Petermann and Sommerfield, 1957) contributes -0.328478965 (alpha/pi)^2 = -1.772e-06 (sealed): 0.15% of the first term. Every vertex carries sqrt alpha ~ 0.085, so each added loop costs about alpha/pi ~ 1/430 - a drawing's complexity prices its own weight. The big term first, the corrections narrowing: the ratchet.",
+     "kind": "witness",
+     "seal": "71193387dee0bce87312fcbc4d58144304fb8b2686f185d5f3e1d8ee477b3e37"
+    },
+    {
+     "by": "Narrow Highway - Feynman diagrams as schematics, 2026-10-08",
+     "claim": "[three classes of drawings land on the measurement] alpha/2pi - 0.328478965 (alpha/pi)^2 + 1.181241456 (alpha/pi)^3 = 0.00115965223 (sealed) against the measured 0.00115965218: 44 parts in 10^9, and the remainder is the size of the four-loop class (cited: 891 diagrams, Kinoshita). GUARD: the alpha used here (CODATA 2018) leans on a_e itself; the independent test takes alpha from atom recoil (Cs 2018, Rb 2020) and agrees at the 10^-9 level with a one-to-two sigma tension between the two - a verified consistency, stated at its precision.",
+     "kind": "witness",
+     "seal": "4388579b8719d5cfc4f208eb08cb357d1aeb72c2b26d4f49688e6520d02aae63"
+    },
+    {
+     "by": "Narrow Highway - Feynman diagrams as schematics, 2026-10-08",
+     "claim": "[the loop count is a graph count] A connected diagram with I internal lines and V vertices has L = I - V + 1 independent loops: the one-loop vertex correction, I = 3, V = 3, gives 1 (sealed). Each loop is one power of h-bar (the paths stick: tree level is the classical path) and one four-dimensional integral to do. The drawing's topology IS its order.",
+     "kind": "witness",
+     "seal": "36c5ec25483153f04899ca5c6d98fbb2357f34cdf2d91d51110d561fd8cec1dd"
+    },
+    {
+     "by": "Narrow Highway - Feynman diagrams as schematics, 2026-10-08",
+     "claim": "[the schematic has the same count] A Wheatstone bridge - six branches, four nodes - has 6 - 4 + 1 = 3 independent meshes (sealed; Kirchhoff 1847), and the same formula, the graph's cycle rank (the topology stick's Euler count), gave the Feynman loop count above. A Feynman diagram and a circuit schematic are one object: a graph whose lines carry rules and whose loops are the integrals - or the mesh equations - to solve.",
+     "kind": "witness",
+     "seal": "fc1f58a42498ed90c2ffa88b0da7c3858d90984427dacff9f86f51d922f04d33"
+    },
+    {
+     "by": "Narrow Highway - Feynman diagrams as schematics, 2026-10-08",
+     "claim": "[the drawing enumerates what the algebra would lose] Six field operators pair in 5!! = 15 ways (sealed; Wick 1950) - each pairing a line, each complete pairing one diagram. The diagram is bookkeeping an eye can check; without it the terms are lost. Dyson 1952: the number of diagrams grows like n! and the series is asymptotic (radius of convergence zero) - the map is faithful term by term and never a closed form. Cited, never sealed.",
+     "kind": "witness",
+     "seal": "7509420e5343bb4a44e7d7b3e3b310481f7fe6205480fe0d3efab6d90948c021"
+    },
+    {
+     "by": "Narrow Highway - Feynman diagrams as schematics, 2026-10-08",
+     "claim": "[a schematic read as a number] R = 10 kOhm and C = 1 uF on a schematic: the corner f_c = 1/(2 pi R C) = 15.92 Hz (sealed), a pole at s = -1/RC = -100 rad/s on the Laplace stick's s-plane. The symbol library (Ohm, Laplace) plus the drawing gives the number - a circuit simulator reads the netlist exactly as Feynman's rules read the diagram. The engine's own schematic is systems.py and the Bridge: fifteen components, their edges priced, the roll-call at boot.",
+     "kind": "witness",
+     "seal": "5f6889d3c7279bb016a3e632d038871b6b7452efff0e0d05d76a969e2047ecd1"
+    },
+    {
+     "by": "Narrow Highway - Feynman diagrams as schematics, 2026-10-08",
+     "claim": "[the vision made plain - and the guard] Habakkuk 2:2: 'Write the vision, and make it plain upon tables, that he may run that readeth it' - a drawing plain enough to be executed. Exodus 25:40: 'according to their pattern, which was shewed thee in the mount'; 1 Chronicles 28:19: 'the LORD made me understand in writing by his hand upon me, even all the works of this pattern' - the tabernacle and the temple built from a given schematic. GUARDS: a diagram is one term of a series, not the physics; the series is asymptotic (Dyson); the Scripture patterns are a likeness of schematic-reading, never a fit; alpha's provenance is stated. Seven numbers sealed; the rest cited. Ties: feynman (the sum over paths these diagrams expand), alpha, forces (a_e), topology (cycle rank), laplace (the s-plane), smith_chart, geneva (the mechanical computer), the vacuum-tube computer (systems.py is the map).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

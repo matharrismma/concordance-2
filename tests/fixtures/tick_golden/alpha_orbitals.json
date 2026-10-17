@@ -1,0 +1,76 @@
+{
+ "entry": "alpha_orbitals",
+ "rc": 0,
+ "seals": {
+  "18358a55ae11fb321c4dc7116676bd0d23ca5014cb2fa302f41635d2dc1049a2": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "rydberg_energy"
+   ]
+  },
+  "1ef4edc0646c13732fd5f565330ddb71de48f07197de3b35247f4a301a7a140b": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "bohr_radius"
+   ]
+  },
+  "981b7f1311f82cbf109d6eb865e6df8d451a54dbddcc6c7259c6f0755198eea2": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "alpha_orbital_speed"
+   ]
+  },
+  "ac2dd07f02c61c99c408123374bee550a36561ccdba23a4b7743ccc71560af38": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "fine_structure_suppression"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_fine_structure_constant": {
+   "field": "physics",
+   "question": "The fine-structure constant",
+   "references": [
+    "CODATA 2018 recommended values",
+    "A. Sommerfeld, Ann. Phys. 356 (1916) 1 (the fine structure of the hydrogen spectrum)"
+   ],
+   "statement": "Why does the fine-structure constant have the value alpha ~ 1/137.036, and is it truly constant across space and time? No accepted theory derives it from first principles; the open question is its value and its constancy, not its measurement.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the atomic-orbital reading, 2026-10-06",
+     "claim": "[orbital - speed] The ground-state (n=1) electron's orbital speed is v1 = alpha*c = e^2/(2*eps0*h) = 2.187691e+06 m/s ~ c/137: alpha IS v/c for the innermost orbital.",
+     "kind": "witness",
+     "seal": "981b7f1311f82cbf109d6eb865e6df8d451a54dbddcc6c7259c6f0755198eea2"
+    },
+    {
+     "by": "Narrow Highway - the atomic-orbital reading, 2026-10-06",
+     "claim": "[orbital - energy] The Rydberg (hydrogen binding/ionization) energy is E_R = 1/2 alpha^2 m_e c^2 = m_e e^4/(8 eps0^2 h^2) = 2.179872e-18 J = 13.6057 eV - the gross-structure scale; it equals h*c*R_inf to 8e-12 (CODATA R_inf), confirming the derivation.",
+     "kind": "witness",
+     "seal": "18358a55ae11fb321c4dc7116676bd0d23ca5014cb2fa302f41635d2dc1049a2"
+    },
+    {
+     "by": "Narrow Highway - the atomic-orbital reading, 2026-10-06",
+     "claim": "[orbital - size] The Bohr radius is a_0 = hbar/(alpha*m_e*c) = 4*pi*eps0*hbar^2/(m_e e^2) = 5.291772e-11 m, matching CODATA a_0 to 6e-10: alpha sets the atom's size (a_0 = the reduced Compton wavelength / alpha).",
+     "kind": "witness",
+     "seal": "1ef4edc0646c13732fd5f565330ddb71de48f07197de3b35247f4a301a7a140b"
+    },
+    {
+     "by": "Narrow Highway - the atomic-orbital reading, 2026-10-06",
+     "claim": "[suborbital - fine structure] The suborbital splitting - the spin-orbit and relativistic lifting of the l,j degeneracy within a shell - is suppressed by alpha^2 = 5.325135e-05 relative to the gross structure (fine-structure energy ~ 1/2 alpha^4 m_e c^2 ~ alpha^2 * Rydberg ~ 7.2e-4 eV). This alpha^2-fineness of the spectral lines is why Sommerfeld (1916) named it the FINE-STRUCTURE constant.",
+     "kind": "witness",
+     "seal": "ac2dd07f02c61c99c408123374bee550a36561ccdba23a4b7743ccc71560af38"
+    },
+    {
+     "by": "Narrow Highway - the atomic-orbital reading, 2026-10-06",
+     "claim": "[the anchor] alpha is not an abstract number: it is the atom's architecture. The orbital electron's speed (alpha*c), the binding energy (alpha^2), the size (1/alpha in reduced-Compton units), and the fineness of the suborbital splitting (alpha^2) all follow from it - the name is the meaning, the fine structure of the orbitals. Seal the arithmetic; WHY alpha has this value stays the open question.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

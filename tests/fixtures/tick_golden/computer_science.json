@@ -1,0 +1,70 @@
+{
+ "entry": "computer_science",
+ "rc": 0,
+ "seals": {
+  "db2ca6b78206dae59d1c8638fd9eeb135528f291ed0d7b8ce9d405792ae034b9": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "boolean_functions_of_two_inputs_two_to_the_fourth"
+   ]
+  },
+  "f921ec1a2e47fa50038fa3ddf767ceecdf02c7b1e04b1856d56e1fb3b2a3ee67": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "a_byte_is_two_to_the_eighth_values"
+   ]
+  },
+  "fc84b6e6790726fda3c12a4385d98a517b82af6d265f20938ff2e1c4f02ccf72": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "merge_sort_comparisons_n_log2_n_for_eight"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_computer_science_bits_logic_and_what_can_be_computed": {
+   "field": "",
+   "question": "Computer science - bits, logic, and what can be computed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[information is bits, SEALED] Everything digital is bits, and n bits name 2^n things: a byte of 8 bits is 2^8 = 256 values (sealed) - a character, a shade, a number from 0 to 255. The bit is the atom of information (the Shannon bit, sealed on the information instrument); computing is what you can do with enough of them.",
+     "kind": "instance",
+     "seal": "f921ec1a2e47fa50038fa3ddf767ceecdf02c7b1e04b1856d56e1fb3b2a3ee67"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[logic gates - the 16 functions of two inputs, SEALED] A gate maps inputs to a bit; of two inputs there are exactly 2^(2^2) = 16 possible Boolean functions (sealed) - AND, OR, XOR, NAND and the rest. NAND alone can build them all, and from gates come adders, memory, processors. All of computation is wired from this finite logic.",
+     "kind": "instance",
+     "seal": "db2ca6b78206dae59d1c8638fd9eeb135528f291ed0d7b8ce9d405792ae034b9"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[algorithms matter - merge sort, SEALED] The same task can cost wildly different work. Sorting 8 items by merge sort takes about n log2 n = 8 * 3 = 24 comparisons (sealed); the naive way takes n^2 = 64. As n grows the gap explodes - this is why ALGORITHMS, not just faster hardware, are the heart of the field.",
+     "kind": "instance",
+     "seal": "fc84b6e6790726fda3c12a4385d98a517b82af6d265f20938ff2e1c4f02ccf72"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[computability - what a machine can do at all] A Turing machine defines what is computable, and the universal machine runs any program - the engine, your laptop, the brain's computation are all instances. But some problems are UNDECIDABLE: the halting problem (will a program stop?) has no algorithm, proved by Turing. A hard limit found in the structure, like the uncertainty principle - not ignorance, a proof. Ties card_floor_p_vs_np and card_floor_the_mind.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[complexity - how fast, and the open frontier] Beyond CAN it be computed lies HOW FAST: big-O counts the work, P is the tractable, NP the checkable, and whether P = NP is the open Millennium problem on the map. Cryptography bets it is not (factoring is hard). Computation sits exactly on the P vs NP floor. Ties card_floor_p_vs_np and card_floor_cryptography.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[on the one map] Computer science rests on the instruments (the bit is Shannon information; logic is the formal-logic instrument), P vs NP (computability and complexity), and the mind (which computes - neural networks borrow the brain's shape). The engine is itself one such machine, a deterministic computation over the keeping. Ties card_floor_computer_science.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,70 @@
+{
+ "entry": "cryptography",
+ "rc": 0,
+ "seals": {
+  "21e3c1e17653e49e90b41a44ba59b169d9210d48ad2402ec8eedb62759376498": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "rsa_decrypt_c_pow_d_mod_n_recovers_m"
+   ]
+  },
+  "b38e974c405e12a53f7fd38119e7895f2c2579fd84614ac7658f77cf6315753b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fermats_little_theorem_a_pow_p_minus_1_mod_p"
+   ]
+  },
+  "d6ea2330ea0194468005fe1e484e53794b1c10075ede042dabbb75feee04b9e1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "rsa_encrypt_m_pow_e_mod_n"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_cryptography_public_keys_and_hard_problems": {
+   "field": "",
+   "question": "Cryptography - public keys and hard problems",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py cryptography",
+     "claim": "[the RSA round-trip - encrypt, SEALED] RSA with primes 3 and 11 (n = 33, public exponent e = 3): encrypting the message m = 4 is c = 4^3 mod 33 = 31 (sealed). Anyone with the public key can lock the message; the modular exponentiation is one-way without the private key.",
+     "kind": "instance",
+     "seal": "d6ea2330ea0194468005fe1e484e53794b1c10075ede042dabbb75feee04b9e1"
+    },
+    {
+     "by": "tools/tick.py cryptography",
+     "claim": "[the RSA round-trip - decrypt, SEALED] With the private exponent d = 7, decrypting is 31^7 mod 33 = 4 (sealed) - the original message returns. Public key locks, private key unlocks, and the two are mathematically inverse. The whole of asymmetric cryptography is this round-trip.",
+     "kind": "instance",
+     "seal": "21e3c1e17653e49e90b41a44ba59b169d9210d48ad2402ec8eedb62759376498"
+    },
+    {
+     "by": "tools/tick.py cryptography",
+     "claim": "[why it works - Fermat's little theorem, SEALED] Decryption recovers the message because a^(p-1) = 1 mod p for prime p: for a = 2, p = 7, 2^6 mod 7 = 1 (sealed). This is the number theory that makes e and d inverse modulo phi(n) - RSA is built on the primes and on Fermat/Euler.",
+     "kind": "instance",
+     "seal": "b38e974c405e12a53f7fd38119e7895f2c2579fd84614ac7658f77cf6315753b"
+    },
+    {
+     "by": "tools/tick.py cryptography",
+     "claim": "[security rests on hardness - the P vs NP region] RSA is secure only because FACTORING n back into its primes is believed hard - no known fast (polynomial) algorithm. That belief lives in the P vs NP region of the map: if P = NP, or a fast factoring algorithm were found, RSA would fall. Shor's quantum algorithm already factors fast IN PRINCIPLE (stick_quantum_factoring), which is why post-quantum cryptography is being built. Ties card_floor_p_vs_np.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py cryptography",
+     "claim": "[perfect secrecy - Shannon] One scheme is provably unbreakable: the one-time pad (XOR the message with a truly random key as long as the message, used once). Shannon proved it has PERFECT secrecy - the ciphertext reveals nothing about the message - because the key's entropy equals the message's. Its cost (a key as long as all traffic, never reused) is why we fall back to hardness-based schemes for everything else. Ties card_floor_the_instruments (information theory).",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py cryptography",
+     "claim": "[on the one map] Cryptography stands on the instruments (number theory and information), the P vs NP region (its security IS a hardness assumption), and Riemann (it runs on the primes, whose distribution the zeta function governs). The applied domain where the Millennium problems become a daily tool: every secure connection bets that factoring is hard. Ties card_floor_cryptography.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

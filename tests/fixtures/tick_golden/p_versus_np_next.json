@@ -1,0 +1,136 @@
+{
+ "entry": "p_versus_np_next",
+ "rc": 0,
+ "seals": {
+  "090b86da028c3ef942ce094aa20b3476bad8929e53b8b436c55cbb952c3e78b4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "cook_levin_circuit_size_t_squared_at_t_1e6"
+   ]
+  },
+  "3a952271e1aa1adbbe9f7f535dcc494ff141cc7a15b17c7837cbf37e7169942d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fghk_2016_circuit_lower_bound_3_plus_1_over_86_n_at_n_1000"
+   ]
+  },
+  "40da82be6ecb28f11e55e4a68435600d40e0348fa884ad8f10b25e02c386c8a2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "brute_force_assignments_of_50_variables"
+   ]
+  },
+  "7b9616ae65844dce4b88bd9a78c2fc306fb864009463b87da3d64a951b8d3bec": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "time_hierarchy_separating_factor_log_n_at_n_1e6"
+   ]
+  },
+  "87a01fe2a637851da1074cd5b60917385c73ff2afd753f9230bf31dbf28e865f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "blum_1984_circuit_lower_bound_3n_at_n_1000"
+   ]
+  },
+  "b9d10769512e1afa645e780c9f90b1c5c6e4c7a17bbdebcb922fa59974441994": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "three_sat_satisfiability_threshold_clauses_at_n_1000"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_p_versus_np": {
+   "field": "",
+   "question": "P versus NP",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "The best PROVEN circuit lower bound for an explicit Boolean function is (3 + 1/86) n - o(n) gates (Find, Golovnev, Hirsch, Kulikov 2016), raised from Blum's 3n - o(n) of 1984; at n = 1000 that is 3011.6 gates (sealed). Every lower bound ever proven for an explicit function is linear; P != NP by circuits would need superpolynomial. This is the stick's one ratcheting number: the window above it is the whole problem.",
+     "kind": "bound",
+     "seal": "3a952271e1aa1adbbe9f7f535dcc494ff141cc7a15b17c7837cbf37e7169942d",
+     "unit": "n gates (explicit lower bound)",
+     "up_to": 3.011627906976744
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "[the ladder's first rung] Blum 1984: 3n - o(n) gates for an explicit function - 3000 at n = 1000 (sealed). Thirty-two years to raise it by n/86.",
+     "kind": "instance",
+     "seal": "87a01fe2a637851da1074cd5b60917385c73ff2afd753f9230bf31dbf28e865f"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "[the one separation that is easy] The time hierarchy theorem (Hartmanis-Stearns 1965): more time decides more; DTIME(n^2) is strictly inside DTIME(n^2 log^2 n), and so P != EXPTIME - PROVEN. The separating factor at n = 10^6 is log n = 13.8 (sealed). The theorem works by diagonalization, which relativizes - which is exactly why it cannot reach P vs NP (the first barrier on this stick).",
+     "kind": "instance",
+     "seal": "7b9616ae65844dce4b88bd9a78c2fc306fb864009463b87da3d64a951b8d3bec"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "[what brute force costs] Fifty Boolean variables have 2^50 = 1.13e15 assignments (sealed). SAT asks whether one of them works; P = NP would mean the question never needs the count.",
+     "kind": "instance",
+     "seal": "40da82be6ecb28f11e55e4a68435600d40e0348fa884ad8f10b25e02c386c8a2"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "[where hardness lives, measured] Random 3-SAT at n variables goes from almost surely satisfiable to almost surely not at about 4.267 clauses per variable (Mertens-Mezard-Zecchina 2006, the cavity prediction; the threshold's existence is Friedgut's theorem) - 4267 clauses at n = 1000 (sealed as the instance of a stated constant). The hardest instances cluster at the transition.",
+     "kind": "instance",
+     "seal": "b9d10769512e1afa645e780c9f90b1c5c6e4c7a17bbdebcb922fa59974441994"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "[Cook-Levin: the reduction's cost] A computation of t steps becomes a circuit of O(t^2) gates (t = 10^6 gives 10^12, sealed), so every NP problem reduces to SAT in polynomial time - which is why ONE problem carries the whole question: P = NP if and only if SAT is in P.",
+     "kind": "instance",
+     "seal": "090b86da028c3ef942ce094aa20b3476bad8929e53b8b436c55cbb952c3e78b4"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "[the postulate it builds on] Polynomial time is feasibility: a problem is tractable when some algorithm solves every instance of size n within n^k steps for a fixed k, on a Turing machine - the Cobham-Edmonds thesis on the Church-Turing model. Not kept as a fact: every algorithm in use works under it, and the classes P and NP are defined by it; from its working the truth of the framing is inferred - never proven, never kept as fact.",
+     "kind": "postulate",
+     "source": "A. Cobham (1965); J. Edmonds, Paths, trees, and flowers (1965); A. Church (1936), A. Turing (1936)"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "[proven links] Cook 1971 / Levin 1973: SAT is NP-complete, so P = NP <=> SAT in P; Karp 1972: twenty-one problems join it. Hartmanis-Stearns 1965: P != EXPTIME. Ladner 1975: if P != NP there are NP problems neither in P nor NP-complete. Williams 2011: NEXP is not in ACC0 - a lower bound proven PAST all three barriers on this stick, the first in decades, by an algorithm for circuit-satisfiability turned into a separation.",
+     "kind": "equivalence",
+     "source": "S. A. Cook (1971); L. Levin (1973); R. M. Karp (1972); J. Hartmanis, R. E. Stearns (1965); R. E. Ladner (1975); R. Williams, Non-uniform ACC circuit lower bounds (2011)"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "relativizing proof techniques cannot resolve P vs NP: there are oracles A, B with P^A = NP^A and P^B != NP^B - the FIRST barrier (Baker, Gill, Solovay 1975). It blocks diagonalization and simulation, the techniques that relativize (hold relative to every oracle): P^A = NP^A for any PSPACE-complete A, since P^PSPACE = PSPACE = NP^PSPACE, while a diagonalized B gives P^B != NP^B - so no argument that relativizes can decide the unrelativized question. First breached by arithmetization: IP = PSPACE (Shamir 1992) does not relativize.",
+     "kind": "exclusion",
+     "source": "T. Baker, J. Gill, R. Solovay, Relativizations of the P =? NP question, SIAM J. Comput. 4 (1975) 431-442; A. Shamir, IP = PSPACE, J. ACM 39 (1992)"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "natural proofs cannot separate P from NP if strong pseudorandom generators exist - the SECOND barrier (Razborov, Rudich 1997). A proof is 'natural' when its hard-function property is CONSTRUCTIVE (recognizable in time 2^O(n)), LARGE (holds for a 2^-O(n) fraction of all Boolean functions), and USEFUL (implies a circuit lower bound). Almost every combinatorial lower bound proven is natural; but a natural property useful against P/poly would itself break the pseudorandom generators P/poly is believed to contain, so a separation must be non-natural - it must give up one of the three conditions.",
+     "kind": "exclusion",
+     "source": "A. A. Razborov, S. Rudich, Natural proofs, J. Comput. System Sci. 55 (1997) 24-35"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "algebrizing proof techniques cannot resolve P vs NP - the THIRD barrier (Aaronson, Wigderson 2009). Algebrization extends relativization to low-degree polynomial (algebraic) oracle extensions, so it captures arithmetization itself - the very technique that beat the first barrier. A result that algebrizes still cannot separate P from NP, nor prove NP is not in P/poly; a separation must be non-algebrizing.",
+     "kind": "exclusion",
+     "source": "S. Aaronson, A. Wigderson, Algebrization: a new barrier in complexity theory, ACM Trans. Comput. Theory 1 (2009) 2:1-2:54"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "[the barrier map, identified] Three barriers stand between any proof and P vs NP, each ruling out a family of techniques proven unable to reach it: RELATIVIZATION (Baker-Gill-Solovay 1975) rules out diagonalization and simulation; NATURAL PROOFS (Razborov-Rudich 1997) rules out the standard combinatorial circuit lower bounds; ALGEBRIZATION (Aaronson-Wigderson 2009) rules out the arithmetization that had evaded the first. Each was breached in turn - arithmetization passed relativization (IP = PSPACE, 1992), then algebrization showed that road also stops short. The one lower bound known to pass all three is Williams 2011 (NEXP not in ACC0): non-relativizing, non-natural, non-algebrizing - the needle's eye any proof of P != NP must thread. The barriers are why the surviving window above (3 + 1/86) n is the whole problem; the sources are carded on the P vs NP chain (card_floor_p_vs_np).",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py p_versus_np_next",
+     "claim": "[the surviving window, read] Sealed: the lower-bound ladder's rungs, the hierarchy factor, the brute-force count, the threshold instance, the reduction's cost. Proven (cited): SAT is complete, P != EXPTIME, Ladner, Williams. Excluded (cited, already on this stick): relativization, natural proofs, algebrization - a proof must use the specific structure of computation in a way none of those do. Open: everything between (3 + 1/86) n and superpolynomial. Gaps become wants: the cited texts (Cook, Karp, Blum, FGHK, Williams) and Aaronson's survey for inclusion; the geometric complexity theory program (Mulmuley-Sohoni) as the one road not yet excluded, cited; a SAT solver door so a stated instance's satisfiability is COMPUTED and sealed here. Every link sealed or cited; nothing out of thin air; the chain not closed.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

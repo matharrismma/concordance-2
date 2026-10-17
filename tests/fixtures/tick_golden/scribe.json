@@ -1,0 +1,77 @@
+{
+ "entry": "scribe",
+ "rc": 0,
+ "seals": {
+  "39ae6a0bf82f756b240cc017e9e5bb6c633523fccf773ee56a4b7bfdd64f62a9": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "scribe_segment_falling"
+   ]
+  },
+  "587cf234a76724202ac843a838e14e8c11619d3450a4a0ef79f507d4715d8221": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "scribe_segment_rising"
+   ]
+  },
+  "d335d1b2a113ca1ff44db703526afd470803036859a87d377d721ffd9902946d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "scribe_more_points_sharper"
+   ]
+  },
+  "eade77567282f91dd683bf4e818a661216fb7bffbc8236c710eb91854cabd13a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "scribe_to_center_bisect"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_scribing_mark_the_points_let_the_lines_connect_them": {
+   "field": "meta",
+   "question": "Scribing - mark the points, let the lines connect them",
+   "references": [
+    "bisection: bracket a target, set the new reference inward, converge",
+    "interpolation: the connecting line's slope is read FROM the marked points",
+    "found, never generated; map, never launder - the line is only the connection"
+   ],
+   "statement": "Scribing works in three motions. To find the exact middle you bracket it, set a mark, and that mark becomes the new reference - a bisection that only moves inward (a ratchet). To map an uneven surface you mark the true points and let the line be nothing but their connection - never a smooth curve imposed and then fitted. And as more true points are marked, every line sharpens - the image clears, the note comes on tune, the path narrows - a convergence that is a law, not a hope. The line is derived from the points; it is not authored.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - scribing, 2026-10-07",
+     "claim": "[movement 1 - scribe to the center] Bracket the middle and bisect: the de Bruijn-Newman scribe on RH has bracket [0, 0.22] with midpoint (0 + 0.22)/2 = 0.11 (sealed). Set a mark and it becomes the new reference - a RATCHET that never cuts back past it, converging on the exact middle (Lambda = 0). Narrowing that cannot regress (stick_the_de_bruijn_newman_constant).",
+     "kind": "witness",
+     "seal": "eade77567282f91dd683bf4e818a661216fb7bffbc8236c710eb91854cabd13a"
+    },
+    {
+     "by": "Narrow Highway - scribing, 2026-10-07",
+     "claim": "[movement 2 - the line rises with the surface] On an uneven surface you do not draw a smooth curve and fit; you mark the true points and let the line be their connection. Points A(0,0), B(1,3): the segment A->B has slope (3-0)/(1-0) = 3 (sealed) - the surface rises, and the line is read FROM the points, not chosen.",
+     "kind": "witness",
+     "seal": "587cf234a76724202ac843a838e14e8c11619d3450a4a0ef79f507d4715d8221"
+    },
+    {
+     "by": "Narrow Highway - scribing, 2026-10-07",
+     "claim": "[...and falls with it] The next segment B(1,3) -> C(2,2) has slope (2-3)/(2-1) = -1 (sealed) - the surface falls. The connection follows the actual surface, up then down, because the line is nothing but the joining of the marked points. Impose a smooth line reality does not have and you launder; follow the points and the shape is found.",
+     "kind": "witness",
+     "seal": "39ae6a0bf82f756b240cc017e9e5bb6c633523fccf773ee56a4b7bfdd64f62a9"
+    },
+    {
+     "by": "Narrow Highway - scribing, 2026-10-07",
+     "claim": "[as the points multiply, everything sharpens] The more true points you mark, the more precise the line, the clearer the image, the truer the note, the narrower the path. It is a law, not a hope: a note's frequency resolution is Delta_f = 1/T, so 100 seconds of it pins the pitch to 1/100 = 0.01 Hz (sealed) - gather more and the note comes on tune; an image resolves with more samples (Nyquist); an estimate tightens as 1/sqrt(N) (stick_monte_carlo); and the path narrows by the ratchet (stick_the_de_bruijn_newman_constant). The tuned notes put together play the rhythm and rhyme of reality - the symphony comes on key as more of them are tuned (stick_the_final_assembly).",
+     "kind": "witness",
+     "seal": "d335d1b2a113ca1ff44db703526afd470803036859a87d377d721ffd9902946d"
+    },
+    {
+     "by": "Narrow Highway - scribing, 2026-10-07",
+     "claim": "[this IS the engine's method] 'Creating the points and then allowing the lines to be the connection of points' is FOUND, NEVER GENERATED in geometric form: the sealed marks are the points; the law / curve / narrow path is only ever their connection - never drawn independently and never fitted-to. It is the keeping itself (cards = points, connections = lines/edges; chains walks the lines between points - stick_the_standard_model_chain_where_two_trees_connect), the Legendre envelope of tangent points (stick_the_legendre_transform_mark_the_points_create_the_line), and why substance lives in the RELATIONS not the isolated points. The two movements together - narrow to the center (ratchet) and follow the uneven surface (points -> lines) - are the whole method: approach the one fixed center, honestly, by the connection of real marks. A generator that drew its own line would be the destructive act ([[feedback_a_generator_picking_its_own_path_is_a_destructive_act_2026-08-02]]). map, never launder: the line is the connection of the points, nothing added.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

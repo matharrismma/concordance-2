@@ -1,0 +1,63 @@
+{
+ "entry": "mandelbrot",
+ "rc": 0,
+ "seals": {
+  "5041ca30610dd3c41c1894b5682e0f01042b41469d4700f25ec65ed74bd8f23e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mandelbrot_escape_c1"
+   ]
+  },
+  "5a415e5c090711ba47fbfb8e7c5b1401e7fdccad1b1ef74b41bc144ceafe71f1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mandelbrot_period2_bulb_radius"
+   ]
+  },
+  "aa1f89a88230c9b7b509a6926cc96d62f9d4e538639ca19d11ef363817e51342": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mandelbrot_bounded_cneg1"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_mandelbrot_set": {
+   "field": "mathematics",
+   "question": "The Mandelbrot set",
+   "references": [
+    "B. Mandelbrot, Fractal aspects of z -> lambda z(1-z) (1980)",
+    "A. Douady & J. Hubbard, Etude dynamique des polynomes complexes (1984) (M is connected)"
+   ],
+   "statement": "Membership in the Mandelbrot set is decided by iterating z -> z^2 + c from zero: escape is a definite rejection, but interior membership is certified only for special points while a generic boundary point stays 'not yet escaped'. The arithmetic of the orbit is exact; the boundary is where the deciding never finitely completes.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Mandelbrot reading (a component), 2026-10-07",
+     "claim": "[escape is a definite rejection] c is in M iff the orbit z -> z^2 + c from z=0 never leaves |z| <= 2. For c=1 the orbit is 0 -> 1 -> 2 -> 5: the third step is ((0^2+1)^2+1)^2+1 = 5 (sealed) > 2, and once past radius 2 the orbit escapes to infinity and never returns. So c=1 is DEFINITELY OUT - a clean rejection, exactly the gate's hard refuse.",
+     "kind": "witness",
+     "seal": "5041ca30610dd3c41c1894b5682e0f01042b41469d4700f25ec65ed74bd8f23e"
+    },
+    {
+     "by": "Narrow Highway - the Mandelbrot reading (a component), 2026-10-07",
+     "claim": "[membership stays provisional, except where certified] For c=-1 the orbit is 0 -> -1 -> 0 -> -1...: (0^2-1)^2-1 = 0 (sealed), a period-2 cycle that never escapes, so c=-1 IS in M. Such special (hyperbolic) points are certified; but a generic boundary point is only 'has not escaped in N iterations' - never proven IN by any finite computation. The boundary is where narrowing never completes: a miss stays a miss, and 'in' stays open.",
+     "kind": "witness",
+     "seal": "aa1f89a88230c9b7b509a6926cc96d62f9d4e538639ca19d11ef363817e51342"
+    },
+    {
+     "by": "Narrow Highway - the Mandelbrot reading (a component), 2026-10-07",
+     "claim": "[it is built of COMPONENTS] M is not a blob: it is the main cardioid plus infinitely many hyperbolic bulbs, each a component where the orbit settles to a fixed period. The period-2 component is the disk of radius 1/4 = 0.25 (sealed) centred at c=-1, where the fixed point doubles. The structure IS the components; the fractal boundary between them (Hausdorff dimension 2) is where all the complexity lives.",
+     "kind": "witness",
+     "seal": "5a415e5c090711ba47fbfb8e7c5b1401e7fdccad1b1ef74b41bc144ceafe71f1"
+    },
+    {
+     "by": "Narrow Highway - the Mandelbrot reading (a component), 2026-10-07",
+     "claim": "[the component in the engine] The Mandelbrot set is the engine's gate and tick-stick made visual: infinite structure from a TRIVIAL deterministic rule (z^2 + c - no model, no generator, found never authored), decided by ITERATION and ELIMINATION (a definite OUT on escape, only a provisional IN otherwise), connected (Douady-Hubbard) yet with a boundary no finite computation closes. Admit-or-refuse; a miss stays a miss; narrowing is evidence, never proof - the same shape as the positive-geometry core. A component: one organ of the one body. Map, never launder: seal the orbit and the bulb; the likeness to the engine is discernment.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

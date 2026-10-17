@@ -1,0 +1,64 @@
+{
+ "entry": "smith_chart",
+ "rc": 0,
+ "seals": {
+  "2ef55aba75f5fe431a4ffebf8546b84d1683fc74cb3d633c9e689a09cbe85bc8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "smith_matched"
+   ]
+  },
+  "4d32303c3793a8bd61e9508e3b1939caf07ebc6a8cea50d36d135ac853bc78d9": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "smith_short"
+   ]
+  },
+  "589bc8f4fa4b4ee98620524536623d62e60ec0a52815ff42fce05e18f25cc0bc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "smith_lossless_unit_circle"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_smith_chart_the_cayley_transform": {
+   "field": "meta",
+   "question": "The Smith chart - the Cayley transform",
+   "references": [
+    "P. Smith's impedance chart (1939) - Gamma = (Z - Z0)/(Z + Z0)",
+    "the Cayley transform between self-adjoint and unitary operators",
+    "the conformal map of the half-plane onto the disk"
+   ],
+   "statement": "Gamma = (z - 1)/(z + 1) maps the passive-impedance half-plane (Re z >= 0) into the unit disk and the lossless imaginary axis onto the unit circle |Gamma| = 1. It is the Cayley transform; the operator form (A - iI)(A + iI)^-1 sends a self-adjoint A to a unitary U, the real spectrum to the unit circle.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Smith chart / Cayley transform, 2026-10-07",
+     "claim": "[matched load -> center] z = 1 gives Gamma = (1-1)/(1+1) = 0 (sealed): a perfectly matched load sits at the center of the chart, |Gamma| = 0, no reflection. The fixed point of the transform.",
+     "kind": "witness",
+     "seal": "2ef55aba75f5fe431a4ffebf8546b84d1683fc74cb3d633c9e689a09cbe85bc8"
+    },
+    {
+     "by": "Narrow Highway - the Smith chart / Cayley transform, 2026-10-07",
+     "claim": "[short -> the circle] z = 0 (a short) gives Gamma = (0-1)/(0+1) = -1 (sealed): on the unit circle, total reflection. Open and short sit at opposite points of |Gamma| = 1.",
+     "kind": "witness",
+     "seal": "4d32303c3793a8bd61e9508e3b1939caf07ebc6a8cea50d36d135ac853bc78d9"
+    },
+    {
+     "by": "Narrow Highway - the Smith chart / Cayley transform, 2026-10-07",
+     "claim": "[lossless -> the unit circle, the key] z = i (pure reactance) gives |Gamma|^2 = ((-1)^2 + 1^2)/(1^2 + 1^2) = 2/2 = 1 (sealed), so |Gamma| = 1. EVERY lossless impedance - the whole imaginary axis - maps onto the unit circle. This is self-adjoint (spectrum on the line) <-> unitary (spectrum on the circle) in the engineer's hand: the same line<->circle symmetry that pins |alpha| = sqrt(q) over a finite field (stick_finite_field_riemann) and that Hilbert-Polya would use (stick_hilbert_polya).",
+     "kind": "witness",
+     "seal": "589bc8f4fa4b4ee98620524536623d62e60ec0a52815ff42fce05e18f25cc0bc"
+    },
+    {
+     "by": "Narrow Highway - the Smith chart / Cayley transform, 2026-10-07",
+     "claim": "[why this belongs in the Riemann arc] The Smith chart is a conformal MAP; the critical line Re(s) = 1/2 and the unit circle are two faces of one symmetry under Cayley. The engine is not an RF simulator and does not run electromagnetics; it seals the transform's arithmetic and keeps the likeness as discernment. map, never launder.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,74 @@
+{
+ "entry": "feynman",
+ "rc": 0,
+ "seals": {
+  "54301470e8720839e211226c1db01bd10e3886bd36d06ad5200df259ae09fe1b": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "planck_length"
+   ]
+  },
+  "a29d206411833acc817e0ee927a674efb39ca4f9fe5d254dbc31741b964f5811": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "least_action_straight"
+   ]
+  },
+  "bfe14a7e8065c6f8afb77b459ec1a60ab79e45e4f6d7a9a410c048f6378c805b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "least_action_bent_path"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_principle_of_least_action": {
+   "field": "physics",
+   "question": "The principle of least action",
+   "references": [
+    "R. P. Feynman, Rev. Mod. Phys. 20 (1948) 367 (space-time approach / path integral)",
+    "R. P. Feynman, QED: The Strange Theory of Light and Matter (1985)",
+    "CODATA 2018 recommended values (Planck length)"
+   ],
+   "statement": "Why does nature follow the path of least (stationary) action, and what lies at the scale where the action of spacetime itself is of order hbar? The classical principle is exact and the quantum path integral explains it; the Planck-scale quantum gravity it points to is open.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the least-action reading (Feynman), 2026-10-07",
+     "claim": "[least action - the straight path wins] A free particle (m=1) going from x=0 to x=1 in time T=1: the classical straight path (v=1) has action S = integral 1/2 v^2 dt = 0.5 (sealed); a bent path with the same endpoints, x=t^2, has S = integral 1/2 (2t)^2 dt = 0.6667 (sealed) - LARGER. The actual path is the one that makes the action stationary (here, least): delta S = 0 is the Euler-Lagrange equation, which for this Lagrangian IS F=ma.",
+     "kind": "witness",
+     "seal": "a29d206411833acc817e0ee927a674efb39ca4f9fe5d254dbc31741b964f5811"
+    },
+    {
+     "by": "Narrow Highway - the least-action reading (Feynman), 2026-10-07",
+     "claim": "[the alternative path's action] The bent path's 0.6667 > the straight path's 0.5 (sealed) - a concrete instance of the inequality that singles out the classical trajectory. Vary the path, the action goes up; the true path sits at the bottom.",
+     "kind": "witness",
+     "seal": "bfe14a7e8065c6f8afb77b459ec1a60ab79e45e4f6d7a9a410c048f6378c805b"
+    },
+    {
+     "by": "Narrow Highway - the least-action reading (Feynman), 2026-10-07",
+     "claim": "[the Planck length - Feynman's frontier] lP = sqrt(hbar G / c^3) = 1.6163e-35 m (sealed from the attested hbar, G, c): the length built from the quantum (hbar), gravity (G) and relativity (c). It is the scale at which the action of SPACETIME itself becomes of order hbar - where the path integral would have to sum over fluctuating geometries.",
+     "kind": "witness",
+     "seal": "54301470e8720839e211226c1db01bd10e3886bd36d06ad5200df259ae09fe1b"
+    },
+    {
+     "by": "Narrow Highway - the least-action reading (Feynman), 2026-10-07",
+     "claim": "[the path integral] Feynman's sum over histories: the quantum amplitude to go from A to B is the integral of e^{iS/hbar} over EVERY path, not just the classical one. When S >> hbar the phases cancel everywhere except near the stationary-action path (stationary phase), so the classical least-action trajectory emerges as the limit. The quantum does not break the classical principle; it explains it.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the least-action reading (Feynman), 2026-10-07",
+     "claim": "[three roads to one amplitude] This is the SAME amplitude by three routes the engine has sealed: Feynman diagrams (the perturbative expansion - it computed the electron a_e = alpha/2pi on stick_the_fine_structure_constant); lattice MCMC (the path integral done by sampling - stick_yang_mills_existence_and_mass_gap); and positive geometry (the amplitude as the canonical form of the amplituhedron - stick_the_positive_grassmannian). One thing, seen three ways.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the least-action reading (Feynman), 2026-10-07",
+     "claim": "[the Hole, from Feynman's side] Feynman's path-integral QFT gives the three gauge forces and the most precise prediction in physics (a_e). Pointed at GRAVITY it fails: the theory is non-renormalizable, the loop integrals diverge, and at the Planck length lP the sum over histories must include spacetime geometry itself - exactly where the method breaks. The Planck length is the near edge of the Hole (ties stick_quantum_gravity). Seal the arithmetic; the quantum theory of gravity stays open.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,187 @@
+{
+ "entry": "molecular_geometry",
+ "rc": 0,
+ "seals": {
+  "03c0010ecbfb4014f7d941773318a6c5cf9cd6dc2b7dc0400068624f14bba62e": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "0696fe0ba79edbb6fbd5ca2b31a6742286ac26c3eab8211ed7284c27987fa7c2": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "481473693dfb349933364f43167df9f35e03a8e7c10a932ab022a23dc1aa3599": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "49a32a87af89804202d7d72e2b9f6e932a22bc4a65ef0613afc6451dbc46d400": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5ab61ab3bd37402e572fdba8c1f41cdd1b3a8f1506c7d08eac7ecbb3b5915bb7": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "6491d0dca2aa7ded0cf9586ac454cda0457105973513173f79fb86b644f0b0bb": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7382ef98630fc8eb73efa9ce2162337be7b910444e5804e5d6ba59bc70f194dc": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "90cd22d19b280d884b72a40a9b47ab3abaa91807fd6d3cc4d536d0b43a5d48d1": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "9727d2d31c08d594f43cc5acf8215aec862077638b5118b30c3e60a68e918ec3": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b38fe6fcc497f1e26a6b9493417c292ec643883f6afac6406c9d326af3eccf83": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b641eaf3e0b0c32f1809331fb1b792a5a8eaee28b752ef8d570178656cb6095c": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "cc43d1f27a1b2fda97937b079b2e208fbdae8a47c95c08f92246e56f6ce692ca": {
+   "axis": "molecular_geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_molecular_geometry_vsepr_shapes_and_bond_angles_sealed": {
+   "field": "molecular_geometry",
+   "question": "Molecular geometry - VSEPR shapes and bond angles, sealed",
+   "references": [
+    "R. J. Gillespie & R. S. Nyholm, Inorganic stereochemistry, Q. Rev. Chem. Soc. 11 (1957) 339",
+    "R. J. Gillespie, Molecular Geometry (1972)",
+    "CRC Handbook of Chemistry and Physics, Structure of free molecules in the gas phase"
+   ],
+   "statement": "A molecule's shape follows from its steric number and lone pairs: electron domains repel to the arrangement of greatest separation, and the bond angle is that arrangement's angle.",
+   "ticks": [
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[CO2, SEALED] Two domains, no lone pairs: linear, 180 deg (sealed through molecular_geometry.VSEPR_VERIFY). Two things repelling on a sphere go to opposite poles.",
+     "kind": "instance",
+     "seal": "0696fe0ba79edbb6fbd5ca2b31a6742286ac26c3eab8211ed7284c27987fa7c2"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[BF3, SEALED] Three domains: trigonal planar, 120 deg (sealed through molecular_geometry.VSEPR_VERIFY).",
+     "kind": "instance",
+     "seal": "5ab61ab3bd37402e572fdba8c1f41cdd1b3a8f1506c7d08eac7ecbb3b5915bb7"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[SO2, SEALED] Three domains, one a lone pair: bent, about 119 deg (sealed through molecular_geometry.VSEPR_VERIFY). The shape is named by the atoms, the angle set by all three domains.",
+     "kind": "instance",
+     "seal": "b641eaf3e0b0c32f1809331fb1b792a5a8eaee28b752ef8d570178656cb6095c"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[CH4, SEALED] Four domains: tetrahedral, 109.47 deg (sealed through molecular_geometry.VSEPR_VERIFY) - arccos(-1/3), the angle from the centre of a regular tetrahedron to two vertices. Pure geometry, no chemistry in it: the geometry stick's 'Cat:Dog' pair, two domains confirming one number.",
+     "kind": "instance",
+     "seal": "9727d2d31c08d594f43cc5acf8215aec862077638b5118b30c3e60a68e918ec3"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[NH3, SEALED] Four domains, one lone pair: trigonal pyramidal, 107 deg (sealed through molecular_geometry.VSEPR_VERIFY). The lone pair takes more room than a bond and squeezes the H-N-H angle below tetrahedral.",
+     "kind": "instance",
+     "seal": "90cd22d19b280d884b72a40a9b47ab3abaa91807fd6d3cc4d536d0b43a5d48d1"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[H2O, SEALED] Four domains, two lone pairs: bent, 104.5 deg (sealed through molecular_geometry.VSEPR_VERIFY). Two lone pairs squeeze harder - the angle that makes water polar, and so a solvent, and so the medium of life.",
+     "kind": "instance",
+     "seal": "6491d0dca2aa7ded0cf9586ac454cda0457105973513173f79fb86b644f0b0bb"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[PCl5, SEALED] Five domains: trigonal bipyramidal (sealed through molecular_geometry.VSEPR_VERIFY) - two angles, 90 and 120, so no single bond angle is claimed; the verifier refuses one.",
+     "kind": "instance",
+     "seal": "481473693dfb349933364f43167df9f35e03a8e7c10a932ab022a23dc1aa3599"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[SF4, SEALED] Five domains, one lone pair: seesaw (sealed through molecular_geometry.VSEPR_VERIFY) - the lone pair takes an equatorial site, where it crowds two neighbours at 90 deg instead of three.",
+     "kind": "instance",
+     "seal": "7382ef98630fc8eb73efa9ce2162337be7b910444e5804e5d6ba59bc70f194dc"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[ClF3, SEALED] Five domains, two lone pairs: T-shaped (sealed through molecular_geometry.VSEPR_VERIFY).",
+     "kind": "instance",
+     "seal": "cc43d1f27a1b2fda97937b079b2e208fbdae8a47c95c08f92246e56f6ce692ca"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[SF6, SEALED] Six domains: octahedral, 90 deg (sealed through molecular_geometry.VSEPR_VERIFY).",
+     "kind": "instance",
+     "seal": "49a32a87af89804202d7d72e2b9f6e932a22bc4a65ef0613afc6451dbc46d400"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[BrF5, SEALED] Six domains, one lone pair: square pyramidal (sealed through molecular_geometry.VSEPR_VERIFY).",
+     "kind": "instance",
+     "seal": "03c0010ecbfb4014f7d941773318a6c5cf9cd6dc2b7dc0400068624f14bba62e"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[XeF4, SEALED] Six domains, two lone pairs: square planar, 90 deg (sealed through molecular_geometry.VSEPR_VERIFY) - the lone pairs take the two axial sites, opposite each other, and the four fluorines lie in a plane. A noble gas with a shape.",
+     "kind": "instance",
+     "seal": "b38fe6fcc497f1e26a6b9493417c292ec643883f6afac6406c9d326af3eccf83"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[the model, CITED] VSEPR (Gillespie & Nyholm 1957) is a MODEL: electron domains repel and settle at maximum separation, lone pairs repel more than bonds. It works for main-group molecules and fails for many transition-metal ones, so a shape it predicts is inferred, never kept as fact - the measured structure is the fact (CRC tables: H2O 104.5 deg, NH3 106.7 deg). The 180, 120, 90 and 109.47 degree angles are geometry's theorems; the lone-pair angles are measurements the model only approximates.",
+     "kind": "postulate",
+     "source": "Gillespie & Nyholm, Q. Rev. 11 (1957) 339; CRC Handbook, gas-phase structures"
+    },
+    {
+     "by": "tools/tick.py molecular_geometry",
+     "claim": "[on the one map] The shape of a molecule is chemistry (card_floor_chemistry: valence, bonding domains) meeting geometry (the geometry stick: the regular polyhedra and their central angles). The tetrahedral angle is the joint: one number, two floors, neither borrowing from the other.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

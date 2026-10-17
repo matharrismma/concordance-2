@@ -1,0 +1,148 @@
+{
+ "entry": "sports_analytics",
+ "rc": 0,
+ "seals": {
+  "3c3857a914f4baf03bd91c720f42dcda450ea046795b71e90c58b7c2e034f2e8": {
+   "axis": "sports_analytics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "4653a3c73d201797087f6b3c103eda46db4064da3134e59f50ec2069c6bc3d7c": {
+   "axis": "sports_analytics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5cb1b1985cb34743520d55a15de4aa3e7603d4d4930510c83239edf6a4a15cfc": {
+   "axis": "sports_analytics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5df51a6e6100a38332e1c3db3c1afde5f91d4127b761888a894c57e16f70e58b": {
+   "axis": "sports_analytics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7ad2c8f7a5517b8c03bb4a9368c5e6aa6ad4a793edd232dc372d147fc9433461": {
+   "axis": "sports_analytics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "8017adf1c3718a8bfbff3a543d11aab1a1a840041df51866ce41bb8d2d4caeb8": {
+   "axis": "sports_analytics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "8a36515649d714d27fb695b60508da62a58f41de0976a698ea968139626b820d": {
+   "axis": "sports_analytics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "dd28b5830305d31ab306acc4100b4c1bfec0469d3b7de4a44f40d0fbcc6c2a18": {
+   "axis": "sports_analytics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "ec1bb27131c2d1c1e524e29710f5587f52b218ca894f2ff2ac1bdfded1b9e6b0": {
+   "axis": "sports_analytics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_sports_analytics_pythagorean_expectation_elo_games_behind": {
+   "field": "sports_analytics",
+   "question": "Sports analytics - Pythagorean expectation, Elo, games behind",
+   "references": [
+    "B. James, Baseball Abstract (1980s) - the Pythagorean expectation",
+    "A. E. Elo, The Rating of Chessplayers, Past and Present (1978)",
+    "FIDE Rating Regulations (2024), article 8 - the expected-score table and K factors"
+   ],
+   "statement": "A season's record is predicted from runs by a power law, a match by a logistic of the rating gap, and a standing by half the sum of two differences.",
+   "ticks": [
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[Pythagorean expectation, SEALED] 750 runs scored, 600 allowed: W = 750^2 / (750^2 + 600^2) = 0.610 (sealed through sports_analytics.SPORT_VERIFY) - about 99 wins in 162. James's rule: a team's record follows from its run differential more faithfully than from its record so far.",
+     "kind": "instance",
+     "seal": "4653a3c73d201797087f6b3c103eda46db4064da3134e59f50ec2069c6bc3d7c"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[the even case, SEALED] Equal runs for and against give exactly 0.500 (sealed through sports_analytics.SPORT_VERIFY), whatever the exponent - the formula is symmetric.",
+     "kind": "instance",
+     "seal": "8017adf1c3718a8bfbff3a543d11aab1a1a840041df51866ce41bb8d2d4caeb8"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[a 100-point Elo gap, SEALED] 1600 against 1500: E = 1 / (1 + 10^(-100/400)) = 0.640 (sealed through sports_analytics.SPORT_VERIFY). The stronger player is expected to score 64 percent - a win in nearly two games of three.",
+     "kind": "instance",
+     "seal": "ec1bb27131c2d1c1e524e29710f5587f52b218ca894f2ff2ac1bdfded1b9e6b0"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[equal ratings, SEALED] 1500 against 1500: 0.500 (sealed through sports_analytics.SPORT_VERIFY).",
+     "kind": "instance",
+     "seal": "8a36515649d714d27fb695b60508da62a58f41de0976a698ea968139626b820d"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[the 400-point gap, SEALED] 1500 against 1900: E = 1 / (1 + 10^1) = 0.0909 (sealed through sports_analytics.SPORT_VERIFY). Four hundred points is DEFINED as ten-to-one odds - the 400 in the formula is the scale's unit, not a finding.",
+     "kind": "instance",
+     "seal": "3c3857a914f4baf03bd91c720f42dcda450ea046795b71e90c58b7c2e034f2e8"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[a win, SEALED] 1600 beats 1500 at K = 32: R' = 1600 + 32 (1 - 0.640) = 1611.52 (sealed through sports_analytics.SPORT_VERIFY). The favourite gains little for doing what was expected.",
+     "kind": "instance",
+     "seal": "dd28b5830305d31ab306acc4100b4c1bfec0469d3b7de4a44f40d0fbcc6c2a18"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[a loss, SEALED] The same player loses: R' = 1600 + 32 (0 - 0.640) = 1579.52 (sealed through sports_analytics.SPORT_VERIFY) - and loses 20.48 points, the surprise priced by the same expectation. Win and loss are not symmetric; expectation is the pivot.",
+     "kind": "instance",
+     "seal": "5df51a6e6100a38332e1c3db3c1afde5f91d4127b761888a894c57e16f70e58b"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[games behind, SEALED] A leader at 50-30 and a team at 45-35: GB = ((50 - 45) + (35 - 30)) / 2 = 5.0 (sealed through sports_analytics.SPORT_VERIFY): half the sum of the two differences, so a half-game is possible when the teams have played different numbers of games.",
+     "kind": "instance",
+     "seal": "7ad2c8f7a5517b8c03bb4a9368c5e6aa6ad4a793edd232dc372d147fc9433461"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[a tie, SEALED] Identical records are 0.0 games behind (sealed through sports_analytics.SPORT_VERIFY).",
+     "kind": "instance",
+     "seal": "5cb1b1985cb34743520d55a15de4aa3e7603d4d4930510c83239edf6a4a15cfc"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[the models, CITED] The exponent 2 is James's original; the best fit for baseball is nearer 1.83 (and varies by sport) - a FITTED model, not a law. Elo's logistic with 400 and the K factor (FIDE uses 10, 20 and 40) are chosen conventions of a rating system. Cited as postulates: they work, so a prediction from them is inferred, never kept as fact; the standing is the fact.",
+     "kind": "postulate",
+     "source": "James, Baseball Abstract; Elo (1978); FIDE Rating Regulations (2024) art. 8"
+    },
+    {
+     "by": "tools/tick.py sports_analytics",
+     "claim": "[on the one map] The three models are statistics (card_floor_statistics: a power-law share, a logistic expectation, an update that moves by the surprise) applied to the record of games. The Elo scale was built for chess (the chess stick holds the board; this stick holds the rating) and the probability stick holds the odds the 400 encodes.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

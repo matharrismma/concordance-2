@@ -1,0 +1,51 @@
+{
+ "entry": "markov",
+ "rc": 0,
+ "seals": {
+  "329053bc649ebfa4ebb02821b8602aba266e36cd12f903e6f675ab9602fda233": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "markov_stationary_fixed_point"
+   ]
+  },
+  "74eef6784b63ff954b6808654d7a3b0eb9b640b5a5049cba12583433f2f59590": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "markov_detailed_balance"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_yang_mills_existence_and_mass_gap": {
+   "field": "physics",
+   "question": "Yang-Mills existence and mass gap",
+   "references": [
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)",
+    "S. Durr et al., Ab initio determination of light hadron masses, Science 322 (2008) 1224",
+    "N. Metropolis et al., J. Chem. Phys. 21 (1953) 1087 (the Markov-chain sampling rule)"
+   ],
+   "statement": "Does a quantum Yang-Mills theory exist on R^4 for any compact simple gauge group, with a mass gap Delta > 0?",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Markov-chain reading (lattice QCD), 2026-10-06",
+     "claim": "[the mechanism] A Markov chain with transition matrix P converges to a stationary distribution pi with pi*P = pi; if it obeys detailed balance pi_i P_ij = pi_j P_ji it is reversible and pi is its unique limit. For P=[[0.9,0.1],[0.5,0.5]], pi=[5/6,1/6]: the fixed point (pi P)_1 = 5/6*0.9 + 1/6*0.5 = 0.833333 = pi_1 (sealed), and detailed balance holds, pi_1 P_12 = 5/6*0.1 = 0.083333 = 1/12 = pi_2 P_21 (sealed). Markov Chain Monte Carlo builds P so that pi IS a chosen target distribution - the exact mechanism, demonstrated on a chain small enough to seal.",
+     "kind": "witness",
+     "seal": "329053bc649ebfa4ebb02821b8602aba266e36cd12f903e6f675ab9602fda233"
+    },
+    {
+     "by": "Narrow Highway - the Markov-chain reading (lattice QCD), 2026-10-06",
+     "claim": "[lattice QCD - the mass gap by sampling] Lattice gauge theory computes Yang-Mills / QCD non-perturbatively by exactly this method: MCMC samples gauge-field configurations with the Euclidean weight e^{-S} as the chain's stationary distribution (Metropolis 1953; Hybrid Monte Carlo). The simulations exhibit a nonzero MASS GAP - a lightest glueball ~1.5 GeV and linear confinement - and reproduce the light hadron spectrum (the proton mass) to a few percent from first principles (Durr et al., Science 2008). This is overwhelming NUMERICAL EVIDENCE for the mass gap the Millennium problem names; it is evidence, never the rigorous constructive proof the problem demands.",
+     "kind": "witness",
+     "seal": "74eef6784b63ff954b6808654d7a3b0eb9b640b5a5049cba12583433f2f59590"
+    },
+    {
+     "by": "Narrow Highway - the Markov-chain reading (lattice QCD), 2026-10-06",
+     "claim": "[the thread] Markov chains are how the strong force is solved where perturbation theory fails: the alpha_s series (sealed on the fine-structure stick via the beta coefficient b0 = 23/3 > 0, asymptotic freedom) is good at high energy but DIVERGES at low energy, where quarks confine. MCMC on the lattice reaches that regime by sampling, not by expanding - the non-perturbative half of the quantum-field-theory picture the four-forces reading opened. Seal the mechanism; the mass gap stays the open problem.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,60 @@
+{
+ "entry": "medicine",
+ "rc": 0,
+ "seals": {
+  "0fdbe384b1ca622f725cc3e4d276ea34fc12415254822ee452cdaa5465e3b683": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "drug_fraction_after_three_half_lives"
+   ]
+  },
+  "a78ce9e8c36137596c1a3df2347dd1d21b91142e71cdb2eb3b355076d3da51d8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "body_mass_index_kg_over_m_squared"
+   ]
+  },
+  "d41939f0bfd2d880c714a6e67317bd1a97783ebab902b5ff7675f21782246ba8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "herd_immunity_threshold_one_minus_one_over_r0_for_r0_4"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_medicine_the_body_measured_and_mended": {
+   "field": "",
+   "question": "Medicine - the body measured and mended",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py medicine",
+     "claim": "[physiology is measured biology, SEALED] The body-mass index is weight over height squared: 70 kg / (1.75 m)^2 = 22.9 (sealed) - one number among the vitals (blood pressure, temperature, the blood panel) that turn a body into readable data. Medicine is biology (the floor below) measured at the scale of organs. Ties card_floor_biology.",
+     "kind": "instance",
+     "seal": "a78ce9e8c36137596c1a3df2347dd1d21b91142e71cdb2eb3b355076d3da51d8"
+    },
+    {
+     "by": "tools/tick.py medicine",
+     "claim": "[pharmacology is kinetics, SEALED] A drug clears by first-order decay, the same law as radiocarbon: after three half-lives one eighth remains, (1/2)^3 = 0.125 (sealed). Dosing intervals, steady-state levels and toxicity all follow the half-life - chemistry's kinetics, applied to the bloodstream. Ties card_floor_physical_chemistry.",
+     "kind": "instance",
+     "seal": "0fdbe384b1ca622f725cc3e4d276ea34fc12415254822ee452cdaa5465e3b683"
+    },
+    {
+     "by": "tools/tick.py medicine",
+     "claim": "[epidemiology is statistics, SEALED] An outbreak with reproduction number R0 = 4 needs 1 - 1/4 = 0.75, that is 75 percent, immune to stop spreading - the herd-immunity threshold (sealed). Public health is statistics on populations: incidence, trials, confidence intervals. Ties card_floor_statistics and card_floor_biology.",
+     "kind": "instance",
+     "seal": "d41939f0bfd2d880c714a6e67317bd1a97783ebab902b5ff7675f21782246ba8"
+    },
+    {
+     "by": "tools/tick.py medicine",
+     "claim": "[the honest edge - decline the clinical call] The engine seals the arithmetic (a BMI, a dose fraction, a threshold); it does NOT diagnose, prescribe, or give personal medical advice - that is a licensed clinical judgment, declined. A miss stays a miss. On the map, medicine rests on biology (physiology), physical chemistry (pharmacokinetics) and statistics (epidemiology). Ties card_floor_medicine.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

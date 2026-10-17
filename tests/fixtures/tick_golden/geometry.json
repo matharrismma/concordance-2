@@ -1,0 +1,79 @@
+{
+ "entry": "geometry",
+ "rc": 0,
+ "seals": {
+  "680ffc0e0bd905dd3240ac1c4727d7712be15483e5683f5aafba1f90f5549d3a": {
+   "axis": "geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "826c60d54e15c45520ee0852c55101d6411ff3ec2fa3a78292dc159125883cd3": {
+   "axis": "geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "98edc26590f10bf1f06e66426360a869d7ea9a0ac05963ff1237c961af21ddb4": {
+   "axis": "geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b8176d8d03f62406fafd038ef1b5666b7e442efc80b22cec0bf8652f2934ab45": {
+   "axis": "geometry",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_geometry_the_shapes_verified_and_sealed": {
+   "field": "",
+   "question": "Geometry - the shapes, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py geometry_stick",
+     "claim": "[the right triangle] 3-4-5: a^2 + b^2 = 9 + 16 = 25 = c^2, a right triangle (sealed through geometry.GEOM_VERIFY) - the Pythagorean theorem, the hinge of distance.",
+     "kind": "instance",
+     "seal": "98edc26590f10bf1f06e66426360a869d7ea9a0ac05963ff1237c961af21ddb4"
+    },
+    {
+     "by": "tools/tick.py geometry_stick",
+     "claim": "[the circle] radius 1: area pi r^2 = 3.14159 and circumference 2 pi r = 6.28319 (sealed) - pi, the constant of the circle.",
+     "kind": "instance",
+     "seal": "680ffc0e0bd905dd3240ac1c4727d7712be15483e5683f5aafba1f90f5549d3a"
+    },
+    {
+     "by": "tools/tick.py geometry_stick",
+     "claim": "[the pentagon] a 5-gon's interior angles sum to (5-2)*180 = 540 degrees (sealed) - the angle sum grows by 180 with each side.",
+     "kind": "instance",
+     "seal": "826c60d54e15c45520ee0852c55101d6411ff3ec2fa3a78292dc159125883cd3"
+    },
+    {
+     "by": "tools/tick.py geometry_stick",
+     "claim": "[the sphere] radius 3: volume (4/3) pi r^3 = 113.10 and surface 4 pi r^2 = 113.10 (sealed; equal only at r = 3).",
+     "kind": "instance",
+     "seal": "b8176d8d03f62406fafd038ef1b5666b7e442efc80b22cec0bf8652f2934ab45"
+    },
+    {
+     "by": "tools/tick.py geometry_stick",
+     "claim": "[the ground] Euclid's definitions, postulates and the measure of the plane - the theorems are sealed, the parallel postulate is cited (its denial gives the non-Euclidean geometries, equally valid). We follow Euclid: definitions, postulates, theorems.",
+     "kind": "postulate",
+     "source": "Euclid, Elements; geometry.GEOM_VERIFY"
+    },
+    {
+     "by": "tools/tick.py geometry_stick",
+     "claim": "[declined] A figure's meaning, a proof's elegance, a construction's intent are not measured here; the engine seals the measure.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

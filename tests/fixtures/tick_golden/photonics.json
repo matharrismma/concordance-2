@@ -1,0 +1,214 @@
+{
+ "entry": "photonics",
+ "rc": 0,
+ "seals": {
+  "0100b8b555da329389a774da98317d04805de9a9e4c9a12963b4e9732a716e8a": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "0475f80a4d5c7f33d6939a61df44f905bd927d81e0e096d0b920f45adf6eaf2b": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "214f80085a8da5333e00c8d2069feffc0e795864b931b7c660a6029621abaa62": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "34adb98f68c002ae0a50ace06e553e2b2fb8f3830f914f3612f76f24a77bdf34": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "36b53d031fe9effc1e8241c8077eb7eeec92c9b9757242b70680727582645026": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "3f6596cd6601e26b9dfda2073928550328c6fb7af2db68981ecddddf77375240": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "619b37a449a3bdd4469c906961bbecba65da1bdb94d0df888d2ae81c4efe7a86": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "62886fb7b97c84c7d7fd167f1f104c820f023ac814e0faf1bf98e39c302efb0a": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7590da04c695ab0405ccc7a44eae8e65732b174c6e6096f1090fe9d4bb5f25c6": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "9a6704e53f7384179c5f1ac1d57d0e2562752dbf424646827caae534dee37913": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b36b5e962d29b0364ab18aefcbb0900a7eccfee01501b5c3f4841554770e1cde": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "ead3924338c3cdbf0e4cb6ebbef755d82b43ae3b72fb4ec48bc939efc1f35bf5": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "eaef5f7f0c574cb2dce93fb29b620f8760ddddf39401e4b07d04fdeea182c36a": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "fb237f16dfdc83152d20ee06afb08e0a294cc2cd97780dc835af51ad39a50666": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_photonics_guided_resonant_active_and_nonlinear_light_sealed": {
+   "field": "photonics",
+   "question": "Photonics - guided, resonant, active and nonlinear light, sealed",
+   "references": [
+    "B. E. A. Saleh & M. C. Teich, Fundamentals of Photonics, 2nd ed. (2007)",
+    "G. P. Agrawal, Fiber-Optic Communication Systems, 4th ed. (2010)",
+    "T. Miya et al., Ultimate low-loss single-mode fibre at 1.55 um, Electron. Lett. 15 (1979) 106",
+    "A. H. Compton, Phys. Rev. 21 (1923) 483; CODATA 2018 lambda_C = 2.42631e-12 m"
+   ],
+   "statement": "Light engineered as a signal obeys closed forms: a mode count V, a resonator's FSR, loss in decibels, a modulator's V_pi, a square law, a threshold, a grating, an exponential, and the photon's E = h c / lambda.",
+   "ticks": [
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[single-mode, SEALED] A step-index fibre with core radius 4.1 um and NA 0.12 at 1550 nm has V = 2 pi a NA / lambda = 1.994 (sealed through photonics.PHOT_VERIFY): below 2.405, so exactly one guided mode. 2.405 is the first zero of the Bessel function J0 - the cutoff is a theorem, the fibre is built to sit under it.",
+     "kind": "instance",
+     "seal": "ead3924338c3cdbf0e4cb6ebbef755d82b43ae3b72fb4ec48bc939efc1f35bf5"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[the same fibre, multimode, SEALED] At 1000 nm the same fibre has V = 3.091 (sealed through photonics.PHOT_VERIFY): above cutoff, a second mode propagates. Single-mode is a property of fibre AND wavelength; the cutoff wavelength of this fibre is 2 pi a NA / 2.405 = 1286 nm.",
+     "kind": "instance",
+     "seal": "34adb98f68c002ae0a50ace06e553e2b2fb8f3830f914f3612f76f24a77bdf34"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[a ring resonator, SEALED] Group index 4.2, circumference 62.8 um: FSR = c / (n_g L) = 1.137 THz (sealed through photonics.PHOT_VERIFY) - the resonances of a silicon microring are spaced by the round-trip time's inverse.",
+     "kind": "instance",
+     "seal": "62886fb7b97c84c7d7fd167f1f104c820f023ac814e0faf1bf98e39c302efb0a"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[40 km of silica, SEALED] 3 dBm in, 0.2 dB/km over 40 km: 3 - 8 = -5 dBm out (sealed through photonics.PHOT_VERIFY). 0.2 dB/km at 1550 nm is the floor silica reached in 1979 (Miya et al.) - Rayleigh scattering's limit, which is why the world's traffic travels at that wavelength.",
+     "kind": "instance",
+     "seal": "9a6704e53f7384179c5f1ac1d57d0e2562752dbf424646827caae534dee37913"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[a lithium-niobate modulator, SEALED] lambda 1550 nm, gap 10 um, n = 2.2, r33 = 30.8 pm/V, electrode 20 mm: V_pi = lambda d / (n^3 r L) = 2.36 V (sealed through photonics.PHOT_VERIFY) - the voltage that shifts the phase by pi, the number every data link is engineered around.",
+     "kind": "instance",
+     "seal": "36b53d031fe9effc1e8241c8077eb7eeec92c9b9757242b70680727582645026"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[second harmonic, SEALED] 1 W of fundamental makes 10 mW of second harmonic; 2 W makes 40 mW (sealed through photonics.PHOT_VERIFY): P_2w scales as P_w squared, because two photons become one.",
+     "kind": "instance",
+     "seal": "eaef5f7f0c574cb2dce93fb29b620f8760ddddf39401e4b07d04fdeea182c36a"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[a laser above threshold, SEALED] I_th = 15 mA, slope 0.9 W/A, driven at 50 mA: P = 0.9 x 0.035 = 31.5 mW (sealed through photonics.PHOT_VERIFY). Above threshold the output is linear in the current past it.",
+     "kind": "instance",
+     "seal": "619b37a449a3bdd4469c906961bbecba65da1bdb94d0df888d2ae81c4efe7a86"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[and below, SEALED DARK] Driven at 10 mA, under threshold: P = 0 (sealed through photonics.PHOT_VERIFY, sealed at zero). Below threshold gain does not beat loss and the device is an LED's faint glow at best, not a laser - the engine seals the dark as dark.",
+     "kind": "instance",
+     "seal": "7590da04c695ab0405ccc7a44eae8e65732b174c6e6096f1090fe9d4bb5f25c6"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[a grating, SEALED] Period 3 um, first order, 1550 nm: d sin theta = m lambda gives theta = 31.11 deg (sealed through photonics.PHOT_VERIFY).",
+     "kind": "instance",
+     "seal": "3f6596cd6601e26b9dfda2073928550328c6fb7af2db68981ecddddf77375240"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[Beer-Lambert, SEALED] alpha = 200/m over 1 mm: I = I0 e^(-0.2) = 0.8187 (sealed through photonics.PHOT_VERIFY). Absorption is exponential in the path; gain is the same law with alpha negative.",
+     "kind": "instance",
+     "seal": "0100b8b555da329389a774da98317d04805de9a9e4c9a12963b4e9732a716e8a"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[a green photon, SEALED] 500 nm carries E = h c / lambda = 2.480 eV (sealed through photonics.PHOT_VERIFY, through h). The energy that decides whether a photon can lift an electron across a gap - 2.48 eV is above silicon's 1.12, so silicon absorbs green and a solar cell works.",
+     "kind": "instance",
+     "seal": "214f80085a8da5333e00c8d2069feffc0e795864b931b7c660a6029621abaa62"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[the Compton wavelength, SEALED] lambda_C = h / (m_e c) = 2.4263e-12 m (sealed through photonics.PHOT_VERIFY) = 2 pi alpha a_0 - the electron's length scale, through the fine-structure constant.",
+     "kind": "instance",
+     "seal": "fb237f16dfdc83152d20ee06afb08e0a294cc2cd97780dc835af51ad39a50666"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[the 90-degree shift, SEALED] A photon scattered at 90 deg lengthens by exactly lambda_C (sealed through photonics.PHOT_VERIFY): d lambda = lambda_C (1 - cos theta), and cos 90 = 0.",
+     "kind": "instance",
+     "seal": "b36b5e962d29b0364ab18aefcbb0900a7eccfee01501b5c3f4841554770e1cde"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[backscatter, SEALED] At 180 deg the shift is 2 lambda_C = 4.8526e-12 m (sealed through photonics.PHOT_VERIFY) - the maximum. Compton's 1923 measurement of this shift is where light's particle momentum became fact.",
+     "kind": "instance",
+     "seal": "0475f80a4d5c7f33d6939a61df44f905bd927d81e0e096d0b920f45adf6eaf2b"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[the inputs, CITED] 0.2 dB/km (Miya 1979), r33 = 30.8 pm/V for LiNbO3, the group index 4.2 of a silicon waveguide, the slope efficiency and threshold of a diode are MEASURED; the weakly guiding step-index model behind V is an approximation that works for low-contrast fibres. Cited as postulates, inferred not kept; lambda_C is CODATA's and exact to its stated digits.",
+     "kind": "postulate",
+     "source": "Saleh & Teich (2007); Agrawal (2010); Miya et al., Electron. Lett. 15 (1979) 106; CODATA 2018"
+    },
+    {
+     "by": "tools/tick.py photonics",
+     "claim": "[on the one map] Photonics is Maxwell's equations in a guide (card_floor_maxwells_equations: the mode condition, the grating), the photon through h and alpha (card_floor_quantum_mechanics: E = h nu; the alpha stick: lambda_C = 2 pi alpha a_0), and the decibel scale of the fibre-calibration stick. A connective domain: the same forms - wave, periodic, decay, logarithm, power law, threshold - the atlas carries elsewhere, here in glass.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

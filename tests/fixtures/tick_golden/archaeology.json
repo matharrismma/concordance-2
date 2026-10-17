@@ -1,0 +1,142 @@
+{
+ "entry": "archaeology",
+ "rc": 0,
+ "seals": {
+  "07ae8db95e9d68810821fabc572752eacdf544c0e70934456e7fe2fe4267ce60": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "574791fed5dab8b6f10854b0ede4a4328c7ce9de3fcf614ddcfe916b26247742": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "8c1b01a4cfbbb837abc496319daa42c963645c9446cfec5116986fb558b0c042": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "99369ebd25940d6bec1201567a5417de1989475344aa7084e91e74f62f80e6f5": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a6a358e89cd7800523f0552d41ca12ff0f493e757f7dfcb833044275bf0d4bbf": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b50048c3473b6113696b77b3007276f7d69fdebaef361415b38aa78646fc87e7": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d237baec0d9927343ad2b25501d1e80e6bd9ed196f23e8c4163c86b599585727": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "e8061eb30500ee904107a64848b524ef535f16de7d37a02885004e1c98b1889f": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_archaeology_the_decay_clock_dated_and_sealed": {
+   "field": "archaeology",
+   "question": "Archaeology - the decay clock, dated and sealed",
+   "references": [
+    "W. F. Libby, Radiocarbon Dating (1952; Nobel lecture 1960)",
+    "H. Godwin, Half-life of radiocarbon, Nature 195 (1962) 984",
+    "M. Stuiver & H. A. Polach, Discussion: reporting of 14C data, Radiocarbon 19 (1977) 355",
+    "A. H. Jaffey et al., Precision measurement of half-lives of U-235 and U-238, Phys. Rev. C 4 (1971) 1889"
+   ],
+   "statement": "Every radiometric age is the exponential decay law read backwards: t = -(T_half / ln 2) ln(N/N0).",
+   "ticks": [
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[one half-life, SEALED] Half the carbon-14 left means 5730 years: t = -(5730/ln 2) ln(0.5) = 5730 (sealed through archaeology.ARCH_VERIFY). The Cambridge half-life, 5730 +/- 40 yr (Godwin 1962), is the physical constant.",
+     "kind": "instance",
+     "seal": "07ae8db95e9d68810821fabc572752eacdf544c0e70934456e7fe2fe4267ce60"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[two half-lives, SEALED] A quarter left is 11,460 years (sealed through archaeology.ARCH_VERIFY): each halving adds one half-life, so the clock is linear in the logarithm of what remains.",
+     "kind": "instance",
+     "seal": "8c1b01a4cfbbb837abc496319daa42c963645c9446cfec5116986fb558b0c042"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[the practical limit, SEALED] One percent left is 38,069 years (sealed through archaeology.ARCH_VERIFY): ln(0.01) = -4.605 half-lives of 1.4427 each. Below about one percent the count drowns in background, which is why radiocarbon reaches roughly 50,000 years and no further - the bound is the measurement, not the law.",
+     "kind": "instance",
+     "seal": "e8061eb30500ee904107a64848b524ef535f16de7d37a02885004e1c98b1889f"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[the Libby convention, SEALED] With the Libby half-life, 5568 yr, half remaining reads 5568 years (sealed through archaeology.ARCH_VERIFY, half_life_years = 5568). A conventional radiocarbon age is still reported on the 5568 scale (Stuiver & Polach 1977) and corrected later; the two scales differ by the factor 5730/5568 = 1.029. Two conventions, one law - and the convention is CITED, never confused with the constant.",
+     "kind": "instance",
+     "seal": "b50048c3473b6113696b77b3007276f7d69fdebaef361415b38aa78646fc87e7"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[the potassium clock, SEALED] Potassium-40, half-life 1.248 billion years: half remaining is 1.248 Gyr (sealed through archaeology.ARCH_VERIFY, the same law with its own T_half). The potassium-argon clock dates the volcanic layers that bracket the fossils.",
+     "kind": "instance",
+     "seal": "99369ebd25940d6bec1201567a5417de1989475344aa7084e91e74f62f80e6f5"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[the age of the Earth, SEALED] Uranium-238, half-life 4.468 Gyr: a sample with 49.44 percent of its original U-238 is 4.54 Gyr old (sealed through archaeology.ARCH_VERIFY) - the age of the Earth from the uranium-lead clock (Patterson 1956, meteorite leads). The slow clocks reach what the fast one cannot.",
+     "kind": "instance",
+     "seal": "574791fed5dab8b6f10854b0ede4a4328c7ce9de3fcf614ddcfe916b26247742"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[counting half-lives, SEALED] An eighth remaining is exactly three half-lives: n = -log2(1/8) = 3 (sealed through archaeology.ARCH_VERIFY).",
+     "kind": "instance",
+     "seal": "a6a358e89cd7800523f0552d41ca12ff0f493e757f7dfcb833044275bf0d4bbf"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[ten half-lives, SEALED] One part in 1024 is ten half-lives (sealed through archaeology.ARCH_VERIFY): after ten half-lives a thousandth is left - the rule of thumb for when a radioactive source is 'gone'.",
+     "kind": "instance",
+     "seal": "d237baec0d9927343ad2b25501d1e80e6bd9ed196f23e8c4163c86b599585727"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[the half-lives, CITED] 5730 +/- 40 yr (Godwin 1962), 5568 yr (Libby, the conventional scale), 1.248 Gyr for K-40 and 4.468 Gyr for U-238 (Jaffey et al. 1971) are MEASURED constants: cited as postulates, never sealed. What is sealed is the arithmetic the law does with them.",
+     "kind": "postulate",
+     "source": "Godwin, Nature 195 (1962) 984; Stuiver & Polach, Radiocarbon 19 (1977) 355; Jaffey et al., Phys. Rev. C 4 (1971) 1889"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[the assumption the clock rests on] A radiocarbon age assumes the starting ratio N0 is known - that the atmosphere's carbon-14 was constant. It was not (solar activity, the carbon cycle, bomb carbon), so a raw age is CALIBRATED against tree rings and corals (IntCal). The engine seals the decay arithmetic and declines the calibration: a calibrated date is inferred from a curve, never kept as the law's own output.",
+     "kind": "postulate",
+     "source": "P. J. Reimer et al., IntCal20, Radiocarbon 62 (2020) 725; the decay law assumes closed system + known N0"
+    },
+    {
+     "by": "tools/tick.py archaeology",
+     "claim": "[on the one map] The decay clock is nuclear physics (card_floor_nuclear_physics: the exponential law and its half-life) read as a logarithm (card_floor_logarithm: t is proportional to ln of the fraction), applied to the Earth's record (card_floor_earth_science: radiometric dating). One law, three floors; this stick is where the archaeologist's spade meets the physicist's constant.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

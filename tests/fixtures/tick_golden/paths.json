@@ -1,0 +1,80 @@
+{
+ "entry": "paths",
+ "rc": 0,
+ "seals": {
+  "26e2066f2c9e09ef82e6cee65973871262d623ae0fe68c4d0f84de5f76088d4d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "snell_least_time"
+   ]
+  },
+  "45a0a9957175768e1bac126e45f1e5b06bca7ef567df50580c3f2ccabb076c0d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "action_over_hbar_one_joule_second"
+   ]
+  },
+  "45ad57eefec46c9873126ebbbf26d67e52756f7ee2c6fc73e7fccf87e778ed3d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "random_walk_reaches_sqrt_n"
+   ]
+  },
+  "a81d9b58ba3dc1ec132c8b95ee5d38ff38a87068f024b7f5da5e784c253d5b0b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "brachistochrone_straight_over_cycloid"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_path_continuously_finding_new_paths_between_two_points_t": {
+   "field": "physics",
+   "question": "The path - continuously finding new paths between two points; that is life",
+   "references": [
+    "Johann Bernoulli 1696, the brachistochrone: the cycloid, not the chord",
+    "Fermat's least time -> Snell's law; Hamilton's principle; Euler-Lagrange",
+    "Feynman 1948, Space-Time Approach to Non-Relativistic Quantum Mechanics (the sum over paths)",
+    "the random walk: expected displacement ~ sqrt(N) (Pearson 1905, Einstein 1905)",
+    "Psalm 16:11; Proverbs 3:6; Matthew 7:14; John 14:6; Isaiah 30:21",
+    "src/concordance/chains.py - walk and intersect: paths between two points in the keeping"
+   ],
+   "statement": "Between two points there is never one path but every path. A stone takes the one of stationary action, found only by comparison with all its neighbours; in the sum over histories the wrong paths cancel and the stationary one survives - what is not the answer is eliminated, so the narrow path is illuminated by what survives. Life keeps sampling. The fastest path is not the straight line; light bends to find least time; blind search reaches only sqrt(N). The way is offered, never chosen for you.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the path, continuously found between two points, 2026-10-08",
+     "claim": "[the fastest path is not the straight line] From a cusp to the bottom of its arc, a bead on the straight chute takes sqrt(pi^2 + 4) / pi = 1.1854 times as long as one on the cycloid (sealed) - Bernoulli's brachistochrone, 1696. The shortest-looking path between two points is not the quickest, and the only way to learn that is to try the curves: the calculus of variations was born from this one problem.",
+     "kind": "witness",
+     "seal": "a81d9b58ba3dc1ec132c8b95ee5d38ff38a87068f024b7f5da5e784c253d5b0b"
+    },
+    {
+     "by": "Narrow Highway - the path, continuously found between two points, 2026-10-08",
+     "claim": "[light finds the least-time path, every time] Entering water (n = 4/3) at 30 degrees, sin(theta_2) = sin 30 / (4/3) = 0.375 (sealed): it bends, because the straight line is not the fastest way through two media. Fermat's principle - the path of least time - is Snell's law; nature's paths are FOUND by comparison, not drawn.",
+     "kind": "witness",
+     "seal": "26e2066f2c9e09ef82e6cee65973871262d623ae0fe68c4d0f84de5f76088d4d"
+    },
+    {
+     "by": "Narrow Highway - the path, continuously found between two points, 2026-10-08",
+     "claim": "[why a stone takes one path and an electron takes all of them] An action of one joule-second over hbar winds the phase 1 / hbar = 9.48e+33 radians (sealed): neighbouring paths cancel almost perfectly and only the stationary one survives - the classical path emerges from the sum over all paths by elimination. That cancellation is this engine's own tagline made physical: what is not the answer is eliminated, so the narrow path is illuminated by what survives. Addition is interference.",
+     "kind": "witness",
+     "seal": "45a0a9957175768e1bac126e45f1e5b06bca7ef567df50580c3f2ccabb076c0d"
+    },
+    {
+     "by": "Narrow Highway - the path, continuously found between two points, 2026-10-08",
+     "claim": "[what blind search costs] A random walk of 10,000 steps reaches only sqrt(10000) = 100 steps from where it began (sealed). New paths found by wandering are expensive - which is why the narrow way is found by elimination (the tick-stick, the games, the floor), not by drift. Diffusion is the entropy stick's arrow seen as a path.",
+     "kind": "witness",
+     "seal": "45ad57eefec46c9873126ebbbf26d67e52756f7ee2c6fc73e7fccf87e778ed3d"
+    },
+    {
+     "by": "Narrow Highway - the path, continuously found between two points, 2026-10-08",
+     "claim": "[that is life - the map, and the guard] A stone's paths have already cancelled; a living thing keeps sampling, and death is when only one path remains. The engine does this literally: /chains walks from two roots and finds where they meet - new paths between two points in what is kept (the Standard-Model chain joined Fermi's tree to Maxwell's at Weinberg) - and the pressure-fighting chain routes positions to an optimum the same way. It OFFERS the paths; it never picks one for the person (liberty is inherent; a generator choosing its own path is the one destructive act). Scripture said it first: 'Thou wilt shew me the path of life' (Ps 16:11); 'he shall direct thy paths' (Prov 3:6); 'This is the way, walk ye in it' (Isa 30:21); 'narrow is the way, which leadeth unto life' (Mt 7:14); and the two points themselves - 'I am the way' (Jn 14:6). GUARDS: the path integral is physics; life as path-finding is a likeness, a discernment, never a fit; stationary phase is the strongest image of elimination we have and it is still an image. Four numbers sealed; the rest cited.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,57 @@
+{
+ "entry": "biology",
+ "rc": 0,
+ "seals": {
+  "7b46fffcdef83eb3f831a498f4a2f2650aed22afac29df2d64abce642a365b9f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "genetic_code_triplet_codon_count_four_cubed"
+   ]
+  },
+  "a6ba0f581f27c3a34d61090eed97b782e2f1874492f11dbbd39dc047f2df1604": {
+   "axis": "biology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_biology_the_genetic_code_and_the_tree_of_life": {
+   "field": "",
+   "question": "Biology - the genetic code and the tree of life",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py biology",
+     "claim": "[the genetic code is a triplet code, SEALED] DNA spells proteins in three-letter words: four bases read in triplets give 4^3 = 64 codons (sealed) for 20 amino acids plus stop - the digital code of life, read almost the same in every organism. The molecule of heredity is chemistry (sealed floor below); the code it carries is information. Ties card_floor_chemistry and the information instrument.",
+     "kind": "instance",
+     "seal": "7b46fffcdef83eb3f831a498f4a2f2650aed22afac29df2d64abce642a365b9f"
+    },
+    {
+     "by": "tools/tick.py biology",
+     "claim": "[population genetics - the frequencies sum to one, SEALED] Hardy-Weinberg: in a non-evolving population the genotype frequencies p^2 + 2pq + q^2 sum to 1 (sealed through the biology verifier). Departures from it are exactly where evolution shows - selection, drift, migration, mutation. Many genotypes, one total: the capstone's 'sum to one' in a gene pool.",
+     "kind": "instance",
+     "seal": "a6ba0f581f27c3a34d61090eed97b782e2f1874492f11dbbd39dc047f2df1604"
+    },
+    {
+     "by": "tools/tick.py biology",
+     "claim": "[life is chemistry that copies itself] A cell is chemistry (the floor below) organized to replicate and to run on free energy - DNA, proteins, membranes, metabolism, all molecules and reactions. Life does not break the second law: it is a local decrease in entropy paid for by a larger increase around it (heat, waste). Ties card_floor_chemistry and card_floor_thermodynamics.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py biology",
+     "claim": "[common descent - the tree of life] All life descends from one root (LUCA); the near-universal genetic code and the universal genes are the evidence (card_floor_tree_of_life). Evolution by variation and natural selection is the mechanism, and Hardy-Weinberg is its null hypothesis. One source, branching into every living thing. Ties card_floor_tree_of_life.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py biology",
+     "claim": "[on the one map] Biology stands on chemistry (life is self-replicating chemistry) and thermodynamics (it runs on free energy), and connects to the tree of life (its evolutionary structure) and the capstone (allele frequencies sum to one). The rung of the emergence ladder where matter begins to copy itself. Ties card_floor_biology.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,73 @@
+{
+ "entry": "physical_chemistry",
+ "rc": 0,
+ "seals": {
+  "6b4aa001b8008a088c5e9ad543579f7b0ac9cdc0ef2e1e0911c667bc0b2eaf6b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "daniell_cell_standard_potential_volts"
+   ]
+  },
+  "90d941fb8e33d35856585a7982df66f1bc2837ad10d3c405aafc212363a84c8e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "pka_plus_pkb_equals_pkw_at_25c"
+   ]
+  },
+  "cf6b54e42d76403868d42bb10bce7a22abe32bc9a493e066f8ea353403394238": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "first_order_half_life_ln2_over_k_seconds"
+   ]
+  },
+  "d5b57e5cc434ad120870bf6e762a1242792899d7cbeaa3a819c7ebfaa15f3d3d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "standard_free_energy_from_k_minus_rt_lnk_kj_mol"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_physical_chemistry_rate_equilibrium_acid_base_redox": {
+   "field": "",
+   "question": "Physical chemistry - rate, equilibrium, acid-base, redox",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py physical_chemistry",
+     "claim": "[kinetics - how fast, SEALED] Thermodynamics says which way a reaction goes; kinetics says how fast. For a first-order reaction the half-life is t_1/2 = ln 2 / k, independent of how much you start with: for k = 0.1 per second, t_1/2 = 0.693/0.1 = 6.93 s (sealed). The same law governs radioactive decay - rate is its own science, sitting on top of direction.",
+     "kind": "instance",
+     "seal": "cf6b54e42d76403868d42bb10bce7a22abe32bc9a493e066f8ea353403394238"
+    },
+    {
+     "by": "tools/tick.py physical_chemistry",
+     "claim": "[equilibrium - the balance point, SEALED] A reaction settles at equilibrium, and the equilibrium constant K is fixed by the free energy: Delta G-naught = -RT ln K. For K = 10 at 298 K, Delta G-naught = -8.314 * 298 * ln 10 / 1000 = -5.71 kJ/mol (sealed). The bridge from thermodynamics (free energy) to the measured ratio of products to reactants.",
+     "kind": "instance",
+     "seal": "d5b57e5cc434ad120870bf6e762a1242792899d7cbeaa3a819c7ebfaa15f3d3d"
+    },
+    {
+     "by": "tools/tick.py physical_chemistry",
+     "claim": "[acid-base - the conjugate pair, SEALED] For any acid and its conjugate base, pKa + pKb = pKw = 14 at 25 C (sealed; acetic acid pKa 4.75, its conjugate base pKb 9.25). This is Ka * Kb = Kw, the autoionization of water, written in logarithms - the backbone of pH, buffers and titrations.",
+     "kind": "instance",
+     "seal": "90d941fb8e33d35856585a7982df66f1bc2837ad10d3c405aafc212363a84c8e"
+    },
+    {
+     "by": "tools/tick.py physical_chemistry",
+     "claim": "[electrochemistry - the battery, SEALED] A redox reaction can be split into two half-cells, and the cell potential is E-cell = E-cathode - E-anode. The Daniell cell (copper and zinc) gives 0.34 - (-0.76) = 1.10 V (sealed) - the voltage of the first practical battery. Chemistry becomes electricity: redox is electrons moving, so it rests on electromagnetism.",
+     "kind": "instance",
+     "seal": "6b4aa001b8008a088c5e9ad543579f7b0ac9cdc0ef2e1e0911c667bc0b2eaf6b"
+    },
+    {
+     "by": "tools/tick.py physical_chemistry",
+     "claim": "[on the one map] Physical chemistry stands on the chemistry floor and reaches into the physics region: kinetics and acid-base on chemistry, equilibrium on thermodynamics (Delta G = -RT ln K), and electrochemistry on Maxwell (redox is electrons moving - an electrical process). The laws that turn chemistry from a description into a prediction. Ties card_floor_chemistry, card_floor_thermodynamics, card_floor_maxwells_equations.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

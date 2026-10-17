@@ -1,0 +1,52 @@
+{
+ "entry": "syntax_parser",
+ "rc": 0,
+ "seals": {
+  "458ab8e152043b6fd2ccbe61adc4b70ac95bb2518bfb7c3d757ec66ec35d15e1": {
+   "axis": "linguistics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d745870b242e9e907759966dbe566dccdca680ae03e65c4efdcaff9529b2b640": {
+   "axis": "linguistics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_syntax_a_real_parse_tree_or_none": {
+   "field": "",
+   "question": "Syntax - a real parse tree, or none",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py syntax_parser",
+     "claim": "[a real parse, SEALED] 'the cat sat on the mat' has a valid phrase-structure parse (S (NP (DET the) (NOM (N cat))) (VP (V sat) (PP (P on) (NP (DET the) (NOM (N mat)))))), sealed through linguistics.LING_VERIFY. A real chart parser over a hand-written English grammar - offline, no model.",
+     "kind": "instance",
+     "seal": "d745870b242e9e907759966dbe566dccdca680ae03e65c4efdcaff9529b2b640"
+    },
+    {
+     "by": "tools/tick.py syntax_parser",
+     "claim": "[word salad has none, SEALED] 'cat the sat' has NO valid parse (sealed as correctly not grammatical) - the pinned function words reject it. The parser discriminates structure, not length.",
+     "kind": "instance",
+     "seal": "458ab8e152043b6fd2ccbe61adc4b70ac95bb2518bfb7c3d757ec66ec35d15e1"
+    },
+    {
+     "by": "tools/tick.py syntax_parser",
+     "claim": "[0 false positives, the limit named] The parser CONFIRMS only a derivation it actually built - a structural fact, never a judgment that the sentence is true or good English. Closed-class words are pinned; open-class POS is a heuristic (no POS lexicon held), so trees are best-effort and a sentence outside the grammar is 'not derivable here', never mis-parsed. Coordination and long-distance dependencies are outside this grammar; a public-domain POS lexicon (Moby) would sharpen it - the next step.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py syntax_parser",
+     "claim": "[on the one map - the syntax decline lifted] The comprehensive-linguistics pass had kept syntax closed-class only and declined parsing; this lifts it to a real (if bounded) parser on the linguistics floor (card_floor_indo_european), with the regex/rule verifiers remaining the floor.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

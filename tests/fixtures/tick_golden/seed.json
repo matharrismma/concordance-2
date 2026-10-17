@@ -1,0 +1,118 @@
+{
+ "entry": "seed",
+ "rc": 0,
+ "seals": {},
+ "sticks": {
+  "stick_birch_and_swinnerton_dyer_conjecture": {
+   "field": "number_theory",
+   "question": "Birch and Swinnerton-Dyer conjecture",
+   "references": [
+    "B. Birch, H. P. F. Swinnerton-Dyer, Notes on elliptic curves. II, J. Reine Angew. Math. 218 (1965) 79-108",
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "statement": "For an elliptic curve E over Q, is the rank of E(Q) equal to the order of vanishing of L(E, s) at s = 1?",
+   "ticks": []
+  },
+  "stick_hodge_conjecture": {
+   "field": "mathematics",
+   "question": "Hodge conjecture",
+   "references": [
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "statement": "On a projective non-singular complex algebraic variety, is every Hodge class a rational linear combination of classes of algebraic cycles?",
+   "ticks": []
+  },
+  "stick_navier_stokes_existence_and_smoothness": {
+   "field": "physics",
+   "question": "Navier-Stokes existence and smoothness",
+   "references": [
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "statement": "Do smooth, globally defined solutions exist for the three-dimensional incompressible Navier-Stokes equations with smooth initial data?",
+   "ticks": []
+  },
+  "stick_p_versus_np": {
+   "field": "computer_science",
+   "question": "P versus NP",
+   "references": [
+    "S. Cook, The complexity of theorem-proving procedures, STOC (1971)",
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "statement": "Is every problem whose solutions can be verified in polynomial time also solvable in polynomial time?",
+   "ticks": [
+    {
+     "by": "tools/tick.py seed",
+     "claim": "relativizing proof techniques cannot resolve P vs NP: there are oracles A, B with P^A = NP^A and P^B != NP^B",
+     "kind": "exclusion",
+     "source": "T. Baker, J. Gill, R. Solovay, Relativizations of the P =? NP question, SIAM J. Comput. 4 (1975) 431-442"
+    },
+    {
+     "by": "tools/tick.py seed",
+     "claim": "natural proofs cannot separate P from NP if strong pseudorandom generators exist",
+     "kind": "exclusion",
+     "source": "A. Razborov, S. Rudich, Natural proofs, J. Comput. System Sci. 55 (1997) 24-35"
+    },
+    {
+     "by": "tools/tick.py seed",
+     "claim": "algebrizing proof techniques cannot resolve P vs NP",
+     "kind": "exclusion",
+     "source": "S. Aaronson, A. Wigderson, Algebrization: a new barrier in complexity theory, ACM Trans. Comput. Theory 1 (2009) 2:1-2:54"
+    }
+   ]
+  },
+  "stick_poincare_conjecture": {
+   "field": "mathematics",
+   "question": "Poincare conjecture",
+   "references": [
+    "G. Perelman, The entropy formula for the Ricci flow and its geometric applications, arXiv:math/0211159 (2002)",
+    "G. Perelman, Ricci flow with surgery on three-manifolds, arXiv:math/0303109 (2003)"
+   ],
+   "statement": "Every simply connected closed 3-manifold is homeomorphic to the 3-sphere. SOLVED: Perelman, 2002-2003.",
+   "ticks": [
+    {
+     "by": "tools/tick.py seed",
+     "claim": "Solved by Perelman (2002-2003) via Hamilton's Ricci flow with surgery; prize declined 2010. The stick is kept as the one Millennium problem with a proof.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_riemann_hypothesis": {
+   "field": "number_theory",
+   "question": "Riemann hypothesis",
+   "references": [
+    "Riemann, Ueber die Anzahl der Primzahlen unter einer gegebenen Grösse (1859)",
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "statement": "Every non-trivial zero of the Riemann zeta function has real part 1/2.",
+   "ticks": [
+    {
+     "by": "tools/tick.py seed",
+     "claim": "RH is equivalent to |pi(x) - li(x)| < sqrt(x) log(x) / (8 pi) for all x >= 2657",
+     "kind": "equivalence",
+     "source": "L. Schoenfeld, Sharper bounds for the Chebyshev functions theta(x) and psi(x). II, Math. Comp. 30 (1976) 337-360"
+    },
+    {
+     "by": "tools/tick.py seed",
+     "claim": "RH is equivalent to sigma(n) < e^gamma n log log n for all n > 5040 (Robin's inequality)",
+     "kind": "equivalence",
+     "source": "G. Robin, Grandes valeurs de la fonction somme des diviseurs et hypothese de Riemann, J. Math. Pures Appl. 63 (1984) 187-213"
+    },
+    {
+     "by": "tools/tick.py seed",
+     "claim": "RH is equivalent to the Mertens-type bound M(x) = O(x^(1/2 + epsilon)) for every epsilon > 0",
+     "kind": "equivalence",
+     "source": "E. C. Titchmarsh, The Theory of the Riemann Zeta-Function, 2nd ed. (1986), Theorem 14.25"
+    }
+   ]
+  },
+  "stick_yang_mills_existence_and_mass_gap": {
+   "field": "physics",
+   "question": "Yang-Mills existence and mass gap",
+   "references": [
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "statement": "Does a quantum Yang-Mills theory exist on R^4 for any compact simple gauge group, with a mass gap Delta > 0?",
+   "ticks": []
+  }
+ }
+}

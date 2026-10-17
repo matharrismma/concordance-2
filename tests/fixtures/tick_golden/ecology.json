@@ -1,0 +1,47 @@
+{
+ "entry": "ecology",
+ "rc": 0,
+ "seals": {
+  "95ff2101cb59217f2c41564ea7e42f68e9fccf319b21e0049bb14f2175fa2964": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "trophic_ten_percent_rule_kcal"
+   ]
+  },
+  "f0ef340a004c52bb28ff0c1790bd5e7c87a56f51f94de4115ff2a82e78466a36": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "logistic_fastest_growth_at_half_carrying_capacity"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_ecology_energy_and_number_in_the_living_world": {
+   "field": "",
+   "question": "Ecology - energy and number in the living world",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py ecology",
+     "claim": "[energy up the food chain - the 10 percent rule, SEALED] Only about a tenth of the energy at one trophic level reaches the next: 1000 kcal of plants feed 1000*0.1 = 100 kcal of herbivores (sealed), and 10 of carnivores. This is why food chains are short and top predators rare - the second law, paid at every step. Ties card_floor_biology and card_floor_thermodynamics.",
+     "kind": "instance",
+     "seal": "95ff2101cb59217f2c41564ea7e42f68e9fccf319b21e0049bb14f2175fa2964"
+    },
+    {
+     "by": "tools/tick.py ecology",
+     "claim": "[how populations grow - the logistic, SEALED] A population grows fastest not when largest but at HALF its carrying capacity: for K = 1000, the peak growth is at 1000/2 = 500 (sealed). Logistic growth (and predator-prey cycles) is the arithmetic of number in the wild. Ties card_floor_statistics.",
+     "kind": "instance",
+     "seal": "f0ef340a004c52bb28ff0c1790bd5e7c87a56f51f94de4115ff2a82e78466a36"
+    },
+    {
+     "by": "tools/tick.py ecology",
+     "claim": "[on the one map] Ecology rests on biology (the organisms and the tree of life), statistics (population dynamics, sampling), and earth science (climate and habitat). It is the accounting of energy and number across the living world. Ties card_floor_ecology.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

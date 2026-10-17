@@ -1,0 +1,56 @@
+{
+ "entry": "linguistics",
+ "rc": 0,
+ "seals": {
+  "0f32f9ecbddc740bbf314019cd3bdd9c912d1427706d03ee03b063e9302f8cd0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "language_is_generative"
+   ]
+  },
+  "d6e11c802d53cfb20b6b22788a543e6200d1f7c25ab6042a80af48e0959d8707": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "zipf_frequency_times_rank"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_most_linguistics_are_math_outside_a_set_vocabulary_list": {
+   "field": "linguistics",
+   "question": "Most linguistics are math - outside a set vocabulary list",
+   "references": [
+    "Chomsky: a finite grammar generates infinite sentences (recursion)",
+    "Zipf's law: the r-th most common word has frequency proportional to 1/r",
+    "Shannon: the entropy and redundancy of printed language"
+   ],
+   "statement": "A fixed vocabulary is the floor, not the language. A finite lexicon plus a grammar generates an unbounded space of sentences (generative combinatorics), and word frequencies obey a power law (Zipf: frequency times rank is roughly constant). Syntax is formal grammar, text has measurable entropy - the structure of language is mathematical.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - linguistics is math, 2026-10-07",
+     "claim": "[outside a set vocabulary list - language is generative] The word list is not the language. From just 10 words the number of 5-word strings is 10^5 = 100000 (sealed) - already four orders of magnitude past the list; with a 50,000-word lexicon and recursion the space is unbounded. A finite grammar generates infinite sentences (Chomsky). The vocabulary is the floor; the math is the building.",
+     "kind": "witness",
+     "seal": "0f32f9ecbddc740bbf314019cd3bdd9c912d1427706d03ee03b063e9302f8cd0"
+    },
+    {
+     "by": "Narrow Highway - linguistics is math, 2026-10-07",
+     "claim": "[most linguistics are math - Zipf's law] Word frequencies follow a power law: the r-th most common word has frequency proportional to 1/r, so frequency * rank is constant - a rank-10 word at 0.006 gives 0.006 * 10 = 0.06 (sealed), the same constant as rank 1. Language statistics are a measurable law, not a list of exceptions.",
+     "kind": "witness",
+     "seal": "d6e11c802d53cfb20b6b22788a543e6200d1f7c25ab6042a80af48e0959d8707"
+    },
+    {
+     "by": "Narrow Highway - linguistics is math, 2026-10-07",
+     "claim": "[the structure is mathematical] The Chomsky hierarchy (regular < context-free < context-sensitive < recursively enumerable) makes syntax formal grammar; Shannon's information theory measures the entropy and redundancy of text; phonology, morphology and semantics all carry mathematical structure. Most of linguistics is math.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - linguistics is math, 2026-10-07",
+     "claim": "[why the engine handles language by STRUCTURE, not a list] This is the ground for the engine's language layer being a COHERENT model rather than a fixed vocabulary or an LLM's statistics: the reader's tongue and the language cubes handle meaning by STRUCTURE (grammar, relation, the keeping's graph), reaching beyond any set vocabulary. The dispatch of topics by a fixed alias list is a convenience, not the understanding - the understanding is structural (ties the coherent-language-model and tortoise-reader / language-cubes work). map, never launder: seal the arithmetic of the law; the structure is found, not generated.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

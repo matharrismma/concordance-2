@@ -1,0 +1,29 @@
+{
+ "entry": "lagarias",
+ "rc": 0,
+ "seals": {
+  "fcbbc341fd7f1a0fa832e4cc0d9e96bb7ff6a8cdd479795467b11e6ee2529d2f": {
+   "axis": "number_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "lagarias"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_riemann_hypothesis": {
+   "field": "",
+   "question": "Riemann hypothesis",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the elimination reading, 2026-10-05",
+     "claim": "No zero of zeta lies off the critical line by way of a Lagarias (elementary divisor-sum) counterexample at n <= 1,000,000: the sieve finds none in [1, 1,000,000] (tightest n>=2 at n=12, sigma/(H_n+e^H_n ln H_n) = 0.988636 < 1). Lagarias 2002 — Robin made exception-free — a fourth independent tool narrowing the window, by elimination.",
+     "kind": "witness",
+     "seal": "fcbbc341fd7f1a0fa832e4cc0d9e96bb7ff6a8cdd479795467b11e6ee2529d2f"
+    }
+   ]
+  }
+ }
+}

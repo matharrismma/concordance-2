@@ -1,0 +1,34 @@
+{
+ "entry": "schoenfeld",
+ "rc": 0,
+ "seals": {
+  "e3d14ce297042fb268beb6a46d12958d610ead9776399e0ceddc5c20aa9db736": {
+   "axis": "number_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "schoenfeld"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_riemann_hypothesis": {
+   "field": "",
+   "question": "Riemann hypothesis",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the elimination reading, 2026-10-05",
+     "claim": "No zero of zeta lies off the critical line by way of a Schoenfeld (prime-count) violation at x <= 2,000,000: the exact check finds none in [2657, 2,000,000] (closest approach x=2,658, |pi-li|/(sqrt(x) ln x/8pi) = 0.979906 < 1). RH cannot fail by this route below 2,000,000 — a third, independent tool narrowing the window, by elimination from the prime count.",
+     "kind": "witness",
+     "seal": "e3d14ce297042fb268beb6a46d12958d610ead9776399e0ceddc5c20aa9db736"
+    },
+    {
+     "by": "Narrow Highway — the elimination reading, 2026-10-05",
+     "claim": "[by elimination] A third reading of what RH is NOT, from the prime count: Schoenfeld 1976 makes RH equivalent to |pi(x) - li(x)| < sqrt(x) ln x / (8 pi) for every x >= 2657, and the exact check finds no violation to x=2,000,000. With the two zero counts (direct, to height 1e7) and the divisor sum (Robin), three independent tools now eliminate regions where RH could fail; a counterexample must evade all of them at once. Narrowing is evidence, never a proof — the surviving window is where RH stays untested.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

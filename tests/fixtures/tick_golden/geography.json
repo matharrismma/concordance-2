@@ -1,0 +1,47 @@
+{
+ "entry": "geography",
+ "rc": 0,
+ "seals": {
+  "4be33aafd0658e6d97b7523b44f7d610f5a568b5eeedcfcbbd7c248d2ec9b01a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "kilometres_per_degree_of_latitude"
+   ]
+  },
+  "fa2ef41b544a4a14f34d0ed7e6b518c8cc8e75af6c93aa962e2d927ea40a088c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "degrees_of_longitude_per_hour_of_rotation"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_geography_the_measured_earth": {
+   "field": "",
+   "question": "Geography - the measured Earth",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py geography",
+     "claim": "[the size of a degree, SEALED] The Earth's circumference is about 40075 km, so one degree of latitude is 40075/360 = 111 km (sealed), and a minute of arc is a nautical mile. Coordinates turn the globe into addressable space - the grid every map and GPS stands on. Ties card_floor_earth_science.",
+     "kind": "instance",
+     "seal": "4be33aafd0658e6d97b7523b44f7d610f5a568b5eeedcfcbbd7c248d2ec9b01a"
+    },
+    {
+     "by": "tools/tick.py geography",
+     "claim": "[longitude is time - the time zones, SEALED] The Earth turns once in 24 hours, so 360/24 = 15 degrees of longitude per hour (sealed). Longitude and local time are the same measurement - which is why finding longitude at sea waited on an accurate clock. Ties card_floor_the_instruments (the geometry of coordinates).",
+     "kind": "instance",
+     "seal": "fa2ef41b544a4a14f34d0ed7e6b518c8cc8e75af6c93aa962e2d927ea40a088c"
+    },
+    {
+     "by": "tools/tick.py geography",
+     "claim": "[on the one map] Geography rests on earth science (the planet it charts) and the instruments (coordinates, projections and distance are geometry - and every flat map must distort, since a sphere has no flat image). The science of WHERE. Ties card_floor_geography.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

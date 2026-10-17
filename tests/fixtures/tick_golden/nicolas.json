@@ -1,0 +1,29 @@
+{
+ "entry": "nicolas",
+ "rc": 0,
+ "seals": {
+  "0be7664e127782ef5cba6c1845c76ba2f317d58a42ecd93c3b9ee6a3909e33d8": {
+   "axis": "number_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "nicolas"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_riemann_hypothesis": {
+   "field": "",
+   "question": "Riemann hypothesis",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the elimination reading, 2026-10-05",
+     "claim": "No zero of zeta lies off the critical line by way of a Nicolas (primorial) counterexample using a prime <= 1,000,000: every primorial's ratio N_k/(phi(N_k) ln ln N_k) stays above e^gamma (closest at p=999,983, ratio = 1.781337 > 1.781072). Nicolas 1983 — a fifth independent tool narrowing the window, by elimination.",
+     "kind": "witness",
+     "seal": "0be7664e127782ef5cba6c1845c76ba2f317d58a42ecd93c3b9ee6a3909e33d8"
+    }
+   ]
+  }
+ }
+}

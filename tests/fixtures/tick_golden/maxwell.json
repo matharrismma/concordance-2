@@ -1,0 +1,69 @@
+{
+ "entry": "maxwell",
+ "rc": 0,
+ "seals": {
+  "c30967d41d072ceaa100644e0f2ad4cae39c4f023770d0f9c27f96c31b082beb": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "maxwell_c_from_mu0_eps0"
+   ]
+  },
+  "c5325099469af54e5f3b077905101a05d5ec5969d29559cac0556210cfcb26bc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "cooper_pair_halving"
+   ]
+  },
+  "e38db04a2e8003e9a7f1368000ed757ffa77656596bf3dee841b379f631b5c75": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "superconducting_flux_quantum"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_maxwell_s_equations_and_superconductivity": {
+   "field": "physics",
+   "question": "Maxwell's equations and superconductivity",
+   "references": [
+    "J. C. Maxwell, A Treatise on Electricity and Magnetism (1873)",
+    "F. & H. London (1935); Bardeen, Cooper & Schrieffer, Phys. Rev. 108 (1957) 1175",
+    "P. W. Anderson, Phys. Rev. 130 (1963) 439 (gauge invariance and mass)"
+   ],
+   "statement": "Maxwell's equations are exact and settled, and they predict light; superconductivity, where the field becomes a macroscopic quantum state with quantized flux and a massive photon, is largely understood (BCS) but its high-temperature mechanism is open. Kept as sealed witnesses of the electromagnetic unification and its quantum form, with the open part named.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Maxwell/superconductivity reading, 2026-10-07",
+     "claim": "[Maxwell - light IS electromagnetism] The four equations predict electromagnetic waves travelling at c = 1/sqrt(mu0 eps0) = 299792458.000006 m/s (sealed from the attested permeability and permittivity) -- matching the defined speed of light to ~1e-14. The speed of light falls out of the two STATIC electric and magnetic constants: the first great unification, electricity + magnetism + optics into one field (ties stick_the_fine_structure_constant, where alpha is this field's coupling).",
+     "kind": "witness",
+     "seal": "c30967d41d072ceaa100644e0f2ad4cae39c4f023770d0f9c27f96c31b082beb"
+    },
+    {
+     "by": "Narrow Highway - the Maxwell/superconductivity reading, 2026-10-07",
+     "claim": "[superconductivity quantizes flux] Magnetic flux through a superconducting loop comes only in integer multiples of Phi0 = h/(2e) = 2.0678e-15 Wb (sealed from the attested h, e). The classical continuous field is forced into a discrete quantum ladder by the macroscopic condensate.",
+     "kind": "witness",
+     "seal": "e38db04a2e8003e9a7f1368000ed757ffa77656596bf3dee841b379f631b5c75"
+    },
+    {
+     "by": "Narrow Highway - the Maxwell/superconductivity reading, 2026-10-07",
+     "claim": "[the pairing signature - sealed] The superconducting flux quantum is HALF the single-electron (Aharonov-Bohm) quantum h/e: the ratio (h/2e)/(h/e) = 1/2 (sealed). That factor of two is MEASURED, and it is the fingerprint of charge-2e COOPER PAIRS (BCS) -- the supercurrent is carried by bound electron pairs, not single electrons. Ties the flux quantum on the Aharonov-Bohm stick.",
+     "kind": "witness",
+     "seal": "c5325099469af54e5f3b077905101a05d5ec5969d29559cac0556210cfcb26bc"
+    },
+    {
+     "by": "Narrow Highway - the Maxwell/superconductivity reading, 2026-10-07",
+     "claim": "[Maxwell meets the quantum and the Higgs - the Meissner effect] Inside a superconductor Maxwell's equations are modified by the London equations: the magnetic field is EXPELLED (the Meissner effect), decaying over the London penetration depth -- equivalently, the photon acquires an effective MASS. This is the Anderson-Higgs mechanism in a bench-top material: the SAME spontaneous breaking of the electromagnetic gauge symmetry by a condensate that gives the W and Z bosons their mass in electroweak theory (ties the four-forces / Weinberg). Classical EM, quantum mechanics, and the Higgs mechanism meet in a piece of cold metal.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Maxwell/superconductivity reading, 2026-10-07",
+     "claim": "[the open part] Maxwell is settled and BCS explains the conventional superconductors, but the mechanism of HIGH-temperature (cuprate) superconductivity has NO accepted theory -- a genuine Hole. The engine seals the arithmetic (c from the static constants, the flux quantum, the pairing factor), attributes BCS/London/Anderson-Higgs, and keeps the high-Tc mechanism open. Seal the arithmetic; the unresolved stays unresolved. Map, never launder.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

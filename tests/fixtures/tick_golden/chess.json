@@ -1,0 +1,218 @@
+{
+ "entry": "chess",
+ "rc": 0,
+ "seals": {
+  "421a4286388a01463df65bc62b5be0c4949eede437dd1ccba508e10917a98e88": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "48fd1e49142e2e0ef093a3792f7a8ef0317e2ed8ae26fe0339774ec565d076c2": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "4c1904b36dedf472cc89005163c03867929f1ce6cf044e8209a4dbcb9997107b": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "53caa2aac3ed4bfa8841b13c279dc5417625b1c2f07fa505882ec52b29ff3fb4": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5eae1951f9d89beceaeaca1f26c93f45ebef9961ea7721f4a39d617b3bb2fed3": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "603a593dc730a33ab7d25d674c95ccb1dc3cfb723e3ce275b759381169bf0b38": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "61d99fa658f34d8bc6dc4d45ad1aa89a876299075c18db031d605ca50646bc4e": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7833a9da0906b7910ab34ca7be70797bb9e761008644fff86ea7c55423ff3d10": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "80e4c413dc2e23fa302579cf6081040416b7d4bc40d2e3c86574ee227be60979": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "bc0ba88a3e8aeffa2361e0f3da77b574e5d74e89ccaec186003277a49e8636c2": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "c1834624e30b37e2c62539a071d75b051694ba45cf610edf71935c3e550b4757": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d5c524e2575522cf476554ecd686173d5bdfe443ed75d3362c526e6bb81796f3": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "dcc75052e90e5d5241a9f07c3878990fc4f52ef35f9c4d549366fb9ace031edd": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "eec413c3cf8ef84a87078df9cf4c8682b8b22ef7c2031a6b550e047040511ebb": {
+   "axis": null,
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_chess_the_rules_decide_mate_stalemate_legality_material": {
+   "field": "chess",
+   "question": "Chess - the rules decide: mate, stalemate, legality, material",
+   "references": [
+    "FIDE Laws of Chess (2023), Articles 1-5",
+    "F.-A. D. Philidor, Analyse du jeu des Echecs (1749) - the smothered mate",
+    "src/concordance/chess.py - the perft-proven move generator (tests/test_chess.py)"
+   ],
+   "statement": "A claim about a chess position is decided by the Laws of Chess applied to the position - computed by the move generator, never judged.",
+   "ticks": [
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[fool's mate, SEALED] 1.f3 e5 2.g4 Qh4# - White to move is checkmated (sealed through chess.CHESS_VERIFY). The shortest possible mate: two pawn moves open the diagonal to the king and nothing can interpose.",
+     "kind": "instance",
+     "seal": "bc0ba88a3e8aeffa2361e0f3da77b574e5d74e89ccaec186003277a49e8636c2"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[scholar's mate, SEALED] 1.e4 e5 2.Bc4 Nc6 3.Qh5 Nf6 4.Qxf7# - Black is checkmated (sealed through chess.CHESS_VERIFY): the queen on f7 is guarded by the bishop on c4, the king has no flight square.",
+     "kind": "instance",
+     "seal": "80e4c413dc2e23fa302579cf6081040416b7d4bc40d2e3c86574ee227be60979"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[the smothered mate, SEALED] King h8, rook g8, pawns g7 h7; a white knight lands on f7 and it is mate (sealed through chess.CHESS_VERIFY). The king is smothered by its own pieces - Philidor's pattern (1749), the oldest named mate in the literature.",
+     "kind": "instance",
+     "seal": "d5c524e2575522cf476554ecd686173d5bdfe443ed75d3362c526e6bb81796f3"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[the back-rank mate, SEALED] King g8 behind its three pawns, a rook arrives on a8: mate (sealed through chess.CHESS_VERIFY). The pawns that shielded the king are the wall that traps it.",
+     "kind": "instance",
+     "seal": "dcc75052e90e5d5241a9f07c3878990fc4f52ef35f9c4d549366fb9ace031edd"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[stalemate, SEALED] Black king h8, white queen f7, white king g6, Black to move: stalemate (sealed through chess.CHESS_VERIFY). Every square the king could reach is attacked and no other piece exists - no legal move, so the game is drawn (Laws 5.2.1).",
+     "kind": "instance",
+     "seal": "61d99fa658f34d8bc6dc4d45ad1aa89a876299075c18db031d605ca50646bc4e"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[stalemate is not check, SEALED] In the same position check is FALSE - sealed with claimed = false (sealed through chess.CHESS_VERIFY). Stalemate needs both: no legal move AND the king not attacked. The second condition is what separates a draw from a mate; the engine seals the negative as a negative.",
+     "kind": "instance",
+     "seal": "48fd1e49142e2e0ef093a3792f7a8ef0317e2ed8ae26fe0339774ec565d076c2"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[the start position is quiet, SEALED] From the initial position White is not in check (claimed = false, sealed through chess.CHESS_VERIFY).",
+     "kind": "instance",
+     "seal": "603a593dc730a33ab7d25d674c95ccb1dc3cfb723e3ce275b759381169bf0b38"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[and not mated, SEALED] Nor checkmated (claimed = false, sealed through chess.CHESS_VERIFY): twenty legal moves exist.",
+     "kind": "instance",
+     "seal": "4c1904b36dedf472cc89005163c03867929f1ce6cf044e8209a4dbcb9997107b"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[a legal move, SEALED] e2e4 is legal from the start (sealed through chess.CHESS_VERIFY): a pawn may advance two squares from its starting rank (Laws 3.7.2).",
+     "kind": "instance",
+     "seal": "eec413c3cf8ef84a87078df9cf4c8682b8b22ef7c2031a6b550e047040511ebb"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[an illegal move, SEALED AS ILLEGAL] e2e5 is NOT legal - sealed with claimed = false (sealed through chess.CHESS_VERIFY). Three squares is not a pawn move; the generator lists the twenty legal moves and this is not among them. A miss stays a miss.",
+     "kind": "instance",
+     "seal": "c1834624e30b37e2c62539a071d75b051694ba45cf610edf71935c3e550b4757"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[en passant, SEALED] After 1.e4 c5 2.e5 d5 the capture e5xd6 is legal (sealed through chess.CHESS_VERIFY): a pawn that just advanced two squares may be taken as if it had moved one (Laws 3.7.4.1), on that move only.",
+     "kind": "instance",
+     "seal": "7833a9da0906b7910ab34ca7be70797bb9e761008644fff86ea7c55423ff3d10"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[castling, SEALED] In the 'kiwipete' position White may castle kingside, e1g1 (sealed through chess.CHESS_VERIFY): king and rook unmoved, squares between empty, no square the king crosses attacked (Laws 3.8.2). The position's perft(2) = 2039 is the standard that proves the generator.",
+     "kind": "instance",
+     "seal": "5eae1951f9d89beceaeaca1f26c93f45ebef9961ea7721f4a39d617b3bb2fed3"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[material, SEALED] At the start the material balance is 0 (sealed through chess.CHESS_VERIFY): both sides hold 8 + 6 + 6 + 10 + 9 = 39 points on the 1/3/3/5/9 scale.",
+     "kind": "instance",
+     "seal": "53caa2aac3ed4bfa8841b13c279dc5417625b1c2f07fa505882ec52b29ff3fb4"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[a pawn up, SEALED] After scholar's mate White is +1 (sealed through chess.CHESS_VERIFY): the f7 pawn was the capture. The count is a convention; the capture is a fact.",
+     "kind": "instance",
+     "seal": "421a4286388a01463df65bc62b5be0c4949eede437dd1ccba508e10917a98e88"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[the Laws, CITED] The FIDE Laws of Chess are the postulate set: how each piece moves, check, checkmate, stalemate, en passant, castling. They are chosen rules, cited and never sealed; every verdict above is a theorem of them, computed exhaustively over the legal moves. The piece values 1/3/3/5/9 are a convention of the literature, not a law.",
+     "kind": "postulate",
+     "source": "FIDE Laws of Chess (2023); the 1/3/3/5/9 scale (standard literature convention)"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[the bound, stated] The verifier decides what is TRUE of a position - mate, stalemate, legality, material - by exhaustive legal-move generation, proven by perft (start: 20 / 400 / 8902; kiwipete: 2039 at depth 2). It never plays, evaluates, or recommends a move: what the best move is lies outside the closed set and is declined.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py chess",
+     "claim": "[on the one map] Strategy has three witnesses here: game theory (the abstract equilibrium), the body under pressure (the combat grammar), and chess - the one where perfect information makes optimal literally computable, so it is the calibration rig for the other two. Ties the game-theory stick and card_floor_the_mind; the search tree is card_floor_computer_science.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}
