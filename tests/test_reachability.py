@@ -166,15 +166,10 @@ AGENT_ONLY = {
 # Pages reachable by design without an in-site link: entered by URL, by QR, by an app shell,
 # or deliberately quiet. Named so "unlinked" is a decision, never an accident.
 UNLISTED_PAGES = {
-    "offline.html",       # served by the service worker when the network is gone
-    "404.html",
     "coach.html",         # Coach (the audio-native desk; internal codename console) — reached by voice / direct URL / home-screen install, an E-Ink-first tool, not a page on the public witness nav
     "tv.html",            # narrowhighway.tv (the museum/broadcast shell) — reached by direct URL / the .tv domain, curated to what the viewer seeks, not a page on the witness nav
     "bridge.html",        # THE BRIDGE — the operator's console (the vacuum-tube computer, live + on trend), noindex; the renamed keep, reached by direct URL, token-gated
-    "keep.html",          # the operator's own surface, noindex — now a thin redirect to The Bridge; a public list is not its place
     "steward.html",       # the Steward's instrument (budget, rounds, cost-destroyed) — plumbing in the five-doors map (2026-10-02); documented on connect.html, never a reader's door
-    "encyclopedia.html",  # a redirect stub onto characters.html; a second door to one room
-    "ask.html",           # the landing's predecessor, kept for old links
     "crossrefs.html",     # a cross-reference reference surface — reached by direct URL, not on the public nav (pre-existing orphan, declared 2026-10-15)
     "profile.html",       # the opt-in sovereign keeping (ez-login) — reached by direct URL / the keeping flow, not the public nav
     "reader.html",        # the tortoise reader (the whole PD source on demand) — reached from search-result "read it" buttons and ?find= deep links, a contextual reader, not a page on the nav
@@ -192,7 +187,8 @@ UNLISTED_PAGES = {
     "plow.html",          # the Plow surface — an operator instrument, not the public nav
     # THE UNIFIED HERO (2026-10-11): console.html is served at / by home_for() on BOTH faces (the domain
     # root — surface routing the static link-checker cannot see); bridge.html is the operator console,
-    # reached via keep.html's redirect. Neither is a nav <a href>, same limit as com.html.
+    # served for /keep* and /bridge* by api._keep (no keep.html file since 2026-10-16, issue #20).
+    # Neither is a nav <a href>, same limit as com.html.
     "console.html", "bridge.html",
 }
 
@@ -244,6 +240,14 @@ def test_agent_only_declarations_are_real_routes():
     live = {r["path"] for r in api.ROUTES}
     stale = sorted(AGENT_ONLY - live)
     assert not stale, f"AGENT_ONLY names routes that no longer exist: {stale}"
+
+
+def test_unlisted_declarations_are_real_pages():
+    """The same drift on the page side: five names sat here after their files were gone (keep.html,
+    ask.html, encyclopedia.html, offline.html, 404.html — cleared 2026-10-16, issue #20). A stale name
+    would let a NEW page inherit an old exemption by name."""
+    stale = sorted(n for n in UNLISTED_PAGES if not (SITE / n).exists())
+    assert not stale, f"UNLISTED_PAGES names pages that no longer ship: {stale}"
 
 
 def test_every_page_is_linked_or_declared_unlisted():
