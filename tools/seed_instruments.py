@@ -261,6 +261,9 @@ def _bridges() -> List[dict]:
     # the service joints to the one map
     for mod, node, ev in SERVICE:
         out.append(_edge(_iid(mod), node, "connects_at", f"instruments the map: {ev}"))
+    # the Floor itself roots in the Floor of Discovery — the edge UP that every Floor carries (it was missing
+    # here: the card sat with connections [] and could not be walked back to the root; issue #25 step 4)
+    out.append(_edge(FLOOR, GLOBAL_FLOOR, "part_of", "the engine's instruments on the one map"))
     return out
 
 
