@@ -148,6 +148,12 @@ def _bridges() -> List[dict]:
             out.append(_edge(_sid(s["key"]), c, "connects_at", f"{s['title'].split(' — ')[0]}: uses {c}"))
     for later, earlier in EDGES:
         out.append(_edge(_sid(later), _sid(earlier), "builds_on", f"{later} follows {earlier} on the solve path"))
+    # the Floor itself roots in the Floor of Discovery — the edge UP that every Floor carries (it was missing
+    # here: the card sat with connections [] and could not be walked back to the root; issue #25 step 4)
+    out.append(_edge(FLOOR, GLOBAL_FLOOR, "part_of", "the solve path on the one map"))
+    # its two doors ARE instruments: GET CLOSE (approximation) and CHANGE OF DOMAIN (spectral)
+    out.append(_edge(FLOOR, "card_floor_the_instruments", "rests_on",
+                     "the two doors are instruments: get close (approximation) and change of domain (spectral)"))
     return out
 
 
