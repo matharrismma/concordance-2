@@ -1,0 +1,22 @@
+{
+ "schema": 1,
+ "name": "fractal_maps",
+ "aliases": [
+  "fractal_maps",
+  "fractals",
+  "fractals_as_maps",
+  "sorting",
+  "sorting_algorithms",
+  "sort",
+  "merge_sort",
+  "quicksort",
+  "hilbert_curve",
+  "z_order",
+  "morton",
+  "coastline",
+  "logistic_map",
+  "radix"
+ ],
+ "handler": "fractal_maps",
+ "why_python": "pending migration (issue #13)"
+}

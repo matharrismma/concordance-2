@@ -1,0 +1,19 @@
+{
+ "schema": 1,
+ "name": "geneva",
+ "aliases": [
+  "geneva",
+  "geneva_drive",
+  "maltese_cross",
+  "mechanical_computer",
+  "mechanical",
+  "intermittent_motion",
+  "indexing",
+  "antikythera",
+  "difference_engine",
+  "babbage",
+  "counter"
+ ],
+ "handler": "geneva",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "prime_waves",
+ "aliases": [
+  "prime_waves",
+  "waveforms_in_primes",
+  "torus",
+  "torus_primes",
+  "zeta_waves",
+  "explicit_formula",
+  "music_of_the_primes"
+ ],
+ "handler": "prime_waves",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,16 @@
+{
+ "schema": 1,
+ "name": "formal_logic",
+ "aliases": [
+  "formal_logic",
+  "formal-logic",
+  "logic",
+  "boolean",
+  "boolean_algebra",
+  "truth_table",
+  "boole",
+  "sheffer"
+ ],
+ "handler": "stick_formal_logic",
+ "why_python": "pending migration (issue #13)"
+}

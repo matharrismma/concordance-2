@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "resonance",
+ "aliases": [
+  "resonance",
+  "resonance_disaster",
+  "hidden_division_by_zero",
+  "omega",
+  "omega_nought",
+  "tacoma",
+  "driven_oscillator"
+ ],
+ "handler": "resonance",
+ "why_python": "pending migration (issue #13)"
+}

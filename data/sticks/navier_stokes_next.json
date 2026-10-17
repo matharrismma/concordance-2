@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "navier_stokes_next",
+ "aliases": [
+  "navier_stokes_next",
+  "ns_next",
+  "existence_and_smoothness",
+  "taylor_green",
+  "poiseuille"
+ ],
+ "handler": "navier_stokes_next",
+ "why_python": "pending migration (issue #13)"
+}

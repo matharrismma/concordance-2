@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "get_close",
+ "aliases": [
+  "get_close",
+  "approximation",
+  "bounded_estimate"
+ ],
+ "handler": "get_close",
+ "why_python": "pending migration (issue #13)"
+}

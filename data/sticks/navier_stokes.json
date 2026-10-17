@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "navier_stokes",
+ "aliases": [
+  "navier_stokes",
+  "navierstokes",
+  "navier",
+  "turbulence",
+  "dispersion",
+  "dissonance"
+ ],
+ "handler": "navier_stokes",
+ "why_python": "pending migration (issue #13)"
+}

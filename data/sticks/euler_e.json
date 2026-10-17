@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "euler_e",
+ "aliases": [
+  "e",
+  "eulers_number",
+  "euler_number",
+  "exponential_constant",
+  "natural_log",
+  "compounding"
+ ],
+ "handler": "euler_e",
+ "why_python": "pending migration (issue #13)"
+}

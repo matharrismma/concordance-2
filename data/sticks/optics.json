@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "optics",
+ "aliases": [
+  "optics",
+  "lenses",
+  "refraction",
+  "the_lens"
+ ],
+ "handler": "optics",
+ "why_python": "pending migration (issue #13)"
+}

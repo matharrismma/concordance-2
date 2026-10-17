@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "tesseract",
+ "aliases": [
+  "tesseract",
+  "hypercube",
+  "four_cube",
+  "eight_cell"
+ ],
+ "handler": "tesseract",
+ "why_python": "pending migration (issue #13)"
+}

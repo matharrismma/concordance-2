@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "yang_mills_next",
+ "aliases": [
+  "yang_mills_next",
+  "ym_next",
+  "mass_gap_next",
+  "string_tension",
+  "glueball",
+  "asymptotic_freedom"
+ ],
+ "handler": "yang_mills_next",
+ "why_python": "pending migration (issue #13)"
+}

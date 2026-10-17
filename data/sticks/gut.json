@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "gut",
+ "aliases": [
+  "gut",
+  "grand_unification",
+  "unification_scale"
+ ],
+ "handler": "gut",
+ "why_python": "calls verify_derivation itself (3x)"
+}

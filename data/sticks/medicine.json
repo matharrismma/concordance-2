@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "medicine",
+ "aliases": [
+  "medicine",
+  "pharmacology",
+  "epidemiology",
+  "physiology"
+ ],
+ "handler": "medicine",
+ "why_python": "pending migration (issue #13)"
+}

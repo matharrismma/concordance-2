@@ -1,0 +1,106 @@
+{
+ "schema": 1,
+ "name": "economics",
+ "aliases": [
+  "economics",
+  "finance_stick"
+ ],
+ "doc": "ECONOMICS - SEALED THROUGH THE EXISTING VERIFIER (Matt, 2026-10-09: cover every domain, easiest first,\nintegrate what we have). The deterministic finance arithmetic certified and sealed via economics.ECON_VERIFY\n(public-domain formulas): compound interest, the rule of 72, present and future value, price elasticity, GDP per\ncapita. The predictive layer - valuations, market direction, policy outcomes - is declined. Idempotent.",
+ "seals": [
+  {
+   "key": "compound",
+   "domain": "economics",
+   "artifact": "ECON_VERIFY",
+   "spec": {
+    "principal": 1000,
+    "rate": 0.05,
+    "compounding_periods": 12,
+    "time_years": 10,
+    "claimed_compound_amount": 1647.01
+   }
+  },
+  {
+   "key": "rule72",
+   "domain": "economics",
+   "artifact": "ECON_VERIFY",
+   "spec": {
+    "rate_percent": 7,
+    "claimed_doubling_years": 10.3
+   }
+  },
+  {
+   "key": "pv",
+   "domain": "economics",
+   "artifact": "ECON_VERIFY",
+   "spec": {
+    "future_value": 1000,
+    "discount_rate": 0.05,
+    "time_years": 3,
+    "claimed_present_value": 863.84
+   }
+  },
+  {
+   "key": "ped",
+   "domain": "economics",
+   "artifact": "ECON_VERIFY",
+   "spec": {
+    "pct_change_quantity": -10,
+    "pct_change_price": 5,
+    "claimed_price_elasticity": -2.0
+   }
+  },
+  {
+   "key": "gdp",
+   "domain": "economics",
+   "artifact": "ECON_VERIFY",
+   "spec": {
+    "gdp": 21000000000000,
+    "population": 331000000,
+    "claimed_gdp_per_capita": 63444
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Economics - the finance arithmetic, verified and sealed",
+   "by": "tools/tick.py economics",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[compound interest] $1000 at 5% compounded monthly for 10 years grows to A = P(1 + r/n)^(nt) = 1000(1 + 0.05/12)^120 = $1647.01 (sealed through economics.ECON_VERIFY). Interest on interest - the engine of saving and of debt.",
+     "seal": "compound"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the rule of 72] At 7%, money doubles in about 72/7 = 10.3 years (sealed) - the mental shortcut for the doubling time, accurate to the half-year here.",
+     "seal": "rule72"
+    },
+    {
+     "kind": "instance",
+     "claim": "[present value] $1000 due in 3 years, discounted at 5%, is worth PV = FV/(1+r)^t = $863.84 today (sealed). The time value of money: a dollar later is worth less than a dollar now.",
+     "seal": "pv"
+    },
+    {
+     "kind": "instance",
+     "claim": "[price elasticity] A 10% fall in quantity against a 5% rise in price is PED = (-10)/(5) = -2.0 (sealed) - demand is elastic: quantity moves more than price.",
+     "seal": "ped"
+    },
+    {
+     "kind": "instance",
+     "claim": "[GDP per capita] $21 trillion over 331 million people is $63,444 per person (sealed) - the measure divided by the people it is spread across.",
+     "seal": "gdp"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the model it assumes] These are accounting identities and definitions, true by arithmetic. The wider theory (supply and demand, rational actors, ceteris paribus) is a MODEL - it works often enough to reason with, so its conclusions are inferred, never kept as fact; the engine seals the arithmetic and declines the forecast.",
+     "source": "standard public-domain finance formulas; economics.ECON_VERIFY"
+    },
+    {
+     "kind": "note",
+     "claim": "[what is declined] Asset valuations, market direction, interest-rate moves, policy outcomes and any forecast are DECLINED, cited or left as a want - not investment advice, and a miss stays a miss. The engine certifies the computation, not the prediction.",
+     "source": "src/concordance/verifiers/economics.py"
+    }
+   ]
+  }
+ ]
+}

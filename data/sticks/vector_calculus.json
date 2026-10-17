@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "vector_calculus",
+ "aliases": [
+  "vector_calculus",
+  "divergence",
+  "curl",
+  "div_curl",
+  "helmholtz",
+  "vorticity"
+ ],
+ "handler": "vector_calculus",
+ "why_python": "pending migration (issue #13)"
+}

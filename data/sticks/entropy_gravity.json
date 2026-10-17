@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "entropy_gravity",
+ "aliases": [
+  "entropy_gravity",
+  "entropy",
+  "bekenstein",
+  "hawking",
+  "holographic"
+ ],
+ "handler": "entropy_gravity",
+ "why_python": "pending migration (issue #13)"
+}

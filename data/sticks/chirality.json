@@ -1,0 +1,84 @@
+{
+ "schema": 1,
+ "name": "chirality",
+ "aliases": [
+  "chirality",
+  "autocatalysis",
+  "homochirality",
+  "kagan_soai",
+  "enantiomeric_excess"
+ ],
+ "doc": "CHIRALITY & ASYMMETRIC AUTOCATALYSIS - the 2026 Nobel Prize in Chemistry (Kagan & Soai, \"non-linear\neffects and autocatalysis in asymmetric organic synthesis\"). SEALED through chemistry.CHEM_VERIFY: the\nenantiomeric-excess arithmetic and the amplification SIGNATURE (product ee exceeds seed ee). The lab\ndiscovery - that this happens, and runs toward homochirality - is Kagan's and Soai's, CITED, never\nsealed by the engine. The one-handedness of life (L-amino acids, D-sugars) is carried as the open\nquestion it answers. Idempotent. Matt, 2026-10-13: \"Look at what they found.\" New stick.",
+ "seals": [
+  {
+   "key": "ee_hi",
+   "domain": "chemistry",
+   "artifact": "CHEM_VERIFY",
+   "spec": {
+    "r": 99,
+    "s": 1,
+    "claimed_ee_percent": 98
+   }
+  },
+  {
+   "key": "ee_rac",
+   "domain": "chemistry",
+   "artifact": "CHEM_VERIFY",
+   "spec": {
+    "r": 50,
+    "s": 50,
+    "claimed_ee_percent": 0
+   }
+  },
+  {
+   "key": "amp",
+   "domain": "chemistry",
+   "artifact": "CHEM_VERIFY",
+   "spec": {
+    "seed_ee_percent": 5,
+    "product_ee_percent": 95,
+    "claimed_amplification": true
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Chirality and asymmetric autocatalysis",
+   "statement": "The 2026 Nobel Prize in Chemistry (Kagan & Soai). Enantiomeric excess measures one-handedness; a small excess can be amplified - the product's ee exceeds the catalyst's (Kagan's non-linear effect), and in Soai's asymmetric autocatalysis the product is its own catalyst, so the excess runs toward homochirality (one source, a small bias, one end).",
+   "field": "chemistry",
+   "references": [
+    "Nobel Prize in Chemistry 2026 (H. B. Kagan, K. Soai), nobelprize.org/prizes/chemistry/2026",
+    "H. B. Kagan et al., nonlinear effects in asymmetric synthesis, J. Am. Chem. Soc. 108 (1986) 2353",
+    "K. Soai et al., asymmetric autocatalysis, Nature 378 (1995) 767"
+   ],
+   "by": "tools/tick.py chirality",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[one-handedness, measured] A 99:1 mixture of the two mirror images has enantiomeric excess ee = |R-S|/(R+S) x 100% = |99-1|/100 = 98% (sealed through chemistry.CHEM_VERIFY) - how far a sample leans to a single hand.",
+     "seal": "ee_hi"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the symmetric start] A 50:50 mixture is racemic: ee = 0% (sealed) - no handedness, the field a tiny bias breaks.",
+     "seal": "ee_rac"
+    },
+    {
+     "kind": "instance",
+     "claim": "[amplification - the Kagan-Soai signature] When product ee (95%) EXCEEDS seed ee (5%), a small handedness has been amplified: a positive non-linear effect (sealed). Soai's asymmetric autocatalysis - the product catalyzing its own formation - drives this toward homochirality. One source, a small bias, one end.",
+     "seal": "amp"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the ground] Enantiomeric excess and the inequality product_ee > seed_ee are exact arithmetic, sealed. THAT a near-symmetric start amplifies to one hand in the lab is the 2026 Nobel discovery of Kagan and Soai - cited, inferred from their experiments, never sealed here.",
+     "source": "Nobel Prize in Chemistry 2026; Kagan (1986); Soai (1995)"
+    },
+    {
+     "kind": "note",
+     "claim": "[declined] How life came to use a single handedness (L-amino acids, D-sugars) is the open origin question this illuminates but does not close; the engine seals the ee arithmetic and the amplification inequality, not the account of life's beginning.",
+     "source": "src/concordance/verifiers/chemistry.py (enantiomeric_excess, chiral_amplification)"
+    }
+   ]
+  }
+ ]
+}

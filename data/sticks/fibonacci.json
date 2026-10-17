@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "fibonacci",
+ "aliases": [
+  "fibonacci",
+  "fib",
+  "golden_ratio",
+  "phi",
+  "binet",
+  "lucas"
+ ],
+ "handler": "fibonacci",
+ "why_python": "pending migration (issue #13)"
+}

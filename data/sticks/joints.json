@@ -1,0 +1,23 @@
+{
+ "schema": 1,
+ "name": "joints",
+ "aliases": [
+  "joints",
+  "where_two_domains_connect",
+  "connection_points",
+  "braket",
+  "bra_ket",
+  "bras_and_kets",
+  "hilbert",
+  "hilbert_space",
+  "inner_product",
+  "engine_is_the_hilbert_space",
+  "geometry_algebra",
+  "geometry_connect_to_algebra",
+  "quantum_physics",
+  "quantum_mechanics_and_physics",
+  "correspondence"
+ ],
+ "handler": "joints",
+ "why_python": "pending migration (issue #13)"
+}

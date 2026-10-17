@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "markov",
+ "aliases": [
+  "markov",
+  "mcmc",
+  "lattice"
+ ],
+ "handler": "markov",
+ "why_python": "calls verify_derivation itself (2x)"
+}

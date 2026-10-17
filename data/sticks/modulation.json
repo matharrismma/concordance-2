@@ -1,0 +1,20 @@
+{
+ "schema": 1,
+ "name": "modulation",
+ "aliases": [
+  "modulation",
+  "am_fm",
+  "am",
+  "fm",
+  "amplitude_modulation",
+  "frequency_modulation",
+  "diagonalization",
+  "diagonalisation",
+  "eigenbasis",
+  "carrier",
+  "sidebands",
+  "bessel"
+ ],
+ "handler": "modulation",
+ "why_python": "pending migration (issue #13)"
+}

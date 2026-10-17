@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "yang_mills",
+ "aliases": [
+  "yang_mills",
+  "yangmills",
+  "mass_gap",
+  "massgap",
+  "confinement"
+ ],
+ "handler": "yang_mills",
+ "why_python": "pending migration (issue #13)"
+}

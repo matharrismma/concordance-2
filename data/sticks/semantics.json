@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "semantics",
+ "aliases": [
+  "semantics",
+  "semantic_relations",
+  "synonymy",
+  "wordnet"
+ ],
+ "handler": "semantics",
+ "why_python": "returned 1"
+}

@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "game_theory",
+ "aliases": [
+  "game_theory",
+  "nash_equilibrium",
+  "prisoners_dilemma",
+  "zero_sum"
+ ],
+ "handler": "game_theory",
+ "why_python": "pending migration (issue #13)"
+}

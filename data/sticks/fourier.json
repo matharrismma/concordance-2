@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "fourier",
+ "aliases": [
+  "fourier",
+  "rotation",
+  "phasor",
+  "frequency",
+  "spin",
+  "fourier_transform",
+  "dft"
+ ],
+ "handler": "fourier",
+ "why_python": "pending migration (issue #13)"
+}

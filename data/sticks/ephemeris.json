@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "ephemeris",
+ "aliases": [
+  "ephemeris",
+  "julian_day",
+  "moon_phase",
+  "sunrise",
+  "solstice"
+ ],
+ "handler": "stick_ephemeris",
+ "why_python": "pending migration (issue #13)"
+}

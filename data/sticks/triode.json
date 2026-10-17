@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "triode",
+ "aliases": [
+  "triode",
+  "vacuum_triode",
+  "vacuum_tube",
+  "audion",
+  "child_langmuir",
+  "tube"
+ ],
+ "handler": "triode",
+ "why_python": "pending migration (issue #13)"
+}

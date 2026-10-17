@@ -1,0 +1,10 @@
+{
+ "schema": 1,
+ "name": "law",
+ "aliases": [
+  "law",
+  "law_stick"
+ ],
+ "handler": "law",
+ "why_python": "pending migration (issue #13)"
+}

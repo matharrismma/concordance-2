@@ -1,0 +1,17 @@
+{
+ "schema": 1,
+ "name": "spm",
+ "aliases": [
+  "spm",
+  "spherical_parallel_mechanism",
+  "spherical_parallel",
+  "spherical_mechanism",
+  "agile_eye",
+  "parallel_mechanism",
+  "orientation_mechanism",
+  "grubler",
+  "kutzbach"
+ ],
+ "handler": "spm",
+ "why_python": "pending migration (issue #13)"
+}

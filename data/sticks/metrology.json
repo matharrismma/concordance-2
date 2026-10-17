@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "metrology",
+ "aliases": [
+  "metrology",
+  "si_units",
+  "the_metre",
+  "unit_conversion"
+ ],
+ "handler": "metrology",
+ "why_python": "pending migration (issue #13)"
+}

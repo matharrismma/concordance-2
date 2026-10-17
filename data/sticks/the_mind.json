@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "the_mind",
+ "aliases": [
+  "the_mind",
+  "neuroscience",
+  "neuron",
+  "cognition"
+ ],
+ "handler": "the_mind",
+ "why_python": "pending migration (issue #13)"
+}

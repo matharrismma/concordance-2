@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "hermitian_operators",
+ "aliases": [
+  "hermitian",
+  "hermitian_operators",
+  "observables",
+  "real_eigenvalues"
+ ],
+ "handler": "hermitian_operators",
+ "why_python": "pending migration (issue #13)"
+}

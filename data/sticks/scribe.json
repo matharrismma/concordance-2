@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "scribe",
+ "aliases": [
+  "scribe",
+  "scribing",
+  "scribe_the_center",
+  "points_to_lines",
+  "connect_the_points"
+ ],
+ "handler": "scribe",
+ "why_python": "pending migration (issue #13)"
+}

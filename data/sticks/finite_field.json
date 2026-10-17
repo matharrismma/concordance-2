@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "finite_field",
+ "aliases": [
+  "finite_field",
+  "finitefield",
+  "weil",
+  "deligne",
+  "frobenius",
+  "function_field"
+ ],
+ "handler": "finite_field",
+ "why_python": "pending migration (issue #13)"
+}

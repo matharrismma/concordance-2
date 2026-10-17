@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "legendre",
+ "aliases": [
+  "legendre",
+  "legendre_transform",
+  "tangent_lines",
+  "y_intercept",
+  "convex_duality",
+  "dual"
+ ],
+ "handler": "legendre",
+ "why_python": "pending migration (issue #13)"
+}

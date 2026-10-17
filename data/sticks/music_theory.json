@@ -1,0 +1,10 @@
+{
+ "schema": 1,
+ "name": "music_theory",
+ "aliases": [
+  "music_theory_stick",
+  "music_theory"
+ ],
+ "handler": "music_theory_stick",
+ "why_python": "pending migration (issue #13)"
+}

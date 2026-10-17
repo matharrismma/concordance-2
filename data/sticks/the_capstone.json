@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "the_capstone",
+ "aliases": [
+  "one_source_one_end",
+  "copenhagen",
+  "reply_to_copenhagen",
+  "many_potentials_one_end"
+ ],
+ "handler": "the_capstone",
+ "why_python": "pending migration (issue #13)"
+}

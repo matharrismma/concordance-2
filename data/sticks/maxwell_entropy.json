@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "maxwell_entropy",
+ "aliases": [
+  "maxwell_entropy",
+  "maxwells_demon",
+  "maxwell_demon",
+  "demon",
+  "entropy_concentrated",
+  "landauer",
+  "second_law"
+ ],
+ "handler": "maxwell_entropy",
+ "why_python": "pending migration (issue #13)"
+}

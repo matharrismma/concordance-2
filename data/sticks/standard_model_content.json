@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "standard_model_content",
+ "aliases": [
+  "gauge_theory",
+  "particle_physics",
+  "quark_model",
+  "gluons"
+ ],
+ "handler": "standard_model_content",
+ "why_python": "pending migration (issue #13)"
+}

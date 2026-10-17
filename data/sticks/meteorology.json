@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "meteorology",
+ "aliases": [
+  "meteorology",
+  "weather",
+  "climate",
+  "the_atmosphere"
+ ],
+ "handler": "meteorology",
+ "why_python": "pending migration (issue #13)"
+}

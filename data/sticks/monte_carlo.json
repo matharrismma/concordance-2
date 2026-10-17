@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "monte_carlo",
+ "aliases": [
+  "monte_carlo",
+  "montecarlo",
+  "monte",
+  "mc",
+  "sampling"
+ ],
+ "handler": "monte_carlo",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,9 @@
+{
+ "schema": 1,
+ "name": "residual",
+ "aliases": [
+  "residual"
+ ],
+ "handler": "residual",
+ "why_python": "returned 1"
+}

@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "lebesgue",
+ "aliases": [
+  "lebesgue",
+  "measure_theory",
+  "measure",
+  "lebesgue_integral",
+  "almost_everywhere"
+ ],
+ "handler": "lebesgue",
+ "why_python": "pending migration (issue #13)"
+}

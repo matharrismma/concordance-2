@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "symmetry",
+ "aliases": [
+  "symmetry",
+  "critical_line",
+  "reflection",
+  "fixed_axis"
+ ],
+ "handler": "symmetry",
+ "why_python": "pending migration (issue #13)"
+}

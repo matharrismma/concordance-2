@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "philosophy",
+ "aliases": [
+  "philosophy",
+  "modal_logic",
+  "leibniz",
+  "a_priori",
+  "ethics"
+ ],
+ "handler": "stick_philosophy",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "svd",
+ "aliases": [
+  "svd",
+  "singular_value_decomposition",
+  "rotation_and_stretch",
+  "spherical_matrix",
+  "efficient_vectors",
+  "most_efficient_vectors",
+  "polar_decomposition"
+ ],
+ "handler": "svd",
+ "why_python": "pending migration (issue #13)"
+}

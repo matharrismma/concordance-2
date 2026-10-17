@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "the_hamiltonian",
+ "aliases": [
+  "hamiltonian",
+  "the_hamiltonian",
+  "energy_operator",
+  "law_of_the_flow"
+ ],
+ "handler": "the_hamiltonian",
+ "why_python": "pending migration (issue #13)"
+}

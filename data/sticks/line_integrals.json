@@ -1,0 +1,18 @@
+{
+ "schema": 1,
+ "name": "line_integrals",
+ "aliases": [
+  "line_integrals",
+  "line_integral",
+  "electrodynamics",
+  "ampere",
+  "faraday",
+  "gauss_law",
+  "work",
+  "feynman_path",
+  "sum_over_paths",
+  "hamiltons_principle"
+ ],
+ "handler": "line_integrals",
+ "why_python": "pending migration (issue #13)"
+}

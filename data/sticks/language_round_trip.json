@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "language_round_trip",
+ "aliases": [
+  "language_round_trip",
+  "flip_to_original",
+  "original_tongue",
+  "leave_in_the_tongue",
+  "eigenbasis_language"
+ ],
+ "handler": "language_round_trip",
+ "why_python": "pending migration (issue #13)"
+}

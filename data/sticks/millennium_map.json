@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "millennium_map",
+ "aliases": [
+  "millennium_map",
+  "one_map",
+  "joints_map"
+ ],
+ "handler": "millennium_map",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """THE TICK STICK — make a mark (docs/TICK_STICK.md; Matt, 2026-10-05).
 
+    PYTHONPATH=src python tools/tick.py list                 # every stick in the catalog (data/sticks/*.json) and its aliases
+    PYTHONPATH=src python tools/tick.py <alias>              # run one: a data stick through concordance.sticks, a Python
+                                                             # handler (the computational minority below) by its function
     PYTHONPATH=src python tools/tick.py seed                 # open the first sticks with their cited marks
     PYTHONPATH=src python tools/tick.py document              # write the Riemann attempt's record onto its stick
     PYTHONPATH=src python tools/tick.py lnh                   # Dirac's Large Numbers Hypothesis: seal N1, cite the rest
@@ -27,6 +30,13 @@ tick's seal is a real, re-checkable entry in this node's keeping. The verify doo
 here: the tool raises CONCORDANCE_VERIFY_TIMEOUT_S before the engine loads, because a mark at T = 2000 takes minutes
 and is still a verification, not a proof. Run it ON THE BRANCH (the box): a mark minted on a replica stays there
 until marks travel back (Gen 3 · 1b).
+
+STICKS ARE DATA (issue #13, 2026-10-17). Every stick is an entry in data/sticks/<name>.json — aliases, seals (nid /
+expr / value / tol, or a domain verifier's spec), the stick and its marks — run by concordance.sticks.run; adding a
+stick needs no Python. The functions below are the computational minority (they call verify_derivation or
+tickstick.tick themselves, take a CLI argument, or read a table) and are registered in the SAME catalog as handler
+entries, so main() has one table and an alias can reach exactly one stick: a duplicate is a load-time error.
+tools/tick_golden.py pins every entry's sealed content; tools/tick_record.py is how a function becomes data.
 """
 from __future__ import annotations
 
@@ -139,7 +149,6 @@ def riemann(T_height: float) -> int:
     print(json.dumps({"ok": r.get("ok"), "error": r.get("error"), "fit": (r.get("fit") or {}).get("verified_up_to"),
                       "open": (r.get("fit") or {}).get("open")}, indent=1))
     return 0 if r.get("ok") else 1
-
 
 
 def riemann_li(n_max: int = 30) -> int:
@@ -1086,75 +1095,6 @@ def get_close() -> int:
     return 0
 
 
-def change_of_domain() -> int:
-    """CHANGE OF DOMAIN - THE EXACT FLIP (Matt, 2026-10-09: "putting the problem in a Hilbert Space" - "build it").
-    Put the problem in the space where it diagonalizes, solve it as independent scalars, map back. Demonstrated and
-    sealed on three flips: (1) FIBONACCI by the eigenbasis - the coupled recurrence [[1,1],[1,0]] has eigenvalues phi
-    and psi (the golden ratio and its conjugate); the trace phi+psi = 1 and the determinant phi*psi = -1 are sealed,
-    and Binet's formula (phi^10 - psi^10)/sqrt(5) = 55 is sealed - the nth term is independent scalar powers in the
-    eigenbasis. (2) A MARKOV steady state as the lambda = 1 eigenvector - the detailed balance 0.1*(5/6) = 0.5*(1/6)
-    sealed to zero, the stationary pi_1 = 5/6 sealed. (3) the FOURIER flip - the convolution sum identity (sum a)(sum
-    b) = 12 sealed (the convolution theorem's consequence; the full ifft(fft.fft) = direct check is in the verifier
-    spectral.py). The verifier CHECKS the flip is valid (A v = lambda v) before trusting it. Idempotent."""
-    import math
-    from concordance import tickstick as TS
-    S = {}
-    seals = [
-        ("fib_trace", "fibonacci_matrix_trace_phi_plus_psi", "(1+sqrt(5))/2 + (1-sqrt(5))/2", 1.0, 1e-12),
-        ("fib_det", "fibonacci_matrix_determinant_phi_times_psi", "((1+sqrt(5))/2)*((1-sqrt(5))/2)", -1.0, 1e-12),
-        ("binet", "fibonacci_10_by_binet_in_the_eigenbasis", "(((1+sqrt(5))/2)**10 - ((1-sqrt(5))/2)**10)/sqrt(5)", 55.0, 1e-9),
-        ("markov_bal", "markov_detailed_balance_lambda_1_eigenvector", "0.1*(5/6) - 0.5*(1/6)", 0.0, 1e-12),
-        ("markov_pi", "markov_stationary_pi_1", "0.5/(0.1+0.5)", 5.0/6.0, 1e-12),
-        ("conv_sum", "fourier_convolution_sum_identity_sum_a_times_sum_b", "(1+2+3)*(1+1)", 12.0, 1e-12),
-    ]
-    for key, nid, expr, val, tol in seals:
-        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
-        if not S[key]:
-            print("a seal failed:", nid); return 1
-    print("sealed", len(S), "change-of-domain numbers")
-    sid = TS.create("Change of domain - solve in the eigenbasis, map back")["id"]
-    marks = [
-        ("instance", "[Fibonacci by the eigenbasis] The recurrence F_n = F_{n-1} + F_{n-2} is the matrix M = [[1,1],[1,0]] "
-                     "applied n times - coupled in the standard basis. M diagonalizes: its eigenvalues are phi = "
-                     "(1+sqrt5)/2 and psi = (1-sqrt5)/2, with trace phi+psi = 1 (sealed) and determinant phi*psi = -1 "
-                     "(sealed). In the eigenbasis the nth power is just phi^n and psi^n - independent scalars - and "
-                     "mapping back gives Binet: F_10 = (phi^10 - psi^10)/sqrt5 = 55 (sealed, an exact integer). The flip "
-                     "turned iteration into a closed form.", S["binet"]),
-        ("instance", "[a Markov steady state as the lambda = 1 eigenvector] A two-state chain with rates 0.1 and 0.5 has "
-                     "its stationary distribution at the eigenvector of eigenvalue 1: detailed balance 0.1*(5/6) = "
-                     "0.5*(1/6), i.e. the difference is 0 (sealed), giving pi_1 = 0.5/(0.1+0.5) = 5/6 (sealed). The long-run "
-                     "behaviour - a hard limit of powers in the standard basis - is one eigenvector in the eigenbasis.",
-         S["markov_bal"]),
-        ("instance", "[the Fourier flip] Multiplying (1 + 2x + 3x^2)(1 + x) convolves the coefficients. Convolution is "
-                     "O(n^2) directly and pointwise multiplication in the frequency basis (DFT(a*b) = DFT(a).DFT(b)). A "
-                     "sealed consequence: the convolution's coefficients sum to (sum a)(sum b) = 6*2 = 12 (sealed); the "
-                     "full ifft(fft.fft) = direct-convolution check is run in the verifier. Convolution is multiplication "
-                     "in the frequency domain.", S["conv_sum"]),
-        ("postulate", "[what it rests on] The spectral theorem: a diagonalizable operator is, in its eigenbasis, a "
-                      "diagonal matrix - the coupled system becomes independent scalars, and any function of the operator "
-                      "is that function applied to each eigenvalue. The flip is EXACT when the eigenbasis exists and is "
-                      "known; the engine verifies A v = lambda v before trusting it. Taken as the frame these flips work "
-                      "in; from their working the method is inferred, never kept as a universal fact - a defective matrix "
-                      "has no such basis, and a problem with no cheap diagonalizing basis is where the barriers bite.",
-         {"source": "the spectral theorem; Binet (1843); J. Fourier (1822); the convolution theorem"}),
-        ("note", "[don't blindly apply bra-ket] The flip is a win only when the diagonalizing basis is known and cheap "
-                 "to apply: Fourier is O(n log n), a general diagonalization is O(n^3), and for an NP-complete problem the "
-                 "basis would be exponentially large or exponentially hard to find - the barrier, re-appearing, not "
-                 "evaded. Exact here (structure present: linearity, a symmetry, a modularity); where it is absent, fall "
-                 "through to the get-close approximation with a proven bound.",
-         {"source": "src/concordance/verifiers/spectral.py; the P vs NP barriers (card_floor_p_vs_np); "
-                    "the get-close door (stick_get_fairly_close_with_a_proven_bound)"}),
-        ("note", "[the engine is the Hilbert space] The domains are its subspaces, the verifiers its operators, and the "
-                 "joints where two domains connect (card_floor_millennium, card_floor_the_instruments) are the inner "
-                 "products. Solving is choosing the domain whose best aspect diagonalizes your problem, working there, and "
-                 "mapping back - exact in the eigenbasis (here), approximate by relaxation (get close). This is the "
-                 "transceiver reading: find the carrier, demodulate, read the message.",
-         {"source": "the one map; src/concordance/verifiers/spectral.py and approximation.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py change_of_domain")
-    return 0
-
-
 def grimm_law() -> int:
     """GRIMM'S LAW - A SOUND LAW, VERIFIED AND SEALED (Matt, 2026-10-09: "How do we use this for linguistics?" -
     "build it"). The first consonant shift: in Germanic the Proto-Indo-European voiceless stops became voiceless
@@ -1291,58 +1231,10 @@ def genomics() -> int:
 
 
 def _seal_through(domain, artifact_key, spec):
-    """Verify a claim through an existing domain verifier and return its seal (verify -> receipts.attach)."""
-    from concordance import receipts
-    from concordance.derivation import verify_derivation
-    from concordance.engine import EngineConfig
-    res = verify_derivation([{"id": "x", "domain": domain, "spec": {artifact_key: spec}}])
-    if res.get("verdict") != "HOLDS":
-        print("  did NOT hold:", domain, res.get("verdict")); return None
-    res = receipts.attach(res, config=EngineConfig(), domain=domain)
-    return (res.get("seal") or {}).get("content_hash")
-
-
-def economics() -> int:
-    """ECONOMICS - SEALED THROUGH THE EXISTING VERIFIER (Matt, 2026-10-09: cover every domain, easiest first,
-    integrate what we have). The deterministic finance arithmetic certified and sealed via economics.ECON_VERIFY
-    (public-domain formulas): compound interest, the rule of 72, present and future value, price elasticity, GDP per
-    capita. The predictive layer - valuations, market direction, policy outcomes - is declined. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "compound": _seal_through("economics", "ECON_VERIFY", {"principal": 1000, "rate": 0.05, "compounding_periods": 12, "time_years": 10, "claimed_compound_amount": 1647.01}),
-        "rule72": _seal_through("economics", "ECON_VERIFY", {"rate_percent": 7, "claimed_doubling_years": 10.3}),
-        "pv": _seal_through("economics", "ECON_VERIFY", {"future_value": 1000, "discount_rate": 0.05, "time_years": 3, "claimed_present_value": 863.84}),
-        "ped": _seal_through("economics", "ECON_VERIFY", {"pct_change_quantity": -10, "pct_change_price": 5, "claimed_price_elasticity": -2.0}),
-        "gdp": _seal_through("economics", "ECON_VERIFY", {"gdp": 21000000000000, "population": 331000000, "claimed_gdp_per_capita": 63444}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "economics facts")
-    sid = TS.create("Economics - the finance arithmetic, verified and sealed")["id"]
-    marks = [
-        ("instance", "[compound interest] $1000 at 5% compounded monthly for 10 years grows to A = P(1 + r/n)^(nt) = "
-                     "1000(1 + 0.05/12)^120 = $1647.01 (sealed through economics.ECON_VERIFY). Interest on interest - the "
-                     "engine of saving and of debt.", S["compound"]),
-        ("instance", "[the rule of 72] At 7%, money doubles in about 72/7 = 10.3 years (sealed) - the mental shortcut "
-                     "for the doubling time, accurate to the half-year here.", S["rule72"]),
-        ("instance", "[present value] $1000 due in 3 years, discounted at 5%, is worth PV = FV/(1+r)^t = $863.84 today "
-                     "(sealed). The time value of money: a dollar later is worth less than a dollar now.", S["pv"]),
-        ("instance", "[price elasticity] A 10% fall in quantity against a 5% rise in price is PED = (-10)/(5) = -2.0 "
-                     "(sealed) - demand is elastic: quantity moves more than price.", S["ped"]),
-        ("instance", "[GDP per capita] $21 trillion over 331 million people is $63,444 per person (sealed) - the measure "
-                     "divided by the people it is spread across.", S["gdp"]),
-        ("postulate", "[the model it assumes] These are accounting identities and definitions, true by arithmetic. The "
-                      "wider theory (supply and demand, rational actors, ceteris paribus) is a MODEL - it works often "
-                      "enough to reason with, so its conclusions are inferred, never kept as fact; the engine seals the "
-                      "arithmetic and declines the forecast.",
-         {"source": "standard public-domain finance formulas; economics.ECON_VERIFY"}),
-        ("note", "[what is declined] Asset valuations, market direction, interest-rate moves, policy outcomes and any "
-                 "forecast are DECLINED, cited or left as a want - not investment advice, and a miss stays a miss. The "
-                 "engine certifies the computation, not the prediction.",
-         {"source": "src/concordance/verifiers/economics.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py economics")
-    return 0
+    """Verify a claim through an existing domain verifier and return its seal (now concordance.sticks.seal_verifier;
+    kept by name for the Python handlers)."""
+    from concordance import sticks
+    return sticks.seal_verifier(domain, artifact_key, spec)
 
 
 def logistics() -> int:
@@ -1491,117 +1383,6 @@ def probability_stick() -> int:
     return 0
 
 
-def chemistry_stick() -> int:
-    """CHEMISTRY - SEALED through chemistry.CHEM_VERIFY. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "eq": _seal_through("chemistry", "CHEM_VERIFY", {"equation": "2 H2 + O2 -> 2 H2O"}),
-        "thermo": _seal_through("chemistry", "CHEM_VERIFY", {"delta_H_kJ_mol": -285.8, "delta_S_J_mol_K": -163.2, "temperature_K": 298, "claimed_spontaneous": True}),
-        "ph": _seal_through("chemistry", "CHEM_VERIFY", {"pH": 3.0, "claimed_classification": "acidic"}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "chemistry facts")
-    sid = TS.create("Chemistry - reactions and solutions, verified and sealed")["id"]
-    marks = [
-        ("instance", "[a balanced equation] 2 H2 + O2 -> 2 H2O: four H and two O on each side, charge balanced (sealed "
-                     "through chemistry.CHEM_VERIFY) - conservation of mass, the first law of the reaction.", S["eq"]),
-        ("instance", "[spontaneity] For liquid water's formation, dH = -285.8 kJ/mol and dS = -163.2 J/mol/K; at 298 K, "
-                     "dG = dH - T dS < 0, so the reaction is spontaneous (sealed) - the second law deciding direction.", S["thermo"]),
-        ("instance", "[acidity] pH 3.0 is acidic (sealed): pH below 7 is acid, above is base, 7 neutral - the logarithm "
-                     "of the hydrogen-ion concentration.", S["ph"]),
-        ("postulate", "[the ground] Conservation of mass and charge, and the laws of thermodynamics - sealed where "
-                      "applied. The detailed mechanism of a reaction is a model, inferred from evidence, not kept as "
-                      "fact.", {"source": "chemistry.CHEM_VERIFY; the laws of thermodynamics"}),
-        ("note", "[declined] Reaction mechanisms beyond the balance, toxicity, dosage and safety judgments are declined "
-                 "- the engine seals the stoichiometry and the sign of dG, not the clinical call.",
-         {"source": "src/concordance/verifiers/chemistry.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py chemistry_stick")
-    return 0
-
-
-def chirality() -> int:
-    """CHIRALITY & ASYMMETRIC AUTOCATALYSIS - the 2026 Nobel Prize in Chemistry (Kagan & Soai, "non-linear
-    effects and autocatalysis in asymmetric organic synthesis"). SEALED through chemistry.CHEM_VERIFY: the
-    enantiomeric-excess arithmetic and the amplification SIGNATURE (product ee exceeds seed ee). The lab
-    discovery - that this happens, and runs toward homochirality - is Kagan's and Soai's, CITED, never
-    sealed by the engine. The one-handedness of life (L-amino acids, D-sugars) is carried as the open
-    question it answers. Idempotent. Matt, 2026-10-13: "Look at what they found." New stick."""
-    from concordance import tickstick as TS
-    S = {
-        "ee_hi": _seal_through("chemistry", "CHEM_VERIFY", {"r": 99, "s": 1, "claimed_ee_percent": 98}),
-        "ee_rac": _seal_through("chemistry", "CHEM_VERIFY", {"r": 50, "s": 50, "claimed_ee_percent": 0}),
-        "amp": _seal_through("chemistry", "CHEM_VERIFY",
-                             {"seed_ee_percent": 5, "product_ee_percent": 95, "claimed_amplification": True}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "chirality facts")
-    sid = TS.create("Chirality and asymmetric autocatalysis",
-                    "The 2026 Nobel Prize in Chemistry (Kagan & Soai). Enantiomeric excess measures "
-                    "one-handedness; a small excess can be amplified - the product's ee exceeds the catalyst's "
-                    "(Kagan's non-linear effect), and in Soai's asymmetric autocatalysis the product is its own "
-                    "catalyst, so the excess runs toward homochirality (one source, a small bias, one end).",
-                    "chemistry",
-                    ["Nobel Prize in Chemistry 2026 (H. B. Kagan, K. Soai), nobelprize.org/prizes/chemistry/2026",
-                     "H. B. Kagan et al., nonlinear effects in asymmetric synthesis, J. Am. Chem. Soc. 108 (1986) 2353",
-                     "K. Soai et al., asymmetric autocatalysis, Nature 378 (1995) 767"])["id"]
-    marks = [
-        ("instance", "[one-handedness, measured] A 99:1 mixture of the two mirror images has enantiomeric excess "
-                     "ee = |R-S|/(R+S) x 100% = |99-1|/100 = 98% (sealed through chemistry.CHEM_VERIFY) - how far a "
-                     "sample leans to a single hand.", S["ee_hi"]),
-        ("instance", "[the symmetric start] A 50:50 mixture is racemic: ee = 0% (sealed) - no handedness, the field "
-                     "a tiny bias breaks.", S["ee_rac"]),
-        ("instance", "[amplification - the Kagan-Soai signature] When product ee (95%) EXCEEDS seed ee (5%), a small "
-                     "handedness has been amplified: a positive non-linear effect (sealed). Soai's asymmetric "
-                     "autocatalysis - the product catalyzing its own formation - drives this toward homochirality. "
-                     "One source, a small bias, one end.", S["amp"]),
-        ("postulate", "[the ground] Enantiomeric excess and the inequality product_ee > seed_ee are exact arithmetic, "
-                      "sealed. THAT a near-symmetric start amplifies to one hand in the lab is the 2026 Nobel discovery "
-                      "of Kagan and Soai - cited, inferred from their experiments, never sealed here.",
-         {"source": "Nobel Prize in Chemistry 2026; Kagan (1986); Soai (1995)"}),
-        ("note", "[declined] How life came to use a single handedness (L-amino acids, D-sugars) is the open origin "
-                 "question this illuminates but does not close; the engine seals the ee arithmetic and the amplification "
-                 "inequality, not the account of life's beginning.",
-         {"source": "src/concordance/verifiers/chemistry.py (enantiomeric_excess, chiral_amplification)"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py chirality")
-    return 0
-
-
-def astronomy_stick() -> int:
-    """ASTRONOMY - SEALED through astronomy.ASTRO_VERIFY. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "kepler": _seal_through("astronomy", "ASTRO_VERIFY", {"orbital_period_years": 1.0, "semi_major_axis_au": 1.0, "claimed_kepler_consistent": True}),
-        "grav": _seal_through("astronomy", "ASTRO_VERIFY", {"mass_1_kg": 5.972e24, "mass_2_kg": 1.989e30, "separation_m": 1.496e11, "claimed_gravitational_force_N": 3.54e22}),
-        "parallax": _seal_through("astronomy", "ASTRO_VERIFY", {"parallax_arcsec": 0.1, "claimed_distance_parsec": 10}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "astronomy facts")
-    sid = TS.create("Astronomy - orbits and distances, verified and sealed")["id"]
-    marks = [
-        ("instance", "[Kepler's third law] The Earth: period 1 year, semi-major axis 1 AU, so T^2 = a^3 = 1 (sealed "
-                     "through astronomy.ASTRO_VERIFY) - the harmony of the spheres, the square of the year is the cube "
-                     "of the distance.", S["kepler"]),
-        ("instance", "[gravity holds the orbit] The Sun pulls the Earth with F = G m1 m2 / r^2 = 3.54e22 N (sealed) - "
-                     "Newton's law, the same force that drops an apple.", S["grav"]),
-        ("instance", "[the parallax ladder] A star with parallax 0.1 arcsecond is 1/0.1 = 10 parsecs away (sealed) - "
-                     "the first rung of the distance ladder, trigonometry on the Earth's orbit.", S["parallax"]),
-        ("postulate", "[the ground] Newtonian gravity and Kepler's laws - sealed where applied, and themselves the "
-                      "low-field limit of general relativity (cited). The universe's large-scale model (dark matter, "
-                      "dark energy) is inferred from evidence, carried, not kept as fact.",
-         {"source": "J. Kepler (1619); I. Newton (1687); astronomy.ASTRO_VERIFY"}),
-        ("note", "[declined] Cosmological interpretation, the existence and nature of dark matter, and the fate of the "
-                 "universe are declined; the engine seals the orbital arithmetic.",
-         {"source": "src/concordance/verifiers/astronomy.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py astronomy_stick")
-    return 0
-
-
 def information_theory_stick() -> int:
     """INFORMATION THEORY - SEALED through information_theory.INFO_VERIFY. Idempotent."""
     from concordance import tickstick as TS
@@ -1662,75 +1443,6 @@ def music_theory_stick() -> int:
          {"source": "src/concordance/verifiers/music_theory.py"}),
     ]
     _mint_marks(sid, marks, by="tools/tick.py music_theory_stick")
-    return 0
-
-
-def black_holes() -> int:
-    """BLACK HOLES - THE FOUR-CONSTANT CONFLUENCE, SEALED (Matt, 2026-10-09: "What about Black Holes?"). A black hole
-    is where gravity, relativity, the quantum and thermodynamics meet: the Bekenstein-Hawking entropy S = k_B c^3 A /
-    (4 G hbar) is the one formula that contains G, c, hbar AND k_B together. Sealed (solar mass): the Schwarzschild
-    radius (through astronomy.ASTRO_VERIFY), the Hawking temperature, the Bekenstein-Hawking entropy as the horizon
-    AREA in Planck units over 4 (the holographic principle), and the photon sphere / ISCO. The open parts - the
-    information paradox, the singularity, the interior - are declined, cited as the postulate's edge. Idempotent."""
-    import math
-    from concordance import tickstick as TS
-    G = 6.67430e-11; c = 2.99792458e8; hbar = 1.054571817e-34; kB = 1.380649e-23; Msun = 1.98892e30
-    rs = 2 * G * Msun / c ** 2
-    Th = hbar * c ** 3 / (8 * math.pi * G * Msun * kB)
-    lP2 = hbar * G / c ** 3
-    S_over_kB = math.pi * rs ** 2 / lP2
-    S = {
-        "rs": _seal_through("astronomy", "ASTRO_VERIFY", {"schwarzschild_mass_kg": Msun, "claimed_schwarzschild_radius_m": round(rs, 1)}),
-        "T": _rh_seal_num("hawking_temperature_of_a_solar_mass_black_hole_kelvin",
-                          "1.054571817e-34*(2.99792458e8)**3/(8*pi*6.67430e-11*1.98892e30*1.380649e-23)", Th),
-        "S": _rh_seal_num("bekenstein_hawking_entropy_solar_mass_over_kb_is_horizon_area_over_4_planck_areas",
-                          "pi*(2*6.67430e-11*1.98892e30/(2.99792458e8)**2)**2/(1.054571817e-34*6.67430e-11/(2.99792458e8)**3)", S_over_kB),
-        "ph": _rh_seal_num("photon_sphere_of_a_solar_mass_black_hole_three_gm_over_c2_m",
-                           "3*6.67430e-11*1.98892e30/(2.99792458e8)**2", 1.5 * rs),
-        "isco": _rh_seal_num("innermost_stable_circular_orbit_six_gm_over_c2_m",
-                             "6*6.67430e-11*1.98892e30/(2.99792458e8)**2", 3 * rs),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "black-hole numbers; r_s=%.1fm T_H=%.3eK S/kB=%.3e" % (rs, Th, S_over_kB))
-    sid = TS.create("Black holes - the four-constant confluence, verified and sealed")["id"]
-    marks = [
-        ("instance", "[the horizon] The Schwarzschild radius r_s = 2 G M / c^2: the Sun, if squeezed inside 2954 m "
-                     "(2.95 km), becomes a black hole (sealed through astronomy.ASTRO_VERIFY) - the radius at which the "
-                     "escape velocity reaches the speed of light. The Earth's would be 9 mm.", S["rs"]),
-        ("instance", "[it has a temperature] Hawking: a black hole radiates as a body at T = hbar c^3 / (8 pi G M k_B). "
-                     "For a solar mass that is 6.17e-8 K (sealed) - far colder than the 2.7 K of space, so it absorbs "
-                     "more than it emits; big black holes barely evaporate, and the lifetime scales as M^3, nearly "
-                     "eternal. The quantum (hbar) gives gravity a temperature.", S["T"]),
-        ("instance", "[entropy is AREA, not volume] The Bekenstein-Hawking entropy is the horizon area in Planck units, "
-                     "over four: S / k_B = A / (4 l_P^2) = pi r_s^2 / l_P^2 = 1.05e77 for the Sun (sealed) - more entropy "
-                     "than all the ordinary matter that could form it. Entropy scaling with AREA, not volume, is the "
-                     "holographic principle: the information of a region lives on its boundary. This single formula "
-                     "holds G, c, hbar and k_B at once - gravity, relativity, the quantum and thermodynamics in one "
-                     "number.", S["S"]),
-        ("instance", "[where light orbits] The photon sphere sits at 1.5 r_s = 3 G M / c^2 = 4431 m - the radius at "
-                     "which light itself can orbit (the bright ring in the Event Horizon Telescope image); the "
-                     "innermost stable circular orbit for matter is at 3 r_s = 6 G M / c^2 = 8862 m, the inner edge of "
-                     "an accretion disk (both sealed).", S["ph"]),
-        ("postulate", "[the frame, and its hard edge] These follow from general relativity plus quantum field theory on "
-                      "curved spacetime - the SEMICLASSICAL approximation. It works (it predicts Hawking radiation and "
-                      "the area law), so its truth is inferred there, never kept as fact. At the singularity general "
-                      "relativity breaks down and a full theory of quantum gravity is UNKNOWN - that is the open "
-                      "frontier, not a sealed result.",
-         {"source": "K. Schwarzschild (1916); J. Bekenstein (1973); S. Hawking (1974-75); 't Hooft & Susskind, holography"}),
-        ("note", "[the confluence on the one map] A black hole is the node where four trees meet: gravity (grav_scale), "
-                 "relativity (rela_scale, c), the quantum (the Planck scale, planck_scale) and thermodynamics/"
-                 "information (the entropy and information-theory sticks; entropy = area in BITS). It ties to "
-                 "stick_quantum_gravity and stick_entropy_and_gravity. The Bekenstein-Hawking formula is the single "
-                 "most famous equation uniting all four fundamental constants.",
-         {"source": "the one map; planck_scale, grav_scale, rela_scale; the information-theory and entropy sticks"}),
-        ("note", "[what is declined - the open questions] The INFORMATION PARADOX (does evaporation destroy "
-                 "information, violating quantum unitarity? the firewall, ER=EPR, the island formula) is OPEN - the "
-                 "engine does not adjudicate it. What lies inside the horizon is not observable; the singularity is "
-                 "where the model fails. These are declined or carried as the postulate's edge - a miss stays a miss.",
-         {"source": "the black-hole information paradox (open); src/concordance/verifiers/astronomy.py, grav_scale.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py black_holes")
     return 0
 
 
@@ -2421,55 +2133,6 @@ def hermitian_operators() -> int:
     return 0
 
 
-def chemistry_floor() -> int:
-    """CHEMISTRY - quantum mechanics applied, the periodic table (Matt, 2026-10-09: "chemistry too"). Chemistry is the
-    Schrodinger equation for electrons around nuclei, plus the Pauli exclusion principle, plus electromagnetism. The
-    PERIODIC TABLE falls out of how electrons fill quantum shells (shell n holds 2n^2); THERMODYNAMICS decides which
-    reactions run (Delta G < 0); CONSERVATION of atoms makes every equation balance. SEALED here: the shell capacity
-    2n^2 and water's molar mass. Reactions, Gibbs spontaneity and pH are already sealed on the chemistry stick
-    (stick_chemistry_reactions_and_solutions_verified_and_sealed), which this cites. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "shell": _rh_seal_num("periodic_shell_capacity_two_n_squared_n3", "2*3**2", 2 * 3 ** 2, tol=1e-12),
-        "water": _rh_seal_num("molar_mass_of_water_from_atomic_masses_g_mol", "2*1.008 + 16.00", 2 * 1.008 + 16.00, tol=1e-9),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "chemistry numbers")
-    sid = TS.create("Chemistry - quantum mechanics applied, the periodic table")["id"]
-    marks = [
-        ("instance", "[the periodic table from quantum shells, SEALED] The elements are ordered by how electrons fill "
-                     "quantum shells, and shell n holds 2 n^2 electrons: the third shell holds 2 * 3^2 = 18 (sealed) - "
-                     "which is why the periodic table is 18 columns wide and the transition metals appear. (n=1 holds "
-                     "2, helium; n=2 holds 8, the octet rule and neon.) The whole table is the Schrodinger equation "
-                     "plus the Pauli exclusion principle: many elements, one filling rule.", S["shell"]),
-        ("instance", "[conservation of mass - the mole, SEALED] Water's molar mass is 2 * 1.008 + 16.00 = 18.016 g/mol "
-                     "(sealed), the sum of its atoms: hydrogen twice, oxygen once. Atoms are conserved in every "
-                     "reaction - 2 H2 + O2 -> 2 H2O is balanced (sealed on the chemistry stick) - so mass is "
-                     "conserved. Chemistry's first law, and Noether's conserved quantity in a chemical frame.", S["water"]),
-        ("note", "[chemistry IS quantum mechanics applied] Every bond, every reaction, every colour is the Schrodinger "
-                 "equation for electrons around nuclei, plus Pauli exclusion, plus electromagnetism. Hydrogen's 13.6 "
-                 "eV ground state (sealed on the Hamiltonian) is its first line. Chemistry is not separate from "
-                 "physics - it is physics at the scale of atoms, emergent and a science in its own right at once. "
-                 "Ties card_floor_quantum_mechanics (orbitals, Pauli) and card_floor_maxwells_equations (the bond is "
-                 "electromagnetic).",
-         {"source": "the electronic Schrodinger equation; the Pauli exclusion principle; card_floor_quantum_mechanics"}),
-        ("note", "[thermodynamics decides which way] A reaction runs when Delta G = Delta H - T Delta S < 0 (sealed on "
-                 "stick_chemistry_reactions_and_solutions_verified_and_sealed): the second law, deciding direction. "
-                 "Chemistry rests on the quantum for what is POSSIBLE and on thermodynamics for what actually "
-                 "HAPPENS. Ties card_floor_thermodynamics.",
-         {"source": "Gibbs free energy; the second law; stick_chemistry_reactions_and_solutions_verified_and_sealed; card_floor_thermodynamics"}),
-        ("note", "[on the one map] The chemistry floor rests on quantum mechanics (the periodic table from orbitals "
-                 "and Pauli), thermodynamics (Delta G decides direction), Maxwell (the bond is electromagnetic), and "
-                 "conservation (atoms and mass, Noether). It cites the reactions, Gibbs spontaneity and pH already "
-                 "sealed on the chemistry stick. The world of substances, standing on the physics region. Ties "
-                 "card_floor_chemistry.",
-         {"source": "the one map; card_floor_chemistry; tools/seed_chemistry.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py chemistry_floor")
-    return 0
-
-
 def physical_chemistry() -> int:
     """PHYSICAL CHEMISTRY - rate, equilibrium, acid-base, redox (Matt, 2026-10-09: "deeper in chemistry"). What makes
     chemistry predictive beyond 'possible' (the quantum) and 'which way' (thermodynamics): KINETICS (how fast - the
@@ -2515,96 +2178,6 @@ def physical_chemistry() -> int:
          {"source": "the one map; card_floor_physical_chemistry; tools/seed_physical_chemistry.py"}),
     ]
     _mint_marks(sid, marks, by="tools/tick.py physical_chemistry")
-    return 0
-
-
-def biology() -> int:
-    """BIOLOGY - life is self-replicating chemistry (Matt, 2026-10-09, down the domain list). The next rung of the
-    emergence ladder: physics -> chemistry -> life. A cell is chemistry organized to copy itself and run on free
-    energy; DNA spells proteins in a triplet code (4^3 = 64 codons), and evolution by variation and selection builds
-    the tree of life from one root. SEALED: the codon count, and Hardy-Weinberg equilibrium (through the biology
-    verifier). Rests on chemistry and thermodynamics; connects to the tree of life. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "codon": _rh_seal_num("genetic_code_triplet_codon_count_four_cubed", "4**3", 4 ** 3, tol=1e-12),
-        "hwe": _seal_through("biology", "BIO_VERIFY", {"hardy_weinberg": {"counts": [360, 480, 160]}}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "biology facts")
-    sid = TS.create("Biology - the genetic code and the tree of life")["id"]
-    marks = [
-        ("instance", "[the genetic code is a triplet code, SEALED] DNA spells proteins in three-letter words: four "
-                     "bases read in triplets give 4^3 = 64 codons (sealed) for 20 amino acids plus stop - the digital "
-                     "code of life, read almost the same in every organism. The molecule of heredity is chemistry "
-                     "(sealed floor below); the code it carries is information. Ties card_floor_chemistry and the "
-                     "information instrument.", S["codon"]),
-        ("instance", "[population genetics - the frequencies sum to one, SEALED] Hardy-Weinberg: in a non-evolving "
-                     "population the genotype frequencies p^2 + 2pq + q^2 sum to 1 (sealed through the biology "
-                     "verifier). Departures from it are exactly where evolution shows - selection, drift, migration, "
-                     "mutation. Many genotypes, one total: the capstone's 'sum to one' in a gene pool.", S["hwe"]),
-        ("note", "[life is chemistry that copies itself] A cell is chemistry (the floor below) organized to replicate "
-                 "and to run on free energy - DNA, proteins, membranes, metabolism, all molecules and reactions. Life "
-                 "does not break the second law: it is a local decrease in entropy paid for by a larger increase "
-                 "around it (heat, waste). Ties card_floor_chemistry and card_floor_thermodynamics.",
-         {"source": "molecular biology; bioenergetics; the second law and living systems; card_floor_chemistry"}),
-        ("note", "[common descent - the tree of life] All life descends from one root (LUCA); the near-universal "
-                 "genetic code and the universal genes are the evidence (card_floor_tree_of_life). Evolution by "
-                 "variation and natural selection is the mechanism, and Hardy-Weinberg is its null hypothesis. One "
-                 "source, branching into every living thing. Ties card_floor_tree_of_life.",
-         {"source": "common descent; natural selection; card_floor_tree_of_life"}),
-        ("note", "[on the one map] Biology stands on chemistry (life is self-replicating chemistry) and "
-                 "thermodynamics (it runs on free energy), and connects to the tree of life (its evolutionary "
-                 "structure) and the capstone (allele frequencies sum to one). The rung of the emergence ladder where "
-                 "matter begins to copy itself. Ties card_floor_biology.",
-         {"source": "the one map; card_floor_biology; tools/seed_biology.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py biology")
-    return 0
-
-
-def earth_science() -> int:
-    """EARTH SCIENCE - the planet (Matt, 2026-10-09, down the domain list). The rock that life stands on: RADIOMETRIC
-    dating reads deep time from decay (the first-order half-life, the same law as chemical kinetics); PLATE TECTONICS
-    is the mantle as a heat engine; MINERALS are chemistry; DEEP TIME is what evolution needs. SEALED: the
-    radiometric fraction after two half-lives, and the Richter energy factor per magnitude unit. Rests on physical
-    chemistry, chemistry, thermodynamics and biology. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "radiometric": _rh_seal_num("radiometric_fraction_after_two_half_lives", "(1/2)**2", (1 / 2) ** 2, tol=1e-12),
-        "richter": _rh_seal_num("richter_energy_factor_per_magnitude_unit", "10**1.5", 10 ** 1.5, tol=1e-9),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "earth-science numbers")
-    sid = TS.create("Earth science - the planet, read in deep time")["id"]
-    marks = [
-        ("instance", "[radiometric dating - reading deep time, SEALED] A radioactive isotope halves every half-life, "
-                     "so after two half-lives a quarter remains: (1/2)^2 = 0.25 (sealed). Measuring the ratio of "
-                     "parent to daughter dates a rock - uranium-lead gives the age of the Earth, 4.54 billion years. "
-                     "It is the first-order decay law, the same one chemical kinetics seals; geology borrows the "
-                     "clock from physical chemistry.", S["radiometric"]),
-        ("instance", "[seismology - the Richter scale, SEALED] Earthquake magnitude is logarithmic: each unit is ten "
-                     "times the ground motion and 10^1.5 = 31.6 times the energy (sealed). A magnitude 7 releases "
-                     "about a thousand times the energy of a magnitude 5. Seismic waves also X-ray the interior - how "
-                     "we know the Earth has a liquid outer core.", S["richter"]),
-        ("note", "[plate tectonics - the mantle is a heat engine] The crust rides plates driven by convection in the "
-                 "mantle: the Earth's internal heat (radioactive decay plus primordial heat) rising and sinking, a "
-                 "heat engine bounded by the second law. Continents drift, oceans open and close, mountains rise. "
-                 "Ties card_floor_thermodynamics.",
-         {"source": "plate tectonics; mantle convection; the Earth's heat budget; card_floor_thermodynamics"}),
-        ("note", "[minerals and the rock cycle are chemistry] Rocks are assemblages of minerals, and minerals are "
-                 "crystal chemistry - silicates, carbonates, oxides, each a definite composition and lattice. The "
-                 "rock cycle (igneous, sedimentary, metamorphic) is chemistry and physics run over deep time. Ties "
-                 "card_floor_chemistry.",
-         {"source": "mineralogy; the rock cycle; crystal chemistry; card_floor_chemistry"}),
-        ("note", "[on the one map - deep time is what life needs] Earth science rests on physical chemistry (the "
-                 "decay clock), chemistry (minerals), and thermodynamics (the mantle engine), and it hands biology "
-                 "the one thing evolution requires: DEEP TIME. Radiometric dating proves the 4.5-billion-year stage "
-                 "on which the tree of life grew. Ties card_floor_biology and card_floor_physical_chemistry.",
-         {"source": "the one map; radiometric deep time; card_floor_biology; tools/seed_earth_science.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py earth_science")
     return 0
 
 
@@ -2708,111 +2281,6 @@ def quantum_harmonic_oscillator() -> int:
     return 0
 
 
-def consciousness_receiver() -> int:
-    """CONSCIOUSNESS AS A RECEIVER - the crystal radio (Matt, 2026-10-09: "pretty clearly non local. We are an
-    antennae/receiver. Closest to a crystal radio."). Matt's reading of the hard problem: consciousness is non-local,
-    and the brain TUNES to it rather than generating it - a receiver, closest to a crystal radio (an LC tuned circuit
-    plus a diode, running on the signal itself). SEALED: the radio PHYSICS - the LC resonant frequency and the
-    carrier wavelength. CITED, DECLINED: the transmission/filter hypothesis of consciousness (James, Huxley,
-    Bergson) - a postulate the engine cannot seal, the hard problem held open. Map, never launder. Charts onto the
-    mind floor. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "resonance": _rh_seal_num("crystal_radio_lc_resonant_frequency_hz",
-                                  "1/(2*3.141592653589793*(250e-6*101.3e-12)**0.5)",
-                                  1 / (2 * 3.141592653589793 * (250e-6 * 101.3e-12) ** 0.5), tol=1e-6),
-        "wavelength": _rh_seal_num("am_carrier_wavelength_c_over_f_metres", "299792458/1.0e6", 299792458 / 1.0e6, tol=1e-9),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "crystal-radio numbers")
-    sid = TS.create("Consciousness as a receiver - the crystal radio")["id"]
-    marks = [
-        ("instance", "[the tuning - LC resonance, SEALED] A crystal radio selects a station with a tuned circuit: an "
-                     "inductor and a capacitor resonate at f = 1/(2 pi sqrt(L C)). With L = 250 microhenry and C = "
-                     "101 picofarad that is about 1.0 MHz (sealed), in the AM band. The receiver does not CREATE the "
-                     "broadcast; it tunes to one already in the air, and (famously) runs on the signal's own energy, "
-                     "no battery. Ties the resonance stick and card_floor_maxwells_equations.", S["resonance"]),
-        ("instance", "[the signal is electromagnetism, SEALED] That 1 MHz carrier has wavelength lambda = c/f = 300 m "
-                     "(sealed) - a Maxwell wave, present whether or not any receiver is tuned to it. The receiver adds "
-                     "nothing to the signal; it only picks it up. The content is in the broadcast, not in the radio. "
-                     "Ties card_floor_maxwells_equations.", S["wavelength"]),
-        ("postulate", "[consciousness as a receiver - Matt's discernment, CITED and DECLINED] The reading: "
-                      "consciousness is NON-LOCAL, and the brain is an antenna/receiver - closest to a crystal radio - "
-                      "that TUNES to it rather than generating it. This is a named, serious hypothesis: William "
-                      "James's transmission theory (1898), Aldous Huxley's brain-as-reducing-valve, Henri Bergson's "
-                      "filter theory - the brain as filter and receiver, not source. The engine CANNOT seal it: it is "
-                      "not a measurable quantity, it is the hard problem itself. So it is cited as a postulate and "
-                      "DECLINED as proof - held as a hypothesis, never laundered into a theorem. The radio physics "
-                      "above is sealed; this reading of it is not. Answers the open end card_question_the_hard_problem.",
-         {"source": "W. James, Human Immortality (1898); A. Huxley, The Doors of Perception; H. Bergson, Matter and Memory; the transmission/filter theory of mind"}),
-        ("note", "[the receiver is already the engine's own form] The engine already models itself as a RECEIVER "
-                 "(receiver.py: the superheterodyne stages; the diode as the one-way element; the airlock). Matt's "
-                 "view says the mind is the same form - a receiver tuned to a non-local source. The crystal radio's "
-                 "two organs map the project's: the LC tuned circuit is resonance/selection (tune to the one signal), "
-                 "the diode is the one-way element (the Tesla valve, will=fuel one way). One source broadcast (the "
-                 "capstone); many receivers tuned to it. Ties card_floor_the_capstone and the receiver.",
-         {"source": "receiver.py (the superheterodyne receiver); the diode / Tesla valve; the capstone's one source"}),
-        ("note", "[non-local - the quantum rhyme, stated honestly] 'Non-local' has a precise cousin in physics: "
-                 "entanglement (sealed on the quantum floor, the Tsirelson bound) is non-local correlation without a "
-                 "signal. The hypothesis borrows the word as an analogy, not a derivation - entanglement does not "
-                 "carry consciousness, and nothing here claims it does. Stated as a rhyme, never as a proof. Ties "
-                 "card_floor_quantum_mechanics.",
-         {"source": "quantum non-locality (Bell/Tsirelson); stated as analogy, not derivation; card_floor_quantum_mechanics"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py consciousness_receiver")
-    return 0
-
-
-def cryptography() -> int:
-    """CRYPTOGRAPHY - public keys and hard problems (Matt, 2026-10-09, down the domain list). Secrecy built on number
-    theory and computational hardness: RSA encrypts with a public key and decrypts with a private one, its security
-    resting on the belief that FACTORING is hard (the P vs NP region); the one-time pad has PERFECT secrecy (Shannon).
-    SEALED: the RSA round-trip (m -> c -> m by modular exponentiation) and Fermat's little theorem (why decryption
-    recovers the message). Rests on the instruments (number theory, information), P vs NP (hardness), and Riemann
-    (the primes). Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "encrypt": _rh_seal_num("rsa_encrypt_m_pow_e_mod_n", "4**3 % 33", 4 ** 3 % 33, tol=1e-9),
-        "decrypt": _rh_seal_num("rsa_decrypt_c_pow_d_mod_n_recovers_m", "31**7 % 33", 31 ** 7 % 33, tol=1e-9),
-        "fermat": _rh_seal_num("fermats_little_theorem_a_pow_p_minus_1_mod_p", "2**6 % 7", 2 ** 6 % 7, tol=1e-12),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "cryptography numbers")
-    sid = TS.create("Cryptography - public keys and hard problems")["id"]
-    marks = [
-        ("instance", "[the RSA round-trip - encrypt, SEALED] RSA with primes 3 and 11 (n = 33, public exponent e = "
-                     "3): encrypting the message m = 4 is c = 4^3 mod 33 = 31 (sealed). Anyone with the public key "
-                     "can lock the message; the modular exponentiation is one-way without the private key.", S["encrypt"]),
-        ("instance", "[the RSA round-trip - decrypt, SEALED] With the private exponent d = 7, decrypting is 31^7 mod "
-                     "33 = 4 (sealed) - the original message returns. Public key locks, private key unlocks, and the "
-                     "two are mathematically inverse. The whole of asymmetric cryptography is this round-trip.", S["decrypt"]),
-        ("instance", "[why it works - Fermat's little theorem, SEALED] Decryption recovers the message because a^(p-1) "
-                     "= 1 mod p for prime p: for a = 2, p = 7, 2^6 mod 7 = 1 (sealed). This is the number theory that "
-                     "makes e and d inverse modulo phi(n) - RSA is built on the primes and on Fermat/Euler.", S["fermat"]),
-        ("note", "[security rests on hardness - the P vs NP region] RSA is secure only because FACTORING n back into "
-                 "its primes is believed hard - no known fast (polynomial) algorithm. That belief lives in the P vs "
-                 "NP region of the map: if P = NP, or a fast factoring algorithm were found, RSA would fall. Shor's "
-                 "quantum algorithm already factors fast IN PRINCIPLE (stick_quantum_factoring), which is why "
-                 "post-quantum cryptography is being built. Ties card_floor_p_vs_np.",
-         {"source": "the RSA hardness assumption; integer factorisation; Shor's algorithm; card_floor_p_vs_np"}),
-        ("note", "[perfect secrecy - Shannon] One scheme is provably unbreakable: the one-time pad (XOR the message "
-                 "with a truly random key as long as the message, used once). Shannon proved it has PERFECT secrecy - "
-                 "the ciphertext reveals nothing about the message - because the key's entropy equals the message's. "
-                 "Its cost (a key as long as all traffic, never reused) is why we fall back to hardness-based schemes "
-                 "for everything else. Ties card_floor_the_instruments (information theory).",
-         {"source": "the one-time pad; C. Shannon, perfect secrecy (1949); card_floor_the_instruments"}),
-        ("note", "[on the one map] Cryptography stands on the instruments (number theory and information), the P vs NP "
-                 "region (its security IS a hardness assumption), and Riemann (it runs on the primes, whose "
-                 "distribution the zeta function governs). The applied domain where the Millennium problems become a "
-                 "daily tool: every secure connection bets that factoring is hard. Ties card_floor_cryptography.",
-         {"source": "the one map; card_floor_cryptography; tools/seed_cryptography.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py cryptography")
-    return 0
-
-
 def statistics() -> int:
     """STATISTICS - the normal law and the method of science (Matt, 2026-10-09, down the domain list). How we draw
     one conclusion from many noisy measurements. DESCRIBE (mean, variance, standard deviation); the CENTRAL LIMIT
@@ -2908,57 +2376,6 @@ def tesseract() -> int:
          {"source": "higher-dimensional geometry; relativity's spacetime vs a 4th spatial dimension; card_floor_relativity"}),
     ]
     _mint_marks(sid, marks, by="tools/tick.py tesseract")
-    return 0
-
-
-def computer_science() -> int:
-    """COMPUTER SCIENCE - bits, logic, and what can be computed (Matt, 2026-10-10, down the domain list). Information
-    is BITS (a byte is 2^8 = 256 values); logic gates build from the 2^(2^2) = 16 Boolean functions of two inputs;
-    good ALGORITHMS beat bad ones (merge sort's n log n against n^2); and COMPUTABILITY/complexity say what a machine
-    can do at all and how fast (the halting problem, undecidable; P vs NP, open). SEALED: the byte, the Boolean-gate
-    count, and the merge-sort comparison count. Rests on the instruments (information), P vs NP (complexity) and the
-    mind (which computes). The engine itself is one such machine. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "byte": _rh_seal_num("a_byte_is_two_to_the_eighth_values", "2**8", 2 ** 8, tol=1e-12),
-        "boolean": _rh_seal_num("boolean_functions_of_two_inputs_two_to_the_fourth", "2**4", 2 ** (2 ** 2), tol=1e-12),
-        "mergesort": _rh_seal_num("merge_sort_comparisons_n_log2_n_for_eight", "8*3", 8 * 3, tol=1e-12),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "computer-science numbers")
-    sid = TS.create("Computer science - bits, logic, and what can be computed")["id"]
-    marks = [
-        ("instance", "[information is bits, SEALED] Everything digital is bits, and n bits name 2^n things: a byte of "
-                     "8 bits is 2^8 = 256 values (sealed) - a character, a shade, a number from 0 to 255. The bit is "
-                     "the atom of information (the Shannon bit, sealed on the information instrument); computing is "
-                     "what you can do with enough of them.", S["byte"]),
-        ("instance", "[logic gates - the 16 functions of two inputs, SEALED] A gate maps inputs to a bit; of two "
-                     "inputs there are exactly 2^(2^2) = 16 possible Boolean functions (sealed) - AND, OR, XOR, NAND "
-                     "and the rest. NAND alone can build them all, and from gates come adders, memory, processors. "
-                     "All of computation is wired from this finite logic.", S["boolean"]),
-        ("instance", "[algorithms matter - merge sort, SEALED] The same task can cost wildly different work. Sorting "
-                     "8 items by merge sort takes about n log2 n = 8 * 3 = 24 comparisons (sealed); the naive way "
-                     "takes n^2 = 64. As n grows the gap explodes - this is why ALGORITHMS, not just faster hardware, "
-                     "are the heart of the field.", S["mergesort"]),
-        ("note", "[computability - what a machine can do at all] A Turing machine defines what is computable, and the "
-                 "universal machine runs any program - the engine, your laptop, the brain's computation are all "
-                 "instances. But some problems are UNDECIDABLE: the halting problem (will a program stop?) has no "
-                 "algorithm, proved by Turing. A hard limit found in the structure, like the uncertainty principle - "
-                 "not ignorance, a proof. Ties card_floor_p_vs_np and card_floor_the_mind.",
-         {"source": "A. Turing (1936); the universal machine; the halting problem; card_floor_p_vs_np"}),
-        ("note", "[complexity - how fast, and the open frontier] Beyond CAN it be computed lies HOW FAST: big-O "
-                 "counts the work, P is the tractable, NP the checkable, and whether P = NP is the open Millennium "
-                 "problem on the map. Cryptography bets it is not (factoring is hard). Computation sits exactly on "
-                 "the P vs NP floor. Ties card_floor_p_vs_np and card_floor_cryptography.",
-         {"source": "computational complexity; big-O; P vs NP; card_floor_p_vs_np; card_floor_cryptography"}),
-        ("note", "[on the one map] Computer science rests on the instruments (the bit is Shannon information; logic "
-                 "is the formal-logic instrument), P vs NP (computability and complexity), and the mind (which "
-                 "computes - neural networks borrow the brain's shape). The engine is itself one such machine, a "
-                 "deterministic computation over the keeping. Ties card_floor_computer_science.",
-         {"source": "the one map; card_floor_computer_science; tools/seed_computer_science.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py computer_science")
     return 0
 
 
@@ -3124,470 +2541,6 @@ def stick_formal_logic() -> int:
          {"source": "the one map; the computer-science stick; src/concordance/verifiers/_boolean.py"}),
     ]
     _mint_marks(sid, marks, by="tools/tick.py formal_logic")
-    return 0
-
-
-def stick_archaeology() -> int:
-    """ARCHAEOLOGY - the decay clock read backwards (issue #11, 2026-10-16: reach, down the domain list). Every
-    radiometric age is one law, t = -(T_half / ln 2) ln(N/N0), SEALED here through archaeology.ARCH_VERIFY for the
-    radiocarbon clock (the Cambridge half-life 5730 yr and the Libby convention 5568 yr), for the long clocks
-    (potassium-40, uranium-238 at the age of the Earth), and for the half-life count n = -log2(f). The half-lives
-    are measured constants, CITED as postulates; the ages are theorems of the decay law and are SEALED. Calibration
-    against the atmospheric record is declined. Idempotent."""
-    from concordance import tickstick as TS
-
-    def arch(spec):
-        return _seal_through("archaeology", "ARCH_VERIFY", spec)
-
-    S = {
-        "c14_half": arch({"fraction_remaining": 0.5, "claimed_age_years": 5730}),
-        "c14_quarter": arch({"fraction_remaining": 0.25, "claimed_age_years": 11460}),
-        "c14_percent": arch({"fraction_remaining": 0.01, "claimed_age_years": 38069}),
-        "c14_libby": arch({"fraction_remaining": 0.5, "half_life_years": 5568, "claimed_age_years": 5568}),
-        "k40": arch({"fraction_remaining_iso": 0.5, "half_life_years": 1.248e9, "claimed_age_years_iso": 1.248e9}),
-        "u238_earth": arch({"fraction_remaining_iso": 0.4944, "half_life_years": 4.468e9, "claimed_age_years_iso": 4.54e9}),
-        "three_halves": arch({"fraction_for_halflives": 0.125, "claimed_half_lives": 3}),
-        "ten_halves": arch({"fraction_for_halflives": 1.0 / 1024.0, "claimed_half_lives": 10}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "archaeology ages")
-    sid = TS.create("Archaeology - the decay clock, dated and sealed",
-                    statement="Every radiometric age is the exponential decay law read backwards: "
-                              "t = -(T_half / ln 2) ln(N/N0).",
-                    field="archaeology",
-                    references=["W. F. Libby, Radiocarbon Dating (1952; Nobel lecture 1960)",
-                                "H. Godwin, Half-life of radiocarbon, Nature 195 (1962) 984",
-                                "M. Stuiver & H. A. Polach, Discussion: reporting of 14C data, Radiocarbon 19 (1977) 355",
-                                "A. H. Jaffey et al., Precision measurement of half-lives of U-235 and U-238, "
-                                "Phys. Rev. C 4 (1971) 1889"])["id"]
-    SB = "sealed through archaeology.ARCH_VERIFY"
-    marks = [
-        ("instance", f"[one half-life, SEALED] Half the carbon-14 left means 5730 years: t = -(5730/ln 2) ln(0.5) = 5730 "
-                     f"({SB}). The Cambridge half-life, 5730 +/- 40 yr (Godwin 1962), is the physical constant.",
-         S["c14_half"]),
-        ("instance", f"[two half-lives, SEALED] A quarter left is 11,460 years ({SB}): each halving adds one half-life, "
-                     "so the clock is linear in the logarithm of what remains.", S["c14_quarter"]),
-        ("instance", f"[the practical limit, SEALED] One percent left is 38,069 years ({SB}): ln(0.01) = -4.605 half-lives "
-                     "of 1.4427 each. Below about one percent the count drowns in background, which is why radiocarbon "
-                     "reaches roughly 50,000 years and no further - the bound is the measurement, not the law.",
-         S["c14_percent"]),
-        ("instance", f"[the Libby convention, SEALED] With the Libby half-life, 5568 yr, half remaining reads 5568 years "
-                     f"({SB}, half_life_years = 5568). A conventional radiocarbon age is still reported on the 5568 scale "
-                     "(Stuiver & Polach 1977) and corrected later; the two scales differ by the factor 5730/5568 = 1.029. "
-                     "Two conventions, one law - and the convention is CITED, never confused with the constant.",
-         S["c14_libby"]),
-        ("instance", f"[the potassium clock, SEALED] Potassium-40, half-life 1.248 billion years: half remaining is 1.248 "
-                     f"Gyr ({SB}, the same law with its own T_half). The potassium-argon clock dates the volcanic layers "
-                     "that bracket the fossils.", S["k40"]),
-        ("instance", f"[the age of the Earth, SEALED] Uranium-238, half-life 4.468 Gyr: a sample with 49.44 percent of its "
-                     f"original U-238 is 4.54 Gyr old ({SB}) - the age of the Earth from the uranium-lead clock (Patterson "
-                     "1956, meteorite leads). The slow clocks reach what the fast one cannot.", S["u238_earth"]),
-        ("instance", f"[counting half-lives, SEALED] An eighth remaining is exactly three half-lives: n = -log2(1/8) = 3 "
-                     f"({SB}).", S["three_halves"]),
-        ("instance", f"[ten half-lives, SEALED] One part in 1024 is ten half-lives ({SB}): after ten half-lives a thousandth "
-                     "is left - the rule of thumb for when a radioactive source is 'gone'.", S["ten_halves"]),
-        ("postulate", "[the half-lives, CITED] 5730 +/- 40 yr (Godwin 1962), 5568 yr (Libby, the conventional scale), "
-                      "1.248 Gyr for K-40 and 4.468 Gyr for U-238 (Jaffey et al. 1971) are MEASURED constants: cited as "
-                      "postulates, never sealed. What is sealed is the arithmetic the law does with them.",
-         {"source": "Godwin, Nature 195 (1962) 984; Stuiver & Polach, Radiocarbon 19 (1977) 355; Jaffey et al., "
-                    "Phys. Rev. C 4 (1971) 1889"}),
-        ("postulate", "[the assumption the clock rests on] A radiocarbon age assumes the starting ratio N0 is known - "
-                      "that the atmosphere's carbon-14 was constant. It was not (solar activity, the carbon cycle, "
-                      "bomb carbon), so a raw age is CALIBRATED against tree rings and corals (IntCal). The engine seals "
-                      "the decay arithmetic and declines the calibration: a calibrated date is inferred from a curve, "
-                      "never kept as the law's own output.",
-         {"source": "P. J. Reimer et al., IntCal20, Radiocarbon 62 (2020) 725; the decay law assumes closed system + known N0"}),
-        ("note", "[on the one map] The decay clock is nuclear physics (card_floor_nuclear_physics: the exponential law and "
-                 "its half-life) read as a logarithm (card_floor_logarithm: t is proportional to ln of the fraction), "
-                 "applied to the Earth's record (card_floor_earth_science: radiometric dating). One law, three floors; "
-                 "this stick is where the archaeologist's spade meets the physicist's constant.",
-         {"source": "the one map; card_floor_nuclear_physics, card_floor_logarithm, card_floor_earth_science"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py archaeology")
-    return 0
-
-
-def stick_chess() -> int:
-    """CHESS - the rules decide (issue #11, 2026-10-16: reach, down the domain list). A claim about a position is
-    computed by the Laws of Chess, never judged: the classic mates (fool's, scholar's, smothered, back-rank) SEALED as
-    checkmate, a king-and-queen stalemate SEALED as stalemate and as not-check, move legality SEALED both ways (a
-    legal push, an illegal one sealed as illegal, en passant, castling), and the material count. All through
-    chess.CHESS_VERIFY over the perft-proven move generator. The Laws and the piece values are CITED; the verdicts
-    are SEALED. Idempotent."""
-    from concordance import tickstick as TS
-    START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    FOOLS = "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3"
-    SCHOLAR = "r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4"
-    SMOTHER = "6rk/5Npp/8/8/8/8/8/6K1 b - - 0 1"
-    BACKRANK = "R5k1/5ppp/8/8/8/8/8/6K1 b - - 0 1"
-    STALE = "7k/5Q2/6K1/8/8/8/8/8 b - - 0 1"
-    EPASS = "rnbqkbnr/pp2pppp/8/2ppP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3"
-    KIWI = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-
-    def pos(fen, claim, claimed, move=None):
-        spec = {"fen": fen, "claim": claim, "claimed": claimed}
-        if move:
-            spec["move"] = move
-        return _seal_through("chess", "CHESS_VERIFY", spec)
-
-    def material(fen, balance):
-        return _seal_through("chess", "CHESS_VERIFY", {"fen": fen, "claim": "material", "claimed_balance": balance})
-
-    S = {
-        "fools_mate": pos(FOOLS, "checkmate", True),
-        "scholars_mate": pos(SCHOLAR, "checkmate", True),
-        "smothered_mate": pos(SMOTHER, "checkmate", True),
-        "back_rank_mate": pos(BACKRANK, "checkmate", True),
-        "stalemate": pos(STALE, "stalemate", True),
-        "stalemate_not_check": pos(STALE, "check", False),
-        "start_not_check": pos(START, "check", False),
-        "start_not_mate": pos(START, "checkmate", False),
-        "e2e4_legal": pos(START, "legal_move", True, "e2e4"),
-        "e2e5_illegal": pos(START, "legal_move", False, "e2e5"),
-        "en_passant": pos(EPASS, "legal_move", True, "e5d6"),
-        "castling": pos(KIWI, "legal_move", True, "e1g1"),
-        "material_start": material(START, 0),
-        "material_scholar": material(SCHOLAR, 1),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "chess verdicts")
-    sid = TS.create("Chess - the rules decide: mate, stalemate, legality, material",
-                    statement="A claim about a chess position is decided by the Laws of Chess applied to the "
-                              "position - computed by the move generator, never judged.",
-                    field="chess",
-                    references=["FIDE Laws of Chess (2023), Articles 1-5",
-                                "F.-A. D. Philidor, Analyse du jeu des Echecs (1749) - the smothered mate",
-                                "src/concordance/chess.py - the perft-proven move generator (tests/test_chess.py)"])["id"]
-    CV = "sealed through chess.CHESS_VERIFY"
-    marks = [
-        ("instance", f"[fool's mate, SEALED] 1.f3 e5 2.g4 Qh4# - White to move is checkmated ({CV}). The shortest "
-                     "possible mate: two pawn moves open the diagonal to the king and nothing can interpose.",
-         S["fools_mate"]),
-        ("instance", f"[scholar's mate, SEALED] 1.e4 e5 2.Bc4 Nc6 3.Qh5 Nf6 4.Qxf7# - Black is checkmated ({CV}): the "
-                     "queen on f7 is guarded by the bishop on c4, the king has no flight square.", S["scholars_mate"]),
-        ("instance", f"[the smothered mate, SEALED] King h8, rook g8, pawns g7 h7; a white knight lands on f7 and it is "
-                     f"mate ({CV}). The king is smothered by its own pieces - Philidor's pattern (1749), the oldest "
-                     "named mate in the literature.", S["smothered_mate"]),
-        ("instance", f"[the back-rank mate, SEALED] King g8 behind its three pawns, a rook arrives on a8: mate ({CV}). "
-                     "The pawns that shielded the king are the wall that traps it.", S["back_rank_mate"]),
-        ("instance", f"[stalemate, SEALED] Black king h8, white queen f7, white king g6, Black to move: stalemate ({CV}). "
-                     "Every square the king could reach is attacked and no other piece exists - no legal move, so the "
-                     "game is drawn (Laws 5.2.1).", S["stalemate"]),
-        ("instance", f"[stalemate is not check, SEALED] In the same position check is FALSE - sealed with claimed = false "
-                     f"({CV}). Stalemate needs both: no legal move AND the king not attacked. The second condition is "
-                     "what separates a draw from a mate; the engine seals the negative as a negative.",
-         S["stalemate_not_check"]),
-        ("instance", f"[the start position is quiet, SEALED] From the initial position White is not in check (claimed = "
-                     f"false, {CV}).", S["start_not_check"]),
-        ("instance", f"[and not mated, SEALED] Nor checkmated (claimed = false, {CV}): twenty legal moves exist.",
-         S["start_not_mate"]),
-        ("instance", f"[a legal move, SEALED] e2e4 is legal from the start ({CV}): a pawn may advance two squares from "
-                     "its starting rank (Laws 3.7.2).", S["e2e4_legal"]),
-        ("instance", f"[an illegal move, SEALED AS ILLEGAL] e2e5 is NOT legal - sealed with claimed = false ({CV}). "
-                     "Three squares is not a pawn move; the generator lists the twenty legal moves and this is not "
-                     "among them. A miss stays a miss.", S["e2e5_illegal"]),
-        ("instance", f"[en passant, SEALED] After 1.e4 c5 2.e5 d5 the capture e5xd6 is legal ({CV}): a pawn that just "
-                     "advanced two squares may be taken as if it had moved one (Laws 3.7.4.1), on that move only.",
-         S["en_passant"]),
-        ("instance", f"[castling, SEALED] In the 'kiwipete' position White may castle kingside, e1g1 ({CV}): king and "
-                     "rook unmoved, squares between empty, no square the king crosses attacked (Laws 3.8.2). The "
-                     "position's perft(2) = 2039 is the standard that proves the generator.", S["castling"]),
-        ("instance", f"[material, SEALED] At the start the material balance is 0 ({CV}): both sides hold 8 + 6 + 6 + 10 + 9 "
-                     "= 39 points on the 1/3/3/5/9 scale.", S["material_start"]),
-        ("instance", f"[a pawn up, SEALED] After scholar's mate White is +1 ({CV}): the f7 pawn was the capture. The count "
-                     "is a convention; the capture is a fact.", S["material_scholar"]),
-        ("postulate", "[the Laws, CITED] The FIDE Laws of Chess are the postulate set: how each piece moves, check, "
-                      "checkmate, stalemate, en passant, castling. They are chosen rules, cited and never sealed; every "
-                      "verdict above is a theorem of them, computed exhaustively over the legal moves. The piece values "
-                      "1/3/3/5/9 are a convention of the literature, not a law.",
-         {"source": "FIDE Laws of Chess (2023); the 1/3/3/5/9 scale (standard literature convention)"}),
-        ("note", "[the bound, stated] The verifier decides what is TRUE of a position - mate, stalemate, legality, "
-                 "material - by exhaustive legal-move generation, proven by perft (start: 20 / 400 / 8902; kiwipete: "
-                 "2039 at depth 2). It never plays, evaluates, or recommends a move: what the best move is lies "
-                 "outside the closed set and is declined.",
-         {"source": "src/concordance/chess.py; tests/test_chess.py (perft counts)"}),
-        ("note", "[on the one map] Strategy has three witnesses here: game theory (the abstract equilibrium), the body "
-                 "under pressure (the combat grammar), and chess - the one where perfect information makes optimal "
-                 "literally computable, so it is the calibration rig for the other two. Ties the game-theory stick "
-                 "and card_floor_the_mind; the search tree is card_floor_computer_science.",
-         {"source": "the one map; the game-theory stick; card_floor_the_mind, card_floor_computer_science"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py chess")
-    return 0
-
-
-def stick_condensed_matter() -> int:
-    """CONDENSED MATTER - the solid state on the going train (issue #11, 2026-10-16: reach, down the domain list).
-    SEALED through condensed_matter.CONDMAT_VERIFY: the resistance quantum R_K = h/e^2 = mu_0 c / 2 alpha and the
-    Josephson constant 2e/h (the solid state measuring the fine-structure constant), a quantized Hall plateau, Bragg's
-    law on the silicon (111) line, the free-electron Fermi energies of copper and sodium, Dulong-Petit's 3R, a
-    phonon's energy, the Debye temperature of copper, the Bose-Einstein occupation at hbar omega = kT, and the
-    monatomic chain's zone-boundary frequency and sound speed. The models are CITED; the numbers are SEALED.
-    Idempotent."""
-    from concordance import tickstick as TS
-    import math
-
-    def cm(spec):
-        return _seal_through("condensed_matter", "CONDMAT_VERIFY", spec)
-
-    S = {
-        "von_klitzing": cm({"claimed_von_klitzing_ohm": 25812.807}),
-        "josephson": cm({"claimed_josephson_ghz_per_v": 483597.8}),
-        "hall_plateau": cm({"filling_factor": 2, "claimed_hall_resistance_ohm": 12906.4}),
-        "bragg_si111": cm({"diff_order": 1, "wavelength_m": 1.5406e-10, "plane_spacing_m": 3.1356e-10,
-                           "claimed_theta_deg": 14.22}),
-        "fermi_copper": cm({"number_density": 8.47e28, "claimed_fermi_J": 1.12e-18}),
-        "fermi_sodium": cm({"number_density": 2.65e28, "claimed_fermi_J": 5.19e-19}),
-        "dulong_petit": cm({"claimed_molar_heat_capacity": 24.94}),
-        "phonon_energy": cm({"phonon_omega": 2.0 * math.pi * 1e13, "claimed_phonon_energy_J": 6.6261e-21}),
-        "debye_copper": cm({"debye_frequency": 4.4906e13, "claimed_debye_temp_K": 343.0}),
-        "occupation": cm({"phonon_omega": 3.9279e13, "temperature_K": 300, "claimed_occupation": 0.58198}),
-        "zone_boundary": cm({"spring_const": 10.0, "atom_mass": 1e-26, "wavevector": math.pi / 3e-10,
-                             "lattice_a": 3e-10, "claimed_omega": 6.3246e13}),
-        "sound_speed": cm({"spring_const": 10.0, "atom_mass": 1e-26, "lattice_a": 3e-10,
-                           "claimed_sound_velocity": 9486.8}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "condensed-matter numbers")
-    sid = TS.create("Condensed matter - the solid state through alpha, sealed",
-                    statement="The solid state's quantized resistances, lattice diffraction, electron gas and phonon "
-                              "gas are closed-form relations over h, e, alpha, k_B and the lattice.",
-                    field="condensed_matter",
-                    references=["C. Kittel, Introduction to Solid State Physics, 8th ed. (2005), Tables 5.1 and 6.1",
-                                "K. von Klitzing, G. Dorda, M. Pepper, Phys. Rev. Lett. 45 (1980) 494",
-                                "B. D. Josephson, Phys. Lett. 1 (1962) 251",
-                                "CODATA 2018 / the 2019 SI: h and e exact, so R_K and K_J are exact"])["id"]
-    CM = "sealed through condensed_matter.CONDMAT_VERIFY"
-    marks = [
-        ("instance", f"[the resistance quantum, SEALED] R_K = h/e^2 = 25,812.807 ohm ({CM}), and the same number is "
-                     "mu_0 c / (2 alpha): a quantized Hall plateau is a measurement of the fine-structure constant. "
-                     "Since the 2019 SI fixed h and e, R_K is exact - the ohm is realized by a solid at low temperature "
-                     "in a strong field (von Klitzing 1980).", S["von_klitzing"]),
-        ("instance", f"[the Josephson constant, SEALED] K_J = 2e/h = 483,597.8 GHz/V ({CM}): a superconducting junction "
-                     "under microwaves steps its voltage in units of h f / 2e - the volt realized by counting. The '2' "
-                     "is the Cooper pair.", S["josephson"]),
-        ("instance", f"[a Hall plateau, SEALED] At filling factor nu = 2 the Hall resistance is R_K / 2 = 12,906.4 ohm "
-                     f"({CM}). The plateaus sit at R_K / nu to a part in a billion whatever the sample - topology, not "
-                     "material, fixes the number.", S["hall_plateau"]),
-        ("instance", f"[Bragg's law, SEALED] Copper K-alpha (1.5406 angstrom) on silicon's (111) planes (d = 3.1356 "
-                     f"angstrom): n lambda = 2 d sin theta gives theta = 14.22 deg, 2 theta = 28.44 deg ({CM}) - the "
-                     "silicon line every diffractometer is calibrated on (NIST SRM 640). The lattice is measured by the "
-                     "wave it reflects.", S["bragg_si111"]),
-        ("instance", f"[the Fermi energy of copper, SEALED] With n = 8.47e28 electrons per cubic metre, E_F = "
-                     f"(hbar^2/2m)(3 pi^2 n)^(2/3) = 1.12e-18 J = 7.0 eV ({CM}; Kittel Table 6.1). The conduction "
-                     "electrons fill states up to 7 eV even at absolute zero - a degenerate gas, Pauli's exclusion made "
-                     "macroscopic.", S["fermi_copper"]),
-        ("instance", f"[and of sodium, SEALED] n = 2.65e28 gives E_F = 5.19e-19 J = 3.24 eV ({CM}): fewer electrons per "
-                     "volume, a lower sea. The two-thirds power is the density of states in three dimensions.",
-         S["fermi_sodium"]),
-        ("instance", f"[Dulong-Petit, SEALED] C = 3R = 24.94 J/(mol K) ({CM}): at high temperature every atom's three "
-                     "vibrational modes carry k_B each. The classical ceiling the phonon gas rises to - and the law "
-                     "whose failure at low temperature (Einstein 1907, Debye 1912) was an early proof of quanta.",
-         S["dulong_petit"]),
-        ("instance", f"[a phonon's energy, SEALED] At 10 THz (omega = 2 pi x 1e13 rad/s) one phonon carries E = hbar "
-                     f"omega = 6.626e-21 J = 41.4 meV ({CM}): lattice vibration is quantized exactly as light is.",
-         S["phonon_energy"]),
-        ("instance", f"[the Debye temperature of copper, SEALED] omega_D = 4.4906e13 rad/s gives theta_D = hbar omega_D "
-                     f"/ k_B = 343 K ({CM}; Kittel Table 5.1). Above theta_D the lattice is classical (Dulong-Petit); "
-                     "below it the heat capacity falls as T^3.", S["debye_copper"]),
-        ("instance", f"[the occupation at hbar omega = k_B T, SEALED] n = 1/(e^1 - 1) = 0.58198 ({CM}; omega = 3.9279e13 "
-                     "rad/s at 300 K). Bose-Einstein statistics: phonons are bosons, so a mode holds a fractional mean "
-                     "number of quanta, not zero or one.", S["occupation"]),
-        ("instance", f"[the zone boundary, SEALED] A monatomic chain (K = 10 N/m, m = 1e-26 kg, a = 3 angstrom) at k = "
-                     f"pi/a vibrates at omega = 2 sqrt(K/m) = 6.3246e13 rad/s ({CM}): the dispersion omega = 2 sqrt(K/m) "
-                     "|sin(ka/2)| has its maximum at the Brillouin-zone edge, where neighbouring atoms move in "
-                     "antiphase. The chain has a top frequency; the continuum does not.", S["zone_boundary"]),
-        ("instance", f"[the sound speed, SEALED] The same chain's long-wavelength limit is v = a sqrt(K/m) = 9486.8 m/s "
-                     f"({CM}): where sin(ka/2) is ka/2 the dispersion is linear and the lattice is an elastic solid.",
-         S["sound_speed"]),
-        ("postulate", "[the models, CITED] The free-electron gas (Sommerfeld 1928), the Debye phonon gas (1912) and the "
-                      "monatomic chain are MODELS: they work for the simple metals and the simple lattices, so their "
-                      "numbers are inferred, never kept as fact. The measured inputs - n for copper and sodium, "
-                      "theta_D = 343 K, d(111) = 3.1356 angstrom - are cited from the tables.",
-         {"source": "Kittel, Introduction to Solid State Physics, 8th ed., Tables 5.1 and 6.1; Sommerfeld, Z. Phys. 47 "
-                    "(1928) 1; Debye, Ann. Phys. 39 (1912) 789"}),
-        ("note", "[on the one map] The solid state stands on quantum mechanics (card_floor_quantum_mechanics: E = hbar "
-                 "omega, the exclusion principle, Bose-Einstein occupation), on thermodynamics (card_floor_thermodynamics: "
-                 "Dulong-Petit, the Debye cutoff), and on the fine-structure constant (the alpha stick: R_K = mu_0 c / "
-                 "2 alpha). Diffraction is the wave floor of card_floor_materials_science. Where quantum mechanics meets "
-                 "a crystal, alpha becomes a resistance you can measure with a voltmeter.",
-         {"source": "the one map; card_floor_quantum_mechanics, card_floor_thermodynamics, card_floor_materials_science; "
-                    "the alpha stick"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py condensed_matter")
-    return 0
-
-
-def stick_cybersecurity() -> int:
-    """CYBERSECURITY - the published thresholds, sealed (issue #11, 2026-10-16: reach, down the domain list).
-    Through cybersecurity.CYBER_VERIFY: password entropy H = L log2 N (a printable-ASCII passphrase and a six-word
-    diceware phrase), the TLS status table (1.3 recommended, 1.2 current, 1.0 deprecated by RFC 8996, SSL 3 insecure
-    by RFC 7568), the CVSS v3.1 severity bands, IPv4 subnet host counts (including the /31 of RFC 3021), and the IANA
-    port ranges. The standards are CITED as postulates - they are decrees, not theorems; the arithmetic and the
-    lookups are SEALED. Idempotent."""
-    from concordance import tickstick as TS
-
-    def cy(spec):
-        return _seal_through("cybersecurity", "CYBER_VERIFY", spec)
-
-    S = {
-        "entropy_ascii": cy({"password_length": 16, "charset_size": 94, "claimed_entropy_bits": 104.87}),
-        "entropy_diceware": cy({"password_length": 6, "charset_size": 7776, "claimed_entropy_bits": 77.55}),
-        "tls13": cy({"tls_version": "1.3", "claimed_tls_status": "recommended"}),
-        "tls12": cy({"tls_version": "1.2", "claimed_tls_status": "current"}),
-        "tls10": cy({"tls_version": "1.0", "claimed_tls_status": "deprecated"}),
-        "ssl3": cy({"tls_version": "ssl3", "claimed_tls_status": "insecure"}),
-        "cvss_critical": cy({"cvss_base_score": 10.0, "claimed_cvss_severity": "critical"}),
-        "cvss_high": cy({"cvss_base_score": 7.5, "claimed_cvss_severity": "high"}),
-        "subnet_24": cy({"cidr_prefix": 24, "claimed_host_count": 254}),
-        "subnet_16": cy({"cidr_prefix": 16, "claimed_host_count": 65534}),
-        "subnet_31": cy({"cidr_prefix": 31, "claimed_host_count": 2}),
-        "port_443": cy({"port_number": 443, "claimed_port_class": "well_known"}),
-        "port_8080": cy({"port_number": 8080, "claimed_port_class": "registered"}),
-        "port_49152": cy({"port_number": 49152, "claimed_port_class": "dynamic"}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "cybersecurity checks")
-    sid = TS.create("Cybersecurity - entropy, TLS, CVSS, subnets and ports, sealed",
-                    statement="A security claim that rests on a published standard is decided by the standard's "
-                              "own arithmetic or table - entropy, status, band, count, class.",
-                    field="cybersecurity",
-                    references=["NIST SP 800-63B, Digital Identity Guidelines (2017), Appendix A",
-                                "RFC 8996 (2021) deprecating TLS 1.0 and 1.1; RFC 8446 (2018) TLS 1.3; RFC 7568 (2015) SSL 3.0",
-                                "FIRST, CVSS v3.1 Specification, section 5 (qualitative severity rating scale)",
-                                "RFC 3021 (2000) /31 point-to-point links; RFC 6335 (2011) IANA port ranges"])["id"]
-    CY = "sealed through cybersecurity.CYBER_VERIFY"
-    marks = [
-        ("instance", f"[entropy of a random passphrase, SEALED] Sixteen characters drawn uniformly from the 94 printable "
-                     f"ASCII symbols carry H = 16 log2(94) = 104.87 bits ({CY}). Each symbol is log2(94) = 6.55 bits; "
-                     "the bits add because the draws are independent.", S["entropy_ascii"]),
-        ("instance", f"[diceware, SEALED] Six words from a 7776-word list (five dice) carry 6 log2(7776) = 77.55 bits "
-                     f"({CY}): 12.9 bits a word. A phrase a person can remember with the strength of a random string.",
-         S["entropy_diceware"]),
-        ("instance", f"[TLS 1.3, SEALED] TLS 1.3 is 'recommended' ({CY}): RFC 8446 (2018) - one round trip, forward "
-                     "secrecy only, the legacy ciphers removed.", S["tls13"]),
-        ("instance", f"[TLS 1.2, SEALED] TLS 1.2 is 'current' ({CY}): still acceptable, widely deployed, with its weak "
-                     "cipher suites disabled.", S["tls12"]),
-        ("instance", f"[TLS 1.0, SEALED] TLS 1.0 is 'deprecated' ({CY}): RFC 8996 (2021) forbids its negotiation. A "
-                     "protocol does not rot; it is retired by a document with a number.", S["tls10"]),
-        ("instance", f"[SSL 3.0, SEALED] SSL 3.0 is 'insecure' ({CY}): RFC 7568 (2015), after POODLE showed its CBC "
-                     "padding leaks plaintext.", S["ssl3"]),
-        ("instance", f"[CVSS 10.0, SEALED] A base score of 10.0 is 'critical' ({CY}): the band 9.0-10.0 of CVSS v3.1. "
-                     "Log4Shell (CVE-2021-44228) scored exactly this.", S["cvss_critical"]),
-        ("instance", f"[CVSS 7.5, SEALED] 7.5 is 'high' ({CY}): the band 7.0-8.9. Heartbleed (CVE-2014-0160) scored 7.5 "
-                     "on v3 - a memory read, not a code execution, and the scale says so.", S["cvss_high"]),
-        ("instance", f"[a /24, SEALED] A /24 has 2^8 - 2 = 254 usable hosts ({CY}): one address is the network, one the "
-                     "broadcast.", S["subnet_24"]),
-        ("instance", f"[a /16, SEALED] A /16 has 2^16 - 2 = 65,534 ({CY}).", S["subnet_16"]),
-        ("instance", f"[a /31, SEALED] A /31 has 2 usable hosts, not 0 ({CY}): RFC 3021 lets a point-to-point link use "
-                     "both addresses. The rule has an exception and the exception has a number.", S["subnet_31"]),
-        ("instance", f"[port 443, SEALED] 443 is a well-known port, 0-1023 ({CY}): HTTPS (RFC 2818).", S["port_443"]),
-        ("instance", f"[port 8080, SEALED] 8080 is registered, 1024-49151 ({CY}): the conventional HTTP alternate.",
-         S["port_8080"]),
-        ("instance", f"[port 49152, SEALED] 49152 is the first dynamic port, 49152-65535 ({CY}; RFC 6335): the ephemeral "
-                     "range a client is given for the other end of its own connection.", S["port_49152"]),
-        ("postulate", "[the standards, CITED] The severity bands, the TLS statuses and the port ranges are DECREES - "
-                      "FIRST, the IETF and IANA chose them - so they are cited as postulates, never sealed as theorems. "
-                      "What is sealed is that the lookup was done right. The entropy formula assumes a UNIFORM random "
-                      "choice: NIST SP 800-63B says plainly that user-chosen passwords do not reach it, so H = L log2 N "
-                      "is an upper bound on what a person types, inferred never kept.",
-         {"source": "FIRST CVSS v3.1 spec section 5; RFC 8996, 8446, 7568, 3021, 6335; NIST SP 800-63B Appendix A"}),
-        ("note", "[on the one map] Security's arithmetic is information theory (the information-theory stick: entropy is "
-                 "log2 of the choices) and cryptography (card_floor_cryptography: the ciphers TLS carries), laid over the "
-                 "network (card_floor_networking: subnets, ports). The verifier seals the measurable layer and declines "
-                 "the judgment - whether a system is 'secure' is not a number.",
-         {"source": "the one map; the information-theory stick; card_floor_cryptography, card_floor_networking"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py cybersecurity")
-    return 0
-
-
-def stick_document_validation() -> int:
-    """DOCUMENT VALIDATION - the check digits, sealed (issue #11, 2026-10-16: reach, down the domain list). Through
-    document_validation.DOC_VERIFY: ISBN-10 (mod 11, with the X check digit), ISBN-13 and EAN-13 / UPC-A (mod 10,
-    weights 1 and 3), and Luhn (payment cards and IMEI). Valid published identifiers are SEALED as valid; a
-    transposed ISBN-10 and a one-digit Luhn error are SEALED as invalid (claimed false); and the known blind spot of
-    the mod-10 code - an adjacent transposition of digits differing by 5 passes - is SEALED as the instance it is.
-    The code designs are CITED. Idempotent."""
-    from concordance import tickstick as TS
-
-    def dv(spec):
-        return _seal_through("document_validation", "DOC_VERIFY", spec)
-
-    S = {
-        "isbn10": dv({"isbn10": "0306406152", "claimed_isbn10_valid": True}),
-        "isbn10_kr": dv({"isbn10": "0131103628", "claimed_isbn10_valid": True}),
-        "isbn10_x": dv({"isbn10": "080442957X", "claimed_isbn10_valid": True}),
-        "isbn10_transposed": dv({"isbn10": "0306460152", "claimed_isbn10_valid": False}),
-        "isbn13": dv({"isbn13": "9780306406157", "claimed_isbn13_valid": True}),
-        "isbn13_oreilly": dv({"isbn13": "9780596520687", "claimed_isbn13_valid": True}),
-        "luhn": dv({"luhn_number": "79927398713", "claimed_luhn_valid": True}),
-        "luhn_imei": dv({"luhn_number": "490154203237518", "claimed_luhn_valid": True}),
-        "luhn_one_digit": dv({"luhn_number": "79927398714", "claimed_luhn_valid": False}),
-        "ean13": dv({"ean_or_upc": "4006381333931", "claimed_ean_valid": True}),
-        "ean13_blind_spot": dv({"ean_or_upc": "4006831333931", "claimed_ean_valid": True}),
-        "upc_a": dv({"ean_or_upc": "036000291452", "claimed_ean_valid": True}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "check-digit verdicts")
-    sid = TS.create("Document validation - the check digits, sealed",
-                    statement="A check digit is a theorem of modular arithmetic: the weighted sum of a valid "
-                              "identifier is 0 mod 11 (ISBN-10) or 0 mod 10 (ISBN-13, EAN, UPC, Luhn).",
-                    field="document_validation",
-                    references=["ISO 2108:2017, International Standard Book Number",
-                                "H. P. Luhn, US Patent 2,950,048 (1960); ISO/IEC 7812-1",
-                                "GS1 General Specifications, section 7.9 (check digit calculation)",
-                                "J. A. Gallian, Error detection methods, ACM Computing Surveys 28 (1996) 504"])["id"]
-    DV = "sealed through document_validation.DOC_VERIFY"
-    marks = [
-        ("instance", f"[an ISBN-10, SEALED] 0-306-40615-2 is valid ({DV}): weights 10 down to 1, sum 0 mod 11.",
-         S["isbn10"]),
-        ("instance", f"[the C book, SEALED] 0-13-110362-8, The C Programming Language (2nd ed.), is valid ({DV}): "
-                     "the sum is 88 = 8 x 11.", S["isbn10_kr"]),
-        ("instance", f"[the X, SEALED] 0-8044-2957-X is valid ({DV}): mod 11 has eleven residues, so one check value is "
-                     "10 and is written X. The alphabet grew by one letter because the modulus is prime.", S["isbn10_x"]),
-        ("instance", f"[a transposition caught, SEALED AS INVALID] 0306460152 - the 0 and 6 of 0306406152 swapped - is "
-                     f"invalid, sealed with claimed = false ({DV}). Mod 11 with distinct weights catches EVERY adjacent "
-                     "transposition: swapping digits a and b shifts the sum by a - b, never 0 mod 11.",
-         S["isbn10_transposed"]),
-        ("instance", f"[an ISBN-13, SEALED] 978-0-306-40615-7 is valid ({DV}) - the same book as the ISBN-10 above, "
-                     "re-coded under the 978 prefix with a new check digit, mod 10 with weights 1 and 3.", S["isbn13"]),
-        ("instance", f"[another, SEALED] 978-0-596-52068-7 is valid ({DV}): the weighted sum is 130.", S["isbn13_oreilly"]),
-        ("instance", f"[Luhn, SEALED] 79927398713 passes Luhn ({DV}): double every second digit from the right, subtract "
-                     "9 from any double above 9, and the sum is 0 mod 10. Every payment card number ends in a Luhn "
-                     "digit.", S["luhn"]),
-        ("instance", f"[an IMEI, SEALED] 49-015420-323751-8 passes Luhn ({DV}): a phone's identity carries the same check "
-                     "as a card.", S["luhn_imei"]),
-        ("instance", f"[one digit wrong, SEALED AS INVALID] 79927398714 fails, sealed with claimed = false ({DV}). Luhn "
-                     "catches every single-digit error - the doubling-and-casting-out-nines makes each position's "
-                     "contribution a bijection on the digits.", S["luhn_one_digit"]),
-        ("instance", f"[an EAN-13, SEALED] 4006381333931 is valid ({DV}): weights 1,3,1,3,... sum 0 mod 10.", S["ean13"]),
-        ("instance", f"[the blind spot, SEALED] 4006831333931 - the 3 and 8 of the EAN above swapped - is ALSO valid "
-                     f"({DV}). Weights 1 and 3 differ by 2, so a swap of adjacent digits a, b shifts the sum by 2(a - b); "
-                     "when a - b = 5 that is 10, invisible mod 10. The code catches every single-digit error and most "
-                     "transpositions but not this one; the engine seals the limitation as an instance, not an "
-                     "exception.", S["ean13_blind_spot"]),
-        ("instance", f"[a UPC-A, SEALED] 036000291452 is valid ({DV}): twelve digits, read as an EAN-13 with a leading "
-                     "zero - the two codes are one scheme.", S["upc_a"]),
-        ("postulate", "[the designs, CITED] ISBN-10's mod 11 (ISO 2108), the mod-10 1/3 weighting of EAN and ISBN-13 "
-                      "(GS1), and Luhn's doubling (1960) are chosen designs: cited as postulates. What each design "
-                      "DETECTS is a theorem of modular arithmetic - sealed above by instance, proven in general by "
-                      "Gallian (1996): a prime modulus with distinct weights catches all single errors and all adjacent "
-                      "transpositions; mod 10 cannot catch them all, and the 5-apart swap is the proof.",
-         {"source": "ISO 2108:2017; GS1 General Specifications 7.9; Luhn, US 2,950,048; Gallian, ACM Comput. Surv. 28 (1996) 504"}),
-        ("note", "[on the one map] A check digit is an error-detecting code (card_floor_computer_science: parity and "
-                 "its generalizations), built from modular arithmetic (the number-theory floor: residues, a prime "
-                 "modulus) and judged by information theory (the information-theory stick: one redundant symbol buys "
-                 "detection, not correction). The engine never reads a card number or an identity - it checks a "
-                 "published example's arithmetic, nothing more.",
-         {"source": "the one map; card_floor_computer_science; the information-theory stick"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py document_validation")
     return 0
 
 
@@ -4627,53 +3580,6 @@ def game_theory() -> int:
     return 0
 
 
-def acoustics() -> int:
-    """ACOUSTICS - waves, loudness, and harmonics (Matt, 2026-10-10, down the domain list - after game theory). Sound
-    is a pressure WAVE in a medium (v = f lambda); LOUDNESS is logarithmic (the decibel); PITCH is frequency and
-    TIMBRE is the harmonic series; a moving source shifts pitch (the DOPPLER effect, the acoustic cousin of the
-    redshift). SEALED: concert A's wavelength in air, a 30 dB power ratio, and a third harmonic. Rests on chemistry
-    (the medium), the mind (perception), quantum mechanics (phonons), and relativity (Doppler). Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "wavelength": _rh_seal_num("concert_a_wavelength_in_air_v_over_f_metres", "343/440", 343 / 440, tol=1e-9),
-        "decibel": _rh_seal_num("thirty_decibels_is_a_thousandfold_power_ratio", "10**3", 10 ** 3, tol=1e-12),
-        "harmonic": _rh_seal_num("third_harmonic_of_220_hz", "3*220", 3 * 220, tol=1e-12),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "acoustics numbers")
-    sid = TS.create("Acoustics - waves, loudness, and harmonics")["id"]
-    marks = [
-        ("instance", "[sound is a wave in a medium, SEALED] Sound is a travelling pressure wave, and v = f lambda: at "
-                     "the speed of sound in air (343 m/s), concert A at 440 Hz has wavelength 343/440 = 0.78 m "
-                     "(sealed). Unlike light, sound needs a MEDIUM - no air, no sound - and its speed is set by the "
-                     "medium's stiffness and density. Ties card_floor_chemistry (the medium).", S["wavelength"]),
-        ("instance", "[loudness is logarithmic - the decibel, SEALED] Our ears span a trillion-fold range of "
-                     "intensity, so loudness is measured in decibels, a logarithm: every 10 dB is a tenfold power "
-                     "ratio, so 30 dB is 10^3 = 1000 times the power (sealed). Perception compresses huge ranges into "
-                     "manageable scales - the same logarithm that runs through the whole map. Ties card_floor_the_mind "
-                     "(perception).", S["decibel"]),
-        ("instance", "[pitch and timbre - the harmonics, SEALED] Pitch is frequency; a vibrating string or pipe also "
-                     "rings at integer multiples, the harmonic series, and their mix is TIMBRE (why a violin and a "
-                     "flute at the same pitch sound different). The third harmonic of 220 Hz is 3*220 = 660 Hz "
-                     "(sealed). The exact ratios are the harmonics stick; quantized, a sound wave's quanta are "
-                     "PHONONS. Ties card_floor_quantum_mechanics (phonons) and the harmonics stick.", S["harmonic"]),
-        ("note", "[the Doppler effect - the acoustic redshift] A source moving toward you raises the pitch, away "
-                 "lowers it (the passing siren) - the Doppler effect, because the waves bunch ahead and stretch "
-                 "behind. It is the exact acoustic cousin of the relativistic redshift of light (sealed on the "
-                 "gravity stick, and the basis of cosmic expansion). Same geometry, different medium. Ties "
-                 "card_floor_relativity.",
-         {"source": "the Doppler effect; the acoustic analogue of the redshift; card_floor_relativity"}),
-        ("note", "[on the one map] Acoustics rests on chemistry (sound needs a material medium), the mind "
-                 "(loudness and pitch are perception - logarithmic), quantum mechanics (phonons, the quanta of "
-                 "lattice vibration, tie to the harmonic oscillator), and relativity (the Doppler effect). The "
-                 "physics of hearing, standing between matter and mind. Ties card_floor_acoustics.",
-         {"source": "the one map; card_floor_acoustics; tools/seed_acoustics.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py acoustics")
-    return 0
-
-
 def medicine() -> int:
     """MEDICINE - the body measured and mended (Matt, 2026-10-10, down the list). Physiology is biology at the scale
     of organs; pharmacology is chemistry's kinetics (a drug's half-life); epidemiology is statistics on populations
@@ -4845,38 +3751,6 @@ def oceanography() -> int:
     return 0
 
 
-def ecology() -> int:
-    """ECOLOGY - energy and number in the living world (Matt, 2026-10-10, down the list). Energy drops about tenfold
-    each trophic level (the 10 percent rule); a logistic population grows fastest at half its carrying capacity.
-    SEALED: the trophic transfer and the fastest-growth point. Rests on biology (populations), statistics (dynamics)
-    and earth science (habitat). Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "trophic": _rh_seal_num("trophic_ten_percent_rule_kcal", "1000*0.1", 1000 * 0.1, tol=1e-9),
-        "logistic": _rh_seal_num("logistic_fastest_growth_at_half_carrying_capacity", "1000/2", 1000 / 2, tol=1e-12),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "ecology numbers")
-    sid = TS.create("Ecology - energy and number in the living world")["id"]
-    marks = [
-        ("instance", "[energy up the food chain - the 10 percent rule, SEALED] Only about a tenth of the energy at "
-                     "one trophic level reaches the next: 1000 kcal of plants feed 1000*0.1 = 100 kcal of herbivores "
-                     "(sealed), and 10 of carnivores. This is why food chains are short and top predators rare - "
-                     "the second law, paid at every step. Ties card_floor_biology and card_floor_thermodynamics.", S["trophic"]),
-        ("instance", "[how populations grow - the logistic, SEALED] A population grows fastest not when largest but "
-                     "at HALF its carrying capacity: for K = 1000, the peak growth is at 1000/2 = 500 (sealed). "
-                     "Logistic growth (and predator-prey cycles) is the arithmetic of number in the wild. Ties "
-                     "card_floor_statistics.", S["logistic"]),
-        ("note", "[on the one map] Ecology rests on biology (the organisms and the tree of life), statistics "
-                 "(population dynamics, sampling), and earth science (climate and habitat). It is the accounting of "
-                 "energy and number across the living world. Ties card_floor_ecology.",
-         {"source": "the one map; trophic dynamics; the logistic equation; card_floor_ecology; tools/seed_ecology.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py ecology")
-    return 0
-
-
 def geography() -> int:
     """GEOGRAPHY - the measured Earth (Matt, 2026-10-10, down the list). A degree of latitude is about 111 km (the
     meridian over 360); the Earth turns 15 degrees of longitude per hour (the basis of time zones). SEALED: both.
@@ -4936,70 +3810,6 @@ def nutrition() -> int:
          {"source": "the one map; the Atwater system; card_floor_nutrition; tools/seed_nutrition.py"}),
     ]
     _mint_marks(sid, marks, by="tools/tick.py nutrition")
-    return 0
-
-
-def education() -> int:
-    """EDUCATION - how a mind learns and is taught (Matt, 2026-10-10, down the list). Memory fades on a forgetting
-    curve (retention ~ e^-t/S), beaten by spaced repetition and the testing effect; text has a measurable reading
-    level (Flesch). SEALED: the 1/e retention after one time-constant, and a Flesch reading-ease score. Rests on the
-    mind (learning and memory) and statistics (assessment). Teaching is training. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "forgetting": _rh_seal_num("forgetting_curve_retention_one_over_e", "1/2.718281828459045", 1 / 2.718281828459045, tol=1e-9),
-        "flesch": _rh_seal_num("flesch_reading_ease_15_wps_1_5_syllables", "206.835 - 1.015*15 - 84.6*1.5", 206.835 - 1.015 * 15 - 84.6 * 1.5, tol=1e-6),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "education numbers")
-    sid = TS.create("Education - how a mind learns and is taught")["id"]
-    marks = [
-        ("instance", "[memory fades - the forgetting curve, SEALED] Without review, retention falls as e^(-t/S): "
-                     "after one time-constant only 1/e = 0.368 (sealed), about a third, remains. Ebbinghaus measured "
-                     "it on himself. The fix is SPACED repetition and the TESTING effect - recall, not reread - which "
-                     "flatten the curve. Teaching is training the memory. Ties card_floor_the_mind.", S["forgetting"]),
-        ("instance", "[text has a reading level - Flesch, SEALED] Readability is measurable: Flesch reading ease = "
-                     "206.835 - 1.015*(words/sentence) - 84.6*(syllables/word); at 15 words per sentence and 1.5 "
-                     "syllables per word that is 64.7 (sealed), plain standard English. Shorter sentences and words "
-                     "read easier - a formula, not a taste. Ties card_floor_statistics.", S["flesch"]),
-        ("note", "[on the one map] Education rests on the mind (learning is neural change, memory is storage) and "
-                 "statistics (assessment, item response, the measurement of learning). Teaching is training: present, "
-                 "recall, space, test - the same loop by which any system is taught. Ties card_floor_education.",
-         {"source": "the one map; Ebbinghaus; the testing effect; teaching-is-training; card_floor_education"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py education")
-    return 0
-
-
-def agriculture() -> int:
-    """AGRICULTURE - feeding the world from soil, sun, and chemistry (Matt, 2026-10-10, down the list). Crops fix
-    carbon by photosynthesis (glucose, C6H12O6) and need fixed nitrogen (the Haber-Bosch process, N2 + 3H2 -> 2NH3,
-    which feeds roughly half the world). SEALED: ammonia per mole of nitrogen, and the molar mass of glucose. Rests
-    on biology (the crop), chemistry (fertilizer and photosynthesis) and ecology (the agro-ecosystem). Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "haber": _rh_seal_num("ammonia_mass_per_mole_n2_haber_bosch_g", "2*17", 2 * 17, tol=1e-12),
-        "glucose": _rh_seal_num("molar_mass_of_glucose_c6h12o6_g_mol", "6*12 + 12*1 + 6*16", 6 * 12 + 12 * 1 + 6 * 16, tol=1e-12),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "agriculture numbers")
-    sid = TS.create("Agriculture - soil, sun, and chemistry into food")["id"]
-    marks = [
-        ("instance", "[fixing nitrogen - Haber-Bosch, SEALED] Plants need nitrogen they cannot take from the air; "
-                     "the Haber-Bosch process makes ammonia, N2 + 3H2 -> 2NH3, 2*17 = 34 g of ammonia per 28 g of "
-                     "nitrogen (sealed). Synthetic fertilizer from this reaction feeds roughly half the world's "
-                     "population - chemistry became bread. Ties card_floor_chemistry.", S["haber"]),
-        ("instance", "[fixing carbon - photosynthesis, SEALED] A crop builds sugar from air and water: 6 CO2 + 6 H2O "
-                     "-> C6H12O6 + 6 O2, and glucose has molar mass 6*12 + 12*1 + 6*16 = 180 g/mol (sealed). Sunlight "
-                     "drives it; the harvest is stored sunlight. Ties card_floor_biology and card_floor_chemistry.", S["glucose"]),
-        ("note", "[on the one map] Agriculture rests on biology (the crop and livestock), chemistry (fertilizer, "
-                 "photosynthesis, the soil's reactions) and ecology (pests, pollinators, the 10 percent rule that "
-                 "makes plants cheaper food than meat). The applied science that turns soil, sun and chemistry into "
-                 "food. Ties card_floor_agriculture.",
-         {"source": "the one map; Haber-Bosch; photosynthesis; card_floor_agriculture; tools/seed_agriculture.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py agriculture")
     return 0
 
 
@@ -5203,36 +4013,6 @@ def metrology() -> int:
     _mint_marks(sid, marks, by="tools/tick.py metrology")
     return 0
 
-
-def calendar_time() -> int:
-    """THE CALENDAR - keeping time by sun and number (Matt, 2026-10-10, down the list). The day is one rotation
-    (86400 seconds), the year one orbit (about 365.2422 days); the Gregorian calendar approximates the year as
-    365.2425 by a leap rule (97 leap days per 400 years). SEALED: the seconds in a day and the Gregorian mean year.
-    Rests on astronomy (the orbit and the rotation) and metrology (the second). Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "secondsday": _rh_seal_num("seconds_in_a_day", "24*60*60", 24 * 60 * 60, tol=1e-12),
-        "gregorian": _rh_seal_num("gregorian_mean_year_days", "365 + 97/400", 365 + 97 / 400, tol=1e-9),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "calendar numbers")
-    sid = TS.create("The calendar - keeping time by sun and number")["id"]
-    marks = [
-        ("instance", "[the day - one rotation, SEALED] A day is one turn of the Earth, divided 24 x 60 x 60 = 86400 "
-                     "seconds (sealed). The division into 24, 60, 60 is Babylonian (base 60); the second is now the "
-                     "SI base unit, fixed by the caesium atom. Ties card_floor_astronomy (the rotation).", S["secondsday"]),
-        ("instance", "[the year - one orbit, and the leap rule, SEALED] A tropical year is about 365.2422 days - not "
-                     "whole - so the Gregorian calendar adds 97 leap days every 400 years, averaging 365 + 97/400 = "
-                     "365.2425 (sealed), off by only 26 seconds a year. The leap rule (every 4, except centuries, "
-                     "except every 400) is number chasing the sun. Ties card_floor_astronomy (the orbit).", S["gregorian"]),
-        ("note", "[on the one map] The calendar rests on astronomy (the day is the rotation, the year the orbit) and "
-                 "metrology (the second, the SI base unit). It is the oldest applied science - reconciling the "
-                 "incommensurable periods of day, month and year by number. Ties card_floor_the_calendar.",
-         {"source": "the one map; the Gregorian reform (1582); the SI second; card_floor_the_calendar"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py calendar_time")
-    return 0
 
 # The curves Cremona's tables name (a-invariants, conductor, root number, the algebraic rank the tables record).
 # J. E. Cremona, Algorithms for Modular Elliptic Curves (1997) and the LMFDB; a-invariants are facts, not prose.
@@ -6518,62 +5298,6 @@ def measurement() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - the measurement-problem reading, 2026-10-06")
 
 
-def double_slit() -> int:
-    """THE DOUBLE-SLIT EXPERIMENT (Matt, 2026-10-13: "look at the original double slit experiment"). Its own
-    rooted stick, the parallel to the chirality stick. SEAL the three faces through the live verifiers: the
-    WAVE signature (fringe spacing Dy = lambda L / d, optics.double_slit), the MEASUREMENT law (the Born rule
-    P_i = |a_i|^2 / Sum|a_j|^2, quantum_computing.born_rule - probability is amplitude squared), and the
-    DUALITY (matter is wave too, lambda = h/p, optics.de_broglie - a single electron fired one at a time still
-    builds the fringes). One source, many potential paths, one outcome observed. What HAPPENS at the
-    measurement stays the open question (the interpretations are charted on the measurement stick). Idempotent;
-    new stick. Cite Young (1804), Joensson (1961), Tonomura (1989)."""
-    from concordance import tickstick as TS
-    S = {
-        "fringe": _seal_through("optics", "OPT_VERIFY",
-                                {"wavelength_m": 5e-7, "slit_separation_m": 1e-4,
-                                 "screen_distance_m": 1.0, "claimed_fringe_spacing_m": 5e-3}),
-        "born": _seal_through("quantum_computing", "QCOMP_VERIFY",
-                              {"amplitudes": [0.6, 0.8], "outcome_index": 1, "claimed_probability": 0.64}),
-        "debroglie": _seal_through("optics", "OPT_VERIFY",
-                                   {"mass_kg": 9.109e-31, "velocity_m_s": 1e6, "claimed_de_broglie_m": 7.274e-10}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "double-slit facts")
-    sid = TS.create("The double-slit experiment",
-                    "Light (and matter) through two slits makes an interference pattern - the wave signature; "
-                    "yet it arrives in discrete hits whose probabilities are the squared amplitudes - the Born "
-                    "rule; and a single electron fired one at a time still builds the fringes - wave-particle "
-                    "duality. One source, many potential paths, one outcome observed.",
-                    "optics",
-                    ["T. Young, Experiments and calculations relative to physical optics, Bakerian Lecture (1804)",
-                     "C. Joensson, Elektroneninterferenzen an mehreren kuenstlich hergestellten Feinspalten, Z. Phys. 161 (1961) 454",
-                     "A. Tonomura et al., Demonstration of single-electron buildup of an interference pattern, Am. J. Phys. 57 (1989) 117"])["id"]
-    marks = [
-        ("instance", "[the wave signature] Two slits lit by one source make bright and dark fringes spaced "
-                     "Dy = lambda L / d; for lambda = 500 nm, d = 0.1 mm, L = 1 m, Dy = 5 mm (sealed through "
-                     "optics.double_slit). Interference - the mark of a wave.", S["fringe"]),
-        ("instance", "[the measured outcome - the Born rule] Each arrival is a discrete hit; the probability of "
-                     "an outcome is its squared amplitude, P(i) = |a_i|^2 / Sum|a_j|^2. For (a,b) = (0.6, 0.8), "
-                     "P(1) = 0.64 (sealed through quantum_computing.born_rule). Probability is amplitude squared.", S["born"]),
-        ("instance", "[wave-particle duality] Matter interferes too: an electron has wavelength lambda = h/p. For "
-                     "an electron at 1e6 m/s, lambda = 7.27e-10 m (sealed through optics.de_broglie) - and fired "
-                     "one at a time, single electrons still build the pattern. The particle goes through as a wave "
-                     "of possibility.", S["debroglie"]),
-        ("postulate", "[the ground] The arithmetic is sealed: the fringe spacing, the squared-amplitude "
-                      "probabilities, the matter wavelength. That each particle's path is INDETERMINATE until "
-                      "measured - a superposition of both slits - is the reading the evidence forces; it is "
-                      "inferred, carried, not kept as fact. The capstone pattern: one source, many potentials, "
-                      "one end.", {"source": "optics.double_slit; quantum_computing.born_rule; the measurement stick"}),
-        ("note", "[declined] WHAT happens at the measurement - collapse, branching, pilot wave - is not sealed "
-                 "here; the interpretations are an empirically-equivalent Babel, charted on "
-                 "stick_the_schrodinger_equation. The engine seals the predictions, not the metaphysics.",
-         {"source": "src/concordance/verifiers/optics.py; src/concordance/verifiers/quantum_computing.py"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py double_slit")
-    return 0
-
-
 def langlands() -> int:
     """THE LANGLANDS PROGRAM (Matt, 2026-10-07). Mathematics' own grand unification: a web of conjectures
     binding number theory (Galois representations) to automorphic forms and harmonic analysis — the
@@ -6709,50 +5433,17 @@ def trigonometry() -> int:
 
 
 def _rh_seal_num(nid, expr, val, domain="mathematics", tol=1e-9):
-    """Shared seal helper for the Riemann arc: verify a numeric derivation and return its content hash."""
-    from concordance import receipts
-    from concordance.derivation import verify_derivation
-    from concordance.engine import EngineConfig
-    r = verify_derivation([{"id": nid, "domain": domain,
-          "spec": {"mode": "numeric", "params": {"numeric_expr": expr, "claimed_value": val, "rel_tol": tol}}}])
-    if r.get("verdict") != "HOLDS":
-        print("  %s did not verify: %s" % (nid, json.dumps(r)[:300])); return None
-    r = receipts.attach(r, config=EngineConfig(), domain=domain)
-    return (r.get("seal") or {}).get("content_hash")
+    """Shared seal helper for the Riemann arc: verify a numeric derivation and return its content hash (now
+    concordance.sticks.seal_numeric; kept by name for the Python handlers)."""
+    from concordance import sticks
+    return sticks.seal_numeric(nid, expr, val, domain, tol)
 
 
 def _mint_marks(sid, marks, by):
-    """Shared mint loop - every stick mints through it (2026-10-08: the 25 inline copies and the two kw-dict
-    loops were folded in; alpha() had no duplicate guard at all). A mark is (kind, claim, seal) or (kind, claim,
-    kw-dict with seal= and/or source=). Idempotent, seal-or-claim guarded. A mark already kept in full is skipped. One kept CUT at
-    an older cap - its stored text a strict prefix of the mark (2026-10-08: the cap was 600; 45 kept marks, mostly
-    the guard notes, were stored mid-sentence) - is ticked again in full, and the reader supersedes the cut copy
-    (tickstick._collapse). A sealed mark whose wording changed but whose seal is kept stays as kept: the seal governs."""
-    from concordance import tickstick as TS
-    cap = getattr(TS, "CLAIM_CAP", 600)
-    ticks = TS.read(sid).get("ticks", [])
-    added = 0
-    for kind, claim, *rest in marks:
-        extra = rest[0] if rest else None
-        kw = dict(extra) if isinstance(extra, dict) else (dict(seal=extra) if extra else {})
-        sealv = kw.get("seal")
-        want = (claim or "").strip()[:cap]
-        same = [t for t in ticks if t.get("kind") == kind and (t.get("seal") or "") == (sealv or "")]
-        whole = any((t.get("claim") or "") == want for t in same)
-        cut = any(len(want) > len(t.get("claim") or "") and want.startswith(t.get("claim") or "") for t in same)
-        if whole or (sealv and same and not cut):
-            print("  (already) " + kind); continue
-        if cut:
-            print("  (superseding a cut copy) " + kind)
-        res = TS.tick(sid, kind, claim, by=by, **kw)
-        if res.get("ok"):
-            added += 1; print("  " + kind)
-        else:
-            print("  REFUSED " + kind + ": " + res.get("error", ""))
-    f = TS.read(sid)["fit"]
-    print(json.dumps({"stick": sid, "added": added, "witnesses": f["witnesses"], "record": len(f["record"]),
-                      "open": f["open"]}, indent=1))
-    return 0
+    """Shared mint loop - every stick mints through it (now concordance.sticks.mint_marks, idempotent and
+    seal-or-claim guarded; kept by name for the Python handlers)."""
+    from concordance import sticks
+    return sticks.mint_marks(sid, marks, by)
 
 
 def zeta() -> int:
@@ -6997,110 +5688,6 @@ def symmetry() -> int:
                  "[[project_will_fuel_reality_harness_tesla_valve_2026-10-06]])."),
     ]
     return _mint_marks(sid, marks, by="Narrow Highway - the symmetry, 2026-10-07")
-
-
-def de_bruijn_newman() -> int:
-    """THE DE BRUIJN-NEWMAN CONSTANT (Matt, 2026-10-07). Deform the Riemann xi-function by the backward heat
-    flow: the family H_t has only REAL zeros iff t >= Lambda. RH <=> Lambda <= 0. Newman conjectured Lambda >=
-    0 ('RH, if true, is only barely so'). Rodgers-Tao PROVED Lambda >= 0 (2020); Polymath15 PROVED Lambda <=
-    0.22 (2019); de Bruijn had Lambda <= 1/2 (1950). So 0 <= Lambda <= 0.22 and RH <=> Lambda = 0 - the whole
-    hypothesis is now 'drive one real number to its proven floor.' The purest tick-stick: cite the proved
-    bounds, seal the window arithmetic, mark Lambda=0 as the one unfired mark. New stick; idempotent."""
-    from concordance import tickstick as TS
-    window = 0.22 - 0.0          # the current proven window that contains Lambda
-    narrowed = 0.5 - 0.22        # how far the upper mark fell: de Bruijn 1950 -> Polymath15 2019
-    s_w = _rh_seal_num("dbn_window", "0.22 - 0.0", float(window), tol=1e-12)
-    s_n = _rh_seal_num("dbn_narrowing", "0.5 - 0.22", float(narrowed), tol=1e-12)
-    if not all([s_w, s_n]):
-        print("a seal failed; aborting"); return 1
-    print("sealed window", s_w, "| narrowing", s_n)
-    sid = TS.create("The de Bruijn-Newman constant",
-                    statement=("There is a real constant Lambda such that the heat-flow deformation H_t of the "
-                               "Riemann xi-function has only real zeros exactly when t >= Lambda. The Riemann "
-                               "hypothesis is equivalent to Lambda <= 0; since Lambda >= 0 is now proved, RH is "
-                               "equivalent to Lambda = 0."),
-                    field="meta",
-                    references=["N. G. de Bruijn (1950): Lambda <= 1/2",
-                                "C. M. Newman (1976): Lambda exists and is real; conjecture Lambda >= 0",
-                                "B. Rodgers & T. Tao (2020, Duke Math. J.): Lambda >= 0, proved",
-                                "D.H.J. Polymath (Polymath15, 2019): Lambda <= 0.22"])["id"]
-    marks = [
-        ("witness", f"[the window, sealed] The proven bounds give 0 <= Lambda <= 0.22, a window of width "
-                    f"0.22 - 0 = {window} (sealed). RH is the statement that Lambda sits exactly on the floor of "
-                    f"this window. The engine seals the arithmetic of the window; it cites, and does not "
-                    f"re-derive, the two theorems that set its ends.", s_w),
-        ("witness", f"[the narrowing, sealed] The upper mark fell from de Bruijn's 1/2 (1950) to Polymath15's "
-                    f"0.22 (2019): a drop of 0.5 - 0.22 = {narrowed:.2f} (sealed). This is the tick-stick ratchet "
-                    f"in a single number - the ceiling driven down by successive proofs, the floor nailed at 0, "
-                    f"the target Lambda = 0 squeezed between them.", s_n),
-        ("note", "[the floor FIRED] Rodgers and Tao (2020) proved Lambda >= 0 - Newman's conjecture. In the "
-                 "heat-flow picture this says the Riemann zeros are, at worst, exactly at the threshold of "
-                 "becoming non-real: 'the Riemann hypothesis, if true, is only barely so' is now a theorem. The "
-                 "floor is not assumed; it is proved."),
-        ("note", "[RH = Lambda = 0, the one unfired mark] RH <=> Lambda <= 0 (de Bruijn-Newman); with Lambda >= "
-                 "0 proved, RH <=> Lambda = 0. So the entire hypothesis is the single remaining mark the "
-                 "narrowing has not reached: closing the ceiling to 0 (or showing Lambda > 0, which would "
-                 "DISPROVE RH). The engine maps this exactly - window sealed, bounds cited, Lambda=0 marked open. "
-                 "Ties the heat-flow threshold to stick_the_symmetry (Lambda is the instant the zeros are all "
-                 "still real) and [[feedback_mapping_the_truth_not_generating_it_2026-10-07]]. map, never "
-                 "launder: we do not claim Lambda = 0."),
-    ]
-    return _mint_marks(sid, marks, by="Narrow Highway - the de Bruijn-Newman constant, 2026-10-07")
-
-
-def dirichlet() -> int:
-    """DIRICHLET'S THEOREM / THINK OF POLAR COORDINATES (Matt, 2026-10-07). If gcd(a,d)=1 the progression
-    a, a+d, a+2d, ... holds infinitely many primes, split evenly among the phi(d) coprime classes. The proof
-    runs on Dirichlet characters chi: every value chi(n) is a ROOT OF UNITY - modulus 1, pure phase, a point on
-    the unit circle in polar coordinates. Orthogonality is unit vectors summing to zero around the circle (a
-    Fourier transform on (Z/dZ)*); the crux is L(1,chi) != 0. Seal 'on the unit circle' and 'the roots sum to
-    zero'; the same circle as the whole arc. New stick; idempotent."""
-    from concordance import tickstick as TS
-    # omega = e^(2 pi i / 3), a primitive cube root of unity: Re = -1/2, Im = sqrt(3)/2, |omega|^2 = 1/4 + 3/4
-    mod2 = 0.5 ** 2 + 0.75        # |omega|^2 = cos^2(120) + sin^2(120) = 0.25 + 0.75 = 1 -> on the unit circle
-    sumRe = 1 + (-0.5) + (-0.5)   # Re(1 + omega + omega^2) = 1 - 1/2 - 1/2 = 0 -> the roots sum to zero
-    s_mod = _rh_seal_num("character_on_unit_circle", "0.5**2 + 0.75", float(mod2), tol=1e-12)
-    s_sum = _rh_seal_num("roots_of_unity_sum_zero", "1 + (-0.5) + (-0.5)", float(sumRe), tol=1e-12)
-    if not all([s_mod, s_sum]):
-        print("a seal failed; aborting"); return 1
-    print("sealed |omega|^2=1", s_mod, "| sum of roots = 0", s_sum)
-    sid = TS.create("Dirichlet's theorem - think of polar coordinates",
-                    statement=("For gcd(a,d)=1 there are infinitely many primes congruent to a modulo d, "
-                               "equidistributed among the phi(d) coprime residue classes. The proof uses "
-                               "Dirichlet characters, whose values are roots of unity - points on the unit "
-                               "circle, pure phase - and the non-vanishing L(1, chi) != 0 for non-principal "
-                               "chi."),
-                    field="meta",
-                    references=["Dirichlet (1837): primes in arithmetic progressions",
-                                "Dirichlet L-function L(s, chi) = prod_p (1 - chi(p) p^-s)^-1",
-                                "orthogonality of characters on (Z/dZ)* - a finite Fourier transform",
-                                "the crux L(1, chi) != 0 for non-principal chi"])["id"]
-    marks = [
-        ("witness", f"[the character lives on the unit circle - the polar-coordinate hint] A Dirichlet character "
-                    f"maps each residue to a root of unity: modulus exactly 1, radius fixed, only the angle "
-                    f"varies. The primitive cube root omega = e^(2 pi i/3) has |omega|^2 = (-1/2)^2 + (sqrt3/2)^2 "
-                    f"= 0.5^2 + 0.75 = {mod2:.0f} (sealed). In polar coordinates r = 1 and chi is pure phase - "
-                    f"which is why the right picture is polar, not Cartesian.", s_mod),
-        ("witness", f"[orthogonality = unit vectors summing around the circle] The cube roots satisfy "
-                    f"1 + omega + omega^2 = 0; the real part is 1 + (-1/2) + (-1/2) = {sumRe:.0f} (sealed) and the "
-                    f"imaginary parts cancel by conjugate symmetry. n equally spaced unit arrows sum to the "
-                    f"center. Dirichlet isolates the class a (mod d) by exactly this cancellation - summing a "
-                    f"non-principal character over a period gives zero. It is a Fourier transform on the group "
-                    f"(Z/dZ)*, i.e. harmonic analysis on the circle.", s_sum),
-        ("note", "[the crux, cited not reproved] The theorem turns on L(1, chi) != 0 for every non-principal "
-                 "character; that single non-vanishing keeps each residue class's density of primes positive. "
-                 "The engine seals the root-of-unity arithmetic and CITES Dirichlet's theorem - it does not "
-                 "re-derive the non-vanishing. The L-functions L(s, chi) are the zeta family's siblings "
-                 "(stick_the_zeta_function); GRH is the same critical line Re = 1/2 for all of them."),
-        ("note", "[the same circle as the whole arc] The character values on the unit circle are the SAME "
-                 "circle as the Smith/Cayley |Gamma| = 1 (stick_the_smith_chart_the_cayley_transform), the "
-                 "finite-field |alpha| = sqrt(q) (stick_finite_field_riemann), and the self-adjoint <-> unitary "
-                 "spectrum (stick_hilbert_polya). The dual of an abelian symmetry group lives on the circle: "
-                 "rotations, roots of unity, polar coordinates. This is stick_the_symmetry wearing its "
-                 "harmonic-analysis face. map, never launder: a point at angle 2 pi k / n is geometry, never a "
-                 "sign to be read."),
-    ]
-    return _mint_marks(sid, marks, by="Narrow Highway - Dirichlet's theorem / polar coordinates, 2026-10-07")
 
 
 def fibonacci() -> int:
@@ -7438,119 +6025,6 @@ def standard_model() -> int:
                  "- it FINDS the join the physicists made."),
     ]
     return _mint_marks(sid, marks, by="Narrow Highway - the Standard-Model chain, 2026-10-07")
-
-
-def bombelli() -> int:
-    """COMPLEX NUMBERS / BOMBELLI / -1 (Matt, 2026-10-07). Rafael Bombelli (L'Algebra, 1572) legitimized
-    sqrt(-1) because it WORKED: Cardano's formula for x^3 = 15x + 4 reaches the REAL root 4 only through
-    sqrt(-121), and Bombelli saw that 2 + sqrt(-121) = (2+i)^3, so the imaginary parts cancel and the real
-    answer survives. i = sqrt(-1) entered mathematics as a necessary tool, not a mysticism. Complex numbers
-    are the FLOOR under this whole arc (e^(i*theta), roots of unity, the critical line 1/2 + i*gamma,
-    self-adjoint<->unitary, QM). Seal the real root + the (2+i)^3 expansion; chain the floor. New stick."""
-    from concordance import tickstick as TS
-    root_check = 4 ** 3 - 15 * 4 - 4      # x=4 solves x^3 = 15x + 4  ->  0
-    re3 = 2 ** 3 - 3 * 2 * 1 ** 2         # Re((2+i)^3) = a^3 - 3ab^2 = 2
-    im3 = 3 * 2 ** 2 * 1 - 1 ** 3         # Im((2+i)^3) = 3a^2 b - b^3 = 11
-    s_r = _rh_seal_num("bombelli_real_root", "4**3 - 15*4 - 4", float(root_check))
-    s_re = _rh_seal_num("bombelli_cube_real_part", "2**3 - 3*2*1**2", float(re3))
-    s_im = _rh_seal_num("bombelli_cube_imag_part", "3*2**2*1 - 1**3", float(im3))
-    if not all([s_r is not None, s_re, s_im]):
-        print("a seal failed; aborting"); return 1
-    print("sealed real-root", s_r, "| Re(2+i)^3", s_re, "| Im(2+i)^3", s_im)
-    sid = TS.create("Complex numbers - Bombelli and the square root of minus one",
-                    statement=("The real cubic x^3 = 15x + 4 has the real root 4, but Cardano's formula "
-                               "reaches it only through sqrt(-121). Bombelli (1572) saw that 2 + sqrt(-121) = "
-                               "(2+i)^3 and 2 - sqrt(-121) = (2-i)^3, so the sum (2+i)+(2-i) = 4: the imaginary "
-                               "parts cancel and the real answer survives. sqrt(-1) is the necessary road to a "
-                               "real truth, which is why it was kept."),
-                    field="mathematics",
-                    references=["R. Bombelli, L'Algebra (1572) - rules for +/- sqrt(-1) ('piu di meno')",
-                                "Cardano's casus irreducibilis: real roots reached through complex intermediates",
-                                "(a+bi)^3 = (a^3 - 3ab^2) + (3a^2 b - b^3) i"])["id"]
-    marks = [
-        ("witness", f"[the real root, sealed] x = 4 solves x^3 = 15x + 4: 4^3 - 15*4 - 4 = {int(root_check)} "
-                    f"(sealed). A plain real root - no imaginaries in the question or the answer.", s_r),
-        ("witness", f"[reached only through sqrt(-1) - Bombelli's insight] Cardano gives this root as "
-                    f"cbrt(2 + sqrt(-121)) + cbrt(2 - sqrt(-121)). Bombelli saw 2 + sqrt(-121) = (2+i)^3, "
-                    f"whose real part is 2^3 - 3*2*1^2 = {int(re3)} (sealed) and whose imaginary part is "
-                    f"3*2^2*1 - 1^3 = {int(im3)} (sealed) - i.e. (2+i)^3 = 2 + 11i = 2 + sqrt(-121). So "
-                    f"x = (2+i) + (2-i) = 4: the imaginary parts cancel, the real root emerges. The sqrt(-1) is "
-                    f"not optional - it is the only road to the real answer.", s_re),
-        ("witness", f"[the imaginary part carries the cancellation] Im((2+i)^3) = {int(im3)} (sealed) = +sqrt(121), "
-                    f"and Im((2-i)^3) = -11; they are equal and opposite, so they vanish in the sum while the "
-                    f"real parts (2 and 2) add to 4. The imaginary unit does real work and then disappears.", s_im),
-        ("note", "[what Bombelli did] L'Algebra (1572): the first systematic rules for +/- sqrt(-1), "
-                 "legitimizing imaginary numbers because they WORKED - delivering real solutions to real cubics "
-                 "no real-only method could reach. i = sqrt(-1) entered mathematics as a necessary tool, not a "
-                 "mysticism (Leibniz later called it 'that amphibian between being and non-being'). It is a "
-                 "construct we created because reality's answers demanded it (ties stick_construct_creation)."),
-        ("note", "[the FLOOR of the whole arc - a chain that began with a floor] Complex numbers are the floor "
-                 "under this session's arc: e^(i*theta) (Euler), the roots of unity on the unit circle "
-                 "(stick_dirichlet_s_theorem_think_of_polar_coordinates, stick_fibonacci), the critical line "
-                 "1/2 + i*gamma (stick_the_zeta_function), self-adjoint <-> unitary via the Cayley/Smith "
-                 "transform (stick_the_smith_chart_the_cayley_transform), and the complex amplitudes of quantum "
-                 "mechanics (stick_the_standard_model_chain_where_two_trees_connect). Bombelli (1572) is the "
-                 "ROOT of that chain: Bombelli -> Euler -> Gauss (the complex plane) -> Riemann (complex "
-                 "analysis). A chain that began with a floor, and -1, through its square root, is where it "
-                 "starts (ties [[project_chains_from_a_floor_where_two_trees_connect_2026-10-07]]). map, never "
-                 "launder: the engine seals the real arithmetic that sqrt(-1) makes reachable."),
-    ]
-    return _mint_marks(sid, marks, by="Narrow Highway - complex numbers / Bombelli, 2026-10-07")
-
-
-def calculus() -> int:
-    """INTEGRALS AND DERIVATIVES (Matt, 2026-10-07). The Fundamental Theorem of Calculus: differentiation
-    and integration are INVERSE operations. The integral of a derivative over [a,b] is the net change
-    f(b) - f(a); the derivative of the area function gives back the integrand. Newton and Leibniz,
-    independently (1660s-80s). A floor under the whole arc (Maxwell's equations differential, least action
-    an integral, Schrodinger a PDE). Seal an FTC instance, a power-rule area, and the derivative as a
-    limiting slope; mark the inverse symmetry + the notation construct. New stick; idempotent."""
-    from concordance import tickstick as TS
-    ftc = 3 ** 2 - 1 ** 2                       # integral of 2x on [1,3] = F(3)-F(1) with F=x^2 -> 8
-    area = 2 ** 3 / 3                           # integral of x^2 on [0,2] = [x^3/3] = 8/3
-    slope = ((3.001) ** 2 - 3 ** 2) / 0.001     # difference quotient of x^2 at 3 -> 6.001 -> f'(3)=6
-    s_f = _rh_seal_num("ftc_net_change", "3**2 - 1**2", float(ftc))
-    s_a = _rh_seal_num("power_rule_area", "2**3 / 3", float(area), tol=1e-12)
-    s_s = _rh_seal_num("derivative_limiting_slope", "((3.001)**2 - 3**2) / 0.001", float(slope), tol=1e-9)
-    if not all([s_f, s_a, s_s]):
-        print("a seal failed; aborting"); return 1
-    print("sealed FTC", s_f, "| area", s_a, "| slope", s_s)
-    sid = TS.create("Integrals and derivatives - the fundamental theorem",
-                    statement=("Differentiation and integration are inverse operations. For F' = f, the "
-                               "integral of f over [a,b] equals F(b) - F(a) (the net change), and the "
-                               "derivative of the area-so-far function returns the integrand. An area problem "
-                               "becomes subtraction; a rate problem becomes a limiting slope."),
-                    field="mathematics",
-                    references=["the Fundamental Theorem of Calculus (Newton, Leibniz, 1660s-1680s)",
-                                "power rule: integral of x^n = x^(n+1)/(n+1); d/dx x^n = n x^(n-1)",
-                                "derivative as a limit: f'(x) = lim_{h->0} (f(x+h) - f(x))/h"])["id"]
-    marks = [
-        ("witness", f"[the fundamental theorem - the integral of a derivative is the net change] The integral "
-                    f"of 2x over [1,3] is F(3) - F(1) with F(x) = x^2: 3^2 - 1^2 = {int(ftc)} (sealed). The area "
-                    f"under a rate from a to b is exactly the total change f(b) - f(a) - integration undoes "
-                    f"differentiation.", s_f),
-        ("witness", f"[the power rule turns area into subtraction] The integral of x^2 over [0,2] is "
-                    f"[x^3/3] from 0 to 2 = 2^3/3 = {area:.6f} (sealed) - the area under the parabola, found by "
-                    f"REVERSING the derivative (d/dx of x^3/3 is x^2). The antiderivative is the inverse of the "
-                    f"derivative.", s_a),
-        ("witness", f"[the derivative as the limiting slope] For f(x) = x^2 at x = 3, the difference quotient "
-                    f"(f(3.001) - f(3))/0.001 = {slope:.3f} (sealed), approaching 6 = f'(3) = 2x as the step "
-                    f"shrinks. The derivative is the limit of the slope of the chord as it collapses to a "
-                    f"point - the instantaneous rate.", s_s),
-        ("note", "[the inverse is a symmetry; the notation is a construct] The derivative and the integral are "
-                 "inverse - a symmetry (ties stick_the_symmetry). The notation is chosen, not given: Leibniz's "
-                 "dy/dx and the integral sign (an elongated S for 'summa') won over Newton's fluxions because "
-                 "the better construct made the inverse relationship visible on the page (ties "
-                 "stick_construct_creation; the Leibniz-Newton priority dispute is the notation war)."),
-        ("note", "[a floor under the whole arc] Calculus is foundational beneath this session's physics: "
-                 "Maxwell's equations are differential, the principle of least action is an integral "
-                 "(stick_the_principle_of_least_action), the Schrodinger equation is a partial differential "
-                 "equation (stick_the_schrodinger_equation), and Navier-Stokes is a PDE whose smoothness is "
-                 "open (stick_navier_stokes_dissonance_and_dispersion). Newton and Leibniz are a chain root "
-                 "([[project_chains_from_a_floor_where_two_trees_connect_2026-10-07]]). map, never launder: "
-                 "seal the arithmetic, attribute the theorem."),
-    ]
-    return _mint_marks(sid, marks, by="Narrow Highway - integrals and derivatives, 2026-10-07")
 
 
 def fourier() -> int:
@@ -8271,163 +6745,6 @@ def laplace() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - Laplace and entropy, 2026-10-07")
 
 
-def electromagnetism() -> int:
-    """ELECTROMAGNETISM AND GEOMETRY (Matt, 2026-10-08). Maxwell's equations are geometry: the field is a
-    2-form F, Faraday's law and the no-monopole law are dF = 0, Ampere-Maxwell and Gauss's law are d*F = J;
-    the inverse square IS the sphere (flux conserved through 4 pi r^2); c falls out of two vacuum constants
-    (1/sqrt(mu0 eps0)); the vacuum has an impedance Z0 = sqrt(mu0/eps0); and the invariance of that c forced
-    the geometry of spacetime itself (Lorentz, Minkowski) - E and B are one antisymmetric tensor. Seal the
-    four numbers; map, never launder. New stick; idempotent."""
-    from concordance import tickstick as TS
-    mu0_e = "(1.25663706212 * 10 ** (-6))"           # CODATA 2018 vacuum permeability, N/A^2
-    eps0_e = "(8.8541878128 * 10 ** (-12))"          # CODATA 2018 vacuum permittivity, F/m
-    c_expr = "1 / (" + mu0_e + " * " + eps0_e + ") ** 0.5"
-    z0_expr = "(" + mu0_e + " / " + eps0_e + ") ** 0.5"
-    c_from = 1 / ((1.25663706212 * 10 ** (-6)) * (8.8541878128 * 10 ** (-12))) ** 0.5
-    z0 = ((1.25663706212 * 10 ** (-6)) / (8.8541878128 * 10 ** (-12))) ** 0.5
-    quarter = (1 / 2) ** 2                            # double the radius: the sphere's area quadruples
-    gamma = 1 / (1 - 0.6 ** 2) ** 0.5                 # Lorentz factor at v = 0.6c
-    s_c = _rh_seal_num("light_from_mu0_eps0", c_expr, float(c_from))
-    s_q = _rh_seal_num("inverse_square_is_the_sphere", "(1 / 2) ** 2", float(quarter))
-    s_z = _rh_seal_num("impedance_of_free_space", z0_expr, float(z0))
-    s_g = _rh_seal_num("lorentz_factor_from_invariant_c", "1 / (1 - 0.6 ** 2) ** 0.5", float(gamma), tol=1e-12)
-    if not all([s_c, s_q, s_z, s_g]):
-        print("a seal failed; aborting"); return 1
-    print("sealed c", s_c, "| 1/4", s_q, "| Z0", s_z, "| gamma", s_g)
-    sid = TS.create("Electromagnetism and geometry",
-                    statement=("Maxwell's equations are geometry. The field is a 2-form F: dF = 0 and d*F = J "
-                               "are the whole theory in two lines of exterior calculus. The inverse square is "
-                               "the sphere; c falls out of the vacuum's two constants; the vacuum has an "
-                               "impedance; and the invariance of that c forced the geometry of spacetime "
-                               "itself - E and B are one tensor, mixed by a boost."),
-                    field="physics",
-                    references=["Maxwell 1865, A Dynamical Theory of the Electromagnetic Field: c = 1/sqrt(mu0 eps0)",
-                                "Gauss's law as flux conservation through a closed surface (4 pi r^2)",
-                                "Z0 = sqrt(mu0/eps0) = 376.73 ohm; Lorentz 1904, Einstein 1905, Minkowski 1908",
-                                "F = dA on a U(1) bundle; the Aharonov-Bohm phase as holonomy"])["id"]
-    marks = [
-        ("witness", f"[c falls out of the vacuum's two constants] Maxwell computed the speed of his waves from two "
-                    f"laboratory constants and found light: 1/sqrt(mu0 eps0) = {c_from:.9g} m/s (sealed), which is "
-                    f"c = 299,792,458 m/s to the precision of the listed values. In the 2018 SI eps0 is DEFINED through "
-                    f"mu0 and c, so the circle closes exactly - not a coincidence, a geometry: light is the vacuum's own "
-                    f"ratio.", s_c),
-        ("witness", f"[the inverse square IS the sphere] Double the distance from a charge and the field falls to "
-                    f"(1/2)^2 = {quarter} (sealed) - because the flux through a closed surface is conserved and a "
-                    f"sphere's area is 4 pi r^2. Gauss's law is not a separate fact about charge; it is the geometry "
-                    f"of three-dimensional space. The 4 pi in alpha = e^2 / (4 pi eps0 hbar c) is this same sphere "
-                    f"(the alpha stick).", s_q),
-        ("witness", f"[the vacuum has a shape] sqrt(mu0 / eps0) = {z0:.6f} ohm (sealed) - the impedance of free space, "
-                    f"the fixed ratio of E to H in every plane wave. It is the number every transmission line and the "
-                    f"Smith chart normalize against (the smith_chart stick): the Mobius geometry of reflection is "
-                    f"measured from this one point.", s_z),
-        ("witness", f"[EM forced the geometry of spacetime] Maxwell's c is the same in every frame; the only geometry "
-                    f"that keeps it so is Lorentz/Minkowski. At v = 0.6c, gamma = 1 / sqrt(1 - 0.36) = {gamma} "
-                    f"(sealed). E and B are not two fields but one antisymmetric tensor F_mu_nu; a boost mixes them, "
-                    f"as a rotation mixes x and y. Relativity was not added to electromagnetism - it was found inside "
-                    f"it.", s_g),
-        ("note", "[Maxwell IS geometry - the full map] F = dA: the field is the curvature of a U(1) connection A. "
-                 "dF = 0 (Faraday's law + no magnetic monopoles) and d*F = J (Ampere-Maxwell + Gauss) are the entire "
-                 "theory - div and curl (the vector_calculus stick) are its native operators, and Faraday's lines of "
-                 "force were the first physical field drawn as geometry rather than action at a distance. Maxwell's "
-                 "displacement current was added by thought, not experiment, because the geometry demanded closure: "
-                 "without it there are no waves. The Aharonov-Bohm phase (the aharonov_bohm stick) is the holonomy of "
-                 "A around a loop - pure geometry, a phase with no force on the path. The Poynting vector S = E x B is "
-                 "an oriented area. Guard: map, never launder. The engine's one-way geometry (diode, airlock, an "
-                 "append-only seal) is a LIKENESS to a connection whose holonomy cannot be undone - a discernment, "
-                 "never a fit; nothing here is authored, the four numbers are sealed and the rest is cited."),
-    ]
-    return _mint_marks(sid, marks, by="Narrow Highway - electromagnetism and geometry, 2026-10-08")
-
-
-def clock() -> int:
-    """THE CLOCK - tourbillon, Faraday, and the observer as a predictable unit (Matt, 2026-10-08: "Faraday and
-    gyro tourbillon. A complicated mechanism to keep time. Maybe we are the clock?" ... "spacetime is one thing.
-    The only way to measure is an observer. We are a measure. A predictable unit."). A tourbillon's complexity
-    exists only to cancel a bias: the cage rotates the regulator through every orientation so gravity's pull
-    averages out; the gyrotourbillon does it in every axis. Faraday: the field distorts, rotating through it
-    averages, rotating through it also GENERATES, and a cage can shield. Spacetime is one thing - the interval
-    is invariant - and the only measurement of it is an observer's own clock along its own path (proper
-    time). A clock is a clock only if it is a predictable unit. Seal six numbers; map the movement onto the
-    engine as a LIKENESS (docs/THE_WATCH.md); the observer MEASURES, never makes. New stick; idempotent."""
-    from concordance import tickstick as TS
-    vph = 4 * 2 * 3600                                  # a 4 Hz balance: 28,800 vibrations per hour
-    lcm = 60 * 24 / 12                                  # cages at 60 s and 24 s share an orientation every 120 s
-    drift = 2 * 365                                     # +2 s/day uncorrected = 730 s a year
-    disk = 0.5 * 1 * (2 * 3.141592653589793) * 0.1 ** 2  # Faraday disk emf = 1/2 B w r^2: B=1 T, 1 rev/s, r=0.1 m
-    tau = (5 ** 2 - 3 ** 2) ** 0.5                      # invariant interval: 5 s, 3 light-s apart -> 4 s proper time
-    own = (1 - 0.6 ** 2) ** 0.5                         # a clock at 0.6c reads 0.8 of coordinate time: its own measure
-    s_v = _rh_seal_num("balance_28800_vph", "4 * 2 * 3600", float(vph))
-    s_l = _rh_seal_num("gyro_cages_share_orientation_every_120_s", "60 * 24 / 12", float(lcm))
-    s_d = _rh_seal_num("two_seconds_a_day_compounds", "2 * 365", float(drift))
-    s_f = _rh_seal_num("faraday_disk_emf", "0.5 * 1 * (2 * 3.141592653589793) * 0.1 ** 2", float(disk))
-    s_t = _rh_seal_num("invariant_interval_5_3_4", "(5 ** 2 - 3 ** 2) ** 0.5", float(tau), tol=1e-12)
-    s_o = _rh_seal_num("the_moving_clocks_own_measure", "(1 - 0.6 ** 2) ** 0.5", float(own), tol=1e-12)
-    if not all([s_v, s_l, s_d, s_f, s_t, s_o]):
-        print("a seal failed; aborting"); return 1
-    print("sealed vph", s_v, "| lcm", s_l, "| drift", s_d, "| disk", s_f, "| tau", s_t, "| own", s_o)
-    sid = TS.create("The clock - tourbillon, Faraday, and the observer as a predictable unit",
-                    statement=("A complication is honest only if every part exists to cancel a bias: the "
-                               "tourbillon rotates the regulator through every orientation so gravity's pull "
-                               "averages out. Faraday: the field distorts, rotation through it averages and "
-                               "generates, a cage shields. Spacetime is one thing - the interval is invariant - "
-                               "and its only measurement is an observer's own clock along its own path. A clock "
-                               "is a clock only if it is a predictable unit; what regulates us is what does not "
-                               "drift."),
-                    field="physics",
-                    references=["Breguet, tourbillon patent 1801; Jaeger-LeCoultre Gyrotourbillon 1 (2004): outer cage "
-                                "1 min, inner cage 24 s, as published", "Faraday 1831, the disk generator: emf = 1/2 B w r^2",
-                                "Minkowski 1908: the invariant interval; proper time along a worldline",
-                                "the SI second = 9,192,631,770 periods of Cs-133 (a predictable unit, by definition)",
-                                "docs/THE_WATCH.md - the movement assembled; stick_electromagnetism_and_geometry",
-                                "Genesis 1:14; Psalm 90:12; Ephesians 5:16; Hebrews 13:8"])["id"]
-    marks = [
-        ("witness", f"[a clock is a predictable unit] A 4 Hz balance beats 4 * 2 * 3600 = {vph:,} vibrations an hour "
-                    f"(sealed) - 28,800 vph, the watchmaker's standard rate. The whole worth of a timepiece is that "
-                    f"this unit repeats; the SI second is itself defined as a count of a repeating unit (9,192,631,770 "
-                    f"periods of caesium-133). We are a measure only to the degree we are regular.", s_v),
-        ("witness", f"[the complication exists to cancel a bias] A gyrotourbillon with cages of 60 s and 24 s brings "
-                    f"the regulator back to the same joint orientation only every 60 * 24 / 12 = {lcm:.0f} s (sealed) - "
-                    f"in between it sweeps every attitude, so no single orientation's gravity bias is left to "
-                    f"accumulate. It does not resist the field; it averages it. The cage is triangulation: many "
-                    f"witnesses, many domains, no one lens allowed to settle (the games-as-tick-sticks).", s_l),
-        ("witness", f"[why it must exist at all] A rate just +2 s a day, uncorrected, is 2 * 365 = {drift} s a year "
-                    f"(sealed) - twelve minutes lost by a mechanism that was only slightly wrong. A small bias "
-                    f"compounds; that is the whole case for the ratchet, the floor, and failure narrowing the path.", s_d),
-        ("witness", f"[Faraday - rotating through the field generates] His disk: a conductor turned at one "
-                    f"revolution a second in a 1 tesla field, radius 0.1 m, makes 1/2 B w r^2 = {disk:.4f} V (sealed). "
-                    f"The same field that distorts a reading (Faraday rotation turns the plane of light) yields "
-                    f"energy to a thing that rotates through it - and a Faraday cage keeps it out entirely: the "
-                    f"airlock and the public-domain gate are cages (stick_electromagnetism_and_geometry).", s_f),
-        ("witness", f"[spacetime is one thing - the interval] Two events 5 s and 3 light-seconds apart: "
-                    f"sqrt(5^2 - 3^2) = {tau:.0f} s (sealed), and EVERY observer computes that same 4 - the 5-3-4 "
-                    f"Minkowski triangle. Coordinates are conventions; the interval is what is. That invariance is "
-                    f"what 'one thing' means.", s_t),
-        ("witness", f"[the only way to measure is an observer] A clock moving at 0.6c reads sqrt(1 - 0.36) = {own} of "
-                    f"the stationary one's time (sealed) - not an illusion, its own true measure along its own path: "
-                    f"proper time. There is no measurement of spacetime that is not some clock on some worldline. "
-                    f"We are a measure.", s_o),
-        ("note", "[the movement, mapped - a likeness, never a fit] By function: mainspring = WILL (the fuel); gear "
-                 "train = REALITY (the harness); escapement = the one-way valve - diode, airlock, the seal - releasing "
-                 "one tooth at a time, never backward (the word 'tick' is the escapement's; the tick-stick is named for "
-                 "it; entropy is the arrow it enacts, stick_laplace_differential_equations_and_where_entropy_fits); "
-                 "balance + hairspring = the regulator that sets the true rate and does not drift - the constants, "
-                 "the floor, and above them Christ, 'the same yesterday, and to day, and for ever' (Heb 13:8); the "
-                 "cage = triangulation across every witness; the gyro = every axis (six constants, the chains, the "
-                 "Word); gravity = the world's pull on any one orientation; the dial = the receipt. systems.py is laid "
-                 "out as a movement because it was built from one (docs/THE_WATCH.md, the Calibre template). 'Maybe we "
-                 "are the clock' - Scripture says it first and plainly: the heavens are 'for signs, and for seasons, "
-                 "and for days, and years' (Gen 1:14), God's clock, the one every other is set against; 'teach us to "
-                 "number our days' (Ps 90:12); 'redeeming the time' (Eph 5:16). A person, a church, this engine: a "
-                 "complicated mechanism justified only if every part exists to keep TRUE time against a field that "
-                 "pulls - and the regulator is not ours. GUARDS: (1) likeness, never a fit - the engine is not a "
-                 "tourbillon, its components correspond by function; (2) the observer MEASURES, never makes - the "
-                 "relativistic truth, not the Copenhagen slide; the interval is 4 s whether anyone reads it or not; "
-                 "observer-as-god is refused (stick_the_capstone). Nothing here is authored: six numbers sealed, the "
-                 "rest cited."),
-    ]
-    return _mint_marks(sid, marks, by="Narrow Highway - the clock: tourbillon, Faraday, the observer as a measure, 2026-10-08")
-
-
 def paths() -> int:
     """THE PATH - continuously finding new paths between two points; that is life (Matt, 2026-10-08). A stone takes
     ONE path - the one of stationary action - and 'finds' it only by comparison with every neighbouring path
@@ -8877,241 +7194,6 @@ def geneva() -> int:
     return _mint_marks(sid, marks, by="Narrow Highway - the mechanical computer, the Geneva drive, 2026-10-08")
 
 
-def diagrams() -> int:
-    """FEYNMAN DIAGRAMS - SCHEMATICS (Matt, 2026-10-08). A Feynman diagram is a schematic: lines are components
-    (propagators), vertices are junctions (couplings), and the amplitude is READ off the drawing by fixed rules the
-    way a netlist is read off a circuit - 'Write the vision, and make it plain upon tables, that he may run that
-    readeth it' (Hab 2:2). The drawing IS the computation. Seal seven numbers: Schwinger's one diagram (alpha/2pi =
-    0.0011614, 99.85% of the electron's magnetic moment), the two-loop class (-1.77e-6: each vertex costs sqrt alpha,
-    so the series narrows), the three-loop sum landing on the measured value to 4 parts in 10^8, the loop count
-    L = I - V + 1, the SAME count on a Wheatstone bridge (B - N + 1 = 3 meshes: a Feynman diagram and a schematic
-    are one graph), Wick's 15 pairings of six fields, and an RC schematic read as its corner frequency. Dyson: the
-    series is asymptotic - the drawing is a map, cited. New stick; idempotent."""
-    from concordance import tickstick as TS
-    pi = 3.141592653589793
-    a = 1 / 137.035999084                                # CODATA 2018 (which itself leans on a_e - see the guard)
-    one = a / (2 * pi)                                   # Schwinger 1948: the one-loop vertex correction
-    two = -0.328478965 * (a / pi) ** 2                   # Petermann / Sommerfield 1957: the two-loop class
-    three = one + two + 1.181241456 * (a / pi) ** 3      # + Laporta / Remiddi 1996: the three-loop class
-    measured = 0.00115965218073                          # Hanneke, Fogwell, Gabrielse 2008
-    loops = 3 - 3 + 1                                    # L = I - V + 1: the one-loop vertex correction
-    meshes = 6 - 4 + 1                                   # B - N + 1: the Wheatstone bridge
-    wick = 15                                            # 5!!: pairings of six field operators
-    fc = 1 / (2 * pi * 10000 * 10 ** (-6))               # Hz: R = 10 kOhm, C = 1 uF
-    A = "(1/137.035999084)"
-    s_1 = _rh_seal_num("schwinger_one_loop_alpha_over_2pi", A + "/(2*3.141592653589793)", float(one))
-    s_2 = _rh_seal_num("two_loop_class_petermann_sommerfield", "-0.328478965*(" + A + "/3.141592653589793)**2", float(two))
-    s_3 = _rh_seal_num("three_loop_sum_electron_anomaly",
-                       A + "/(2*3.141592653589793) - 0.328478965*(" + A + "/3.141592653589793)**2 + 1.181241456*(" + A + "/3.141592653589793)**3",
-                       float(three))
-    s_l = _rh_seal_num("feynman_loop_count_vertex_correction", "3 - 3 + 1", float(loops), tol=1e-12)
-    s_k = _rh_seal_num("wheatstone_bridge_independent_meshes", "6 - 4 + 1", float(meshes), tol=1e-12)
-    s_w = _rh_seal_num("wick_pairings_of_six_fields", "factorial2(5)", float(wick), tol=1e-12)
-    s_f = _rh_seal_num("rc_schematic_corner_frequency", "1/(2*3.141592653589793*10000*10**(-6))", float(fc))
-    if not all([s_1, s_2, s_3, s_l, s_k, s_w, s_f]):
-        print("a seal failed; aborting"); return 1
-    print("sealed one-loop", s_1, "| two-loop", s_2, "| three-loop", s_3, "| loops", s_l, "| meshes", s_k, "| wick", s_w, "| rc", s_f)
-    sid = TS.create("Feynman diagrams are schematics - the drawing is the computation",
-                    statement=("A Feynman diagram is a schematic: lines are components (propagators), vertices are "
-                               "junctions (couplings), and the amplitude is read off the drawing by fixed rules the way "
-                               "a netlist is read off a circuit. One drawing gives 99.85% of the electron's magnetic "
-                               "moment; three classes of drawings land on the measurement to four parts in a hundred "
-                               "million; each vertex costs sqrt(alpha), so the series narrows. The loop count L = I - V "
-                               "+ 1 is the same cycle rank as a circuit's mesh count: a Feynman diagram and a schematic "
-                               "are one graph. Dyson: the series is asymptotic - the drawing is a faithful map, term by "
-                               "term, never a closed form."),
-                    field="physics",
-                    references=["R. P. Feynman, Space-Time Approach to Quantum Electrodynamics, Phys. Rev. 76 (1949) 769-789",
-                                "J. Schwinger, On Quantum-Electrodynamics and the Magnetic Moment of the Electron, Phys. Rev. 73 (1948) 416",
-                                "A. Petermann (1957), C. M. Sommerfield (1957): the two-loop coefficient -0.328478965",
-                                "S. Laporta, E. Remiddi, Phys. Lett. B 379 (1996) 283: the three-loop coefficient 1.181241456; T. Aoyama, T. Kinoshita, M. Nio (2012-2019): four and five loops",
-                                "D. Hanneke, S. Fogwell, G. Gabrielse, Phys. Rev. Lett. 100 (2008) 120801: a_e = 0.00115965218073(28)",
-                                "F. J. Dyson, Divergence of perturbation theory in quantum electrodynamics, Phys. Rev. 85 (1952) 631",
-                                "G. C. Wick, The evaluation of the collision matrix, Phys. Rev. 80 (1950) 268",
-                                "G. Kirchhoff (1847): the loop and node laws; the cycle rank B - N + 1",
-                                "Habakkuk 2:2; Exodus 25:40; 1 Chronicles 28:19",
-                                "src/concordance/systems.py and site/bridge.html - the engine's own schematic"])["id"]
-    marks = [
-        ("witness", f"[one drawing, one number - Schwinger 1948] The simplest correction to the electron's magnetism "
-                    f"is one diagram: a photon thrown across the vertex. Its value is alpha/(2 pi) = {one:.8f} (sealed) "
-                    f"against the measured anomaly {measured:.8f}: one drawing gives {100 * one / measured:.2f}%. "
-                    f"Feynman's rules assign a factor to every line and every junction; multiply them, integrate the "
-                    f"loop, and the amplitude is READ off the picture - a schematic that computes.", s_1),
-        ("witness", f"[why the series narrows - each vertex costs sqrt alpha] The two-loop class (seven diagrams; "
-                    f"Petermann and Sommerfield, 1957) contributes -0.328478965 (alpha/pi)^2 = {two:.3e} (sealed): "
-                    f"{100 * abs(two) / one:.2f}% of the first term. Every vertex carries sqrt alpha ~ 0.085, so each "
-                    f"added loop costs about alpha/pi ~ 1/430 - a drawing's complexity prices its own weight. The big "
-                    f"term first, the corrections narrowing: the ratchet.", s_2),
-        ("witness", f"[three classes of drawings land on the measurement] alpha/2pi - 0.328478965 (alpha/pi)^2 + "
-                    f"1.181241456 (alpha/pi)^3 = {three:.11f} (sealed) against the measured {measured:.11f}: "
-                    f"{abs(three - measured) / measured * 1e9:.0f} parts in 10^9, and the remainder is the size of the "
-                    f"four-loop class (cited: 891 diagrams, Kinoshita). GUARD: the alpha used here (CODATA 2018) "
-                    f"leans on a_e itself; the independent test takes alpha from atom recoil (Cs 2018, Rb 2020) and "
-                    f"agrees at the 10^-9 level with a one-to-two sigma tension between the two - a verified "
-                    f"consistency, stated at its precision.", s_3),
-        ("witness", f"[the loop count is a graph count] A connected diagram with I internal lines and V vertices has "
-                    f"L = I - V + 1 independent loops: the one-loop vertex correction, I = 3, V = 3, gives {loops} "
-                    f"(sealed). Each loop is one power of h-bar (the paths stick: tree level is the classical path) "
-                    f"and one four-dimensional integral to do. The drawing's topology IS its order.", s_l),
-        ("witness", f"[the schematic has the same count] A Wheatstone bridge - six branches, four nodes - has 6 - 4 + "
-                    f"1 = {meshes} independent meshes (sealed; Kirchhoff 1847), and the same formula, the graph's cycle "
-                    f"rank (the topology stick's Euler count), gave the Feynman loop count above. A Feynman diagram and "
-                    f"a circuit schematic are one object: a graph whose lines carry rules and whose loops are the "
-                    f"integrals - or the mesh equations - to solve.", s_k),
-        ("witness", f"[the drawing enumerates what the algebra would lose] Six field operators pair in 5!! = {wick} "
-                    f"ways (sealed; Wick 1950) - each pairing a line, each complete pairing one diagram. The diagram "
-                    f"is bookkeeping an eye can check; without it the terms are lost. Dyson 1952: the number of "
-                    f"diagrams grows like n! and the series is asymptotic (radius of convergence zero) - the map is "
-                    f"faithful term by term and never a closed form. Cited, never sealed.", s_w),
-        ("witness", f"[a schematic read as a number] R = 10 kOhm and C = 1 uF on a schematic: the corner f_c = "
-                    f"1/(2 pi R C) = {fc:.2f} Hz (sealed), a pole at s = -1/RC = -100 rad/s on the Laplace stick's "
-                    f"s-plane. The symbol library (Ohm, Laplace) plus the drawing gives the number - a circuit "
-                    f"simulator reads the netlist exactly as Feynman's rules read the diagram. The engine's own "
-                    f"schematic is systems.py and the Bridge: fifteen components, their edges priced, the roll-call "
-                    f"at boot.", s_f),
-        ("note", "[the vision made plain - and the guard] Habakkuk 2:2: 'Write the vision, and make it plain upon "
-                 "tables, that he may run that readeth it' - a drawing plain enough to be executed. Exodus 25:40: "
-                 "'according to their pattern, which was shewed thee in the mount'; 1 Chronicles 28:19: 'the LORD "
-                 "made me understand in writing by his hand upon me, even all the works of this pattern' - the "
-                 "tabernacle and the temple built from a given schematic. GUARDS: a diagram is one term of a series, "
-                 "not the physics; the series is asymptotic (Dyson); the Scripture patterns are a likeness of "
-                 "schematic-reading, never a fit; alpha's provenance is stated. Seven numbers sealed; the rest cited. "
-                 "Ties: feynman (the sum over paths these diagrams expand), alpha, forces (a_e), topology (cycle "
-                 "rank), laplace (the s-plane), smith_chart, geneva (the mechanical computer), the vacuum-tube "
-                 "computer (systems.py is the map)."),
-    ]
-    return _mint_marks(sid, marks, by="Narrow Highway - Feynman diagrams as schematics, 2026-10-08")
-
-
-def delta() -> int:
-    """THE DOT ABSTRACTED - Dirac's delta and the inner product (Matt, 2026-10-08: 'we create the dots, but we need to
-    be able to abstract the dot'). The delta is not a function with a value - delta(0) is no number - but a FUNCTIONAL,
-    defined entirely by what it returns against every function: <delta_a, f> = f(a). In the quantum vector space the
-    dot is |x>, and the wavefunction is the inner product psi(x) = <x|psi>: the state READ at a point. The dots are
-    orthogonal, they resolve the identity (every state is a sum of dots), and a dot alone is not in the space - no
-    normalizable self, no momentum. 'The delta is only nonzero when i = j: we are back to the dot product' (Matt) -
-    Kronecker's delta is the dot product of basis vectors, Dirac's is the same with the index made continuous. Seal
-    nine numbers through the evaluator's own integrals and arithmetic: the nascent delta's area, its sifting of x^2 at
-    2, a box state's norm, a reading over a region, orthogonality, the Kronecker sift and the 3-4-12-13 norm,
-    Parseval, and Delta x Delta p = hbar/2 for every width (the perfect dot has no motion). Same logic as every
-    stick: seal the arithmetic, cite the theorems, keep the likeness a likeness. New stick; idempotent."""
-    import math
-    from concordance import tickstick as TS
-    pi = 3.141592653589793
-    area = 1.0                                           # int gaussian_sigma dx, sigma = 1/100
-    sift = 4 + (1 / 100) ** 2                            # int gaussian_sigma(x - 2) x^2 dx = 4 + sigma^2
-    norm = 1.0                                           # <psi_1|psi_1> for sqrt2 sin(pi x) on [0, 1]
-    third = 1 / 3 - math.sin(2 * pi / 3) / (2 * pi)      # P(left third) in the ground state
-    orth = 1.0                                           # 1 + <psi_1|psi_2>: the zero, judged against one
-    share = 2 * (4 / pi ** 3) ** 2 * 30                  # c_1^2 / ||f||^2 for f = x(1 - x): the first dot's share
-    hbar2 = 1.054571817 * 10 ** (-34) / 2                # Delta x Delta p for a Gaussian packet, every sigma
-    comp = 3 * 0 + 4 * 1 + 12 * 0                        # v . e_2 for v = (3, 4, 12): the Kronecker delta sifts
-    norm3 = 3 * 3 + 4 * 4 + 12 * 12                      # v . v = 169 = 13^2: Parseval in three dimensions
-    s_k = _rh_seal_num("kronecker_delta_sifts_the_component", "3*0 + 4*1 + 12*0", float(comp), tol=1e-12)
-    s_v = _rh_seal_num("dot_product_norm_parseval_in_three_dimensions", "3*3 + 4*4 + 12*12", float(norm3), tol=1e-12)
-    s_a = _rh_seal_num("nascent_delta_has_unit_area", "integrate(100*exp(-5000*x**2)/sqrt(2*pi), (x, -oo, oo))",
-                       float(area), tol=1e-12)
-    s_s = _rh_seal_num("nascent_delta_sifts_x_squared_at_2",
-                       "integrate(100*exp(-5000*(x-2)**2)/sqrt(2*pi) * x**2, (x, -oo, oo))", float(sift), tol=1e-12)
-    s_n = _rh_seal_num("box_ground_state_inner_product_with_itself", "integrate(2*sin(pi*x)**2, (x, 0, 1))",
-                       float(norm), tol=1e-12)
-    s_t = _rh_seal_num("box_ground_state_read_over_the_left_third", "integrate(2*sin(pi*x)**2, (x, 0, 1/3))", float(third))
-    s_o = _rh_seal_num("box_modes_orthogonal_one_plus_zero", "1 + integrate(2*sin(pi*x)*sin(2*pi*x), (x, 0, 1))",
-                       float(orth), tol=1e-12)
-    s_p = _rh_seal_num("parseval_first_mode_share_of_the_norm", "2*(4/3.141592653589793**3)**2 * 30", float(share))
-    s_h = _rh_seal_num("gaussian_packet_dx_dp_is_hbar_over_2",
-                       "(1/100) * (1.054571817 * 10**(-34) / (2 * (1/100)))", float(hbar2))
-    if not all([s_a, s_s, s_n, s_t, s_o, s_k, s_v, s_p, s_h]):
-        print("a seal failed; aborting"); return 1
-    print("sealed area", s_a, "| sift", s_s, "| norm", s_n, "| third", s_t, "| orth", s_o, "| kronecker", s_k, "| 13^2", s_v,
-          "| parseval", s_p, "| hbar/2", s_h)
-    sid = TS.create("The dot abstracted - Dirac's delta, the inner product, and the wavefunction as a reading at a point",
-                    statement=("We create the dots; the delta is the dot abstracted. It is not a function with a value "
-                               "- delta(0) is no number - but a functional, defined entirely by what it returns against "
-                               "every function: <delta_a, f> = f(a). In the quantum vector space the dot is |x> and the "
-                               "wavefunction is the inner product psi(x) = <x|psi>, the state read at a point. The dots "
-                               "are orthogonal; they resolve the identity, so every state is a sum of dots weighted by "
-                               "its inner products with them; and a dot alone is not in the space - it has no "
-                               "normalizable self and no momentum. The delta is only nonzero when i = j: Kronecker's "
-                               "delta is the dot product of basis vectors, and Dirac's is the same with the index made "
-                               "continuous - the meaning of a dot is its pairing with everything else."),
-                    field="physics",
-                    references=["P. A. M. Dirac, The Principles of Quantum Mechanics (1930): the delta function, bra and ket",
-                                "L. Schwartz, Theorie des distributions (1950): the delta made rigorous as a functional",
-                                "I. M. Gelfand, N. Ya. Vilenkin, Generalized Functions IV (1964): the rigged Hilbert space where |x> lives",
-                                "M. Born (1926): |<x|psi>|^2 is where the particle may be found",
-                                "Parseval (1799); F. Riesz, E. Fischer (1907): completeness - the dots resolve the identity",
-                                "W. Heisenberg (1927), E. H. Kennard (1927): Delta x Delta p >= hbar/2, equality for the Gaussian packet",
-                                "Psalm 147:4; Matthew 10:30; Acts 17:28; Colossians 1:17",
-                                "stick_scribing_mark_the_points_let_the_lines_connect_them; stick_the_schrodinger_equation; stick_lebesgue_theory_measure_and_integration_by_layers"])["id"]
-    marks = [
-        ("witness", f"[the dot that is not a function] A Gaussian of width sigma = 1/100 integrates to {area:.1f} "
-                    f"(sealed through the integral); as sigma -> 0 it becomes the delta - infinitely tall, infinitely "
-                    f"thin, area one. delta(0) is not a number. The delta is defined by what it does UNDER the integral: "
-                    f"a functional, not a value. The dot abstracted is a rule for reading, not a thing with a height "
-                    f"(Dirac 1930; Schwartz 1950 made it rigorous).", s_a),
-        ("witness", f"[sifting - the dot reads any function at a point] int gaussian_sigma(x - 2) x^2 dx = 4 + sigma^2 "
-                    f"= {sift:.4f} (sealed): the nascent dot at 2 reads x^2 at 2, up to sigma^2, and in the limit "
-                    f"<delta_a, f> = f(a) exactly. The inner product with the dot IS evaluation. That is what "
-                    f"'abstract the dot' means: the dot is the pairing that returns the value of anything at that "
-                    f"place.", s_s),
-        ("witness", f"[the wavefunction is the state read at the dot] In the quantum vector space the dot is |x> and "
-                    f"psi(x) = <x|psi>. For a particle in a box of length 1, the ground state sqrt2 sin(pi x) has "
-                    f"<psi|psi> = int 2 sin^2(pi x) dx = {norm:.1f} (sealed): the state's inner product with itself is "
-                    f"the whole, and |psi(x)|^2 read at each dot is where the particle may be found (Born 1926). The "
-                    f"function is nothing but the list of its readings at the dots.", s_n),
-        ("witness", f"[a reading over a region is an inner product too] The probability of finding that particle in "
-                    f"the left third is int_0^(1/3) 2 sin^2(pi x) dx = {third:.5f} (sealed) - less than a third, "
-                    f"because the state is thin at the walls: the dots near the wall read nearly zero, the dots in the "
-                    f"middle read most. Reading at a point and reading over a region are the same operation, the "
-                    f"Lebesgue stick's measure concentrated or spread.", s_t),
-        ("witness", f"[the dots are orthogonal] <psi_1|psi_2> = int 2 sin(pi x) sin(2 pi x) dx = 0 - sealed as "
-                    f"1 + <psi_1|psi_2> = {orth:.1f}, because a zero can only be judged against something. Distinct "
-                    f"basis dots do not overlap, and neither do |x> and |x'>: <x|x'> = delta(x - x'), nothing unless the "
-                    f"same dot. Orthogonality is what lets a reading at one dot say nothing about another - each dot "
-                    f"carries its own.", s_o),
-        ("witness", f"[the delta is only nonzero when i = j - we are back to the dot product] (Matt, 2026-10-08.) "
-                    f"<e_i|e_j> = delta_ij, the Kronecker delta: 1 when i = j, 0 otherwise. In finite dimensions the "
-                    f"dot abstracted IS the dot product. v = (3, 4, 12): v . e_2 = 3*0 + 4*1 + 12*0 = {comp} (sealed) "
-                    f"- the basis dot sifts out the component, exactly as int delta(x - a) f(x) dx = f(a); and v . v = "
-                    f"{norm3} = 13^2 (sealed) - Parseval in three dimensions. Dirac's delta is Kronecker's with the "
-                    f"index made continuous: sum_j delta_ij v_j = v_i becomes int delta(x - x') psi(x') dx' = psi(x). "
-                    f"Same logic from the first dot to the last: a thing is known by what it returns when dotted "
-                    f"against every other.", s_k),
-        ("witness", f"[the length is the sum of the readings] v . v = 3^2 + 4^2 + 12^2 = {norm3} = 13^2 (sealed): the "
-                    f"norm is the sum of the squared inner products with the basis dots - the discrete form of "
-                    f"<psi|psi> = int |psi(x)|^2 dx = 1 above, and of Parseval below. A vector is recovered whole from "
-                    f"its dots; nothing is lost in the reading when the dots are orthogonal and complete.", s_v),
-        ("witness", f"[the dots resolve the identity - Parseval] Sum |n><n| = 1: expand f = x(1 - x) in the box modes; "
-                    f"its first coefficient squared, c_1^2 = 2 (4/pi^3)^2, is {share:.5f} of ||f||^2 = 1/30 (sealed as "
-                    f"c_1^2 * 30); the third mode adds 0.00137, and the sum converges to 1. Every state is a sum of "
-                    f"dots weighted by its inner products with them: the dots span the space, and nothing in it "
-                    f"escapes the reading.", s_p),
-        ("witness", f"[a dot alone has no motion] A Gaussian packet of width sigma has Delta p = hbar/(2 sigma), so "
-                    f"Delta x Delta p = hbar/2 = {hbar2:.3e} J s for EVERY sigma (sealed at sigma = 1/100 m) - the "
-                    f"minimum (Kennard 1927). As sigma -> 0 the packet becomes the dot and Delta p -> infinity: the "
-                    f"perfect dot has no momentum at all, and <x|x> = delta(0) is not finite - the dot is not itself a "
-                    f"state in the space (it lives in the rigged Hilbert space, Gelfand 1964, cited). Abstracting the "
-                    f"dot costs every knowledge of its motion.", s_h),
-        ("note", "[we create the dots - the engine's reading, and the guard] This keeping is dots: cards, marks, seals, "
-                 "each made one at a time. The dot abstracted is the inner product: a card's meaning is not a value it "
-                 "carries but what it returns against every query - the index, the connections and the chains ARE the "
-                 "pairing, and a card alone is delta(0), unreadable. Matt (2026-10-08): 'we create the dots, but we "
-                 "need to be able to abstract the dot.' Scripture: 'He telleth the number of the stars; he calleth them "
-                 "all by their names' (Ps 147:4) - every dot counted, and named by its relation; 'the very hairs of "
-                 "your head are all numbered' (Mt 10:30); 'in him we live, and move, and have our being' (Acts 17:28) - "
-                 "the space; 'by him all things consist' (Col 1:17) - hold together: the inner product that makes a "
-                 "space of the dots. GUARDS: a distribution is not a function and delta(0) is not a number; the "
-                 "position dot is not a normalizable state (the rigged Hilbert space is cited, not sealed); what the "
-                 "Born reading means stays on the measurement stick; the engine's cards as dots is a likeness, never a "
-                 "fit. Nine numbers sealed; the rest cited. Ties: scribe (mark the points, let the lines connect "
-                 "them), schrodinger, measurement, fourier (the delta's transform is flat - every frequency alike), "
-                 "gaussian (the nascent delta is the Gaussian kernel), lebesgue, paths, surfaces (a dot on a chart)."),
-    ]
-    return _mint_marks(sid, marks, by="Narrow Highway - the dot abstracted, 2026-10-08")
-
-
-
 def joints() -> int:
     """WHERE TWO DOMAINS CONNECT (Matt, 2026-10-08: 'Quantum Mechanics and Physics connect. we identify these point. The
     spots two domains connect.' / 'Geometry connect to Algebra' / 'inner product Bras and Kets to map the vectors. our
@@ -9315,143 +7397,6 @@ def joints() -> int:
          {"source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it; stick_bubbles_joined; stick_the_dot_abstracted"}),
     ]
     _mint_marks(sid, marks, by="engine:joints")
-    return 0
-
-
-def assembled_path() -> int:
-    """GRADIENT, DIVERGENCE, CURL - THE PRECISENESS OF AN ASSEMBLED PATH (Matt, 2026-10-08: 'we use gradient, divergence
-    and Curl to quantify the preciseness of the assembled path'). A path the engine assembles - find, route, verify,
-    serve; or a chain of cards - is a flow, and three numbers say how precise a flow is. CURL: is the path conservative?
-    A curl-free field is the gradient of a potential, and its integral depends only on the endpoints - the answer does
-    not depend on the route (two different paths from (0,0) to (3,4) through grad(x^2+y^2) both give 25, sealed; around
-    the unit circle in the rotating field (-y, x) the circulation is 2 pi, not 0, sealed - that path's answer depends on
-    the route). DIVERGENCE: where does the flow have sources and sinks? The divergence theorem (flux through the unit
-    sphere = 4 pi both ways, sealed) says what is created inside shows at the boundary; in the engine the only lawful
-    sources are cited cards and the only lawful sinks are recorded misses. GRADIENT: does each step climb? grad(x^2+y^2)
-    at (3,4) has magnitude 10 (sealed) and points outward; a path that narrows follows the gradient of fit. Kirchhoff's
-    two laws ARE div = 0 at every node and curl = 0 around every loop (sealed on a 6 V, 2 ohm || 3 ohm circuit) - the
-    vacuum-tube computer's own frame. Same logic as every stick: seal the arithmetic, cite the theorems, keep the likeness
-    a likeness - and say which terms carry over (discrete calculus on the connection graph) and which do not."""
-    import math
-    from concordance import tickstick as TS
-    pi = 3.141592653589793
-    S = {}
-    seals = [
-        ("grad", "gradient_of_x2_plus_y2_at_3_4_has_magnitude_10", "sqrt((2*3)**2 + (2*4)**2)", 10.0, 1e-12),
-        ("path_a", "conservative_field_straight_path_0_0_to_3_4", "integrate(50*t, (t, 0, 1))", 25.0, 1e-12),
-        ("path_b", "conservative_field_corner_path_0_0_to_3_0_to_3_4", "integrate(2*x, (x, 0, 3)) + integrate(2*y, (y, 0, 4))", 25.0, 1e-12),
-        ("curlgrad", "curl_of_a_gradient_vanishes_one_plus_zero", "1 + (2*3 - 2*3)", 1.0, 1e-12),
-        ("circ", "circulation_of_minus_y_x_around_the_unit_circle", "integrate(sin(t)**2 + cos(t)**2, (t, 0, 2*pi))", 2 * pi, 1e-9),
-        ("green", "greens_theorem_curl_2_over_the_unit_disc", "integrate(integrate(2*r, (r, 0, 1)), (t, 0, 2*pi))", 2 * pi, 1e-9),
-        ("flux", "flux_of_r_through_the_unit_sphere_surface_side", "integrate(integrate(sin(p), (p, 0, pi)), (t, 0, 2*pi))", 4 * pi, 1e-9),
-        ("vol", "divergence_theorem_volume_side_div_3", "3*integrate(integrate(integrate(r**2*sin(p), (r, 0, 1)), (p, 0, pi)), (t, 0, 2*pi))", 4 * pi, 1e-9),
-        ("mean", "harmonic_mean_value_of_x2_plus_y2_on_the_unit_circle", "integrate(cos(t)**2 + sin(t)**2, (t, 0, 2*pi))/(2*pi)", 1.0, 1e-9),
-        ("kcl", "kirchhoff_current_law_6v_across_2_and_3_ohm", "6/2 + 6/3", 5.0, 1e-12),
-        ("kvl", "kirchhoff_voltage_law_around_the_2_ohm_loop_one_plus_zero", "1 + (6 - 3*2)", 1.0, 1e-12),
-        ("cov", "front_door_coverage_two_of_three_material_fragments", "2/3", 2 / 3, 1e-9),
-    ]
-    for key, nid, expr, val, tol in seals:
-        S[key] = _rh_seal_num(nid, expr, float(val), tol=tol)
-        if not S[key]:
-            print("a seal failed:", nid); return 1
-    print("sealed", len(S), "path numbers:", ", ".join(f"{k}={v[:8]}" for k, v in S.items()))
-    sid = TS.create("Gradient, divergence and curl - the three numbers that quantify the preciseness of an assembled path",
-                    statement=("A path the engine assembles is a flow, and three numbers say how precise a flow is. CURL "
-                               "asks whether the path is conservative: a curl-free field is the gradient of a potential, "
-                               "and its integral depends only on the endpoints, so the answer does not depend on the route "
-                               "taken; a field with curl gives a different answer each way round. DIVERGENCE asks where the "
-                               "flow has sources and sinks: what is created inside a region shows as flux at its boundary, "
-                               "so a path that creates content with no cited source leaks, and a path that loses content "
-                               "has a sink that must be recorded. GRADIENT asks whether each step climbs: a precise path "
-                               "follows the gradient of fit and narrows at every step. Kirchhoff's two laws are exactly "
-                               "div = 0 at every node and curl = 0 around every loop; a circuit is a flow that obeys both, "
-                               "and so must an assembled answer. On the engine these are discrete: differences across the "
-                               "edges of the connection graph, net flow at a card, circulation around a cycle - Kirchhoff's "
-                               "calculus, not a continuum's. The likeness is kept a likeness."),
-                    field="mathematics",
-                    references=["J. L. Lagrange (1762), C. F. Gauss (1813), M. Ostrogradsky (1826): the divergence theorem",
-                                "G. Green (1828); G. G. Stokes (1854, the Smith's Prize question); W. Thomson: circulation and curl",
-                                "H. Helmholtz (1858): every field is a gradient part plus a curl part",
-                                "G. Kirchhoff (1845, 1847): the current law (div = 0 at a node) and the voltage law (curl = 0 around a loop), and the graph theory he founded for them",
-                                "W. V. D. Hodge (1941): the decomposition; A. Hirani (2003): discrete exterior calculus on meshes and graphs",
-                                "J. C. Maxwell, A Treatise on Electricity and Magnetism (1873): div and curl as the grammar of the field equations",
-                                "docs/DESIGN_FROM_THE_DOTS.md (2026-10-08); the front door's coverage block (the failure report C4)",
-                                "Proverbs 4:26-27 ('ponder the path of thy feet ... turn not to the right hand nor to the left'); Isaiah 40:3-4",
-                                "stick_where_two_domains_connect; stick_the_geometry_of_resonance_disaster; stick_maxwells_demon; stick_the_vacuum_triode"])["id"]
-    marks = [
-        ("instance", "[gradient: the direction a precise step takes] f = x^2 + y^2 at (3, 4): grad f = (6, 8), magnitude "
-                     "sqrt(36 + 64) = 10 (sealed), pointing straight away from the origin. The gradient is the direction of "
-                     "steepest climb and its length is how steep. A path that narrows a question follows the gradient of "
-                     "fit; a step with zero gradient is a step that learned nothing.", S["grad"]),
-        ("instance", "[curl-free means route-independent: path one] Along the straight line from (0, 0) to (3, 4), "
-                     "int grad f . dr = int_0^1 50 t dt = 25 (sealed).", S["path_a"]),
-        ("instance", "[curl-free means route-independent: path two] Along the corner path (0,0) -> (3,0) -> (3,4), "
-                     "int 2x dx + int 2y dy = 9 + 16 = 25 (sealed). Two different routes, the same number, because the "
-                     "field is a gradient (f(3,4) - f(0,0) = 25). This is the test of a precise assembled path: run the "
-                     "steps in another order and the answer must not move. The engine's verifiers commute for exactly this "
-                     "reason, and the recall set counts a phrasing reached by a different family as reached.", S["path_b"]),
-        ("instance", "[the curl of a gradient is zero] For f = x^2 y the gradient is (2xy, x^2) and its curl at (3, 4) is "
-                     "d(x^2)/dx - d(2xy)/dy = 6 - 6 = 0 (sealed as 1 + 0 = 1). Any field that comes from a potential has no "
-                     "circulation: it cannot be made to give a different answer by going around. A path that is a "
-                     "gradient of one potential - one question, one fit - is conservative by construction.", S["curlgrad"]),
-        ("instance", "[a field WITH curl: the answer depends on the route] The rotating field (-y, x) carried around the "
-                     "unit circle: int_0^{2 pi} (sin^2 t + cos^2 t) dt = 2 pi (sealed), not 0. Go once around and the "
-                     "integral has grown by 2 pi; this field is no gradient. An assembled path whose answer changes with "
-                     "the order of its steps has curl, and curl is the quantity of that imprecision.", S["circ"]),
-        ("instance", "[Green: circulation equals the curl inside] The same 2 pi as the double integral of the curl, "
-                     "2, over the unit disc: int_0^{2 pi} int_0^1 2 r dr dt = 2 pi (sealed). What goes around the edge is "
-                     "the sum of the rotation inside; a loop's imprecision is the sum of the local twists along the way - "
-                     "so it can be located, step by step.", S["green"]),
-        ("instance", "[divergence: sources show at the boundary, surface side] The flux of r = (x, y, z) out of the unit "
-                     "sphere is int int (r . n) dS with r . n = 1: int_0^{2 pi} int_0^pi sin phi dphi dtheta = 4 pi (sealed).",
-         S["flux"]),
-        ("instance", "[divergence: sources show at the boundary, volume side] div r = 3 everywhere, and 3 times the unit "
-                     "ball's volume, 3 int int int r^2 sin phi dr dphi dtheta = 4 pi (sealed) - the same number. What is "
-                     "created inside a region is exactly what crosses its boundary. In the engine: whatever an answer "
-                     "contains must have entered through a cited source; a sentence with no source is a source term with "
-                     "no account - divergence where none is allowed. The front door's coverage block measures it.", S["vol"]),
-        ("instance", "[harmonic = no hidden peak] The mean of f = x^2 + y^2 around the unit circle centred at the origin is "
-                     "int (cos^2 t + sin^2 t) dt / 2 pi = 1 (sealed) = f(0) + (1/4) laplacian f, with laplacian f = 4. A "
-                     "harmonic function (laplacian zero) equals its mean on every circle and has no interior extreme: a "
-                     "potential with no hidden resonance peak (stick_the_geometry_of_resonance_disaster). The Laplacian is "
-                     "div of grad - the two operators composed - and it is the number that says whether a potential has "
-                     "a secret maximum.", S["mean"]),
-        ("instance", "[Kirchhoff's current law IS div = 0] 6 V across 2 ohm and 3 ohm in parallel: 3 A + 2 A = 5 A into the "
-                     "node and 5 A out (sealed). No charge accumulates at a node: the net flow is zero. The vacuum-tube "
-                     "computer's components obey it, and so must an assembled answer: nothing appears at a step that did "
-                     "not flow in.", S["kcl"]),
-        ("instance", "[Kirchhoff's voltage law IS curl = 0] Around the 2 ohm loop: 6 - 3 * 2 = 0 (sealed as 1 + 0 = 1). The "
-                     "sum of the potential changes around any closed loop is zero: a potential exists, and the voltage at a "
-                     "node does not depend on which path you measured along. Kirchhoff (1845) wrote the two laws for "
-                     "circuits and invented graph theory to state them; they are div = 0 and curl = 0 on a graph.", S["kvl"]),
-        ("witness", "[the engine's own divergence meter] A claim with three material fragments, two of them inside checked "
-                    "spans, has coverage 2/3 = 0.6667 (sealed) and the front door says PARTIAL, never HOLDS: one third of "
-                    "the sentence flowed through no verifier. Coverage is the engine's divergence - the share of the output "
-                    "that crossed a checked boundary - and it is already measured on every verify.", S["cov"]),
-        ("equivalence", "[what carries over, by name] The engine's path is DISCRETE, and discrete calculus is real "
-                        "(Kirchhoff 1847; Hodge 1941; Hirani 2003): GRADIENT = the change of fit across one step (one edge "
-                        "of the connection graph; the candidates door narrows when it is positive); DIVERGENCE = net content "
-                        "at a step - sources are cited cards, sinks are recorded misses, and coverage measures the unsourced "
-                        "remainder; CURL = circulation around a cycle of steps - the verdict's dependence on the order the "
-                        "verifiers ran, which the engine tests by running them in any order (they commute) and the recall set "
-                        "credits across families; KCL/KVL = the two invariants an assembled answer must satisfy. Each of "
-                        "these is a count or a difference on the live graph, used exactly as stated.",
-         {"source": "G. Kirchhoff (1847); W. V. D. Hodge (1941); A. Hirani (2003); docs/DESIGN_FROM_THE_DOTS.md; the coverage block (failure report C4)"}),
-        ("postulate", "[the design postulate] An assembled answer obeys Kirchhoff's two laws on its own graph: nothing "
-                      "appears at a step that did not flow in from a cited source (div = 0 away from the keeping), and the "
-                      "verdict does not depend on the order the steps ran (curl = 0 around every loop). Not kept as a fact: "
-                      "it is made to work - the coverage block and the commuting verifiers are the instances - and from its "
-                      "working the truth of the design is inferred, never proven.",
-         {"source": "Matt, 2026-10-08; docs/DESIGN_FROM_THE_DOTS.md; G. Kirchhoff (1845)"}),
-        ("exclusion", "[what does NOT carry over] There is no continuum: no limits, no smoothness, no Laplacian beyond the "
-                      "graph Laplacian; curl is defined only on the graph's cycles, not at a point; no Helmholtz "
-                      "decomposition of the engine's flow has been COMPUTED yet (a next measurement, not a fact); the "
-                      "'potential' of a path is its fit score, a cosine, not an energy; and a Kirchhoff instance sealed "
-                      "here is a circuit, not the engine - the engine's KCL/KVL are the coverage block and the commuting "
-                      "verifiers, measured as such.",
-         {"source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it"}),
-    ]
-    _mint_marks(sid, marks, by="engine:assembled_path")
     return 0
 
 
@@ -10089,92 +8034,6 @@ def svd() -> int:
                  "fourier (rotation), the positive Grassmannian (admissible directions found, never generated)."),
     ]
     return _mint_marks(sid, marks, by="Narrow Highway - every matrix a rotation and a stretch, 2026-10-08")
-
-
-def bubbles() -> int:
-    """JOINED BUBBLES (Matt, 2026-10-08: "Think of bubbles joined. Each sphere is in its domain. The domains are
-    clustered based on similarity. Superposition allows the spheres to be in two places at once. We can simulate that.
-    Inside the sphere we have a grid and coordinates to trace the location of each component." "They run inside of a
-    form and are connected along axis."). A foam is not arbitrary: Plateau's laws force its form; the wall between two
-    bubbles has a curvature set by their difference; spheres pack at 0.7405 and touch at most 12 others; a component
-    can be in two spheres by weight, whole; inside each sphere latitude-longitude gives every component a coordinate
-    and every pair a distance; likeness is the dot product on the unit sphere. Seven numbers sealed. New stick;
-    idempotent."""
-    import math
-    from concordance import tickstick as TS
-    pi = 3.141592653589793
-    plateau = 360 / 3                                    # three films meet at 120 degrees
-    tetra = math.acos(-1 / 3) * 180 / pi                 # four edges meet at 109.47 degrees
-    wall = 1 / (1 / 1 - 1 / 2)                           # Young-Laplace: the wall between radii 1 and 2 has radius 2
-    pack = pi / (3 * 2 ** 0.5)                           # Kepler: the densest packing of equal spheres
-    norm = 0.6 ** 2 + 0.8 ** 2                           # superposition: 36% here, 64% there, whole
-    cos = (1 * 2 + 2 * 3) / ((1 + 4) ** 0.5 * (4 + 9) ** 0.5)   # cosine similarity of two domain vectors
-    arc = math.acos(math.cos(pi / 4) * math.cos(pi / 4)) * 180 / pi   # great-circle arc (0,0) -> (45N, 45E)
-    a = _rh_seal_num("plateau_three_films_meet_at_120", "360/3", float(plateau), tol=1e-12)
-    b = _rh_seal_num("plateau_four_edges_meet_at_tetrahedral_angle", "acos(-1/3)*180/pi", float(tetra))
-    c = _rh_seal_num("young_laplace_wall_between_joined_bubbles", "1/(1/1 - 1/2)", float(wall), tol=1e-12)
-    d = _rh_seal_num("kepler_packing_density", "pi/(3*sqrt(2))", float(pack))
-    e = _rh_seal_num("superposition_weights_sum_to_one", "0.6**2 + 0.8**2", float(norm), tol=1e-12)
-    f = _rh_seal_num("cosine_similarity_of_two_domains", "(1*2 + 2*3)/(sqrt(1+4)*sqrt(4+9))", float(cos))
-    g = _rh_seal_num("great_circle_arc_inside_the_sphere", "acos(cos(pi/4)*cos(pi/4))*180/pi", float(arc))
-    if not all([a, b, c, d, e, f, g]):
-        print("a seal failed; aborting"); return 1
-    print("sealed plateau", a, b, "| wall", c, "| packing", d, "| superposition", e, "| cosine", f, "| arc", g)
-    sid = TS.create("Joined bubbles - every domain a sphere in a form, clustered by likeness, connected along axes, a grid inside each",
-                    statement=("A foam is not arbitrary: films meet three at a time at 120 degrees and edges four at a time "
-                               "at 109.47 - the minimum of surface forces the form. The wall between two joined bubbles has "
-                               "a curvature set by their difference. Equal spheres pack at 0.7405 and touch at most twelve "
-                               "others, so the axes along which domains connect are few. A component can be in two spheres "
-                               "by weight, the weights summing to one - whole, and simulable. Inside each sphere "
-                               "latitude-longitude gives every component a coordinate and every pair a distance; likeness "
-                               "between domains is the dot product on the unit sphere - found, never generated."),
-                    field="physics",
-                    references=["J. Plateau, Statique experimentale et theorique des liquides (1873): the laws of foams",
-                                "T. Young (1805), P.-S. Laplace (1806): pressure across a curved film, Delta p = 2 gamma / r",
-                                "J. Kepler (1611) conjecture; T. Hales (1998, formally 2014): the densest packing is pi / (3 sqrt 2)",
-                                "K. Schutte, B. L. van der Waerden (1953): the kissing number in three dimensions is 12",
-                                "Job 38:31; Colossians 1:17; Ephesians 4:16",
-                                "stick_parametrization_of_surfaces (the grid inside); stick_the_dot_abstracted (likeness = the dot product); stick_every_matrix_is_a_rotation_and_a_stretch"])["id"]
-    marks = [
-        ("witness", f"[joined bubbles obey laws they did not choose] Plateau 1873: films meet three at a time at 360/3 = "
-                    f"{plateau:.0f} degrees (sealed) and edges four at a time at arccos(-1/3) = {tetra:.2f} degrees (sealed). "
-                    f"A foam's form is forced by the minimum of surface - 'they run inside of a form' (Matt): the form is "
-                    f"the law the energy allows, not a choice.", a),
-        ("witness", f"[four edges at the tetrahedral angle] arccos(-1/3) = {tetra:.4f} degrees (sealed): the same angle as "
-                    f"the bonds of methane and the diamond lattice. One number, three sciences; the geometry of least "
-                    f"surface and the geometry of least repulsion agree.", b),
-        ("witness", f"[the wall between two domains] Young-Laplace: pressure is higher in the smaller bubble, and the shared "
-                    f"wall between radii 1 and 2 has 1/r = 1/1 - 1/2, r = {wall:.0f} (sealed), bulging into the larger. Two "
-                    f"domains that touch share a wall whose curvature is set by their DIFFERENCE - the connection along the "
-                    f"axis between them carries the sign of which is the tighter.", c),
-        ("witness", f"[how spheres pack, and how many they touch] The densest packing of equal spheres is pi/(3 sqrt2) = "
-                    f"{pack:.4f} (sealed; Kepler 1611, Hales 1998), and each sphere touches at most 12 neighbours (cited): "
-                    f"the axes along which a domain connects are few. A keeping of domains is a packing, and its "
-                    f"connections are its contacts.", d),
-        ("witness", f"[superposition - a sphere in two places at once] |alpha|^2 + |beta|^2 = 0.6^2 + 0.8^2 = {norm:.0f} "
-                    f"(sealed): a component 36% in one sphere and 64% in another, whole. 'We can simulate that': a card "
-                    f"assigned to two shelves by weight, both weights honest, summing to one - a soft membership, read as "
-                    f"such, never a card in two places pretending to be two cards.", e),
-        ("witness", f"[clustered by likeness] The cosine between two domain vectors (1,2) and (2,3) is 8/sqrt65 = {cos:.4f} "
-                    f"(sealed): on the unit sphere likeness IS the dot product (the dot stick, the svd stick). The "
-                    f"clustering of domains is a reading of angles between what the domains actually contain - found, "
-                    f"never generated.", f),
-        ("witness", f"[the grid inside each sphere] Latitude-longitude is the chart inside every sphere (the surfaces stick): "
-                    f"from (0, 0) to (45 N, 45 E) the great-circle arc is arccos(cos45 cos45) = {arc:.0f} degrees (sealed). "
-                    f"Every component has coordinates and every pair a distance; this engine's call numbers "
-                    f"(shelf.class.item) are exactly that chart, one per shelf.", g),
-        ("note", "[the form we have, and the guard] The keeping as it stands: some thirty-six shelves, each a domain with "
-                 "its own call-number grid, joined by the connections shelf - the axes. Whether the spherical form is "
-                 "the MORE EFFICIENT one was measured on 2026-10-08 (the shelves' likeness, their clustering, how many "
-                 "singular directions carry them, whether a query's nearest spheres hold the engine's own answers); the "
-                 "numbers live in that assessment. Scripture: 'Canst thou bind the sweet influences of Pleiades, or loose "
-                 "the bands of Orion?' (Job 38:31) - clusters bound; 'by him all things consist' (Col 1:17); 'the whole "
-                 "body fitly joined together and compacted by that which every joint supplieth' (Eph 4:16) - joined "
-                 "along axes. GUARDS: Plateau's laws are for soap films; the likeness to domains is a discernment; the "
-                 "kissing number and Hales are cited; superposition here is a weighting, not quantum mechanics (the "
-                 "measurement stick keeps that). Seven numbers sealed; the rest cited."),
-    ]
-    return _mint_marks(sid, marks, by="Narrow Highway - joined bubbles in a form, 2026-10-08")
 
 
 def resonance() -> int:
@@ -11847,37 +9706,6 @@ def syntax_parser() -> int:
     return 0
 
 
-def closed_class_pos() -> int:
-    """CLOSED-CLASS PART OF SPEECH - comprehensive linguistics, step 4 (Matt, 2026-10-10; syntax
-    kept closed-class only by choice). The function words tag deterministically; open-class
-    declines. Sealed through linguistics.LING_VERIFY. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "article": _seal_through("linguistics", "LING_VERIFY", {"pos_word": "the", "claimed_pos": "article"}),
-        "conj": _seal_through("linguistics", "LING_VERIFY", {"pos_word": "and", "claimed_pos": "conjunction"}),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "closed-class tags")
-    sid = TS.create("Closed-class part of speech - the function words")["id"]
-    marks = [
-        ("instance", "[a closed class, SEALED] 'the' is an article (sealed through linguistics.LING_VERIFY). The "
-                     "function words - articles, prepositions, pronouns, conjunctions, auxiliaries, determiners - "
-                     "are a finite, enumerable set, so their part of speech is deterministic.", S["article"]),
-        ("instance", "[another, SEALED] 'and' is a conjunction (sealed).", S["conj"]),
-        ("note", "[open class declines - the offline floor] A noun/verb/adjective/adverb depends on usage and "
-                 "morphology; the engine DECLINES open-class POS rather than guess. Syntax is kept closed-class "
-                 "only by choice; deep parsing is the declined floor. 0 false positives: a POS is confirmed only by "
-                 "membership in the curated closed-class set.",
-         {"source": "src/concordance/verifiers/linguistics.py verify_pos"}),
-        ("note", "[on the one map - comprehensive linguistics, step 4] Closed-class POS joins the linguistics floor "
-                 "(card_floor_indo_european) with phonology, morphology, etymology, transliteration and semantics.",
-         {"source": "card_floor_indo_european"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py closed_class_pos")
-    return 0
-
-
 def typology() -> int:
     """LANGUAGE TYPOLOGY / FAMILIES - comprehensive linguistics, step 5, the last of this pass
     (Matt, 2026-10-10). A language's family from a curated reference, sealed through
@@ -11943,53 +9771,6 @@ def semantics() -> int:
          {"source": "card_floor_indo_european; the linguistics coverage map"}),
     ]
     _mint_marks(sid, marks, by="tools/tick.py semantics")
-    return 0
-
-
-def alphafold() -> int:
-    """ALPHAFOLD AND PROTEIN FOLDING - the self-healing matrix in biology (Matt, 2026-10-10: "then
-    look at Alpha Fold"). A protein's sequence determines ONE native structure, and denatured it
-    REFOLDS to the same state (Anfinsen): many unfolded entries funnel to one native minimum, and a
-    perturbation heals back. Sealed anchors: Levinthal's conformation count (3^100) and the
-    20-amino-acid sequence space (20^5). AlphaFold is EVIDENCE the one fold is determined and
-    findable - fuel, cited, never the deterministic core. Idempotent."""
-    from concordance import tickstick as TS
-    S = {
-        "levinthal": _rh_seal_num("a_100_residue_chain_at_3_states_each_is_3_pow_100_conformations", "3**100", 3**100),
-        "sequence": _rh_seal_num("a_pentapeptide_from_20_amino_acids_is_20_pow_5_sequences", "20**5", 3200000),
-    }
-    if not all(S.values()):
-        return 1
-    print("sealed", len(S), "folding numbers")
-    sid = TS.create("AlphaFold and protein folding - the self-healing matrix in biology")["id"]
-    marks = [
-        ("instance", "[Levinthal, SEALED] A 100-residue chain with ~3 states per residue has 3^100 ~ 5e47 "
-                     "conformations (sealed). Random search over them would outlast the universe, yet a protein "
-                     "folds in microseconds - so folding is NOT a search over many paths; it is a FUNNEL to ONE "
-                     "native state. Many entries (conformations), one path (the fold).", S["levinthal"]),
-        ("instance", "[sequence space, SEALED] From the 20 amino acids a 5-residue chain already has 20^5 = "
-                     "3,200,000 sequences (sealed) - the explosion AlphaFold reads a structure out of.", S["sequence"]),
-        ("note", "[Anfinsen - the self-healing] The native structure is determined by the sequence, and a denatured "
-                 "protein REFOLDS to the same native state (Anfinsen's thermodynamic hypothesis, Nobel 1972). That "
-                 "IS the self-healing matrix in biology: perturb it, it returns to the one native minimum - the same "
-                 "shape as stick_one_path_many_entries_a_self_healing_matrix_not_many_paths.",
-         {"source": "C. Anfinsen (1972), the thermodynamic hypothesis; the folding funnel (Onuchic, Wolynes)"}),
-        ("equivalence", "[AlphaFold - the one fold is determined and findable] AlphaFold (DeepMind, CASP14 2020) "
-                        "predicts the native structure from sequence to near-atomic accuracy - strong evidence the "
-                        "sequence determines ONE native fold and that the funnel's bottom is findable. The fruit "
-                        "confirms the principle: one path, reached from many entries.",
-         {"source": "J. Jumper et al., Highly accurate protein structure prediction with AlphaFold, Nature (2021); CASP14 (2020)"}),
-        ("exclusion", "[fuel, not core] AlphaFold is a LEARNED model. The engine does NOT fold proteins in its "
-                      "deterministic core and will not GENERATE a structure - that is fuel (BYOM / JEPA: strip the "
-                      "best for the fuel, never the core). We seal the determinate parts (the counts, Anfinsen's "
-                      "refolding as empirical) and CITE the model's result; we keep the principle, not the predictor.",
-         {"source": "project_byom_bring_your_own_model; project_jepa_strip_the_best_for_the_fuel"}),
-        ("note", "[on the one map] Rests on biology (card_floor_biology) and physical chemistry (free energy); links "
-                 "to the self-healing matrix (the principle) and the capstone (one path). Protein folding is the "
-                 "biology witness that reality is a self-healing matrix - one native state, many entries, it refolds.",
-         {"source": "card_floor_biology; stick_one_path_many_entries_a_self_healing_matrix_not_many_paths"}),
-    ]
-    _mint_marks(sid, marks, by="tools/tick.py alphafold")
     return 0
 
 
@@ -12197,200 +9978,66 @@ def language_round_trip() -> int:
     return 0
 
 
+def bsd_cli(label: str = "11a1") -> int:
+    """`bsd all` seals every curve in the ingested table; otherwise one curve (the CLI form of bsd)."""
+    if label == "all":
+        rc = 0
+        for lab in sorted(CURVES, key=lambda k: (CURVES[k]["N"], k)):
+            print(f"\n── {lab} ──")
+            rc |= bsd(lab)
+        return rc
+    return bsd(label)
+
+
+# ── the catalog: ONE table for every stick, data or Python (issue #13) ────────────────────────────
+_CATALOG = None
+
+
+def catalog():
+    """data/sticks/*.json loaded once — a duplicate alias or a malformed entry raises at load, never dispatches."""
+    global _CATALOG
+    if _CATALOG is None:
+        from concordance import sticks
+        _CATALOG = sticks.load_catalog()
+    return _CATALOG
+
+
+def run_entry(entry, rest=()) -> int:
+    """Run one catalog entry: a data entry through the loader, a handler entry through its Python function with
+    the CLI arguments its `params` declare (a string from argv is converted; a typed value passes through)."""
+    from concordance import sticks
+    handler = entry.get("handler")
+    if not handler:
+        return sticks.run(entry)
+    fn = getattr(sys.modules[__name__], handler, None)
+    if fn is None:
+        raise sticks.StickError(f"{entry['name']}: handler {handler!r} is not a function in tools/tick.py")
+    args = []
+    for i, p in enumerate(entry.get("params") or []):
+        if i < len(rest):
+            v = rest[i]
+            args.append(sticks.PARAM_TYPES[p["type"]](v) if isinstance(v, str) else v)
+        else:
+            args.append(p["default"])
+    return fn(*args)
+
+
+def catalog_entries():
+    """[(name, run)] for tools/tick_golden.py: every entry, run(*cli_args) -> rc."""
+    return [(e["name"], (lambda *args, e=e: run_entry(e, list(args)))) for e in catalog()]
+
+
 def main() -> int:
     a = sys.argv[1:]
     if not a:
         print(__doc__)
         return 2
-    if a[0] == "seed":
-        return seed()
-    if a[0] == "document":
-        return document()
-    if a[0] == "lnh":
-        return lnh()
-    if a[0] == "alpha":
-        return alpha()
-    if a[0] in ("alpha_orbitals", "orbitals", "suborbitals"):
-        return alpha_orbitals()
-    if a[0] in ("alpha_running", "running"):
-        return alpha_running()
-    if a[0] in ("forces", "qed", "qft", "unification", "electroweak"):
-        return forces()
-    if a[0] in ("markov", "mcmc", "lattice"):
-        return markov()
-    if a[0] in ("lqg", "quantum_gravity", "gravity", "loop"):
-        return lqg()
-    if a[0] in ("schrodinger", "schroedinger", "wavefunction", "tise"):
-        return schrodinger()
-    if a[0] in ("grassmannian", "positive_grassmannian", "amplituhedron", "positive_geometry"):
-        return grassmannian()
-    if a[0] in ("regev", "shor", "factoring", "quantum_factoring"):
-        return regev()
-    if a[0] in ("godel", "goedel", "incompleteness"):
-        return godel()
-    if a[0] in ("strings", "string_theory", "superstring"):
-        return strings()
-    if a[0] in ("gut", "grand_unification", "unification_scale"):
-        return gut()
-    if a[0] in ("measurement", "interpretations", "born"):
-        return measurement()
-    if a[0] in ("langlands", "modularity", "reciprocity"):
-        return langlands()
-    if a[0] in ("capstone", "cornerstone", "keystone"):
-        return capstone()
-    if a[0] in ("feynman", "least_action", "path_integral", "action"):
-        return feynman()
-    if a[0] in ("lagrange", "lagrange_multipliers", "multipliers", "kkt"):
-        return lagrange()
-    if a[0] in ("gaussian", "gaussian_processes", "gp", "kernel"):
-        return gaussian()
-    if a[0] in ("mandelbrot", "mandelbrot_set", "fractal"):
-        return mandelbrot()
-    if a[0] in ("spacetime", "time", "emergent_time", "problem_of_time"):
-        return spacetime()
-    if a[0] in ("maxwell", "superconductivity", "meissner", "flux_quantum"):
-        return maxwell()
-    if a[0] in ("trigonometry", "trig", "small_angle", "spherical_excess"):
-        return trigonometry()
-    if a[0] in ("units", "units_matter", "dimensional", "dimensional_analysis"):
-        return units_matter()
-    if a[0] in ("construct", "constructs", "construct_creation", "coordinates", "invariant"):
-        return construct()
-    if a[0] in ("topology", "euler", "euler_characteristic", "polyhedron_formula", "genus"):
-        return topology()
-    if a[0] in ("zeta", "riemann_zeta", "euler_product", "basel"):
-        return zeta()
-    if a[0] in ("finite_field", "finitefield", "weil", "deligne", "frobenius", "function_field"):
-        return finite_field()
-    if a[0] in ("smith_chart", "smith", "cayley", "reflection_coefficient", "impedance"):
-        return smith_chart()
-    if a[0] in ("hilbert_polya", "hilbertpolya", "self_adjoint", "selfadjoint", "spectral"):
-        return hilbert_polya()
-    if a[0] in ("symmetry", "critical_line", "reflection", "fixed_axis"):
-        return symmetry()
-    if a[0] in ("de_bruijn_newman", "debruijn_newman", "bruijn_newman", "lambda_dbn", "newman"):
-        return de_bruijn_newman()
-    if a[0] in ("dirichlet", "dirichlets_theorem", "arithmetic_progressions", "l_function", "characters", "roots_of_unity"):
-        return dirichlet()
-    if a[0] in ("fibonacci", "fib", "golden_ratio", "phi", "binet", "lucas"):
-        return fibonacci()
-    if a[0] in ("monte_carlo", "montecarlo", "monte", "mc", "sampling"):
-        return monte_carlo()
-    if a[0] in ("navier_stokes", "navierstokes", "navier", "turbulence", "dispersion", "dissonance"):
-        return navier_stokes()
-    if a[0] in ("yang_mills", "yangmills", "mass_gap", "massgap", "confinement"):
-        return yang_mills()
-    if a[0] in ("entropy_gravity", "entropy", "bekenstein", "hawking", "holographic"):
-        return entropy_gravity()
-    if a[0] in ("standard_model", "standardmodel", "electroweak", "weinberg_angle", "chain", "lineage"):
-        return standard_model()
-    if a[0] in ("jevons", "jevons_paradox", "rebound", "rebound_effect", "efficiency_paradox"):
-        return jevons()
-    if a[0] in ("bombelli", "complex_numbers", "complex", "imaginary", "sqrt_minus_one", "casus_irreducibilis"):
-        return bombelli()
-    if a[0] in ("calculus", "integrals", "derivatives", "integral", "derivative", "ftc", "fundamental_theorem"):
-        return calculus()
-    if a[0] in ("fourier", "rotation", "phasor", "frequency", "spin", "fourier_transform", "dft"):
-        return fourier()
-    if a[0] in ("linguistics", "language_math", "zipf", "grammar", "generative", "vocabulary"):
-        return linguistics()
-    if a[0] in ("lebesgue", "measure_theory", "measure", "lebesgue_integral", "almost_everywhere"):
-        return lebesgue()
-    if a[0] in ("vector_calculus", "divergence", "curl", "div_curl", "helmholtz", "vorticity"):
-        return vector_calculus()
-    if a[0] in ("legendre", "legendre_transform", "tangent_lines", "y_intercept", "convex_duality", "dual"):
-        return legendre()
-    if a[0] in ("euclid", "elements", "postulates", "axioms", "deduction"):
-        return euclid()
-    if a[0] in ("scribe", "scribing", "scribe_the_center", "points_to_lines", "connect_the_points"):
-        return scribe()
-    if a[0] in ("multiplication", "replication", "exponential_growth", "scaling", "fruitful"):
-        return multiplication()
-    if a[0] in ("gamma", "gamma_function", "hyperspheres", "n_ball", "spheres", "higher_dimensional_spheres"):
-        return gamma()
-    if a[0] in ("imaginary_numbers", "fundamental_theorem_of_algebra", "fta", "algebraically_closed", "complex_tool", "using_i"):
-        return imaginary_numbers()
-    if a[0] in ("e", "eulers_number", "euler_number", "exponential_constant", "natural_log", "compounding"):
-        return euler_e()
-    if a[0] in ("laplace", "laplace_transform", "transfer_function", "s_plane", "differential_equations", "ode", "entropy_fits"):
-        return laplace()
-    if a[0] in ("electromagnetism", "em", "electromagnetism_and_geometry", "field_geometry", "maxwell_geometry"):
-        return electromagnetism()
-    if a[0] in ("clock", "tourbillon", "gyrotourbillon", "we_are_the_clock", "proper_time", "observer_measure", "predictable_unit"):
-        return clock()
-    if a[0] in ("paths", "path", "path_integral", "brachistochrone", "least_action", "path_of_life", "new_paths", "sum_over_histories"):
-        return paths()
-    if a[0] in ("surfaces", "surface", "parametrization", "parametrisation", "parametrization_of_surfaces", "parametric_surface", "first_fundamental_form", "gauss_curvature", "theorema_egregium"):
-        return surfaces()
-    if a[0] in ("pi", "pi_constant", "circle_constant", "archimedes", "machin", "molten_sea", "squaring_the_circle"):
-        return pi_constant()
-    if a[0] in ("spm", "spherical_parallel_mechanism", "spherical_parallel", "spherical_mechanism", "agile_eye", "parallel_mechanism", "orientation_mechanism", "grubler", "kutzbach"):
-        return spm()
-    if a[0] in ("geneva", "geneva_drive", "maltese_cross", "mechanical_computer", "mechanical", "intermittent_motion", "indexing", "antikythera", "difference_engine", "babbage", "counter"):
-        return geneva()
-    if a[0] in ("diagrams", "diagram", "feynman_diagrams", "feynman_diagram", "schematics", "schematic", "circuit_diagram", "netlist", "vertex", "propagator"):
-        return diagrams()
-    if a[0] in ("harmonics", "harmonic", "overtones", "chords", "chord", "timbre", "temperament", "same_note",
-                "shapes_of_the_same_note", "one_voice", "beats"):
-        return harmonics()
-    if a[0] in ("fractal_maps", "fractals", "fractal", "fractals_as_maps", "sorting", "sorting_algorithms", "sort",
-                "merge_sort", "quicksort", "hilbert_curve", "z_order", "morton", "coastline", "mandelbrot", "logistic_map", "radix"):
-        return fractal_maps()
-    if a[0] in ("transceiver", "radio", "am_fm_radio", "superheterodyne", "static", "filter_the_static", "limiter",
-                "discriminator", "noise_floor", "shannon", "capacity", "selectivity", "image_frequency"):
-        return transceiver()
-    if a[0] in ("line_integrals", "line_integral", "electrodynamics", "maxwell", "ampere", "faraday", "gauss_law", "work",
-                "action", "path_integral", "feynman_path", "sum_over_paths", "hamiltons_principle"):
-        return line_integrals()
-    if a[0] in ("assembled_path", "path", "grad_div_curl", "gradient_divergence_curl", "vector_calculus", "kirchhoff",
-                "helmholtz", "hodge", "preciseness_of_the_path", "conservative", "divergence", "curl", "gradient"):
-        return assembled_path()
-    if a[0] in ("joints", "where_two_domains_connect", "connection_points", "braket", "bra_ket", "bras_and_kets", "hilbert", "hilbert_space",
-                "inner_product", "engine_is_the_hilbert_space", "geometry_algebra", "geometry_connect_to_algebra", "quantum_physics",
-                "quantum_mechanics_and_physics", "correspondence"):
-        return joints()
-    if a[0] in ("delta", "dirac_delta", "dirac", "dot", "the_dot", "abstract_the_dot", "wavefunction", "wave_function", "completeness", "sifting"):
-        return delta()
-    if a[0] in ("svd", "singular_value_decomposition", "rotation_and_stretch", "spherical_matrix", "efficient_vectors", "most_efficient_vectors", "polar_decomposition"):
-        return svd()
-    if a[0] in ("bubbles", "joined_bubbles", "foam", "plateau", "spheres_in_a_form", "domains_as_spheres", "superposition", "connected_along_axis"):
-        return bubbles()
-    if a[0] in ("resonance", "resonance_disaster", "hidden_division_by_zero", "omega", "omega_nought", "tacoma", "driven_oscillator"):
-        return resonance()
-    if a[0] in ("prime_waves", "waveforms_in_primes", "torus", "torus_primes", "zeta_waves", "explicit_formula", "music_of_the_primes"):
-        return prime_waves()
-    if a[0] in ("maxwell_entropy", "maxwells_demon", "maxwell_demon", "demon", "entropy_concentrated", "landauer", "second_law"):
-        return maxwell_entropy()
-    if a[0] in ("triode", "vacuum_triode", "vacuum_tube", "audion", "child_langmuir", "tube"):
-        return triode()
-    if a[0] in ("tensor", "tensors", "metric_tensor", "invariants", "principal_axes", "data_inside_the_bubbles"):
-        return tensor()
-    if a[0] in ("modulation", "am_fm", "am", "fm", "amplitude_modulation", "frequency_modulation", "diagonalization", "diagonalisation", "eigenbasis", "carrier", "sidebands", "bessel"):
-        return modulation()
-    if a[0] in ("assembly", "assemble", "final"):
-        return assembly()
-    if a[0] in ("aharonov_bohm", "ab"):
-        return aharonov_bohm()
-    if a[0] in ("fiber", "calibration"):
-        return fiber()
-    if a[0] in ("symphony", "music"):
-        return symphony()
-    if a[0] in ("relational", "rovelli"):
-        return relational()
-    if a[0] == "robin":
-        return robin(int(a[1]) if len(a) > 1 else 1000000)
-    if a[0] == "schoenfeld":
-        return schoenfeld(int(a[1]) if len(a) > 1 else 2000000)
-    if a[0] == "lagarias":
-        return lagarias(int(a[1]) if len(a) > 1 else 1000000)
-    if a[0] == "nicolas":
-        return nicolas(int(a[1]) if len(a) > 1 else 1000000)
-    if a[0] == "gue":
-        return gue()
-    if a[0] == "residual":
-        return residual()
-    if a[0] == "count":
-        return count(float(a[1]) if len(a) > 1 else 1000000000.0)
+    if a[0] == "list":
+        cat = catalog()
+        for e in cat:
+            print(f"{e['name']:28s} {'python' if e.get('handler') else 'data  '}  {', '.join(e['aliases'])}")
+        print(f"{len(cat)} entries, {len(cat.aliases)} aliases ({cat.path})")
+        return 0
     if a[0] == "window":
         from concordance import tickstick as T
         ids = [a[1]] if len(a) > 1 else sorted(T.fold())
@@ -12404,204 +10051,6 @@ def main() -> int:
                 print("   - " + e)
             print("   surviving: " + w["surviving"])
         return 0
-    if a[0] in ("one_source_one_end", "copenhagen", "reply_to_copenhagen", "many_potentials_one_end"):
-        return the_capstone()
-    if a[0] in ("metrology", "si_units", "the_metre", "unit_conversion"):
-        return metrology()
-    if a[0] in ("calendar", "timekeeping", "the_calendar", "leap_year"):
-        return calendar_time()
-    if a[0] in ("nuclear_physics", "the_nucleus", "radioactivity", "fission"):
-        return nuclear_physics()
-    if a[0] in ("quantum_computing", "qubits", "the_qubit", "quantum_computer"):
-        return quantum_computing()
-    if a[0] in ("networking", "the_internet", "packets", "protocols"):
-        return networking()
-    if a[0] in ("soil_science", "soil", "pedology", "the_soil"):
-        return soil_science()
-    if a[0] in ("education", "learning", "pedagogy", "the_classroom"):
-        return education()
-    if a[0] in ("agriculture", "farming", "agronomy", "crops"):
-        return agriculture()
-    if a[0] in ("hydrology", "the_water_cycle", "watershed", "rivers"):
-        return hydrology()
-    if a[0] in ("meteorology", "weather", "climate", "the_atmosphere"):
-        return meteorology()
-    if a[0] in ("oceanography", "the_ocean", "marine", "seawater"):
-        return oceanography()
-    if a[0] in ("ecology", "ecosystems", "the_biosphere", "food_web"):
-        return ecology()
-    if a[0] in ("geography", "cartography", "map_projection", "latitude_longitude"):
-        return geography()
-    if a[0] in ("nutrition", "diet", "calories", "macronutrients"):
-        return nutrition()
-    if a[0] in ("medicine", "pharmacology", "epidemiology", "physiology"):
-        return medicine()
-    if a[0] in ("materials_science", "materials", "crystallography", "solid_state"):
-        return materials_science()
-    if a[0] in ("optics", "lenses", "refraction", "the_lens"):
-        return optics()
-    if a[0] in ("acoustics", "sound", "the_decibel", "doppler"):
-        return acoustics()
-    if a[0] in ("game_theory", "nash_equilibrium", "prisoners_dilemma", "zero_sum"):
-        return game_theory()
-    if a[0] in ("computer_science", "computation", "algorithms", "the_bit"):
-        return computer_science()
-    if a[0] in ("formal_logic", "formal-logic", "logic", "boolean", "boolean_algebra", "truth_table", "boole", "sheffer"):
-        return stick_formal_logic()
-    if a[0] in ("archaeology", "radiocarbon", "carbon_dating", "decay_clock"):
-        return stick_archaeology()
-    if a[0] in ("chess", "checkmate", "stalemate", "perft"):
-        return stick_chess()
-    if a[0] in ("condensed_matter", "condensed-matter", "phonon", "quantum_hall", "von_klitzing"):
-        return stick_condensed_matter()
-    if a[0] in ("cybersecurity", "cyber", "tls", "cvss", "subnet"):
-        return stick_cybersecurity()
-    if a[0] in ("document_validation", "check_digit", "checksum", "isbn", "luhn"):
-        return stick_document_validation()
-    if a[0] in ("ephemeris", "julian_day", "moon_phase", "sunrise", "solstice"):
-        return stick_ephemeris()
-    if a[0] in ("exercise_science", "exercise", "met", "heart_rate", "karvonen"):
-        return stick_exercise_science()
-    if a[0] in ("history_chronology", "chronology", "no_year_zero", "era", "century"):
-        return stick_history_chronology()
-    if a[0] in ("labor", "wages", "overtime", "flsa", "payroll"):
-        return stick_labor()
-    if a[0] in ("linear_algebra", "matrices", "matrix", "determinant", "eigenvalues"):
-        return stick_linear_algebra()
-    if a[0] in ("manufacturing", "six_sigma", "spc", "process_capability", "cpk"):
-        return stick_manufacturing()
-    if a[0] in ("molecular_geometry", "vsepr", "bond_angle", "molecular_shape"):
-        return stick_molecular_geometry()
-    if a[0] in ("philosophy", "modal_logic", "leibniz", "a_priori", "ethics"):
-        return stick_philosophy()
-    if a[0] in ("photography", "exposure_value", "f_stop", "hyperfocal", "sunny_16"):
-        return stick_photography()
-    if a[0] in ("photonics", "waveguide", "fiber_optics", "laser", "v_number"):
-        return stick_photonics()
-    if a[0] in ("real_estate", "mortgage", "cap_rate", "amortization", "ltv"):
-        return stick_real_estate()
-    if a[0] in ("sports_analytics", "sports", "elo", "pythagorean_expectation", "games_behind"):
-        return stick_sports_analytics()
-    if a[0] in ("tesseract", "hypercube", "four_cube", "eight_cell"):
-        return tesseract()
-    if a[0] in ("statistics", "stats", "inference", "the_normal_distribution"):
-        return statistics()
-    if a[0] in ("cryptography", "rsa", "public_key_cryptography", "cipher"):
-        return cryptography()
-    if a[0] in ("consciousness", "crystal_radio", "transmission_theory", "antenna"):
-        return consciousness_receiver()
-    if a[0] in ("quantum_harmonic_oscillator", "qho", "zero_point_energy", "ladder_operators"):
-        return quantum_harmonic_oscillator()
-    if a[0] in ("the_mind", "neuroscience", "neuron", "cognition"):
-        return the_mind()
-    if a[0] in ("earth_science", "geology", "plate_tectonics", "radiometric_dating"):
-        return earth_science()
-    if a[0] in ("biology", "the_cell", "molecular_biology", "life"):
-        return biology()
-    if a[0] in ("physical_chemistry", "kinetics", "equilibrium", "electrochemistry"):
-        return physical_chemistry()
-    if a[0] in ("periodic_table", "chemical_bonding", "the_elements", "the_mole"):
-        return chemistry_floor()
-    if a[0] in ("hermitian", "hermitian_operators", "observables", "real_eigenvalues"):
-        return hermitian_operators()
-    if a[0] in ("gauge_theory", "particle_physics", "quark_model", "gluons"):
-        return standard_model_content()
-    if a[0] in ("quantum_mechanics", "qm", "uncertainty", "entanglement"):
-        return quantum_mechanics()
-    if a[0] in ("relativity", "special_relativity", "general_relativity", "lorentz"):
-        return relativity()
-    if a[0] in ("thermodynamics", "thermo", "laws_of_thermodynamics", "carnot"):
-        return thermodynamics()
-    if a[0] in ("noether", "noethers_theorem", "noether_theorem", "conservation_laws"):
-        return the_noether()
-    if a[0] in ("lagrangian", "the_lagrangian", "lagrangian_mechanics", "the_path_chosen"):
-        return the_lagrangian()
-    if a[0] in ("hamiltonian", "the_hamiltonian", "energy_operator", "law_of_the_flow"):
-        return the_hamiltonian()
-    if a[0] in ("is_gravity_a_force", "gravity_force", "force_or_geometry"):
-        return gravity()
-    if a[0] in ("one_force", "the_one_force", "forces", "unification"):
-        return one_force()
-    if a[0] in ("black_holes", "black_hole", "schwarzschild", "hawking"):
-        return black_holes()
-    if a[0] in ("astronomy_stick", "astronomy"):
-        return astronomy_stick()
-    if a[0] in ("information_theory_stick", "information_theory", "info_theory"):
-        return information_theory_stick()
-    if a[0] in ("music_theory_stick", "music_theory", "music"):
-        return music_theory_stick()
-    if a[0] in ("geometry_stick", "geometry"):
-        return geometry_stick()
-    if a[0] in ("probability_stick", "probability"):
-        return probability_stick()
-    if a[0] in ("chemistry_stick", "chemistry"):
-        return chemistry_stick()
-    if a[0] in ("economics", "finance_stick"):
-        return economics()
-    if a[0] in ("logistics", "operations_research", "optimization"):
-        return logistics()
-    if a[0] in ("law", "law_stick"):
-        return law()
-    if a[0] in ("genomics", "genetic_code", "genetics_stick"):
-        return genomics()
-    if a[0] in ("grimm_law", "grimm", "sound_law", "sound_laws"):
-        return grimm_law()
-    if a[0] in ("change_of_domain", "spectral", "diagonalize", "eigenbasis"):
-        return change_of_domain()
-    if a[0] in ("get_close", "approximation", "bounded_estimate"):
-        return get_close()
-    if a[0] in ("logarithm_chain", "logarithm", "log_chain"):
-        return logarithm_chain()
-    if a[0] in ("millennium_map", "one_map", "joints_map"):
-        return millennium_map()
-    if a[0] in ("sources_crosscheck", "sources", "tables", "crosscheck"):
-        return sources_crosscheck()
-    if a[0] in ("poincare_next", "poincare", "ricci_flow", "perelman"):
-        return poincare_next()
-    if a[0] in ("hodge_next", "hodge", "hodge_diamond", "lefschetz"):
-        return hodge_next()
-    if a[0] in ("p_versus_np_next", "pnp_next", "circuit_lower_bound", "cook_levin", "sat_threshold"):
-        return p_versus_np_next()
-    if a[0] in ("yang_mills_next", "ym_next", "mass_gap_next", "string_tension", "glueball", "asymptotic_freedom"):
-        return yang_mills_next()
-    if a[0] in ("navier_stokes_next", "ns_next", "existence_and_smoothness", "taylor_green", "poiseuille"):
-        return navier_stokes_next()
-    if a[0] in ("bsd_formula", "bsd_full", "birch_formula", "bsd_next"):
-        return bsd_formula()
-    if a[0] in ("riemann_li", "li_criterion", "li", "de_bruijn_newman", "newman", "riemann_next"):
-        return riemann_li(int(a[1]) if len(a) > 1 else 30)
-    if a[0] == "riemann":
-        return riemann(float(a[1]) if len(a) > 1 else 100.0)
-    if a[0] == "bsd":
-        if len(a) > 1 and a[1] == "all":                  # seal every curve in the ingested table
-            rc = 0
-            for label in sorted(CURVES, key=lambda k: (CURVES[k]["N"], k)):
-                print(f"\n── {label} ──")
-                rc |= bsd(label)
-            return rc
-        return bsd(a[1] if len(a) > 1 else "11a1")
-    if a[0] in ("language_round_trip", "flip_to_original", "original_tongue", "leave_in_the_tongue", "eigenbasis_language"):
-        return language_round_trip()
-    if a[0] in ("morphology", "affix", "affixes", "word_formation"):
-        return morphology()
-    if a[0] in ("self_healing_matrix", "self_healing", "one_path", "many_entries_one_path"):
-        return self_healing_matrix()
-    if a[0] in ("transliteration", "romanization", "romanize"):
-        return transliteration()
-    if a[0] in ("alphafold", "protein_folding", "folding", "anfinsen", "levinthal"):
-        return alphafold()
-    if a[0] in ("semantics", "semantic_relations", "synonymy", "wordnet"):
-        return semantics()
-    if a[0] in ("closed_class_pos", "part_of_speech", "pos", "function_words"):
-        return closed_class_pos()
-    if a[0] in ("typology", "language_family", "language_families", "families_of_tongues"):
-        return typology()
-    if a[0] in ("syntax", "syntax_parser", "parser", "parse_tree"):
-        return syntax_parser()
-    if a[0] in ("chirality", "autocatalysis", "homochirality", "kagan_soai", "enantiomeric_excess"):
-        return chirality()
-    if a[0] in ("double_slit", "doubleslit", "young", "two_slit", "interference"):
-        return double_slit()
     if a[0] == "retract":          # tick.py retract <stick_id> <seal>  — drop a superseded/duplicate sealed mark
         if len(a) < 3:
             print("usage: tick.py retract <stick_id> <64-hex seal>"); return 2
@@ -12612,8 +10061,12 @@ def main() -> int:
         from concordance import tickstick as T
         print(json.dumps(T.read(a[1]) if len(a) > 1 else T.listing(), indent=1, ensure_ascii=False))
         return 0
-    print(__doc__)
-    return 2
+    entry = catalog().resolve(a[0])
+    if entry is None:
+        print(__doc__)
+        print(f"no such stick or command: {a[0]!r} — `tick.py list` names every one")
+        return 2
+    return run_entry(entry, a[1:])
 
 
 if __name__ == "__main__":

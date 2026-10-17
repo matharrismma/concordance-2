@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "quantum_mechanics",
+ "aliases": [
+  "quantum_mechanics",
+  "qm",
+  "uncertainty",
+  "entanglement"
+ ],
+ "handler": "quantum_mechanics",
+ "why_python": "pending migration (issue #13)"
+}

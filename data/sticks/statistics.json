@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "statistics",
+ "aliases": [
+  "statistics",
+  "stats",
+  "inference",
+  "the_normal_distribution"
+ ],
+ "handler": "statistics",
+ "why_python": "pending migration (issue #13)"
+}

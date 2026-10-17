@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "quantum_computing",
+ "aliases": [
+  "quantum_computing",
+  "qubits",
+  "the_qubit",
+  "quantum_computer"
+ ],
+ "handler": "quantum_computing",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "sports_analytics",
+ "aliases": [
+  "sports_analytics",
+  "sports",
+  "elo",
+  "pythagorean_expectation",
+  "games_behind"
+ ],
+ "handler": "stick_sports_analytics",
+ "why_python": "pending migration (issue #13)"
+}

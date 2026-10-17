@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "paths",
+ "aliases": [
+  "paths",
+  "path",
+  "brachistochrone",
+  "path_of_life",
+  "new_paths",
+  "sum_over_histories"
+ ],
+ "handler": "paths",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "linear_algebra",
+ "aliases": [
+  "linear_algebra",
+  "matrices",
+  "matrix",
+  "determinant",
+  "eigenvalues"
+ ],
+ "handler": "stick_linear_algebra",
+ "why_python": "pending migration (issue #13)"
+}

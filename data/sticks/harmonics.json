@@ -1,0 +1,19 @@
+{
+ "schema": 1,
+ "name": "harmonics",
+ "aliases": [
+  "harmonics",
+  "harmonic",
+  "overtones",
+  "chords",
+  "chord",
+  "timbre",
+  "temperament",
+  "same_note",
+  "shapes_of_the_same_note",
+  "one_voice",
+  "beats"
+ ],
+ "handler": "harmonics",
+ "why_python": "pending migration (issue #13)"
+}

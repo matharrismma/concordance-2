@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "oceanography",
+ "aliases": [
+  "oceanography",
+  "the_ocean",
+  "marine",
+  "seawater"
+ ],
+ "handler": "oceanography",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "the_lagrangian",
+ "aliases": [
+  "lagrangian",
+  "the_lagrangian",
+  "lagrangian_mechanics",
+  "the_path_chosen"
+ ],
+ "handler": "the_lagrangian",
+ "why_python": "pending migration (issue #13)"
+}

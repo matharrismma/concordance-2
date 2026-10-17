@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "capstone",
+ "aliases": [
+  "capstone",
+  "cornerstone",
+  "keystone"
+ ],
+ "handler": "capstone",
+ "why_python": "calls tickstick.tick itself (9x)"
+}

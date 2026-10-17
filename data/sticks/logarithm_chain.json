@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "logarithm_chain",
+ "aliases": [
+  "logarithm_chain",
+  "logarithm",
+  "log_chain"
+ ],
+ "handler": "logarithm_chain",
+ "why_python": "pending migration (issue #13)"
+}

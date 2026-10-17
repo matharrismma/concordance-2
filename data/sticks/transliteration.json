@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "transliteration",
+ "aliases": [
+  "transliteration",
+  "romanization",
+  "romanize"
+ ],
+ "handler": "transliteration",
+ "why_python": "pending migration (issue #13)"
+}

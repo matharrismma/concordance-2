@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "gamma",
+ "aliases": [
+  "gamma",
+  "gamma_function",
+  "hyperspheres",
+  "n_ball",
+  "spheres",
+  "higher_dimensional_spheres"
+ ],
+ "handler": "gamma",
+ "why_python": "pending migration (issue #13)"
+}

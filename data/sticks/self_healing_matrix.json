@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "self_healing_matrix",
+ "aliases": [
+  "self_healing_matrix",
+  "self_healing",
+  "one_path",
+  "many_entries_one_path"
+ ],
+ "handler": "self_healing_matrix",
+ "why_python": "pending migration (issue #13)"
+}

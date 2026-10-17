@@ -1,0 +1,10 @@
+{
+ "schema": 1,
+ "name": "probability",
+ "aliases": [
+  "probability_stick",
+  "probability"
+ ],
+ "handler": "probability_stick",
+ "why_python": "pending migration (issue #13)"
+}

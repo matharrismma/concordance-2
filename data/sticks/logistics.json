@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "logistics",
+ "aliases": [
+  "logistics",
+  "operations_research",
+  "optimization"
+ ],
+ "handler": "logistics",
+ "why_python": "pending migration (issue #13)"
+}

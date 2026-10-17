@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "thermodynamics",
+ "aliases": [
+  "thermodynamics",
+  "thermo",
+  "laws_of_thermodynamics",
+  "carnot"
+ ],
+ "handler": "thermodynamics",
+ "why_python": "pending migration (issue #13)"
+}

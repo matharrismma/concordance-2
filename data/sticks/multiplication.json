@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "multiplication",
+ "aliases": [
+  "multiplication",
+  "replication",
+  "exponential_growth",
+  "scaling",
+  "fruitful"
+ ],
+ "handler": "multiplication",
+ "why_python": "pending migration (issue #13)"
+}

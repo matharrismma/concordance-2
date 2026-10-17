@@ -1,0 +1,10 @@
+{
+ "schema": 1,
+ "name": "relational",
+ "aliases": [
+  "relational",
+  "rovelli"
+ ],
+ "handler": "relational",
+ "why_python": "calls verify_derivation itself (1x)"
+}

@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "nutrition",
+ "aliases": [
+  "nutrition",
+  "diet",
+  "calories",
+  "macronutrients"
+ ],
+ "handler": "nutrition",
+ "why_python": "pending migration (issue #13)"
+}

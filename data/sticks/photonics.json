@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "photonics",
+ "aliases": [
+  "photonics",
+  "waveguide",
+  "fiber_optics",
+  "laser",
+  "v_number"
+ ],
+ "handler": "stick_photonics",
+ "why_python": "pending migration (issue #13)"
+}

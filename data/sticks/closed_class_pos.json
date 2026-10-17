@@ -1,0 +1,59 @@
+{
+ "schema": 1,
+ "name": "closed_class_pos",
+ "aliases": [
+  "closed_class_pos",
+  "part_of_speech",
+  "pos",
+  "function_words"
+ ],
+ "doc": "CLOSED-CLASS PART OF SPEECH - comprehensive linguistics, step 4 (Matt, 2026-10-10; syntax\nkept closed-class only by choice). The function words tag deterministically; open-class\ndeclines. Sealed through linguistics.LING_VERIFY. Idempotent.",
+ "seals": [
+  {
+   "key": "article",
+   "domain": "linguistics",
+   "artifact": "LING_VERIFY",
+   "spec": {
+    "pos_word": "the",
+    "claimed_pos": "article"
+   }
+  },
+  {
+   "key": "conj",
+   "domain": "linguistics",
+   "artifact": "LING_VERIFY",
+   "spec": {
+    "pos_word": "and",
+    "claimed_pos": "conjunction"
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Closed-class part of speech - the function words",
+   "by": "tools/tick.py closed_class_pos",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[a closed class, SEALED] 'the' is an article (sealed through linguistics.LING_VERIFY). The function words - articles, prepositions, pronouns, conjunctions, auxiliaries, determiners - are a finite, enumerable set, so their part of speech is deterministic.",
+     "seal": "article"
+    },
+    {
+     "kind": "instance",
+     "claim": "[another, SEALED] 'and' is a conjunction (sealed).",
+     "seal": "conj"
+    },
+    {
+     "kind": "note",
+     "claim": "[open class declines - the offline floor] A noun/verb/adjective/adverb depends on usage and morphology; the engine DECLINES open-class POS rather than guess. Syntax is kept closed-class only by choice; deep parsing is the declined floor. 0 false positives: a POS is confirmed only by membership in the curated closed-class set.",
+     "source": "src/concordance/verifiers/linguistics.py verify_pos"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map - comprehensive linguistics, step 4] Closed-class POS joins the linguistics floor (card_floor_indo_european) with phonology, morphology, etymology, transliteration and semantics.",
+     "source": "card_floor_indo_european"
+    }
+   ]
+  }
+ ]
+}

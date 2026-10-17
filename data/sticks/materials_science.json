@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "materials_science",
+ "aliases": [
+  "materials_science",
+  "materials",
+  "crystallography",
+  "solid_state"
+ ],
+ "handler": "materials_science",
+ "why_python": "pending migration (issue #13)"
+}

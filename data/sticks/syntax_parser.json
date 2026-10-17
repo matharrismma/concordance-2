@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "syntax_parser",
+ "aliases": [
+  "syntax",
+  "syntax_parser",
+  "parser",
+  "parse_tree"
+ ],
+ "handler": "syntax_parser",
+ "why_python": "pending migration (issue #13)"
+}

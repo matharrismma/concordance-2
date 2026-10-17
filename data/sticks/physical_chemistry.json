@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "physical_chemistry",
+ "aliases": [
+  "physical_chemistry",
+  "kinetics",
+  "equilibrium",
+  "electrochemistry"
+ ],
+ "handler": "physical_chemistry",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "nuclear_physics",
+ "aliases": [
+  "nuclear_physics",
+  "the_nucleus",
+  "radioactivity",
+  "fission"
+ ],
+ "handler": "nuclear_physics",
+ "why_python": "pending migration (issue #13)"
+}

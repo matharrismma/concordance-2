@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "exercise_science",
+ "aliases": [
+  "exercise_science",
+  "exercise",
+  "met",
+  "heart_rate",
+  "karvonen"
+ ],
+ "handler": "stick_exercise_science",
+ "why_python": "pending migration (issue #13)"
+}

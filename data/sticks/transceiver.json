@@ -1,0 +1,21 @@
+{
+ "schema": 1,
+ "name": "transceiver",
+ "aliases": [
+  "transceiver",
+  "radio",
+  "am_fm_radio",
+  "superheterodyne",
+  "static",
+  "filter_the_static",
+  "limiter",
+  "discriminator",
+  "noise_floor",
+  "shannon",
+  "capacity",
+  "selectivity",
+  "image_frequency"
+ ],
+ "handler": "transceiver",
+ "why_python": "pending migration (issue #13)"
+}

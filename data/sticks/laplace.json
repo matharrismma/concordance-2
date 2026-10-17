@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "laplace",
+ "aliases": [
+  "laplace",
+  "laplace_transform",
+  "transfer_function",
+  "s_plane",
+  "differential_equations",
+  "ode",
+  "entropy_fits"
+ ],
+ "handler": "laplace",
+ "why_python": "pending migration (issue #13)"
+}

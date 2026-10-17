@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "linguistics",
+ "aliases": [
+  "linguistics",
+  "language_math",
+  "zipf",
+  "grammar",
+  "generative",
+  "vocabulary"
+ ],
+ "handler": "linguistics",
+ "why_python": "pending migration (issue #13)"
+}

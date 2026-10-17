@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "hydrology",
+ "aliases": [
+  "hydrology",
+  "the_water_cycle",
+  "watershed",
+  "rivers"
+ ],
+ "handler": "hydrology",
+ "why_python": "pending migration (issue #13)"
+}

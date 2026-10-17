@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "labor",
+ "aliases": [
+  "labor",
+  "wages",
+  "overtime",
+  "flsa",
+  "payroll"
+ ],
+ "handler": "stick_labor",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "relativity",
+ "aliases": [
+  "relativity",
+  "special_relativity",
+  "general_relativity",
+  "lorentz"
+ ],
+ "handler": "relativity",
+ "why_python": "pending migration (issue #13)"
+}

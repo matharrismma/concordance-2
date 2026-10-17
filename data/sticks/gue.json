@@ -1,0 +1,9 @@
+{
+ "schema": 1,
+ "name": "gue",
+ "aliases": [
+  "gue"
+ ],
+ "handler": "gue",
+ "why_python": "returned 1"
+}

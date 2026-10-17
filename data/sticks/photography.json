@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "photography",
+ "aliases": [
+  "photography",
+  "exposure_value",
+  "f_stop",
+  "hyperfocal",
+  "sunny_16"
+ ],
+ "handler": "stick_photography",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "pi_constant",
+ "aliases": [
+  "pi",
+  "pi_constant",
+  "circle_constant",
+  "archimedes",
+  "machin",
+  "molten_sea",
+  "squaring_the_circle"
+ ],
+ "handler": "pi_constant",
+ "why_python": "pending migration (issue #13)"
+}

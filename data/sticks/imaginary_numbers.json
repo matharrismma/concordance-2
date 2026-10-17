@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "imaginary_numbers",
+ "aliases": [
+  "imaginary_numbers",
+  "fundamental_theorem_of_algebra",
+  "fta",
+  "algebraically_closed",
+  "complex_tool",
+  "using_i"
+ ],
+ "handler": "imaginary_numbers",
+ "why_python": "pending migration (issue #13)"
+}

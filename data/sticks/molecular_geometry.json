@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "molecular_geometry",
+ "aliases": [
+  "molecular_geometry",
+  "vsepr",
+  "bond_angle",
+  "molecular_shape"
+ ],
+ "handler": "stick_molecular_geometry",
+ "why_python": "pending migration (issue #13)"
+}

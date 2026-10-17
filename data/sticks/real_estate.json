@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "real_estate",
+ "aliases": [
+  "real_estate",
+  "mortgage",
+  "cap_rate",
+  "amortization",
+  "ltv"
+ ],
+ "handler": "stick_real_estate",
+ "why_python": "pending migration (issue #13)"
+}

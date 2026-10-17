@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "hodge_next",
+ "aliases": [
+  "hodge_next",
+  "hodge_diamond",
+  "lefschetz"
+ ],
+ "handler": "hodge_next",
+ "why_python": "pending migration (issue #13)"
+}

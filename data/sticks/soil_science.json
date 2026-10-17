@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "soil_science",
+ "aliases": [
+  "soil_science",
+  "soil",
+  "pedology",
+  "the_soil"
+ ],
+ "handler": "soil_science",
+ "why_python": "pending migration (issue #13)"
+}

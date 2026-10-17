@@ -1,0 +1,116 @@
+{
+ "schema": 1,
+ "name": "clock",
+ "aliases": [
+  "clock",
+  "tourbillon",
+  "gyrotourbillon",
+  "we_are_the_clock",
+  "proper_time",
+  "observer_measure",
+  "predictable_unit"
+ ],
+ "doc": "THE CLOCK - tourbillon, Faraday, and the observer as a predictable unit (Matt, 2026-10-08: \"Faraday and\ngyro tourbillon. A complicated mechanism to keep time. Maybe we are the clock?\" ... \"spacetime is one thing.\nThe only way to measure is an observer. We are a measure. A predictable unit.\"). A tourbillon's complexity\nexists only to cancel a bias: the cage rotates the regulator through every orientation so gravity's pull\naverages out; the gyrotourbillon does it in every axis. Faraday: the field distorts, rotating through it\naverages, rotating through it also GENERATES, and a cage can shield. Spacetime is one thing - the interval\nis invariant - and the only measurement of it is an observer's own clock along its own path (proper\ntime). A clock is a clock only if it is a predictable unit. Seal six numbers; map the movement onto the\nengine as a LIKENESS (docs/THE_WATCH.md); the observer MEASURES, never makes. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "balance_28800_vph",
+   "nid": "balance_28800_vph",
+   "expr": "4 * 2 * 3600",
+   "value": 28800.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "gyro_cages_share_orientation_every_120_s",
+   "nid": "gyro_cages_share_orientation_every_120_s",
+   "expr": "60 * 24 / 12",
+   "value": 120.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "two_seconds_a_day_compounds",
+   "nid": "two_seconds_a_day_compounds",
+   "expr": "2 * 365",
+   "value": 730.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "faraday_disk_emf",
+   "nid": "faraday_disk_emf",
+   "expr": "0.5 * 1 * (2 * 3.141592653589793) * 0.1 ** 2",
+   "value": 0.031415926535897934,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "invariant_interval_5_3_4",
+   "nid": "invariant_interval_5_3_4",
+   "expr": "(5 ** 2 - 3 ** 2) ** 0.5",
+   "value": 4.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "the_moving_clocks_own_measure",
+   "nid": "the_moving_clocks_own_measure",
+   "expr": "(1 - 0.6 ** 2) ** 0.5",
+   "value": 0.8,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The clock - tourbillon, Faraday, and the observer as a predictable unit",
+   "statement": "A complication is honest only if every part exists to cancel a bias: the tourbillon rotates the regulator through every orientation so gravity's pull averages out. Faraday: the field distorts, rotation through it averages and generates, a cage shields. Spacetime is one thing - the interval is invariant - and its only measurement is an observer's own clock along its own path. A clock is a clock only if it is a predictable unit; what regulates us is what does not drift.",
+   "field": "physics",
+   "references": [
+    "Breguet, tourbillon patent 1801; Jaeger-LeCoultre Gyrotourbillon 1 (2004): outer cage 1 min, inner cage 24 s, as published",
+    "Faraday 1831, the disk generator: emf = 1/2 B w r^2",
+    "Minkowski 1908: the invariant interval; proper time along a worldline",
+    "the SI second = 9,192,631,770 periods of Cs-133 (a predictable unit, by definition)",
+    "docs/THE_WATCH.md - the movement assembled; stick_electromagnetism_and_geometry",
+    "Genesis 1:14; Psalm 90:12; Ephesians 5:16; Hebrews 13:8"
+   ],
+   "by": "Narrow Highway - the clock: tourbillon, Faraday, the observer as a measure, 2026-10-08",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[a clock is a predictable unit] A 4 Hz balance beats 4 * 2 * 3600 = 28,800 vibrations an hour (sealed) - 28,800 vph, the watchmaker's standard rate. The whole worth of a timepiece is that this unit repeats; the SI second is itself defined as a count of a repeating unit (9,192,631,770 periods of caesium-133). We are a measure only to the degree we are regular.",
+     "seal": "balance_28800_vph"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the complication exists to cancel a bias] A gyrotourbillon with cages of 60 s and 24 s brings the regulator back to the same joint orientation only every 60 * 24 / 12 = 120 s (sealed) - in between it sweeps every attitude, so no single orientation's gravity bias is left to accumulate. It does not resist the field; it averages it. The cage is triangulation: many witnesses, many domains, no one lens allowed to settle (the games-as-tick-sticks).",
+     "seal": "gyro_cages_share_orientation_every_120_s"
+    },
+    {
+     "kind": "witness",
+     "claim": "[why it must exist at all] A rate just +2 s a day, uncorrected, is 2 * 365 = 730 s a year (sealed) - twelve minutes lost by a mechanism that was only slightly wrong. A small bias compounds; that is the whole case for the ratchet, the floor, and failure narrowing the path.",
+     "seal": "two_seconds_a_day_compounds"
+    },
+    {
+     "kind": "witness",
+     "claim": "[Faraday - rotating through the field generates] His disk: a conductor turned at one revolution a second in a 1 tesla field, radius 0.1 m, makes 1/2 B w r^2 = 0.0314 V (sealed). The same field that distorts a reading (Faraday rotation turns the plane of light) yields energy to a thing that rotates through it - and a Faraday cage keeps it out entirely: the airlock and the public-domain gate are cages (stick_electromagnetism_and_geometry).",
+     "seal": "faraday_disk_emf"
+    },
+    {
+     "kind": "witness",
+     "claim": "[spacetime is one thing - the interval] Two events 5 s and 3 light-seconds apart: sqrt(5^2 - 3^2) = 4 s (sealed), and EVERY observer computes that same 4 - the 5-3-4 Minkowski triangle. Coordinates are conventions; the interval is what is. That invariance is what 'one thing' means.",
+     "seal": "invariant_interval_5_3_4"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the only way to measure is an observer] A clock moving at 0.6c reads sqrt(1 - 0.36) = 0.8 of the stationary one's time (sealed) - not an illusion, its own true measure along its own path: proper time. There is no measurement of spacetime that is not some clock on some worldline. We are a measure.",
+     "seal": "the_moving_clocks_own_measure"
+    },
+    {
+     "kind": "note",
+     "claim": "[the movement, mapped - a likeness, never a fit] By function: mainspring = WILL (the fuel); gear train = REALITY (the harness); escapement = the one-way valve - diode, airlock, the seal - releasing one tooth at a time, never backward (the word 'tick' is the escapement's; the tick-stick is named for it; entropy is the arrow it enacts, stick_laplace_differential_equations_and_where_entropy_fits); balance + hairspring = the regulator that sets the true rate and does not drift - the constants, the floor, and above them Christ, 'the same yesterday, and to day, and for ever' (Heb 13:8); the cage = triangulation across every witness; the gyro = every axis (six constants, the chains, the Word); gravity = the world's pull on any one orientation; the dial = the receipt. systems.py is laid out as a movement because it was built from one (docs/THE_WATCH.md, the Calibre template). 'Maybe we are the clock' - Scripture says it first and plainly: the heavens are 'for signs, and for seasons, and for days, and years' (Gen 1:14), God's clock, the one every other is set against; 'teach us to number our days' (Ps 90:12); 'redeeming the time' (Eph 5:16). A person, a church, this engine: a complicated mechanism justified only if every part exists to keep TRUE time against a field that pulls - and the regulator is not ours. GUARDS: (1) likeness, never a fit - the engine is not a tourbillon, its components correspond by function; (2) the observer MEASURES, never makes - the relativistic truth, not the Copenhagen slide; the interval is 4 s whether anyone reads it or not; observer-as-god is refused (stick_the_capstone). Nothing here is authored: six numbers sealed, the rest cited."
+    }
+   ]
+  }
+ ]
+}

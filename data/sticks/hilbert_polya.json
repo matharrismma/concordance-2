@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "hilbert_polya",
+ "aliases": [
+  "hilbert_polya",
+  "hilbertpolya",
+  "self_adjoint",
+  "selfadjoint",
+  "spectral"
+ ],
+ "handler": "hilbert_polya",
+ "why_python": "pending migration (issue #13)"
+}

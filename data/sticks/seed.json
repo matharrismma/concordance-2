@@ -1,0 +1,9 @@
+{
+ "schema": 1,
+ "name": "seed",
+ "aliases": [
+  "seed"
+ ],
+ "handler": "seed",
+ "why_python": "calls tickstick.tick itself (7x)"
+}

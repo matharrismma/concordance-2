@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "poincare_next",
+ "aliases": [
+  "poincare_next",
+  "poincare",
+  "ricci_flow",
+  "perelman"
+ ],
+ "handler": "poincare_next",
+ "why_python": "pending migration (issue #13)"
+}

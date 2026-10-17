@@ -1,0 +1,10 @@
+{
+ "schema": 1,
+ "name": "one_force",
+ "aliases": [
+  "one_force",
+  "the_one_force"
+ ],
+ "handler": "one_force",
+ "why_python": "pending migration (issue #13)"
+}

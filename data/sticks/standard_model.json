@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "standard_model",
+ "aliases": [
+  "standard_model",
+  "standardmodel",
+  "weinberg_angle",
+  "chain",
+  "lineage"
+ ],
+ "handler": "standard_model",
+ "why_python": "pending migration (issue #13)"
+}

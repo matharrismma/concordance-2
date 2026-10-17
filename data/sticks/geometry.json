@@ -1,0 +1,10 @@
+{
+ "schema": 1,
+ "name": "geometry",
+ "aliases": [
+  "geometry_stick",
+  "geometry"
+ ],
+ "handler": "geometry_stick",
+ "why_python": "pending migration (issue #13)"
+}

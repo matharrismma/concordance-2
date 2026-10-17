@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "zeta",
+ "aliases": [
+  "zeta",
+  "riemann_zeta",
+  "euler_product",
+  "basel"
+ ],
+ "handler": "zeta",
+ "why_python": "pending migration (issue #13)"
+}

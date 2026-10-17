@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "jevons",
+ "aliases": [
+  "jevons",
+  "jevons_paradox",
+  "rebound",
+  "rebound_effect",
+  "efficiency_paradox"
+ ],
+ "handler": "jevons",
+ "why_python": "pending migration (issue #13)"
+}

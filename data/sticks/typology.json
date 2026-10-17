@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "typology",
+ "aliases": [
+  "typology",
+  "language_family",
+  "language_families",
+  "families_of_tongues"
+ ],
+ "handler": "typology",
+ "why_python": "pending migration (issue #13)"
+}

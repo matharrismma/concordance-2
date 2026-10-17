@@ -1,0 +1,9 @@
+{
+ "schema": 1,
+ "name": "document",
+ "aliases": [
+  "document"
+ ],
+ "handler": "document",
+ "why_python": "calls tickstick.tick itself (4x)"
+}

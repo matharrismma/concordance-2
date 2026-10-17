@@ -1,0 +1,17 @@
+{
+ "schema": 1,
+ "name": "surfaces",
+ "aliases": [
+  "surfaces",
+  "surface",
+  "parametrization",
+  "parametrisation",
+  "parametrization_of_surfaces",
+  "parametric_surface",
+  "first_fundamental_form",
+  "gauss_curvature",
+  "theorema_egregium"
+ ],
+ "handler": "surfaces",
+ "why_python": "pending migration (issue #13)"
+}

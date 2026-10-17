@@ -1,0 +1,72 @@
+{
+ "schema": 1,
+ "name": "chemistry",
+ "aliases": [
+  "chemistry_stick",
+  "chemistry"
+ ],
+ "doc": "CHEMISTRY - SEALED through chemistry.CHEM_VERIFY. Idempotent.",
+ "seals": [
+  {
+   "key": "eq",
+   "domain": "chemistry",
+   "artifact": "CHEM_VERIFY",
+   "spec": {
+    "equation": "2 H2 + O2 -> 2 H2O"
+   }
+  },
+  {
+   "key": "thermo",
+   "domain": "chemistry",
+   "artifact": "CHEM_VERIFY",
+   "spec": {
+    "delta_H_kJ_mol": -285.8,
+    "delta_S_J_mol_K": -163.2,
+    "temperature_K": 298,
+    "claimed_spontaneous": true
+   }
+  },
+  {
+   "key": "ph",
+   "domain": "chemistry",
+   "artifact": "CHEM_VERIFY",
+   "spec": {
+    "pH": 3.0,
+    "claimed_classification": "acidic"
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Chemistry - reactions and solutions, verified and sealed",
+   "by": "tools/tick.py chemistry_stick",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[a balanced equation] 2 H2 + O2 -> 2 H2O: four H and two O on each side, charge balanced (sealed through chemistry.CHEM_VERIFY) - conservation of mass, the first law of the reaction.",
+     "seal": "eq"
+    },
+    {
+     "kind": "instance",
+     "claim": "[spontaneity] For liquid water's formation, dH = -285.8 kJ/mol and dS = -163.2 J/mol/K; at 298 K, dG = dH - T dS < 0, so the reaction is spontaneous (sealed) - the second law deciding direction.",
+     "seal": "thermo"
+    },
+    {
+     "kind": "instance",
+     "claim": "[acidity] pH 3.0 is acidic (sealed): pH below 7 is acid, above is base, 7 neutral - the logarithm of the hydrogen-ion concentration.",
+     "seal": "ph"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the ground] Conservation of mass and charge, and the laws of thermodynamics - sealed where applied. The detailed mechanism of a reaction is a model, inferred from evidence, not kept as fact.",
+     "source": "chemistry.CHEM_VERIFY; the laws of thermodynamics"
+    },
+    {
+     "kind": "note",
+     "claim": "[declined] Reaction mechanisms beyond the balance, toxicity, dosage and safety judgments are declined - the engine seals the stoichiometry and the sign of dG, not the clinical call.",
+     "source": "src/concordance/verifiers/chemistry.py"
+    }
+   ]
+  }
+ ]
+}

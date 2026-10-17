@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "schrodinger",
+ "aliases": [
+  "schrodinger",
+  "schroedinger",
+  "wavefunction",
+  "tise"
+ ],
+ "handler": "schrodinger",
+ "why_python": "calls verify_derivation itself (5x)"
+}

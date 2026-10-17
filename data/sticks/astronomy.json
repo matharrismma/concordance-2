@@ -1,0 +1,74 @@
+{
+ "schema": 1,
+ "name": "astronomy",
+ "aliases": [
+  "astronomy_stick",
+  "astronomy"
+ ],
+ "doc": "ASTRONOMY - SEALED through astronomy.ASTRO_VERIFY. Idempotent.",
+ "seals": [
+  {
+   "key": "kepler",
+   "domain": "astronomy",
+   "artifact": "ASTRO_VERIFY",
+   "spec": {
+    "orbital_period_years": 1.0,
+    "semi_major_axis_au": 1.0,
+    "claimed_kepler_consistent": true
+   }
+  },
+  {
+   "key": "grav",
+   "domain": "astronomy",
+   "artifact": "ASTRO_VERIFY",
+   "spec": {
+    "mass_1_kg": 5.972e+24,
+    "mass_2_kg": 1.989e+30,
+    "separation_m": 149600000000.0,
+    "claimed_gravitational_force_N": 3.54e+22
+   }
+  },
+  {
+   "key": "parallax",
+   "domain": "astronomy",
+   "artifact": "ASTRO_VERIFY",
+   "spec": {
+    "parallax_arcsec": 0.1,
+    "claimed_distance_parsec": 10
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Astronomy - orbits and distances, verified and sealed",
+   "by": "tools/tick.py astronomy_stick",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[Kepler's third law] The Earth: period 1 year, semi-major axis 1 AU, so T^2 = a^3 = 1 (sealed through astronomy.ASTRO_VERIFY) - the harmony of the spheres, the square of the year is the cube of the distance.",
+     "seal": "kepler"
+    },
+    {
+     "kind": "instance",
+     "claim": "[gravity holds the orbit] The Sun pulls the Earth with F = G m1 m2 / r^2 = 3.54e22 N (sealed) - Newton's law, the same force that drops an apple.",
+     "seal": "grav"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the parallax ladder] A star with parallax 0.1 arcsecond is 1/0.1 = 10 parsecs away (sealed) - the first rung of the distance ladder, trigonometry on the Earth's orbit.",
+     "seal": "parallax"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the ground] Newtonian gravity and Kepler's laws - sealed where applied, and themselves the low-field limit of general relativity (cited). The universe's large-scale model (dark matter, dark energy) is inferred from evidence, carried, not kept as fact.",
+     "source": "J. Kepler (1619); I. Newton (1687); astronomy.ASTRO_VERIFY"
+    },
+    {
+     "kind": "note",
+     "claim": "[declined] Cosmological interpretation, the existence and nature of dark matter, and the fate of the universe are declined; the engine seals the orbital arithmetic.",
+     "source": "src/concordance/verifiers/astronomy.py"
+    }
+   ]
+  }
+ ]
+}

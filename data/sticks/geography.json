@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "geography",
+ "aliases": [
+  "geography",
+  "cartography",
+  "map_projection",
+  "latitude_longitude"
+ ],
+ "handler": "geography",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "history_chronology",
+ "aliases": [
+  "history_chronology",
+  "chronology",
+  "no_year_zero",
+  "era",
+  "century"
+ ],
+ "handler": "stick_history_chronology",
+ "why_python": "pending migration (issue #13)"
+}

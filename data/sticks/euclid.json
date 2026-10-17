@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "euclid",
+ "aliases": [
+  "euclid",
+  "elements",
+  "postulates",
+  "axioms",
+  "deduction"
+ ],
+ "handler": "euclid",
+ "why_python": "pending migration (issue #13)"
+}

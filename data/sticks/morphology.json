@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "morphology",
+ "aliases": [
+  "morphology",
+  "affix",
+  "affixes",
+  "word_formation"
+ ],
+ "handler": "morphology",
+ "why_python": "pending migration (issue #13)"
+}

@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "manufacturing",
+ "aliases": [
+  "manufacturing",
+  "six_sigma",
+  "spc",
+  "process_capability",
+  "cpk"
+ ],
+ "handler": "stick_manufacturing",
+ "why_python": "pending migration (issue #13)"
+}

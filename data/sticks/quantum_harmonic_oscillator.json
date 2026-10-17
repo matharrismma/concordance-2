@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "quantum_harmonic_oscillator",
+ "aliases": [
+  "quantum_harmonic_oscillator",
+  "qho",
+  "zero_point_energy",
+  "ladder_operators"
+ ],
+ "handler": "quantum_harmonic_oscillator",
+ "why_python": "pending migration (issue #13)"
+}

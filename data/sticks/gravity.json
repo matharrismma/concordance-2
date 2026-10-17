@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "gravity",
+ "aliases": [
+  "is_gravity_a_force",
+  "gravity_force",
+  "force_or_geometry"
+ ],
+ "handler": "gravity",
+ "why_python": "pending migration (issue #13)"
+}

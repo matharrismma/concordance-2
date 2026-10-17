@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "trigonometry",
+ "aliases": [
+  "trigonometry",
+  "trig",
+  "small_angle",
+  "spherical_excess"
+ ],
+ "handler": "trigonometry",
+ "why_python": "calls verify_derivation itself (3x)"
+}

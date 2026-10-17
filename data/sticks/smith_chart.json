@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "smith_chart",
+ "aliases": [
+  "smith_chart",
+  "smith",
+  "cayley",
+  "reflection_coefficient",
+  "impedance"
+ ],
+ "handler": "smith_chart",
+ "why_python": "pending migration (issue #13)"
+}

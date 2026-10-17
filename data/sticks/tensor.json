@@ -1,0 +1,14 @@
+{
+ "schema": 1,
+ "name": "tensor",
+ "aliases": [
+  "tensor",
+  "tensors",
+  "metric_tensor",
+  "invariants",
+  "principal_axes",
+  "data_inside_the_bubbles"
+ ],
+ "handler": "tensor",
+ "why_python": "pending migration (issue #13)"
+}

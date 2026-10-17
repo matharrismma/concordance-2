@@ -1,0 +1,13 @@
+{
+ "schema": 1,
+ "name": "p_versus_np_next",
+ "aliases": [
+  "p_versus_np_next",
+  "pnp_next",
+  "circuit_lower_bound",
+  "cook_levin",
+  "sat_threshold"
+ ],
+ "handler": "p_versus_np_next",
+ "why_python": "pending migration (issue #13)"
+}

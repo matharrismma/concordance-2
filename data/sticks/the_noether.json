@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "the_noether",
+ "aliases": [
+  "noether",
+  "noethers_theorem",
+  "noether_theorem",
+  "conservation_laws"
+ ],
+ "handler": "the_noether",
+ "why_python": "pending migration (issue #13)"
+}

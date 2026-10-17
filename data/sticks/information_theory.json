@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "information_theory",
+ "aliases": [
+  "information_theory_stick",
+  "information_theory",
+  "info_theory"
+ ],
+ "handler": "information_theory_stick",
+ "why_python": "pending migration (issue #13)"
+}
