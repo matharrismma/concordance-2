@@ -90,6 +90,34 @@ def test_walk_is_found_and_cited_not_generated():
         assert frame not in w["story"]["text"]
 
 
+def test_the_extended_register_routes_each_new_parable():
+    """2026-10-17: the register grew from 12 toward Christ's full set. Each new parable reaches from one phrasing
+    a person would bring — to its own shape, not a neighbour's — and the old twelve still route (above)."""
+    expect = {
+        "I've prayed for years and God isn't answering, should I give up praying": "par_persistent_widow",
+        "at least I'm not like those people, I look down on them": "par_pharisee_tax_collector",
+        "it's not fair, they came to faith late and got the same reward": "par_workers_vineyard",
+        "I said I would serve but never followed through": "par_two_sons",
+        "I keep making excuses not to come, something more important than the feast": "par_great_banquet",
+        "I'm afraid to share my faith, I keep my faith private": "par_lamp",
+        "I ignored the poor beggar at my gate, is it too late to change": "par_rich_man_lazarus",
+        "I've been forgiven so much, why do I love little": "par_two_debtors",
+        "I started building and can't finish, what will it cost me to follow": "par_counting_cost",
+        "nothing happening yet, I can't see growth in my faith": "par_seed_secretly",
+        "the least of these, I didn't help the hungry": "par_sheep_goats",
+        "apart from him I can do nothing, why am I being pruned": "par_vine",
+        "I relapsed, cleaned up but empty and now worse than before": "par_empty_house",
+        "I keep pointing out their faults with a plank in my own eye": "par_speck_beam",
+        "I lost something precious and turned the house upside down": "par_lost_coin",
+        "I built my life on sand and everything collapsed when the storm hit": "par_two_builders",
+    }
+    for text, want in expect.items():
+        f = parable.for_situation(text, resolve=False)
+        assert f is not None, f"no parable for {text!r} (want {want})"
+        assert f["id"] == want, f"{text!r} -> {f['id']} (want {want})"
+    assert len(parable._PARABLES) >= 38
+
+
 def test_a_sits_whole_parable_has_no_turn():
     """A similitude Christ left to sit (the mustard seed) walks with no turn and the 'sit' invitation."""
     _need_bible()

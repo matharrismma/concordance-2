@@ -23,12 +23,13 @@ from concordance import corpus, teachings  # noqa: E402
 
 def test_queue_is_grouped_and_complete():
     q = teachings.queue()
-    assert q["total"] == 46 and q["note"] == teachings.NOTE
+    assert q["total"] == 73 and q["note"] == teachings.NOTE   # 46 -> 73 on 2026-10-17: the parable register grew 12 -> 39 (every parable id in lockstep), a decision made in the open
     groups = {g["group"]: g["count"] for g in q["groups"]}
     assert groups["Sermon on the Mount"] == 20
     assert set(groups) == {"Sermon on the Mount", "The Discourses",
                            "The I AM Sayings", "The Parables"}
-    assert sum(groups.values()) == 46
+    assert groups["The Parables"] == 39
+    assert sum(groups.values()) == 73
     # each entry carries its anchor ref
     som = next(g for g in q["groups"] if g["group"] == "Sermon on the Mount")
     assert all({"id", "title", "ref"} <= set(t) for t in som["teachings"])
