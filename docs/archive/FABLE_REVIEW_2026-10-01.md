@@ -7,7 +7,7 @@ fix the issues** — while protecting the one guarantee that makes the engine wo
 
 This extends, does not replace, [`RED_TEAM_BRIEF_2026-09-06.md`](RED_TEAM_BRIEF_2026-09-06.md) (the
 invariants table + attack surface — read it; don't repeat its probes) and
-[`WORLD.md`](WORLD.md) (what the project is). This doc is **the method**: how to review the whole
+[`WORLD.md`](../WORLD.md) (what the project is). This doc is **the method**: how to review the whole
 thing honestly and leave it better.
 
 ---

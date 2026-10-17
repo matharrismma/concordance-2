@@ -1,6 +1,6 @@
 """The MCP profiles — every tool on exactly one plane, and the planes hold their shape.
 
-Task #123, specified by docs/MCP_ASSESSMENT_2026-08-04.md §3.3. The properties pinned here are
+Task #123, specified by docs/archive/MCP_ASSESSMENT_2026-08-04.md §3.3. The properties pinned here are
 the ones that rot silently: the partition (a tool in two profiles, or in none, breaks permission
 review without breaking any call), the effect vocabulary (risk metadata a client can trust), the
 read-only planes staying read-only, and the social plane staying a deliberate deployment

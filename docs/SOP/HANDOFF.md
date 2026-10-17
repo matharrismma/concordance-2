@@ -46,7 +46,7 @@ people (and future you) actually read. Name what was measured, what failed, what
 to claim.
 
 **5 · Update the three living documents.** They are the memory that survives the window:
-- `docs/OPERATIONS_LOG.md` — what happened, with measured evidence and where the proof lives.
+- `docs/archive/OPERATIONS_LOG.md` — what happened, with measured evidence and where the proof lives.
 - `docs/MASTER_PLAN.md` — §1 shipped / §3 planned, kept strictly separate; the update log.
 - `docs/GAPS.md` — anything found and not fixed, with its number.
 

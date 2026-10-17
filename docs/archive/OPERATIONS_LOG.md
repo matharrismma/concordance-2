@@ -346,7 +346,7 @@ the act **recorded but unseen by default** (Mt 6:3).
   corrected the same night.
 - Ring C (adjacent families): nothing contradicts the engine's narrow claims; every tension
   lands on the same seam — deterministic checks are safe, interpretive bridges stay marked.
-- Report: `docs/NULL_ASSAY.md`. Gate: 916 passed. Commit `6b2c6e6`.
+- Report: `docs/archive/NULL_ASSAY.md`. Gate: 916 passed. Commit `6b2c6e6`.
 
 **Corpus count: 496,559 cards — 49.7% of the 1M goal** (ISBE contributed 9,381 today).
 
@@ -362,7 +362,7 @@ the act **recorded but unseen by default** (Mt 6:3).
 - Probed clean: consent (wrong signer / tampered scope / cross-agent / cross-verb / TTL cap /
   private-key smuggling), study routes (traversal, injection, oversize, NUL), card render
   (attribute breakout, `javascript:` URLs), ambiguous-ref last mile.
-- Lesson recorded: `docs/SOP/LESSONS.md` (2026-07-29 entry).
+- Lesson recorded: `docs/archive/LESSONS.md` (2026-07-29 entry).
 
 **D5 · acquisitions — ISBE 1915, Adam Clarke, John Gill.**
 - ISBE: CrossWire SWORD module v2.2 (Public Domain), zLD binary parsed stdlib-only after
@@ -804,7 +804,7 @@ Live-verified: two `/console` POSTs of "John 3:16" returned the identical `threa
 `landed` on the card the first one promoted. A first draft duplicated `coach.html`'s functionality in
 a new `console.html` before this was caught (`rm`'d, never shipped) — look-before-you-build held.
 
-*The ranker (`32ed21a`).* docs/HANDOFF.md's own #1 open item: the subject-tier partition in
+*The ranker (`32ed21a`).* docs/archive/HANDOFF.md's own #1 open item: the subject-tier partition in
 `corpus.Corpus._score` could tell "about this" from "not about this," never a thin gloss from a real
 excerpt — and ~67% of the keeping are stubs (`ops.STUB_BODY_CHARS`). Added `SUBSTANCE_WEIGHT = 2.0`
 next to `SUBJECT_TIER`/`THEORY_WEIGHT`, applied to the BASE score before the tier addition so it only

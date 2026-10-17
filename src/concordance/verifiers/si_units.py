@@ -1,7 +1,7 @@
 """SI UNITS — a small, honest unit normalizer: parse a unit expression into a dimension vector and a factor,
 convert between expressions of the same dimension, and say NOTHING when it cannot parse.
 
-Why (R4 of docs/PROJECT_REVIEW_2026-10-03.md; Matt, 2026-10-03: "go in order"): since the Fable review a stated
+Why (R4 of docs/archive/PROJECT_REVIEW_2026-10-03.md; Matt, 2026-10-03: "go in order"): since the Fable review a stated
 unit that did not string-match the constant's own unit was DECLINED — never a false HOLDS ("299792458 km/s" had
 earned one), never a false BROKEN — but the commonest phrasing of a wrong constant, "the speed of light is 150000
 km/s", got no verdict at all. With a real normalizer a wrong unit MISMATCHes honestly, a formatting variant

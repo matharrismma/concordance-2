@@ -101,7 +101,7 @@ def store(record_dict: Dict[str, Any], *, base_dir: Optional[Path] = None,
 # CORRECTED 2026-08-01: this was first justified by a measurement claiming 19 of the Codex's 20
 # advertised receipts answered 404. That measurement was BROKEN — a CRLF in the test script turned
 # every URL into a connection failure, and the failure was mislabeled 404. All 20 resolve; every
-# seal-claiming card on the box has its object. The retraction is in docs/OPERATIONS_LOG.md.
+# seal-claiming card on the box has its object. The retraction is in docs/archive/OPERATIONS_LOG.md.
 #
 # The structural reason stands on its own and is why this code stays: `data/cas/` is node-local —
 # not deployed, not backed up, not in the ark. 127 seals existed only on the operator's machine

@@ -6,7 +6,8 @@
 > This file began as "The 100" and said so for months after the shelf had grown past it. A
 > catalogue that states a count is a catalogue that will be wrong; the count now lives where it
 > can be re-measured, and the drawing at `site/theories.html` is where the gaps are actually
-> visible. (Not `site/floor.html` — that is "The Floor of Discovery", a different page.)
+> visible. (`site/floor.html`, "The Floor of Discovery", was a different page; retired 2026-08-05, it
+> 301s to `/graph`.)
 > Numbers in prose rot. Numbers from an instrument do not.
 
 The corpus for the assay. Each theory is mapped to the engine domain that can touch it, with

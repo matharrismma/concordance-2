@@ -1,7 +1,7 @@
 """Candidates — the CandidateSet: a governed narrowing layer between generators and the moat.
 
 Task #135, adopted from the external red-team assessment
-(docs/RED_TEAM_CANDIDATE_ENGINE_2026-08-05.md). Matt's go, verbatim: "the point of narrow
+(docs/archive/RED_TEAM_CANDIDATE_ENGINE_2026-08-05.md). Matt's go, verbatim: "the point of narrow
 highway is to narrow the possibilities. The candidate engine is what we've been missing, but
 was originally a part of the project."
 

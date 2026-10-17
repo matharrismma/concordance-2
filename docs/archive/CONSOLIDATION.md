@@ -1,8 +1,8 @@
 # CONSOLIDATION — gather the best into one coherent package
 
 *Built 2026-09-23 from two grounded, path-cited audits (the `site/*.html` surface layer; the card /
-deck / shelf / facet layer) read against the live engine, the repo, and [`WORLD.md`](WORLD.md). Every
-item carries an **ID that is a route** — the same discipline as [`REMAINING.md`](REMAINING.md). To
+deck / shelf / facet layer) read against the live engine, the repo, and [`WORLD.md`](../WORLD.md). Every
+item carries an **ID that is a route** — the same discipline as [`REMAINING.md`](../REMAINING.md). To
 close one: do the work, add/flip the guard named in its **durable fix**, then strike it here. A stale
 line here is a lie to the next reader.*
 

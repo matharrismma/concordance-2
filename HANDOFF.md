@@ -1,5 +1,15 @@
 # Handoff — Narrow Highway / Concordance 2.0
 
+> **Read this first (2026-10-16).** This file is the hash-pinned handoff served from `/`
+> (`_FOUNDATION_DOCS` in `web/api.py`) and pinned on the box by `tools/verify_deploy.py` `HARD_FILES`,
+> so it keeps its path. The body below is the **2026-07-28 snapshot**, kept for the trail. The current
+> map is **`docs/ARCHITECTURE.md`**; the open work is the umbrella issue
+> **https://github.com/matharrismma/concordance-2/issues/8** (every program item routes from there);
+> the box ritual is `docs/RUNBOOK.md`. Pages named below that were retired in the cut of 2026-08-05
+> (`catalog.html`, `community.html`, `voices.html`, `ask.html`, …) 301 to their successors —
+> `_RETIRED` in `web/api.py` is the authority. The later handoff (2026-09-06) is archived at
+> `docs/archive/HANDOFF.md`.
+
 > **THE REMAINING BUILD IS DONE (Fable, 2026-07-28 ~12:30). Head: `580875d`, pushed. Gate:
 > `=== GATE PASS ===` 866/866, exit 0. Deployed and live-verified on both surfaces.**
 >
@@ -73,14 +83,14 @@ Serve families and children first. Free, no account.
 - **Repo:** `%USERPROFILE%\OneDrive\Documents\Claude\Projects\concordance-2` (branch `master`).
 - **Gate:** `PYTHONPATH=src python tools/check.py` → must print `=== GATE PASS ===`. **Read the real
   exit code**, not the tail of the log. ~5–6 min. Run it backgrounded and wait for the notification.
-- **Deploy:** `sh tools/deploy.sh <repo-relative files…>` — one tar-over-ssh, **staggered** restarts
-  (witness `nh-org` :8001 first, health-polled, then secular `nh-com-2` :8002), so one face is always
-  up. Patient polling built in.
+- **Deploy:** `sh tools/deploy.sh <repo-relative files…>` — one tar-over-ssh; restarts `nh-engine` (one
+  process: witness :8001 + secular :8002, both health-polled), then `nh-mcp` (:8003); the box gate runs and
+  reverts on a regression; `tools/verify_deploy.py --soft` proves box == repo. The ritual: `docs/RUNBOOK.md`.
 - **Live:** `narrowhighway.com` = secular (:8002), `narrowhighway.org` = witness (:8001), behind
   Caddy. Both load the corpus into RAM at boot; the port binds only after that.
 - **Droplet:** `nh@5.78.186.55`, key `~/.ssh/id_ed25519_nh`, path `/home/nh/concordance-2`.
 - **Git:** never `git add -A`. Keep OUT of commits: `data/*.jsonl*`, `data/shards/`,
-  `.claude/launch.json`, `docs/reviews/`, `HANDOFF.md`.
+  `.claude/launch.json`. (`HANDOFF.md` itself is tracked and pinned now — see the banner.)
 
 ## Gotchas that cost real time (do not re-learn)
 

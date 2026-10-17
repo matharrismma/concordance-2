@@ -1,5 +1,5 @@
 """THE SEAL LEDGER, AS A PUBLIC NUMBER — how many seals the engine has minted, that every one is still
-re-verified, and when (moat lever 1 of docs/PROJECT_REVIEW_2026-10-03.md; Matt, 2026-10-03: "go in order").
+re-verified, and when (moat lever 1 of docs/archive/PROJECT_REVIEW_2026-10-03.md; Matt, 2026-10-03: "go in order").
 
 The seals are the engine's whole promise: a verdict alone is "trust me"; a seal is permanent and anyone can
 re-check it. The hourly integrity check (tools/integrity_check.py) walks the ledger chain and re-verifies every

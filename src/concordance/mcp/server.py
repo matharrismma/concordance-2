@@ -686,7 +686,7 @@ def _secular_tools() -> List[dict]:
          "inputSchema": {"type": "object", "properties": {
              "text": {"type": "string", "description": "the situation, in your own words"}},
              "required": ["text"]}},
-        # THE CANDIDATE ENGINE (task #135, docs/RED_TEAM_CANDIDATE_ENGINE_2026-08-05.md).
+        # THE CANDIDATE ENGINE (task #135, docs/archive/RED_TEAM_CANDIDATE_ENGINE_2026-08-05.md).
         # Zone C between any generator and the moat: commit the complete raw set FIRST, then
         # narrow under a pre-registered policy, then seal the whole path — winners and losers.
         # Generation itself never enters these tools; a candidate is data, never instructions.
@@ -926,7 +926,7 @@ def _no_private_key(tool: str) -> Dict[str, Any]:
 
 
 # ── THE PROFILES — mount narrow, not broad ───────────────────────────────────────────────────
-# Task #123, from the adopted external assessment (docs/MCP_ASSESSMENT_2026-08-04.md §3.3) and
+# Task #123, from the adopted external assessment (docs/archive/MCP_ASSESSMENT_2026-08-04.md §3.3) and
 # Matt's 2026-07-30 consolidation directive. One 83-tool connector is an overloaded discovery
 # surface: tool selection degrades, permission review blurs, and a low-risk read shares a door
 # with a consequential write. So the catalog is PARTITIONED — every tool in exactly ONE profile

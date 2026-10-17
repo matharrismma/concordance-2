@@ -1,6 +1,6 @@
 # THE GAPS — measured 2026-07-29, not guessed
 
-> **The live routed sheet is now [`REMAINING.md`](REMAINING.md)** — every open item there carries a
+> **SUPERSEDED by [`REMAINING.md`](REMAINING.md)** — the live routed sheet; every open item there carries a
 > `<subsystem>-<n>` ID that routes to `/systems`, its SOP, and its code. This file is kept as the
 > **measured snapshot** the `G#` IDs came from (grounded gap analysis, a moment in time); REMAINING
 > maps each surviving `G#` onto its subsystem. Trust `/systems` and the SOPs over any count here.
@@ -81,7 +81,7 @@ claims — are largely unexercised individually.
 
 **And a claim of ours needs correcting:** `tools/benchmark.py` is **60 claims across three
 derivation modes** (equality 30, inequality 14, derivative 16) — it is the *derivation moat*,
-not a 60-domain sweep. `site/guarantees.html` says this correctly ("60 checks… alongside it,
+not a 60-domain sweep. `site/guarantees.html` (retired 2026-08-05 → `/proof.html`) said this correctly ("60 checks… alongside it,
 64 verification domains"). **`docs/MASTER_PLAN.md` §1 juxtaposes "~60 domains" with "60/60"
 and implies the benchmark covers the domains. That wording is mine, from tonight, and it
 over-claims.** Corrected below.

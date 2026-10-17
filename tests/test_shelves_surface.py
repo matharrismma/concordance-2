@@ -1,6 +1,6 @@
 """THE COMMONS · C1b — the shelf flow, reached the two ways anyone reaches this project.
 
-C1a proved the shelf as a module. That is not shipped. `PUNCHLIST.md` sets the completion test for
+C1a proved the shelf as a module. That is not shipped. `docs/archive/PUNCHLIST.md` sets the completion test for
 this unit: *"the whole flow works over HTTP and through an agent."* The lesson behind that wording
 is the one this project has hit more than any other — correct server-side and unreachable by the
 person (or the agent) is not done. So the same journey is walked twice here, once per surface:

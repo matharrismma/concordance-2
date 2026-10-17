@@ -1,5 +1,5 @@
 """FACT FIND — what the CHECK door says when nothing in a claim is computable (R5 of
-docs/PROJECT_REVIEW_2026-10-03.md; Matt, 2026-10-03: "go in order").
+docs/archive/PROJECT_REVIEW_2026-10-03.md; Matt, 2026-10-03: "go in order").
 
 The auditor's extractors turn COMPUTABLE claims (sums, constants, definitional element facts) into verdicts
 with receipts. A lookup claim — "the atomic mass of iron is 55.845", "iron melts at 1538 C" — is not computable,

@@ -1,6 +1,6 @@
 """The Candidate Engine's covenants: commitment before verification, verification over weight.
 
-Task #135, specified by docs/RED_TEAM_CANDIDATE_ENGINE_2026-08-05.md. Each test here refuses
+Task #135, specified by docs/archive/RED_TEAM_CANDIDATE_ENGINE_2026-08-05.md. Each test here refuses
 one failure mode from the assessment's threat register (§6) or its mandatory adversarial
 suite (§9.1) — probability laundering, selective disclosure, verification shopping,
 winner-only retention. The module invariant under test, verbatim (§5.2): "No candidate may

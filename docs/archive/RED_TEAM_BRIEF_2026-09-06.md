@@ -6,8 +6,8 @@ don't repeat it), and every known-open weakness — a gap stays a gap. If you fi
 the point.*
 
 The engine is live on `narrowhighway.com` (secular) / `.org` (witness) / `.tv` (museum), one box
-`nh@5.78.186.55` (two processes). Full routed list of open work: [`REMAINING.md`](REMAINING.md).
-What the project *is*: [`WORLD.md`](WORLD.md). This brief is *where to attack*.
+`nh@5.78.186.55` (two processes). Full routed list of open work: [`REMAINING.md`](../REMAINING.md).
+What the project *is*: [`WORLD.md`](../WORLD.md). This brief is *where to attack*.
 
 ---
 
@@ -119,7 +119,7 @@ All PASSED; re-test if you distrust the method (I do want you to).
   `ops.substance`.
 - **Box config drift** — the freeze env + rebuilt shards + `FREEZE_SHELVES` live in the box `.env` and
   gitignored data, NOT the repo; a fresh box differs.
-- The full open list, ID'd and routed, is [`REMAINING.md`](REMAINING.md).
+- The full open list, ID'd and routed, is [`REMAINING.md`](../REMAINING.md).
 
 ---
 

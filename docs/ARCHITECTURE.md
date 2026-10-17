@@ -202,7 +202,7 @@ seal, one next step). Transports: stdio (`python -m concordance mcp`) and Stream
 | `tools/` | 224 entries: the local gate (`check.py`, `benchmark.py`), the box gate (`benchmarks.py`, `live_assay.py`, `frontdoor.py`, `recall.py`), the seeders, `deploy.sh`, `verify_deploy.py` |
 | `tests/` | 401 `test_*.py` files; `MANIFEST.txt` pins the suite's wholeness |
 | `deploy/` | the systemd units and timers, `Caddyfile`, `README.md` |
-| `docs/` | the design journals; `GAPS.md`, `RUNBOOK.md`, `DEPLOY.md`, `MCP_HOST.md`, `SEAL_SPEC.md` |
+| `docs/` | the design journals; `GAPS.md`, `RUNBOOK.md` (the one runbook — `DEPLOY.md` is a pointer to it), `MCP_HOST.md`, `SEAL_SPEC.md`; `docs/archive/` holds the historical journals |
 | `data/` | the keeping (gitignored) + the 39 tracked spines, seeds and goldens |
 
 ## 8. The deploy ritual and CI

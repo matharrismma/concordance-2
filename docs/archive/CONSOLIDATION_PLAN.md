@@ -12,7 +12,7 @@ is a record, never an erasure.
 > **These targets are SCRIBE LINES, not commitments.** Matt, 2026-07-31: *"Target numbers, names,
 > and theories are initial targets. We always step back and reframe at intervals to work ourselves
 > closer and closer to truth. Just like a wood worker will scribe a line until center is found."*
-> A number here is a first mark taken from one edge. `docs/THE_NAMING.md` is the second cut, taken
+> A number here is a first mark taken from one edge. `docs/archive/THE_NAMING.md` is the second cut, taken
 > from the side of *what each thing does* — and it moved the page line by finding duplicate JOBS
 > (−7) that no traffic ranking could see. Where two marks disagree, that gap is the finding; the
 > number is revised out loud, never defended.

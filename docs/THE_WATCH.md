@@ -12,7 +12,7 @@ where two parts do not yet mesh.
 The movement produces exactly two outputs, which are the two halves of one timepiece:
 
 - **The map of reality** — the plate and the going train: every fact a sealed node, every connection a
-  sealed edge. The structure of what-is, queryable. (`docs/THE_MAP.md`, `docs/FASCIA.md`)
+  sealed edge. The structure of what-is, queryable. (`docs/WORLD.md`, `docs/FASCIA.md`)
 - **The cohesive language model** — the motion and the hands: a question in any words traverses the map,
   through the escapement, and a sourced answer is *read off*, never generated. (`docs/COHERENT_MODEL.md`,
   `docs/ARCHITECTURE_ONE_BODY.md`)
@@ -151,7 +151,7 @@ because a movement that does not yet keep time is not worth a case.
 
 - **The map of reality** = the plate and the going train: `keeping (sealed nodes) + fascia (sealed edges)`.
   A directed, re-checkable graph of what-is and how it connects. Measured by: can any edge be walked and
-  its seal re-verified? (`docs/THE_MAP.md`, `docs/FASCIA.md`)
+  its seal re-verified? (`docs/WORLD.md`, `docs/FASCIA.md`)
 - **The cohesive language model** = `keeping (knowledge) + counting (meaning) + verifiers (truth) + fascia
   (form)`, driven as one motion to the hands. Not neural weights; a traversal that speaks. Any neural part,
   if ever added, is **one** authority-less, shrinking translator at the dial, never the truth

@@ -18,7 +18,7 @@ capability that cannot be probed live is not a capability.
 ## The eight, in order
 
 ### 1. Every copy is whole — the keeping syncs between nodes
-**Serves:** the camel (docs/THE_CAMEL_2026-10-03.md) — box → desktop → Pi → USB → radio; known branches, not
+**Serves:** the camel (docs/archive/THE_CAMEL_2026-10-03.md) — box → desktop → Pi → USB → radio; known branches, not
 random trust. **Today:** the desktop node is a Sep-20 snapshot; the field pack is a read-only ZIM; seals live
 only on the box.
 **Capability:** a node pulls the keeping from a known branch (URL + pinned identity fingerprint), verifies the
@@ -85,5 +85,5 @@ capabilities 1 and 5. **Proof:** a household reaches the doors with the internet
 1 → 5 → 8 (the node line) · 1 → 2 → 6 (the community line) · 3 and 7 run alongside · 4 after the PD gate clears.
 
 ## Record
-Each capability's work is logged in docs/OPERATIONS_LOG.md under "Gen 3 · N", with the commit, the probe ids and
+Each capability's work is logged in docs/archive/OPERATIONS_LOG.md under "Gen 3 · N", with the commit, the probe ids and
 the proof as measured. This charter is amended only by Matt.
