@@ -243,13 +243,21 @@ def _semantic_backstop(text: str) -> bool:
         return False
 
 
-def is_crisis(text: str) -> bool:
-    """The one crisis test. Every surface calls this — a copied list is a list that drifts. Substring
-    net first (fast, exact); then the semantic backstop for the veiled cries (only adds, never removes)."""
+def substring_net(text: str) -> bool:
+    """The exact / keyword / warning-sign net ALONE — is_crisis without the semantic backstop. Public so
+    the backstop's build tool and its tests can measure what the backstop ADDS without the sealed
+    artifact's own catches contaminating the count (issue #41). Not a surface's test: surfaces call
+    is_crisis."""
     t = normalize(text)
     if t in _CRISIS_EXACT or any(w in t for w in _CRISIS_WORDS):
         return True
-    if any(p.search(t) for p in _CRISIS_PATTERNS):   # the behavioral warning-sign net — only adds
+    return any(p.search(t) for p in _CRISIS_PATTERNS)   # the behavioral warning-sign net — only adds
+
+
+def is_crisis(text: str) -> bool:
+    """The one crisis test. Every surface calls this — a copied list is a list that drifts. Substring
+    net first (fast, exact); then the semantic backstop for the veiled cries (only adds, never removes)."""
+    if substring_net(text):
         return True
     return _semantic_backstop(text)
 

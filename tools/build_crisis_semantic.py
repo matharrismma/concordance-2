@@ -3,7 +3,10 @@
 
 Counts a PPMI distributional model from the keeping, builds a crisis centroid from the confirmed crisis
 corpus, projects every word to a small dense space (fixed seeded ±1 — Johnson–Lindenstrauss, so the
-cosine survives), quantizes to int8, sets a CONSERVATIVE threshold so the known-benign set never fires,
+cosine survives), quantizes to int8, sets a CONSERVATIVE threshold so the known-benign set never fires
+(derived from the benign lines no structural guard handles — issue #41 — and sealed only if the
+fail-closed net check passes: 0 false positives, every curated cry caught, the blind red-team
+ratchet held, and nothing the previous artifact caught lost),
 and writes a committable JSON. The runtime (src/concordance/crisis_semantic.py) only loads + scores.
 
 Deterministic: same keeping + same SEED → same artifact. No LLM, no numpy — stdlib only. Tokenization
@@ -33,6 +36,61 @@ MIN_COUNT = 5
 CARD_FILES = ["encyclopedia_cards.jsonl", "cards.jsonl"]
 CARD_CAP = 9000
 MARGIN = 0.02   # headroom above the worst benign score, for safety against unseen benign
+
+
+def derive_threshold(scoreq, benign=None, margin=MARGIN):
+    """Threshold = the top score among the benign lines NO structural guard handles, + margin.
+
+    Guard-handled lines (crisis_semantic.guarded) are EXCLUDED: at runtime they never reach the score, so
+    letting them set the ceiling raises it for every message the guards do not cover. Issue #41 measured
+    it: deriving over all of CLEARLY_BENIGN would have moved a rebuild 0.6568 -> 0.7406 and silently
+    dropped 37 of the 62 pinned catches. The threshold is a property of the UNGUARDED benign set."""
+    benign = T.CLEARLY_BENIGN if benign is None else benign
+    unguarded = [scoreq(x) for x in benign if not cs.guarded(x)]
+    if not unguarded:
+        raise SystemExit("no unguarded benign line to derive the threshold from — refusing to seal")
+    return max(unguarded) + margin
+
+
+def check_net(scoreq, threshold, old_flags=None):
+    """Fail-closed audit of a candidate (scorer, threshold) against the pinned sets, exactly as the
+    runtime will judge (substring net OR (unguarded AND score > threshold)). Returns (problems, report);
+    any problem means DO NOT SEAL. The net may grow, never shrink: with `old_flags` (the sealed
+    artifact's own flags()), every line it catches today must still be caught."""
+    import importlib
+    ask = importlib.import_module("concordance.ask")
+
+    def backstop(x):
+        return (not cs.guarded(x)) and scoreq(x) > threshold
+
+    def caught(x):
+        return ask.substring_net(x) or backstop(x)
+
+    problems = []
+    fp = [x for x in T.CLEARLY_BENIGN if backstop(x)]
+    if fp:
+        problems.append(f"the backstop fires on {len(fp)} clearly-benign lines (must be 0): {fp[:3]}")
+    missed = [x for x in T.CRISIS_FLOOR if not caught(x)]
+    if missed:
+        problems.append(f"{len(missed)} curated cries would route away from help: {missed[:3]}")
+    union = sum(1 for x in T.RED_TEAM_BLIND if caught(x))
+    if union < T._RED_TEAM_FLOOR:
+        problems.append(f"blind red-team recall {union} < pinned floor {T._RED_TEAM_FLOOR}")
+    dropped = []
+    if old_flags is not None:
+        pool = list(T.RED_TEAM_BLIND) + list(T.CRISIS_FLOOR)
+        dropped = [x for x in pool if (ask.substring_net(x) or old_flags(x)) and not caught(x)]
+        if dropped:
+            problems.append(f"the net would SHRINK: {len(dropped)} lines the sealed artifact catches "
+                            f"would be lost: {dropped[:3]}")
+    sub_missed = [x for x in T.RED_TEAM_BLIND if not ask.substring_net(x)]
+    report = {
+        "fp": len(fp), "floor_missed": len(missed), "union": union, "dropped": len(dropped),
+        "sub_missed": len(sub_missed),
+        "backstop_adds": sum(1 for x in sub_missed if backstop(x)),
+        "floor_extra": sum(1 for x in T.CRISIS_FLOOR if backstop(x)),
+    }
+    return problems, report
 
 
 def docs():
@@ -166,15 +224,16 @@ def main():
         na = math.sqrt(na)
         return dot / (na * cnorm) if na else 0.0
 
-    benign = sorted((scoreq(x) for x in T.CLEARLY_BENIGN), reverse=True)
-    threshold = benign[0] + MARGIN
-    import importlib
-    ask = importlib.import_module("concordance.ask")
-    sub_missed = [x for x in T.RED_TEAM_BLIND if not ask.is_crisis(x)]
-    caught = sum(1 for x in sub_missed if scoreq(x) > threshold)
-    fp = sum(1 for x in T.CLEARLY_BENIGN if scoreq(x) > threshold)
-    union = sum(1 for x in T.RED_TEAM_BLIND if ask.is_crisis(x) or scoreq(x) > threshold)
-    floor_extra = sum(1 for x in T.CRISIS_FLOOR if scoreq(x) > threshold)
+    threshold = derive_threshold(scoreq)
+    top_unguarded = threshold - MARGIN
+    # The sealed artifact (if any) is loaded ONCE here, before we overwrite it: the net may grow, never shrink.
+    old_flags = cs.flags if cs.available() else None
+    problems, rep = check_net(scoreq, threshold, old_flags=old_flags)
+    if problems:
+        print(f"\nNOT SEALED — threshold {threshold:.4f} fails the fail-closed net check:")
+        for p in problems:
+            print(f"  - {p}")
+        sys.exit(1)
 
     out = {
         "_note": "Crisis semantic backstop — deterministic PPMI over the keeping, JL-projected, int8. "
@@ -189,14 +248,17 @@ def main():
     mb = path.stat().st_size / 1e6
 
     print(f"\nsealed {path}  ({mb:.1f} MB, {len(words)} words × {K} dims int8)")
-    print(f"threshold {threshold:.4f} (top benign {benign[0]:.4f} + margin {MARGIN})")
-    print(f"benign false-positives: {fp}/{len(T.CLEARLY_BENIGN)}  (must be 0)")
-    print(f"substring-MISSED cries the backstop adds: {caught}/{len(sub_missed)} "
-          f"= {100*caught//max(len(sub_missed),1)}%")
-    print(f"blind-set UNION (substring OR backstop): {union}/{len(T.RED_TEAM_BLIND)} "
-          f"= {100*union//len(T.RED_TEAM_BLIND)}%   (substring alone caught "
-          f"{len(T.RED_TEAM_BLIND)-len(sub_missed)})")
-    print(f"(crisis floor also flagged by semantics: {floor_extra}/{len(T.CRISIS_FLOOR)})")
+    guarded_n = sum(1 for x in T.CLEARLY_BENIGN if cs.guarded(x))
+    print(f"threshold {threshold:.4f} (top UNGUARDED benign {top_unguarded:.4f} + margin {MARGIN}; "
+          f"{guarded_n}/{len(T.CLEARLY_BENIGN)} benign lines are guard-handled and excluded — #41)")
+    print(f"benign false-positives: {rep['fp']}/{len(T.CLEARLY_BENIGN)}  (must be 0)")
+    print(f"substring-MISSED cries the backstop adds: {rep['backstop_adds']}/{rep['sub_missed']} "
+          f"= {100*rep['backstop_adds']//max(rep['sub_missed'],1)}%")
+    print(f"blind-set UNION (substring OR backstop): {rep['union']}/{len(T.RED_TEAM_BLIND)} "
+          f"= {100*rep['union']//len(T.RED_TEAM_BLIND)}%   (substring alone caught "
+          f"{len(T.RED_TEAM_BLIND)-rep['sub_missed']}; pinned floor {T._RED_TEAM_FLOOR})")
+    print(f"(crisis floor also flagged by semantics: {rep['floor_extra']}/{len(T.CRISIS_FLOOR)}; "
+          f"catches lost vs the previous artifact: {rep['dropped']} — must be 0)")
 
 
 if __name__ == "__main__":
