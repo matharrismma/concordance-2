@@ -215,6 +215,18 @@ def real_corpus():
 
 
 @pytest.fixture(autouse=True)
+def _corpus_cache_off_unless_asked(monkeypatch):
+    """The corpus cache (corpus_cache.py, issue #10) is ON by default for a process and OFF by default for a
+    test: dozens of tests set corpus._DEFAULT = None and boot default_corpus() from a tmp dir or the real data
+    dir, and each would otherwise write a cache file as a side effect (the real keeping's is ~1 GB). A test that
+    is ABOUT the cache opts in with its own monkeypatch.setenv (tests/test_corpus_cache.py); an operator who
+    set the env before pytest keeps their choice."""
+    if "CONCORDANCE_CORPUS_CACHE" not in os.environ:
+        monkeypatch.setenv("CONCORDANCE_CORPUS_CACHE", "0")
+    yield
+
+
+@pytest.fixture(autouse=True)
 def _reset_expand_state():
     """expand() keeps a process-wide result cache + a global outbound-acquire budget (the F2
     protection against a /search-miss spray driving uncached archive fetches). Both are module-level,
