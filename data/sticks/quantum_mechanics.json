@@ -7,6 +7,69 @@
   "uncertainty",
   "entanglement"
  ],
- "handler": "quantum_mechanics",
- "why_python": "pending migration (issue #13)"
+ "doc": "QUANTUM MECHANICS - the quantum and its limits (Matt, 2026-10-09: \"What about Quantum mechanics?\"). Not another\nfloor beside the others; the FRAMEWORK they inhabit. Superposition and the Born rule (capstone), the Schrodinger\nequation (Hamiltonian), the path integral (Lagrangian) are already placed. This floor gathers them and adds the\nthree foundations not yet sealed: QUANTIZATION (the quantum of action hbar; light in lumps, E = hf), UNCERTAINTY\n(Delta x Delta p >= hbar/2, a proven limit not an ignorance), and ENTANGLEMENT (Bell/Tsirelson: the world is not\nlocally real; an entangled pair is ONE state). Idempotent.",
+ "seals": [
+  {
+   "key": "hbar",
+   "nid": "reduced_planck_constant_quantum_of_action_js",
+   "expr": "6.62607015e-34/(2*3.141592653589793)",
+   "value": 1.0545718176461565e-34,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "photon",
+   "nid": "green_photon_energy_e_equals_hf_ev",
+   "expr": "6.62607015e-34*5.45e14/1.602176634e-19",
+   "value": 2.253938894823503,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "bell",
+   "nid": "tsirelson_bound_chsh_quantum_correlation",
+   "expr": "2*2**0.5",
+   "value": 2.8284271247461903,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Quantum mechanics - the quantum and its limits",
+   "by": "tools/tick.py quantum_mechanics",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the quantum of action, SEALED] The quantum is real and discrete: the quantum of action is hbar = h/(2 pi) = 1.0546e-34 J s (sealed). Action, angular momentum and energy come in units set by it; where it matters the world is granular, not continuous. It is also the floor of uncertainty - the smallest the product of two complementary spreads can be.",
+     "seal": "hbar"
+    },
+    {
+     "kind": "instance",
+     "claim": "[light comes in lumps - E = hf, SEALED] A photon of green light (5.45e14 Hz) carries E = hf = 2.25 eV (sealed). Planck and Einstein: radiation is quantized, energy in discrete quanta. The sharp spectrum of every atom - hydrogen's 13.6 eV, sealed on the Hamiltonian - is this discreteness; the photon is the electromagnetic field quantized. Ties card_floor_maxwells_equations.",
+     "seal": "photon"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the world is not locally real - entanglement, SEALED] An entangled pair is ONE state, not two; measuring one instantly fixes the other. Bell proved no locally-real theory can match quantum predictions: the CHSH correlation is capped at 2 for any local-realist world, but quantum mechanics reaches 2 sqrt(2) = 2.83 (sealed, the Tsirelson bound), and experiment sides with 2.83 (Aspect; the 2022 Nobel). Many parts, one indivisible state - 'one source, states of that force' at the deepest level. No faster-than-light signal passes, so it still answers to relativity.",
+     "seal": "bell"
+    },
+    {
+     "kind": "note",
+     "claim": "[the framework the physics region lives in] Quantum mechanics is not a floor beside the others; it is the framework they inhabit. Superposition, the Born rule and the measurement gap are on the capstone; the Schrodinger equation and unitary evolution on the Hamiltonian; the path integral on the Lagrangian; gauge symmetry giving charge on Noether and Maxwell; the Born rule and the interpretations on stick_the_schrodinger_equation. This floor gathers them and adds quantization, uncertainty and entanglement. Ties card_floor_the_capstone, card_floor_the_hamiltonian, card_floor_the_lagrangian.",
+     "source": "the Hilbert-space formulation; card_floor_the_capstone, card_floor_the_hamiltonian, card_floor_the_lagrangian"
+    },
+    {
+     "kind": "note",
+     "claim": "[the uncertainty principle - a proven limit, not an ignorance] Position and momentum cannot both be sharp: Delta x Delta p >= hbar/2. This is not a failure of measurement - a particle does not HAVE a sharp position and momentum at once, because they are non-commuting observables ([x, p] = i hbar). A proven limit, FOUND in the structure: the physical cousin of the engine's own refusal to assert beyond what it can check. Ties card_floor_the_instruments (the moat - decline what cannot be known).",
+     "source": "Heisenberg's uncertainty principle; the canonical commutator [x,p] = i hbar; card_floor_the_instruments"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] The superposition is many potentials (capstone); the discrete spectrum is the Hamiltonian's eigenvalues; entanglement is 'one source, states of that force'; the uncertainty bound is a found limit like the engine's decline. Quantum mechanics is the native tongue of the whole physics region. Married to relativity it becomes quantum field theory (the Standard Model); their UNFINISHED marriage with gravity is the open frontier (quantum gravity). Ties card_floor_relativity and card_floor_standard_model.",
+     "source": "the one map; quantum field theory; the open problem of quantum gravity; card_floor_relativity"
+    }
+   ]
+  }
+ ]
 }

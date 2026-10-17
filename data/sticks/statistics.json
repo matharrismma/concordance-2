@@ -7,6 +7,69 @@
   "inference",
   "the_normal_distribution"
  ],
- "handler": "statistics",
- "why_python": "pending migration (issue #13)"
+ "doc": "STATISTICS - the normal law and the method of science (Matt, 2026-10-09, down the domain list). How we draw\none conclusion from many noisy measurements. DESCRIBE (mean, variance, standard deviation); the CENTRAL LIMIT\nTHEOREM makes sums of anything tend to the normal law (the standard error shrinks as 1/sqrt(n)); INFER (z-scores,\nhypothesis tests). SEALED: a standard deviation, a z-score, and the standard error. Rests on the instruments\n(probability), the capstone (distributions sum to one; many measurements, one estimate), and biology (the method\nof every empirical science). Idempotent.",
+ "seals": [
+  {
+   "key": "sd",
+   "nid": "standard_deviation_of_a_sample",
+   "expr": "((9+1+1+1+0+0+4+16)/8)**0.5",
+   "value": 2.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "z",
+   "nid": "z_score_x_minus_mu_over_sigma",
+   "expr": "(7-5)/2",
+   "value": 1.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "se",
+   "nid": "standard_error_sigma_over_sqrt_n_clt",
+   "expr": "2/4**0.5",
+   "value": 1.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Statistics - the normal law and the method of science",
+   "by": "tools/tick.py statistics",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[describe - the standard deviation, SEALED] For the sample {2,4,4,4,5,5,7,9} the mean is 5 and the standard deviation is sqrt(((9+1+1+1+0+0+4+16)/8)) = 2 (sealed) - the typical distance from the mean, the ruler of spread. Mean and standard deviation are the first thing data tells you.",
+     "seal": "sd"
+    },
+    {
+     "kind": "instance",
+     "claim": "[standardize - the z-score, SEALED] A value of 7 in that sample is z = (7-5)/2 = 1 (sealed) - one standard deviation above the mean. The z-score puts every measurement on one common scale, and under the normal law about 68 percent of data fall within z = +/- 1, 95 percent within +/- 2.",
+     "seal": "z"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the central limit theorem - the standard error, SEALED] Average n measurements and the uncertainty of the mean shrinks as the standard error sigma/sqrt(n): for sigma = 2 and n = 4 it is 2/sqrt(4) = 1 (sealed). More data, a tighter estimate - and the average tends to the normal law whatever the original shape. Many noisy measurements converge to one estimate.",
+     "seal": "se"
+    },
+    {
+     "kind": "note",
+     "claim": "[the central limit theorem - many into one shape] Sum or average enough independent things - whatever their individual distributions - and the result tends to the SAME bell curve, the normal law. It is why the normal is everywhere, and it is the capstone's shape again: many possibilities converging to one form. Ties card_floor_the_capstone.",
+     "source": "the central limit theorem; the normal (Gaussian) law; card_floor_the_capstone"
+    },
+    {
+     "kind": "note",
+     "claim": "[the method of every empirical science] Statistics is how a claim is TESTED against noisy data: a hypothesis, a test statistic, a p-value, a confidence interval. Hardy-Weinberg is its biology face (sealed on the biology floor); measurement error is its physics face; it is the discipline that turns data into a verdict - the same job the engine does deterministically. Ties card_floor_biology and card_floor_the_instruments.",
+     "source": "hypothesis testing; confidence intervals; the method of empirical science; card_floor_biology"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Statistics rests on the instruments (the probability machinery), the capstone (the central limit theorem is many-into-one, and a distribution integrates to one), and biology (the method of empirical science). The formal domain that lets every other domain test itself against measurement. Ties card_floor_statistics.",
+     "source": "the one map; card_floor_statistics; tools/seed_statistics.py"
+    }
+   ]
+  }
+ ]
 }

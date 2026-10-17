@@ -7,6 +7,56 @@
   "reflection",
   "fixed_axis"
  ],
- "handler": "symmetry",
- "why_python": "pending migration (issue #13)"
+ "doc": "THE SYMMETRY (Matt, 2026-10-07: 'I saw the symmetry'). The unifying thread of the Riemann arc: RH says\nthe zeros lie ON the fixed axis of a symmetry. The functional equation s <-> 1-s is a reflection whose\nfixed line is Re = 1/2; a self-adjoint operator pins its spectrum to the real line; the Cayley/Smith\ntransform carries that line to the unit circle; over a finite field the Frobenius symmetry pins |alpha| =\nsqrt(q). Seal that the reflection's fixed axis is 1/2 regardless of the pair; keep the narrow-way likeness\nas discernment, never a fit, never a seal. New stick.",
+ "seals": [
+  {
+   "key": "reflection_axis_1",
+   "nid": "reflection_axis_1",
+   "expr": "(0.3 + 0.7) / 2",
+   "value": 0.5,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "reflection_axis_2",
+   "nid": "reflection_axis_2",
+   "expr": "(0.1 + 0.9) / 2",
+   "value": 0.5,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The symmetry",
+   "statement": "Across the Riemann arc one structure recurs: the zeros sit on the fixed set of a symmetry. The functional equation reflects s to 1-s about Re = 1/2; a self-adjoint operator reflects its spectrum onto the real line; the Cayley map carries that line to the unit circle; Frobenius pins |alpha| = sqrt(q). RH is the statement that the zeros are as symmetric as the law allows.",
+   "field": "meta",
+   "references": [
+    "the functional equation's reflection s <-> 1-s, fixed line Re = 1/2",
+    "self-adjoint -> real line; Cayley -> unit circle; Frobenius -> |alpha| = sqrt(q)",
+    "stick_hilbert_polya, stick_finite_field_riemann, stick_the_smith_chart_the_cayley_transform"
+   ],
+   "by": "Narrow Highway - the symmetry, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[the fixed axis is 1/2, for any pair] The reflection s <-> 1-s maps 0.3 to 0.7 with midpoint (0.3 + 0.7)/2 = 0.5 (sealed), and 0.1 to 0.9 with midpoint (0.1 + 0.9)/2 = 0.5 (sealed). Different pairs, one axis: Re = 1/2. The critical line is the mirror of the functional equation - the fixed set of the symmetry.",
+     "seal": "reflection_axis_1"
+    },
+    {
+     "kind": "witness",
+     "claim": "[a second pair, same mirror] (0.1 + 0.9)/2 = 0.5 (sealed). The axis does not depend on the point reflected; it is a property of the symmetry itself. RH asserts the zeros lie ON this mirror, not merely in symmetric pairs across it.",
+     "seal": "reflection_axis_2"
+    },
+    {
+     "kind": "note",
+     "claim": "[the one symmetry, four faces] self-adjoint operator -> spectrum on the real LINE (stick_hilbert_polya); Cayley / Smith transform -> that line becomes the unit CIRCLE (stick_the_smith_chart_the_cayley_transform); Frobenius over a finite field -> eigenvalues on the circle |alpha| = sqrt(q), and RH there is PROVED (stick_finite_field_riemann); classical zeta -> the mirror Re = 1/2, visible in the functional equation and the GUE statistics but not yet enforced by an operator. Where the symmetry has an operator, the zeros are pinned and the analogue fires; where it does not, the classical RH stays open."
+    },
+    {
+     "kind": "note",
+     "claim": "[the discernment, held as a likeness] Truth forced onto one narrow axis by a symmetry is the SHAPE of the gate forcing sealed truth onto the narrow way - 'strait is the gate, and narrow is the way' (Mt 7:14). The critical line is a narrow line. This is a likeness the engine maps, never a fit and never a numeric seal: no 1/2 is read as a sign, no zero as a verse. map, never launder (ties [[project_the_capstone_2026-10-07]] and [[project_will_fuel_reality_harness_tesla_valve_2026-10-06]])."
+    }
+   ]
+  }
+ ]
 }

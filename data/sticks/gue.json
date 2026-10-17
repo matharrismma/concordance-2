@@ -5,5 +5,5 @@
   "gue"
  ],
  "handler": "gue",
- "why_python": "returned 1"
+ "why_python": "calls verify_derivation itself; needs data/zeta_zeros.jsonl in the keeping (NOT_APPLICABLE in an isolated one)"
 }

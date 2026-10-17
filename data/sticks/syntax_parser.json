@@ -7,6 +7,53 @@
   "parser",
   "parse_tree"
  ],
- "handler": "syntax_parser",
- "why_python": "pending migration (issue #13)"
+ "doc": "SYNTAX - a real deterministic parser (Matt, 2026-10-10: \"real syntax parser\"). A chart parser\nover a hand-written English grammar judges whether a sentence has a valid phrase-structure parse\nand returns the tree; sealed through linguistics.LING_VERIFY. Offline, no model. Idempotent.",
+ "seals": [
+  {
+   "key": "parses",
+   "domain": "linguistics",
+   "artifact": "LING_VERIFY",
+   "spec": {
+    "parse_sentence": "the cat sat on the mat",
+    "claimed_grammatical": true
+   }
+  },
+  {
+   "key": "salad",
+   "domain": "linguistics",
+   "artifact": "LING_VERIFY",
+   "spec": {
+    "parse_sentence": "cat the sat",
+    "claimed_grammatical": false
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Syntax - a real parse tree, or none",
+   "by": "tools/tick.py syntax_parser",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[a real parse, SEALED] 'the cat sat on the mat' has a valid phrase-structure parse (S (NP (DET the) (NOM (N cat))) (VP (V sat) (PP (P on) (NP (DET the) (NOM (N mat)))))), sealed through linguistics.LING_VERIFY. A real chart parser over a hand-written English grammar - offline, no model.",
+     "seal": "parses"
+    },
+    {
+     "kind": "instance",
+     "claim": "[word salad has none, SEALED] 'cat the sat' has NO valid parse (sealed as correctly not grammatical) - the pinned function words reject it. The parser discriminates structure, not length.",
+     "seal": "salad"
+    },
+    {
+     "kind": "note",
+     "claim": "[0 false positives, the limit named] The parser CONFIRMS only a derivation it actually built - a structural fact, never a judgment that the sentence is true or good English. Closed-class words are pinned; open-class POS is a heuristic (no POS lexicon held), so trees are best-effort and a sentence outside the grammar is 'not derivable here', never mis-parsed. Coordination and long-distance dependencies are outside this grammar; a public-domain POS lexicon (Moby) would sharpen it - the next step.",
+     "source": "src/concordance/syntax.py; src/concordance/verifiers/linguistics.py verify_syntax"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map - the syntax decline lifted] The comprehensive-linguistics pass had kept syntax closed-class only and declined parsing; this lifts it to a real (if bounded) parser on the linguistics floor (card_floor_indo_european), with the regex/rule verifiers remaining the floor.",
+     "source": "card_floor_indo_european; the linguistics coverage map"
+    }
+   ]
+  }
+ ]
 }

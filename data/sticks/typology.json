@@ -7,6 +7,53 @@
   "language_families",
   "families_of_tongues"
  ],
- "handler": "typology",
- "why_python": "pending migration (issue #13)"
+ "doc": "LANGUAGE TYPOLOGY / FAMILIES - comprehensive linguistics, step 5, the last of this pass\n(Matt, 2026-10-10). A language's family from a curated reference, sealed through\nlinguistics.LING_VERIFY. Idempotent.",
+ "seals": [
+  {
+   "key": "english",
+   "domain": "linguistics",
+   "artifact": "LING_VERIFY",
+   "spec": {
+    "language": "english",
+    "claimed_family": "Indo-European"
+   }
+  },
+  {
+   "key": "arabic",
+   "domain": "linguistics",
+   "artifact": "LING_VERIFY",
+   "spec": {
+    "language": "arabic",
+    "claimed_family": "Semitic"
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Language typology - the families of tongues",
+   "by": "tools/tick.py typology",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[a family, SEALED] English is an Indo-European language (sealed through linguistics.LING_VERIFY): Germanic -> West Germanic -> Indo-European. The family tree of tongues is the comparative method's fruit - and the home of this very floor.",
+     "seal": "english"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a different family, SEALED] Arabic is Semitic (Afro-Asiatic), sealed - NOT Indo-European. The families are distinct; a claim across them is a mismatch.",
+     "seal": "arabic"
+    },
+    {
+     "kind": "note",
+     "claim": "[curated, declines the unknown] The reference is a curated list of languages -> families; an unknown language DECLINES rather than guesses. 0 false positives: a family not in the language's chain cannot be confirmed.",
+     "source": "src/concordance/verifiers/linguistics.py verify_language_family"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map - the comprehensive-linguistics pass is COMPLETE] Typology closes this pass on the linguistics floor (card_floor_indo_european): phonology, orthography, etymology, historical sound change and the Biblical lexicon already held; morphology, transliteration, semantics, closed-class POS and typology added - with deep parsing declined as the honest offline floor. Linguistics went from a Strong's-only lane to a comprehensive domain.",
+     "source": "card_floor_indo_european; the linguistics coverage map"
+    }
+   ]
+  }
+ ]
 }

@@ -8,6 +8,61 @@
   "chain",
   "lineage"
  ],
- "handler": "standard_model",
- "why_python": "pending migration (issue #13)"
+ "doc": "THE STANDARD-MODEL CHAIN - A PATH FROM A FLOOR, AND WHERE TWO TREES CONNECT (Matt, 2026-10-07:\n'Fermi, Yang, Lee, Wu, Higgs, Nambu, Weinberg, Salam, Gross, Politzer, Gell-Mann ... chains that began\nwith a floor ... we are very interested in where two trees/chains connect'). The lineage that built the\nStandard Model, each link on the last, from the floor of Maxwell's EM and Fermi's weak theory. The\nCONNECTION is electroweak unification: the electromagnetic chain (Maxwell -> QED) and the weak chain\n(Fermi -> parity -> gauge) become one theory, hinged on the Weinberg angle cos(theta_W) = m_W/m_Z. Seal\nthat hinge; cite the chain and name the floor. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "ew_cos_theta_w",
+   "nid": "ew_cos_theta_w",
+   "expr": "80.377 / 91.1876",
+   "value": 0.8814466001956406,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "ew_sin2_theta_w",
+   "nid": "ew_sin2_theta_w",
+   "expr": "1 - (80.377 / 91.1876)**2",
+   "value": 0.2230518910035465,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The Standard-Model chain - where two trees connect",
+   "statement": "A chain of discovery that began from a floor: Maxwell's electromagnetism and Fermi's weak theory. Its connection point is electroweak unification, where the electromagnetic and weak chains become one theory, parameterized by a single mixing angle with cos(theta_W) = m_W / m_Z. The photon and Z boson are orthogonal rotations of the two gauge fields by that angle.",
+   "field": "meta",
+   "references": [
+    "Fermi (1933) weak interaction; Yang-Mills (1954) non-abelian gauge",
+    "Lee-Yang (1956) & Wu (1957) parity violation; Nambu SSB; Higgs (1964)",
+    "Glashow-Weinberg-Salam electroweak unification (1967, Nobel 1979)",
+    "Gell-Mann (quarks); Gross-Politzer-Wilczek asymptotic freedom (1973, Nobel 2004)"
+   ],
+   "by": "Narrow Highway - the Standard-Model chain, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[the connection, sealed] The Weinberg angle is where the electromagnetic and weak trees join: cos(theta_W) = m_W / m_Z = 80.377 / 91.1876 = 0.881447 (sealed). The massive W (weak) and the Z and photon (weak + EM mixtures) all relate through this one angle - two chains, one hinge.",
+     "seal": "ew_cos_theta_w"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the mixing parameter] sin^2(theta_W) = 1 - (m_W/m_Z)^2 = 0.223052 (sealed, on-shell) - the single number saying how much the weak and electromagnetic couplings mix. The photon and Z are orthogonal rotations of the two gauge fields by theta_W; the connection is quantitative, not metaphor.",
+     "seal": "ew_sin2_theta_w"
+    },
+    {
+     "kind": "note",
+     "claim": "[the floor of the path] Maxwell's electromagnetism (the EM tree's floor) and Fermi's 1933 theory of beta decay (the weak tree's floor), both standing on quantum mechanics and special relativity. A chain begins from a floor; naming the floor is the first act of establishing the path (ties the Floor of Discovery, card_k_floor_of_discovery)."
+    },
+    {
+     "kind": "note",
+     "claim": "[the chain, link by link] Fermi (weak interaction, 1933) -> Yang-Mills (non-abelian gauge, 1954) -> Lee & Yang (parity violation predicted, 1956) -> Wu (confirmed, 1957) -> Nambu (spontaneous symmetry breaking) -> Higgs (the mass mechanism, 1964) -> Glashow-Weinberg-Salam (electroweak unification, 1967) -> Gell-Mann (quarks) + Gross-Politzer-Wilczek (asymptotic freedom / QCD, 1973). The individual marks are already sealed on this engine (stick_the_four_forces_under_the_fine_structure_constant, stick_yang_mills_the_mass_gap_is_a_measure, and kin); this stick GATHERS them into their lineage - the same paths, seen whole."
+    },
+    {
+     "kind": "note",
+     "claim": "[where two trees connect - the pattern] 'We are very interested in where two trees/chains connect.' Here it is exact: electroweak unification is the node where the electromagnetic chain (Maxwell -> QED) and the weak chain (Fermi -> parity -> gauge) become one theory, hinged on the sealed Weinberg angle. A chain begins from a floor; the profound moments are the CONNECTIONS where two chains meet. This is the physics instance of the two trees and the appointed assembly of scattered pieces ([[project_babel_scattered_pieces_appointed_assembly_2026-08-01]], [[project_two_trees_named_2026-06-12]]). map, never launder: the engine seals the connection's arithmetic and cites the lineage; it does not claim to have unified anything - it FINDS the join the physicists made."
+    }
+   ]
+  }
+ ]
 }

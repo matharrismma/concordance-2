@@ -8,5 +8,5 @@
   "crosscheck"
  ],
  "handler": "sources_crosscheck",
- "why_python": "returned 2"
+ "why_python": "reads the untrusted ark (CONCORDANCE_ARK_MILLENNIUM) and the stick's own sealed count"
 }
