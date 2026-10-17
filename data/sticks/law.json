@@ -5,6 +5,107 @@
   "law",
   "law_stick"
  ],
- "handler": "law",
- "why_python": "pending migration (issue #13)"
+ "doc": "LAW - STRUCTURAL CHECKS, SEALED (Matt, 2026-10-09: cover every domain, integrate what we have). US federal,\npublic-domain / constitutional text only; STRUCTURAL and arithmetic checks, NOT legal advice. Sealed via\nlaw.LAW_VERIFY: the five elements of a contract, the constitutional age minimums, FLSA overtime, the four Miranda\nelements. Interpretation, application, case outcomes and state law are declined - consult a licensed attorney.\nIdempotent.",
+ "seals": [
+  {
+   "key": "contract",
+   "domain": "law",
+   "artifact": "LAW_VERIFY",
+   "spec": {
+    "has_offer": true,
+    "has_acceptance": true,
+    "has_consideration": true,
+    "has_capacity": true,
+    "has_legality": true,
+    "claimed_contract_valid": true
+   }
+  },
+  {
+   "key": "pres",
+   "domain": "law",
+   "artifact": "LAW_VERIFY",
+   "spec": {
+    "office": "president",
+    "age": 36,
+    "claimed_meets_age_requirement": true
+   }
+  },
+  {
+   "key": "sen",
+   "domain": "law",
+   "artifact": "LAW_VERIFY",
+   "spec": {
+    "office": "senator",
+    "age": 30,
+    "claimed_meets_age_requirement": true
+   }
+  },
+  {
+   "key": "ot",
+   "domain": "law",
+   "artifact": "LAW_VERIFY",
+   "spec": {
+    "hours_worked": 48,
+    "regular_rate": 20.0,
+    "claimed_overtime_pay": 240.0
+   }
+  },
+  {
+   "key": "mir",
+   "domain": "law",
+   "artifact": "LAW_VERIFY",
+   "spec": {
+    "warnings_given": [
+     "You have the right to remain silent.",
+     "Anything you say can be used against you in court.",
+     "You have the right to an attorney.",
+     "If you cannot afford an attorney one will be appointed for you."
+    ],
+    "claimed_miranda_complete": true
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Law - structural checks on public-domain US law, sealed",
+   "by": "tools/tick.py law",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[a contract's elements] Offer, acceptance, consideration, capacity and legality - all five present makes a structurally valid contract (sealed through law.LAW_VERIFY). The checklist, not the judgment of a court.",
+     "seal": "contract"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the age to serve - President] The Constitution sets 35 as the minimum for President (Art. II sec 1); age 36 meets it (sealed).",
+     "seal": "pres"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Senator] 30 is the minimum for a Senator (Art. I sec 3); age 30 meets it exactly (sealed).",
+     "seal": "sen"
+    },
+    {
+     "kind": "instance",
+     "claim": "[FLSA overtime] 48 hours at $20 regular: 8 hours over 40, paid at time-and-a-half, is 8 x 20 x 1.5 = $240 overtime (sealed). The arithmetic of the Fair Labor Standards Act.",
+     "seal": "ot"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the Miranda warning] All four elements present - the right to silence, the use against you, the right to an attorney, and appointment if you cannot afford one (sealed). The completeness of the warning, checked.",
+     "seal": "mir"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the frame, and its hard edge] These are STRUCTURAL and arithmetic checks on US federal, public-domain and constitutional text. They are NOT legal advice. Whether a contract is enforceable, how a statute applies to the facts, how a court would rule - all of that is interpretation, and the engine does not do it.",
+     "source": "US Constitution; Fair Labor Standards Act; Miranda v. Arizona (1966); law.LAW_VERIFY"
+    },
+    {
+     "kind": "note",
+     "claim": "[what is declined, loudly] Legal interpretation, the application of law to particular facts, case outcomes, state and local law, and anything that would be advice are DECLINED - consult a licensed attorney. The engine certifies the structure, never the counsel.",
+     "source": "src/concordance/verifiers/law.py"
+    }
+   ]
+  }
+ ]
 }

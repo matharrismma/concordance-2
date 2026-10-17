@@ -7,6 +7,46 @@
   "map_projection",
   "latitude_longitude"
  ],
- "handler": "geography",
- "why_python": "pending migration (issue #13)"
+ "doc": "GEOGRAPHY - the measured Earth (Matt, 2026-10-10, down the list). A degree of latitude is about 111 km (the\nmeridian over 360); the Earth turns 15 degrees of longitude per hour (the basis of time zones). SEALED: both.\nRests on earth science (the planet) and the instruments (coordinates and projection are geometry). Idempotent.",
+ "seals": [
+  {
+   "key": "degree",
+   "nid": "kilometres_per_degree_of_latitude",
+   "expr": "40075/360",
+   "value": 111.31944444444444,
+   "tol": 1e-06,
+   "domain": "mathematics"
+  },
+  {
+   "key": "timezone",
+   "nid": "degrees_of_longitude_per_hour_of_rotation",
+   "expr": "360/24",
+   "value": 15.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Geography - the measured Earth",
+   "by": "tools/tick.py geography",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the size of a degree, SEALED] The Earth's circumference is about 40075 km, so one degree of latitude is 40075/360 = 111 km (sealed), and a minute of arc is a nautical mile. Coordinates turn the globe into addressable space - the grid every map and GPS stands on. Ties card_floor_earth_science.",
+     "seal": "degree"
+    },
+    {
+     "kind": "instance",
+     "claim": "[longitude is time - the time zones, SEALED] The Earth turns once in 24 hours, so 360/24 = 15 degrees of longitude per hour (sealed). Longitude and local time are the same measurement - which is why finding longitude at sea waited on an accurate clock. Ties card_floor_the_instruments (the geometry of coordinates).",
+     "seal": "timezone"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Geography rests on earth science (the planet it charts) and the instruments (coordinates, projections and distance are geometry - and every flat map must distort, since a sphere has no flat image). The science of WHERE. Ties card_floor_geography.",
+     "source": "the one map; map projection; great-circle distance; card_floor_geography; tools/seed_geography.py"
+    }
+   ]
+  }
+ ]
 }

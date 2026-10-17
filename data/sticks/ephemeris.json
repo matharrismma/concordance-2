@@ -8,6 +8,258 @@
   "sunrise",
   "solstice"
  ],
- "handler": "stick_ephemeris",
- "why_python": "pending migration (issue #13)"
+ "doc": "EPHEMERIS - the sky's calendar, sealed (issue #11, 2026-10-16: reach, down the domain list). Through\nephemeris.EPH_VERIFY: the Julian Day of J2000.0 and of the first Gregorian day; four eclipses sealed as the new\nand full moons they must be; the four 2024 equinoxes and solstices to the day; sunrise and sunset for New York\non 2025-07-04 and for the equator at the equinox; and Kepler's third law in its gravitational form for the Earth,\na geostationary satellite, and the Moon - whose two-body period falls 0.14 percent short of the sidereal month,\nthe Sun's perturbation, kept as the method's stated bound. Meeus's algorithms are CITED at their stated\nprecision; the dates are SEALED. Idempotent.",
+ "seals": [
+  {
+   "key": "jd_j2000",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "iso_date": "2000-01-01",
+    "claimed_julian_day": 2451545.0
+   }
+  },
+  {
+   "key": "jd_gregorian",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "iso_date": "1582-10-15",
+    "claimed_julian_day": 2299161.0
+   }
+  },
+  {
+   "key": "new_moon_2024",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "iso_date": "2024-04-08",
+    "claimed_moon_phase": "new"
+   }
+  },
+  {
+   "key": "new_moon_2017",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "iso_date": "2017-08-21",
+    "claimed_moon_phase": "new"
+   }
+  },
+  {
+   "key": "full_moon_2022",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "iso_date": "2022-11-08",
+    "claimed_moon_phase": "full"
+   }
+  },
+  {
+   "key": "full_moon_2019",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "iso_date": "2019-01-21",
+    "claimed_moon_phase": "full"
+   }
+  },
+  {
+   "key": "march_equinox",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "year": 2024,
+    "event": "vernal_equinox",
+    "claimed_event_iso": "2024-03-20"
+   }
+  },
+  {
+   "key": "june_solstice",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "year": 2024,
+    "event": "summer_solstice",
+    "claimed_event_iso": "2024-06-20"
+   }
+  },
+  {
+   "key": "september_equinox",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "year": 2024,
+    "event": "autumnal_equinox",
+    "claimed_event_iso": "2024-09-22"
+   }
+  },
+  {
+   "key": "december_solstice",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "year": 2024,
+    "event": "winter_solstice",
+    "claimed_event_iso": "2024-12-21"
+   }
+  },
+  {
+   "key": "sun_nyc",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "iso_date": "2025-07-04",
+    "lat": 40.7128,
+    "lon": -74.006,
+    "tz_offset_hours": -4,
+    "claimed_sunrise_hour": 5.52,
+    "claimed_sunset_hour": 20.52
+   }
+  },
+  {
+   "key": "sun_equator",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "iso_date": "2024-03-20",
+    "lat": 0.0,
+    "lon": 0.0,
+    "tz_offset_hours": 0,
+    "claimed_sunrise_hour": 6.0,
+    "claimed_sunset_hour": 18.0
+   }
+  },
+  {
+   "key": "orbit_earth",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "orbit_semi_major_m": 149600000000.0,
+    "orbit_central_mass_kg": 1.989e+30,
+    "claimed_orbital_period_s": 31560000.0
+   }
+  },
+  {
+   "key": "orbit_geostationary",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "orbit_semi_major_m": 42164000.0,
+    "orbit_central_mass_kg": 5.9722e+24,
+    "claimed_orbital_period_s": 86164.0
+   }
+  },
+  {
+   "key": "orbit_moon",
+   "domain": "ephemeris",
+   "artifact": "EPH_VERIFY",
+   "spec": {
+    "orbit_semi_major_m": 384400000.0,
+    "orbit_central_mass_kg": 6.0457e+24,
+    "claimed_orbital_period_s": 2357400.0
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Ephemeris - the sky's calendar, sealed",
+   "statement": "Julian days, lunar phases, the equinoxes and solstices, sunrise and sunset, and orbital periods are closed-form functions of the date and the orbit.",
+   "field": "ephemeris",
+   "references": [
+    "J. Meeus, Astronomical Algorithms, 2nd ed. (1998), ch. 7, 25, 27, 49",
+    "NASA GSFC eclipse catalogue (F. Espenak): 2017-08-21, 2024-04-08 solar; 2019-01-21, 2022-11-08 lunar",
+    "USNO, Earth's Seasons - equinoxes, solstices (2024)",
+    "J. Kepler, Harmonices Mundi (1619), Book V - the third law"
+   ],
+   "by": "tools/tick.py ephemeris",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[J2000.0, SEALED] 2000-01-01 at noon UT is Julian Day 2,451,545.0 (sealed through ephemeris.EPH_VERIFY; Meeus ch. 7) - the epoch every modern star catalogue is referred to. The Julian Day counts days since noon on 1 January 4713 BC (Scaliger 1583), a single integer line through every calendar.",
+     "seal": "jd_j2000"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the first Gregorian day, SEALED] 1582-10-15, the day after 1582-10-04 in the reform, is JD 2,299,161.0 (sealed through ephemeris.EPH_VERIFY). Ten dates were skipped; the day count was not - which is why astronomers count days and not dates.",
+     "seal": "jd_gregorian"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the 2024 eclipse was a new moon, SEALED] 2024-04-08 - the total solar eclipse across North America - falls at the new moon (sealed through ephemeris.EPH_VERIFY: mean lunar age within 1.5 d of 0). A solar eclipse is a new moon by definition: the Moon between us and the Sun.",
+     "seal": "new_moon_2024"
+    },
+    {
+     "kind": "instance",
+     "claim": "[and 2017, SEALED] 2017-08-21, the 'Great American' eclipse, is a new moon (sealed through ephemeris.EPH_VERIFY).",
+     "seal": "new_moon_2017"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a lunar eclipse is a full moon, SEALED] 2022-11-08, total lunar eclipse: full moon (sealed through ephemeris.EPH_VERIFY). The Earth between Moon and Sun - the opposite configuration, half a synodic month from new.",
+     "seal": "full_moon_2022"
+    },
+    {
+     "kind": "instance",
+     "claim": "[and 2019, SEALED] 2019-01-21, the total lunar eclipse: full moon (sealed through ephemeris.EPH_VERIFY).",
+     "seal": "full_moon_2019"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the March equinox, SEALED] 2024-03-20 (sealed through ephemeris.EPH_VERIFY; USNO: 03:06 UT).",
+     "seal": "march_equinox"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the June solstice, SEALED] 2024-06-20 (sealed through ephemeris.EPH_VERIFY; USNO: 20:51 UT) - the earliest June solstice since 1796, the leap-cycle drift at its turn.",
+     "seal": "june_solstice"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the September equinox, SEALED] 2024-09-22 (sealed through ephemeris.EPH_VERIFY; USNO: 12:44 UT).",
+     "seal": "september_equinox"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the December solstice, SEALED] 2024-12-21 (sealed through ephemeris.EPH_VERIFY; USNO: 09:20 UT). Four dates a year the tilted Earth's orbit fixes; Meeus's Table 27 gives them to the day for a thousand years either way.",
+     "seal": "december_solstice"
+    },
+    {
+     "kind": "instance",
+     "claim": "[sunrise in New York, SEALED] 2025-07-04 at 40.71 N, 74.01 W, EDT: sunrise 5:31 (5.52 h), sunset 8:31 pm (20.52 h) (sealed through ephemeris.EPH_VERIFY, within the verifier's 0.5 h window; USNO gives 5:31 and 20:31). The geometry of a tilted axis, with refraction's 0.833 deg added to the horizon.",
+     "seal": "sun_nyc"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the equator at the equinox, SEALED] 0 N, 0 E on 2024-03-20: sunrise 6:00, sunset 18:00 (sealed through ephemeris.EPH_VERIFY). Equal night - with the refraction allowance the day runs about 12 h 7 min, which is why the date of truly equal day and night (the equilux) falls a few days before the equinox.",
+     "seal": "sun_equator"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Kepler's third law - the Earth, SEALED] a = 1.496e11 m about 1.989e30 kg: T = 2 pi sqrt(a^3 / G M) = 3.156e7 s, one year (sealed through ephemeris.EPH_VERIFY, through G).",
+     "seal": "orbit_earth"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the geostationary orbit, SEALED] a = 42,164 km about the Earth (5.9722e24 kg): T = 86,164 s, one sidereal day (sealed through ephemeris.EPH_VERIFY). A satellite there hangs over one meridian - the orbit Clarke proposed in 1945, placed by Kepler's law and G.",
+     "seal": "orbit_geostationary"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the Moon - the two-body period, SEALED] a = 384,400 km about Earth + Moon (6.0457e24 kg): T = 2.3574e6 s = 27.28 d (sealed through ephemeris.EPH_VERIFY). The observed sidereal month is 27.3217 d = 2.3606e6 s - 0.14 percent longer. The discordance is the Sun's pull on the Moon, which the two-body formula omits: it indicts the METHOD at that precision, not G or the distance. The honest number is sealed; the sidereal month is cited.",
+     "seal": "orbit_moon"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the precision, CITED] Meeus's low-precision forms are used as stated: the equinox table without its periodic terms (good to about 2 days), the sunrise formula without the equation of time (about 0.5 h), the mean lunar age from a reference new moon (about 1.5 d). Each window is the stated precision and every claim above is judged at it; a claim finer than the method is declined, never waved through.",
+     "source": "J. Meeus, Astronomical Algorithms (1998) ch. 25, 27, 49; src/concordance/verifiers/ephemeris.py"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] The ephemeris is the calendar (card_floor_the_calendar: the Julian day line, the Gregorian reform) read off the orbits (card_floor_astronomy: phases, eclipses, the seasons) under gravity (Kepler's third law in Newton's form, through G). Everything here is time as the sky keeps it - the clock we are inside of.",
+     "source": "the one map; card_floor_the_calendar, card_floor_astronomy; the calendar stick"
+    }
+   ]
+  }
+ ]
 }

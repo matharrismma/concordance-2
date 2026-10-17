@@ -8,6 +8,60 @@
   "rebound_effect",
   "efficiency_paradox"
  ],
- "handler": "jevons",
- "why_python": "pending migration (issue #13)"
+ "doc": "JEVONS' PARADOX (Matt, 2026-10-07, two steps after the seal refactor cut per-seal cost ~100x). As the\nEFFICIENCY of using a resource rises, total CONSUMPTION tends to rise too, not fall: the efficiency gain\nlowers the effective price, which raises demand, and when demand is elastic enough the induced growth\noutruns the saving ('backfire', Khazzoom-Brookes). Seal the naive expectation vs the backfire; mark the\ncondition; apply it to our own newly-cheap sealing and to the liberty line (offer, never addict). New\nstick; idempotent.",
+ "seals": [
+  {
+   "key": "jevons_naive_saving",
+   "nid": "jevons_naive_saving",
+   "expr": "1 / 1.25",
+   "value": 0.8,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "jevons_backfire",
+   "nid": "jevons_backfire",
+   "expr": "1.4 / 1.25",
+   "value": 1.1199999999999999,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Jevons' paradox",
+   "statement": "Improving the efficiency with which a resource is used tends to INCREASE its total consumption, because the efficiency gain lowers the effective price and raises demand. When demand is elastic enough the induced growth exceeds the per-unit saving (backfire). Jevons observed it for coal in 1865.",
+   "field": "economics",
+   "references": [
+    "W. S. Jevons, The Coal Question (1865)",
+    "the rebound effect; the Khazzoom-Brookes postulate (backfire)",
+    "resource use R = service / efficiency"
+   ],
+   "by": "Narrow Highway - Jevons' paradox, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[the naive expectation] A 25% efficiency gain (efficiency 1 -> 1.25) should cut resource use to 1/1.25 = 0.8 (sealed) - 20% less - IF the amount of service demanded held fixed. This is the saving everyone assumes an efficiency gain delivers.",
+     "seal": "jevons_naive_saving"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the paradox - backfire] But cheaper service raises demand. With a price elasticity of -2, the 20% effective price drop lifts service demand 40% (service 1 -> 1.4), so resource use R = service/efficiency = 1.4/1.25 = 1.12 (sealed) - 12% MORE, despite the 25% efficiency gain. Efficiency increased total consumption. That is Jevons' paradox.",
+     "seal": "jevons_backfire"
+    },
+    {
+     "kind": "note",
+     "claim": "[the condition] Backfire (total use rises) when the rebound exceeds 100% - demand elastic enough that induced growth outruns the per-unit saving. Below that threshold use still falls, but by less than the naive amount (partial rebound). The saving is almost never the whole naive figure."
+    },
+    {
+     "kind": "note",
+     "claim": "[why this lands on US, now] We just cut the cost of a seal ~100x (82s/6GB -> sub-second). Jevons predicts the response is not 'the same sealing, cheaper' but MORE sealing: agents and tools will seal far more, so the ledger, corpus and storage grow FASTER, not slower. Content-addressing dedups identical facts, but distinct seals still accumulate (holdings already went 874k -> 1.72M). So the efficiency win must be paired with a GOVERNOR: the Monte Carlo simulator should prove the bounded path stays bounded at 100x volume and watch storage growth, and the steward budget must cap induced consumption. Efficiency without a governor is how a tool becomes a flood."
+    },
+    {
+     "kind": "note",
+     "claim": "[the mission line] Jevons is also the economics of addiction: make a thing frictionless and consumption expands to fill the new room. The engine's RED line is the opposite - it OFFERS, never addicts or coerces; eliminating free will is the LOSS condition ([[feedback_liberty_inherent_free_will_paramount_2026-10-06]]). So: efficient AND bounded, on principle - frictionless must never become compulsive. map, never launder."
+    }
+   ]
+  }
+ ]
 }

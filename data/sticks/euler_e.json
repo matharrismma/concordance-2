@@ -9,6 +9,65 @@
   "natural_log",
   "compounding"
  ],
- "handler": "euler_e",
- "why_python": "pending migration (issue #13)"
+ "doc": "e - EULER'S NUMBER (Matt, 2026-10-07). e = 2.71828... is the law of continuous growth: the sum of\n1/k!, the limit of (1+1/n)^n, and the one function equal to its own derivative (d/dx e^x = e^x). It is\nthe base of the complex exponential (e^(i theta) - rotation), of continuous compounding (replication in\nthe limit), of the Gaussian and Boltzmann entropy, and of the natural logarithm. Transcendental. Seal the\nseries, the compounding limit, and the self-derivative. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "e_as_factorial_series",
+   "nid": "e_as_factorial_series",
+   "expr": "1 + 1 + 1.0/2 + 1.0/6 + 1.0/24 + 1.0/120 + 1.0/720 + 1.0/5040",
+   "value": 2.7182539682539684,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "e_as_compounding_limit",
+   "nid": "e_as_compounding_limit",
+   "expr": "1.001 ** 1000",
+   "value": 2.7169239322355936,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "e_is_its_own_derivative",
+   "nid": "e_is_its_own_derivative",
+   "expr": "(2.718281828459045 ** 0.001 - 1) / 0.001",
+   "value": 1.0005001667083846,
+   "tol": 1e-07,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "e - the number of continuous growth",
+   "statement": "e = 2.71828... is the base of continuous growth: the sum of the reciprocal factorials, the limit of (1 + 1/n)^n, and the unique function (up to scale) equal to its own derivative. It is the base of the complex exponential, of continuous compounding, of the Gaussian and of Boltzmann entropy, and the base of the natural logarithm. It is transcendental.",
+   "field": "mathematics",
+   "references": [
+    "e = sum 1/k! = lim (1 + 1/n)^n = 2.718281828...",
+    "d/dx e^x = e^x (its own derivative); e^(i pi) + 1 = 0",
+    "Hermite (1873): e is transcendental"
+   ],
+   "by": "Narrow Highway - e, the number of continuous growth, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[e as the infinite series] e = sum of 1/k!: eight terms, 1 + 1 + 1/2 + 1/6 + ... + 1/5040 = 2.7182540 (sealed), closing fast on e = 2.7182818. The factorials in the denominators - the gamma function at the integers (stick_higher_dimensional_spheres_and_the_gamma_function) - make it converge ferociously.",
+     "seal": "e_as_factorial_series"
+    },
+    {
+     "kind": "witness",
+     "claim": "[e as the limit of compounding] e = lim (1 + 1/n)^n, continuous growth. At n = 1000, 1.001^1000 = 2.71692 (sealed), climbing to e. A unit at 100% interest compounded continuously becomes e - the number that REPLICATION in the limit converges to (stick_god_works_in_multiplication_addition_is_subtraction_through_).",
+     "seal": "e_as_compounding_limit"
+    },
+    {
+     "kind": "witness",
+     "claim": "[e is its own derivative] e^x is the one function (up to scale) equal to its own rate of change: d/dx e^x = e^x. Its slope at 0 is 1 - the difference quotient (e^0.001 - 1)/0.001 = 1.0005 (sealed), approaching 1. e is the base at which the growth rate EQUALS the amount: self-reinforcement, the fixed point of calculus (stick_integrals_and_derivatives_the_fundamental_theorem).",
+     "seal": "e_is_its_own_derivative"
+    },
+    {
+     "kind": "note",
+     "claim": "[where e lives] e is a hinge of the whole arc: the base of the complex exponential e^(i theta) - multiplication is rotation, the spiral, and e^(i pi) + 1 = 0 (stick_the_complex_field_is_the_physics_of_waves, stick_using_imaginary_numbers_c_completes_r_lift_and_return); the law of continuous growth and decay, so both the Jevons rebound and replication ride e (stick_god_works_in_multiplication..., stick_jevons_paradox); the Gaussian e^(-x^2/2) and Boltzmann's S = k ln W (stick_entropy_and_gravity); and the natural logarithm that inverts it. Transcendental (Hermite 1873) - growth, rotation, and probability are all written in it. map, never launder: seal the arithmetic; e is found as a limit, not chosen."
+    }
+   ]
+  }
+ ]
 }

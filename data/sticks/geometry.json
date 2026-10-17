@@ -5,6 +5,85 @@
   "geometry_stick",
   "geometry"
  ],
- "handler": "geometry_stick",
- "why_python": "pending migration (issue #13)"
+ "doc": "GEOMETRY - SEALED through geometry.GEOM_VERIFY (cover every domain, integrate what we have). Idempotent.",
+ "seals": [
+  {
+   "key": "pyth",
+   "domain": "geometry",
+   "artifact": "GEOM_VERIFY",
+   "spec": {
+    "pyth_a": 3,
+    "pyth_b": 4,
+    "pyth_c": 5,
+    "claimed_right_triangle": true
+   }
+  },
+  {
+   "key": "circle",
+   "domain": "geometry",
+   "artifact": "GEOM_VERIFY",
+   "spec": {
+    "circle_radius": 1,
+    "claimed_circle_area": 3.141592653589793,
+    "claimed_circle_circumference": 6.283185307179586
+   }
+  },
+  {
+   "key": "poly",
+   "domain": "geometry",
+   "artifact": "GEOM_VERIFY",
+   "spec": {
+    "polygon_n": 5,
+    "claimed_interior_angle_sum_deg": 540
+   }
+  },
+  {
+   "key": "sphere",
+   "domain": "geometry",
+   "artifact": "GEOM_VERIFY",
+   "spec": {
+    "sphere_radius": 3,
+    "claimed_sphere_volume": 113.097,
+    "claimed_sphere_surface_area": 113.097
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Geometry - the shapes, verified and sealed",
+   "by": "tools/tick.py geometry_stick",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the right triangle] 3-4-5: a^2 + b^2 = 9 + 16 = 25 = c^2, a right triangle (sealed through geometry.GEOM_VERIFY) - the Pythagorean theorem, the hinge of distance.",
+     "seal": "pyth"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the circle] radius 1: area pi r^2 = 3.14159 and circumference 2 pi r = 6.28319 (sealed) - pi, the constant of the circle.",
+     "seal": "circle"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the pentagon] a 5-gon's interior angles sum to (5-2)*180 = 540 degrees (sealed) - the angle sum grows by 180 with each side.",
+     "seal": "poly"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the sphere] radius 3: volume (4/3) pi r^3 = 113.10 and surface 4 pi r^2 = 113.10 (sealed; equal only at r = 3).",
+     "seal": "sphere"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the ground] Euclid's definitions, postulates and the measure of the plane - the theorems are sealed, the parallel postulate is cited (its denial gives the non-Euclidean geometries, equally valid). We follow Euclid: definitions, postulates, theorems.",
+     "source": "Euclid, Elements; geometry.GEOM_VERIFY"
+    },
+    {
+     "kind": "note",
+     "claim": "[declined] A figure's meaning, a proof's elegance, a construction's intent are not measured here; the engine seals the measure.",
+     "source": "src/concordance/verifiers/geometry.py"
+    }
+   ]
+  }
+ ]
 }

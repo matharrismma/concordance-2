@@ -8,6 +8,221 @@
   "era",
   "century"
  ],
- "handler": "stick_history_chronology",
- "why_python": "pending migration (issue #13)"
+ "doc": "HISTORY / CHRONOLOGY - year arithmetic with no year zero, sealed (issue #11, 2026-10-16: reach, down the\ndomain list). Through history_chronology.HIST_VERIFY: spans within one era by signed subtraction (Rome's kings to\nits republic, Hastings to Columbus, the bicentennial), spans across the era boundary by the no-year-zero rule\n(Caesar's death to the fall of Constantinople, 1 BC to AD 1, Rome founded to Rome fallen), century assignment\n(1776, the year 100, the year 2000 and 2001), era labels, and decades. The era and its missing zero are\nconventions, CITED; the counts are SEALED exactly. Idempotent.",
+ "seals": [
+  {
+   "key": "rome_kings_to_republic",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "from_year": -753,
+    "to_year": -509,
+    "claimed_elapsed_years": 244
+   }
+  },
+  {
+   "key": "hastings_to_columbus",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "from_year": 1066,
+    "to_year": 1492,
+    "claimed_elapsed_years": 426
+   }
+  },
+  {
+   "key": "bicentennial",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "from_year": 1776,
+    "to_year": 1976,
+    "claimed_elapsed_years": 200
+   }
+  },
+  {
+   "key": "caesar_to_constantinople",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "from_BCE": 44,
+    "to_CE": 1453,
+    "claimed_elapsed": 1496
+   }
+  },
+  {
+   "key": "no_year_zero",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "from_BCE": 1,
+    "to_CE": 1,
+    "claimed_elapsed": 1
+   }
+  },
+  {
+   "key": "rome_founded_to_fallen",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "from_BCE": 753,
+    "to_CE": 476,
+    "claimed_elapsed": 1228
+   }
+  },
+  {
+   "key": "century_1776",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "year_CE": 1776,
+    "claimed_century": 18
+   }
+  },
+  {
+   "key": "century_100",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "year_CE": 100,
+    "claimed_century": 1
+   }
+  },
+  {
+   "key": "century_2000",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "year_CE": 2000,
+    "claimed_century": 20
+   }
+  },
+  {
+   "key": "century_2001",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "year_CE": 2001,
+    "claimed_century": 21
+   }
+  },
+  {
+   "key": "era_44",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "year": -44,
+    "claimed_era": "BCE"
+   }
+  },
+  {
+   "key": "era_1453",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "year": 1453,
+    "claimed_era": "CE"
+   }
+  },
+  {
+   "key": "decade_1985",
+   "domain": "history_chronology",
+   "artifact": "HIST_VERIFY",
+   "spec": {
+    "year_CE": 1985,
+    "claimed_decade_start": 1980
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "History and chronology - counting years with no year zero",
+   "statement": "A span of years is an exact integer: signed subtraction within an era, and from_BCE + to_CE - 1 across the boundary, because the Christian era has no year 0.",
+   "field": "history_chronology",
+   "references": [
+    "Dionysius Exiguus, Liber de Paschate (AD 525) - the anno Domini count",
+    "Bede, De temporum ratione (AD 725) - counting backward from the Incarnation",
+    "E. G. Richards, Mapping Time: The Calendar and its History (1998), ch. 2",
+    "ISO 8601 / astronomical year numbering: year 0 = 1 BC (Cassini, 1740)"
+   ],
+   "by": "tools/tick.py history_chronology",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[within an era, SEALED] From Rome's traditional founding, 753 BC, to the republic, 509 BC, is 244 years (sealed through history_chronology.HIST_VERIFY): both dates in one era, signed subtraction is exact.",
+     "seal": "rome_kings_to_republic"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Hastings to Columbus, SEALED] 1066 to 1492 is 426 years (sealed through history_chronology.HIST_VERIFY).",
+     "seal": "hastings_to_columbus"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the bicentennial, SEALED] 1776 to 1976 is 200 years (sealed through history_chronology.HIST_VERIFY) - judged exactly, so 199 and 201 would both be refused. A count of years is an integer claim.",
+     "seal": "bicentennial"
+    },
+    {
+     "kind": "instance",
+     "claim": "[across the boundary, SEALED] From Caesar's death, 44 BC, to the fall of Constantinople, AD 1453, is 44 + 1453 - 1 = 1496 years (sealed through history_chronology.HIST_VERIFY) - not 1497. The missing year is the missing year zero.",
+     "seal": "caesar_to_constantinople"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the rule itself, SEALED] 1 BC to AD 1 is ONE year (sealed through history_chronology.HIST_VERIFY): the year before the era and the first year of it are adjacent. Any span that crosses the boundary is one less than the sum.",
+     "seal": "no_year_zero"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Rome founded to Rome fallen, SEALED] 753 BC to AD 476 is 1228 years (sealed through history_chronology.HIST_VERIFY): the Western empire's span as the textbooks give it.",
+     "seal": "rome_founded_to_fallen"
+    },
+    {
+     "kind": "instance",
+     "claim": "[1776 is the 18th century, SEALED] ceil(1776 / 100) = 18 (sealed through history_chronology.HIST_VERIFY): the century a year belongs to is one more than its hundreds, except at a round hundred.",
+     "seal": "century_1776"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the year 100, SEALED] ceil(100 / 100) = 1: the year 100 is the LAST year of the first century (sealed through history_chronology.HIST_VERIFY), because the first century ran AD 1 to AD 100 - a hundred years with no zero to start from.",
+     "seal": "century_100"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the year 2000, SEALED] 2000 is in the 20th century (sealed through history_chronology.HIST_VERIFY). The millennium parties were a year early: the 21st began on 1 January 2001.",
+     "seal": "century_2000"
+    },
+    {
+     "kind": "instance",
+     "claim": "[and 2001, SEALED] 2001 is the first year of the 21st (sealed through history_chronology.HIST_VERIFY).",
+     "seal": "century_2001"
+    },
+    {
+     "kind": "instance",
+     "claim": "[an era label, SEALED] -44 is BC (BCE) (sealed through history_chronology.HIST_VERIFY): negative is before the era.",
+     "seal": "era_44"
+    },
+    {
+     "kind": "instance",
+     "claim": "[and AD, SEALED] 1453 is AD (CE) (sealed through history_chronology.HIST_VERIFY).",
+     "seal": "era_1453"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a decade, SEALED] 1985 is in the decade beginning 1980 (sealed through history_chronology.HIST_VERIFY): floor to the ten.",
+     "seal": "decade_1985"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the era, CITED] The anno Domini count is Dionysius Exiguus's (525), carried backward by Bede (725) with no year zero - Roman numerals had none. Astronomers (Cassini 1740) and ISO 8601 insert a year 0 = 1 BC so that subtraction works across the boundary. Two conventions, both cited; the engine seals under the historian's (no zero) and names the rule in every cross-era count. Whether Dionysius placed the Incarnation correctly (Herod died 4 BC) is a question of evidence, declined here.",
+     "source": "Dionysius Exiguus (525); Bede, De temporum ratione (725); Richards, Mapping Time (1998); ISO 8601"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Chronology is the calendar's integer axis (card_floor_the_calendar: the era, the leap rule, the Julian day line that has no gap at the boundary) applied to the record of events. The ephemeris stick counts the same line in days; this one counts it in years and watches the one place the years skip.",
+     "source": "the one map; card_floor_the_calendar; the calendar stick; the ephemeris stick"
+    }
+   ]
+  }
+ ]
 }

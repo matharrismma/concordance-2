@@ -9,6 +9,65 @@
   "complex_tool",
   "using_i"
  ],
- "handler": "imaginary_numbers",
- "why_python": "pending migration (issue #13)"
+ "doc": "USING IMAGINARY NUMBERS (Matt, 2026-10-07). R is incomplete; C is complete - Gauss's Fundamental\nTheorem of Algebra: every degree-n polynomial has exactly n roots in C. So you USE i to make every\nequation solvable, lifting a real problem into C where the structure is simpler (e^(i theta) turns\ntrig into algebra), solving there, and returning to R as the conjugate imaginary parts cancel. The\nbirth of sqrt(-1) is stick_complex_numbers_bombelli...; this is the working method. Seal FTA\nfactorization, a real trig fact via the complex exponential, and the cancel-on-return. New stick.",
+ "seals": [
+  {
+   "key": "fta_conjugate_roots_product",
+   "nid": "fta_conjugate_roots_product",
+   "expr": "1**2 + 2**2",
+   "value": 5.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "real_trig_via_complex_exp",
+   "nid": "real_trig_via_complex_exp",
+   "expr": "2 * 0.5**2 - 1",
+   "value": -0.5,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "imaginary_parts_cancel_on_return",
+   "nid": "imaginary_parts_cancel_on_return",
+   "expr": "2 + (-2)",
+   "value": 0.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Using imaginary numbers - C completes R, lift and return",
+   "statement": "The reals are incomplete: x^2 - 2x + 5 = 0 has no real root. The complex numbers are complete - Gauss's Fundamental Theorem of Algebra: every degree-n polynomial has exactly n roots in C. So one USES imaginary numbers by lifting a real problem into C, where multiplication is rotation and e^(i theta) turns trigonometry into algebra, solving there, and returning to R as the conjugate imaginary parts cancel.",
+   "field": "mathematics",
+   "references": [
+    "Gauss, Fundamental Theorem of Algebra: C is algebraically closed",
+    "e^(i theta) = cos + i sin: trig identities, AC impedance, Laplace/Fourier",
+    "conjugate roots a +/- bi: sum 2a, product a^2 + b^2 (both real)"
+   ],
+   "by": "Narrow Highway - using imaginary numbers, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[C completes R - the Fundamental Theorem of Algebra] Over the reals x^2 - 2x + 5 = 0 has no solution (negative discriminant); over C it has two, 1 +/- 2i. Their product is (1+2i)(1-2i) = 1^2 + 2^2 = 5 (sealed) = the constant term, and their sum is 2 = the linear coefficient - the real polynomial factors completely. Gauss: EVERY degree-n polynomial has exactly n roots in C. R is incomplete; C is closed. You use imaginary numbers to make every equation solvable.",
+     "seal": "fta_conjugate_roots_product"
+    },
+    {
+     "kind": "witness",
+     "claim": "[i as a tool - a real answer through the complex exponential] Lift into C, where e^(i theta) turns trigonometry into algebra. The double-angle identity cos(2th) = 2 cos^2(th) - 1 falls straight out of (e^(i th))^2 = e^(i 2th); at th = 60 degrees it gives cos(120) = 2*0.5^2 - 1 = -0.5 (sealed) - a real fact reached through i. The same move gives AC impedance, the Laplace and Fourier transforms, and the solutions of linear differential equations.",
+     "seal": "real_trig_via_complex_exp"
+    },
+    {
+     "kind": "witness",
+     "claim": "[lift, solve, return - the imaginary parts cancel] The method is an amphibian's: go up into C, solve where it is easy, come back to R. The conjugate imaginary parts cancel on return - 2i + (-2i), i.e. 2 + (-2) = 0 (sealed) - leaving the real answer standing. You spend the imaginary and keep the real, exactly Bombelli's road to the real root (stick_complex_numbers_bombelli_and_the_square_root_of_minus_one).",
+     "seal": "imaginary_parts_cancel_on_return"
+    },
+    {
+     "kind": "note",
+     "claim": "[where it lives in the arc] 'Using imaginary numbers' is the working method on the floor of sqrt(-1): C is the complete field where multiplication is rotation and addition is interference (stick_the_complex_field_is_the_physics_of_waves), where the Smith/Cayley transform lives (stick_the_smith_chart_the_cayley_transform), where the gamma function and the Riemann zeros live (stick_higher_dimensional_spheres_and_the_gamma_function, stick_the_zeta_function), and where every polynomial finally factors. R is a shadow of C; you lift to the complete place, work, and project back. map, never launder: seal the real arithmetic the imaginary makes reachable; i is the necessary tool, not a mysticism."
+    }
+   ]
+  }
+ ]
 }

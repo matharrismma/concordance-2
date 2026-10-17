@@ -11,6 +11,693 @@
   "boole",
   "sheffer"
  ],
- "handler": "stick_formal_logic",
- "why_python": "pending migration (issue #13)"
+ "doc": "FORMAL LOGIC - the laws of Boolean algebra, the inference forms, and NAND/NOR completeness (issue #12,\n2026-10-16: a logic floor, down the domain list). Every law here is SEALED BY ITS TRUTH-TABLE PROOF through\nformal_logic.LOGIC_VERIFY, never asserted: the Boolean-algebra laws as equivalences over p, q, r, each in both\ndual forms; the inference forms as entailments - four valid, and the two classic fallacies sealed as NOT\nentailing (claimed_entailment false: the seal records the fallacy honestly); functional completeness - NOT, AND\nand OR each rebuilt from NAND alone and from NOR alone; and one minimization sealed through the minimal_form check\n(Quine-McCluskey, exact to four variables). Boole's and Sheffer's postulates are CITED; the theorems are SEALED\n(the Euclid rule). Idempotent.",
+ "seals": [
+  {
+   "key": "identity_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p & True",
+    "formula_b": "p",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "identity_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p | False",
+    "formula_b": "p",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "domination_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p & False",
+    "formula_b": "False",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "domination_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p | True",
+    "formula_b": "True",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "idempotent_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p & p",
+    "formula_b": "p",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "idempotent_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p | p",
+    "formula_b": "p",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "complement_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p & ~p",
+    "formula_b": "False",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "complement_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p | ~p",
+    "formula_b": "True",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "double_negation",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "~~p",
+    "formula_b": "p",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "commutative_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p & q",
+    "formula_b": "q & p",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "commutative_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p | q",
+    "formula_b": "q | p",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "associative_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "(p & q) & r",
+    "formula_b": "p & (q & r)",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "associative_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "(p | q) | r",
+    "formula_b": "p | (q | r)",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "distributive_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p & (q | r)",
+    "formula_b": "(p & q) | (p & r)",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "distributive_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p | (q & r)",
+    "formula_b": "(p | q) & (p | r)",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "absorption_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p & (p | q)",
+    "formula_b": "p",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "absorption_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p | (p & q)",
+    "formula_b": "p",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "de_morgan_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "~(p & q)",
+    "formula_b": "~p | ~q",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "de_morgan_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "~(p | q)",
+    "formula_b": "~p & ~q",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "modus_ponens",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "premises": [
+     "p",
+     "p >> q"
+    ],
+    "conclusion": "q",
+    "claimed_entailment": true
+   }
+  },
+  {
+   "key": "modus_tollens",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "premises": [
+     "p >> q",
+     "~q"
+    ],
+    "conclusion": "~p",
+    "claimed_entailment": true
+   }
+  },
+  {
+   "key": "hypothetical_syllogism",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "premises": [
+     "p >> q",
+     "q >> r"
+    ],
+    "conclusion": "p >> r",
+    "claimed_entailment": true
+   }
+  },
+  {
+   "key": "disjunctive_syllogism",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "premises": [
+     "p | q",
+     "~p"
+    ],
+    "conclusion": "q",
+    "claimed_entailment": true
+   }
+  },
+  {
+   "key": "affirming_the_consequent",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "premises": [
+     "p >> q",
+     "q"
+    ],
+    "conclusion": "p",
+    "claimed_entailment": false
+   }
+  },
+  {
+   "key": "denying_the_antecedent",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "premises": [
+     "p >> q",
+     "~p"
+    ],
+    "conclusion": "~q",
+    "claimed_entailment": false
+   }
+  },
+  {
+   "key": "nand_not",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "~p",
+    "formula_b": "~(p & p)",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "nand_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p & q",
+    "formula_b": "~(~(p & q) & ~(p & q))",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "nand_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p | q",
+    "formula_b": "~(~(p & p) & ~(q & q))",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "nor_not",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "~p",
+    "formula_b": "~(p | p)",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "nor_or",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p | q",
+    "formula_b": "~(~(p | q) | ~(p | q))",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "nor_and",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q",
+     "r"
+    ],
+    "formula_a": "p & q",
+    "formula_b": "~(~(p | p) | ~(q | q))",
+    "claimed_equivalent": true
+   }
+  },
+  {
+   "key": "minimal",
+   "domain": "formal_logic",
+   "artifact": "LOGIC_VERIFY",
+   "spec": {
+    "variables": [
+     "p",
+     "q"
+    ],
+    "formula": "(p & q) | (p & ~q)",
+    "claimed_minimal": "p",
+    "claimed_minimal_terms": 1
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Formal logic - Boolean algebra, inference forms, NAND and NOR",
+   "statement": "Every law of propositional logic is a theorem of the two-element Boolean algebra, decided by its truth table.",
+   "field": "formal_logic",
+   "references": [
+    "G. Boole, The Laws of Thought (1854)",
+    "H. M. Sheffer, A set of five independent postulates for Boolean algebras (1913)"
+   ],
+   "by": "tools/tick.py formal_logic",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[identity, SEALED] p & True = p: True is the identity for AND (sealed by its truth table through formal_logic.LOGIC_VERIFY). The algebra's two elements, 1 and 0, are the units of its two operations.",
+     "seal": "identity_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[identity, the dual] p | False = p: False is the identity for OR (sealed by its truth table through formal_logic.LOGIC_VERIFY). Every law below has a dual - swap AND with OR and True with False - and the dual is a theorem too.",
+     "seal": "identity_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[domination, SEALED] p & False = False (sealed by its truth table through formal_logic.LOGIC_VERIFY): False annihilates under AND.",
+     "seal": "domination_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[domination, the dual] p | True = True (sealed by its truth table through formal_logic.LOGIC_VERIFY): True annihilates under OR.",
+     "seal": "domination_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[idempotent, SEALED] p & p = p (sealed by its truth table through formal_logic.LOGIC_VERIFY): saying it twice adds nothing - unlike arithmetic, where x * x is not x.",
+     "seal": "idempotent_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[idempotent, the dual] p | p = p (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "seal": "idempotent_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[complement, SEALED] p & ~p = False (sealed by its truth table through formal_logic.LOGIC_VERIFY): the law of non-contradiction - a thing and its denial are never both true.",
+     "seal": "complement_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[complement, the dual] p | ~p = True (sealed by its truth table through formal_logic.LOGIC_VERIFY): the law of excluded middle - one of them is.",
+     "seal": "complement_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[double negation, SEALED] ~~p = p (sealed by its truth table through formal_logic.LOGIC_VERIFY): in the two-element algebra a denial denied is the thing itself.",
+     "seal": "double_negation"
+    },
+    {
+     "kind": "instance",
+     "claim": "[commutative, SEALED] p & q = q & p (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "seal": "commutative_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[commutative, the dual] p | q = q | p (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "seal": "commutative_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[associative, SEALED] (p & q) & r = p & (q & r) (sealed by its truth table through formal_logic.LOGIC_VERIFY): the grouping does not matter, so a chain of ANDs needs no parentheses.",
+     "seal": "associative_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[associative, the dual] (p | q) | r = p | (q | r) (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "seal": "associative_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[distributive, SEALED] p & (q | r) = (p & q) | (p & r) (sealed by its truth table through formal_logic.LOGIC_VERIFY): AND distributes over OR, as multiplication over addition.",
+     "seal": "distributive_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[distributive, the dual] p | (q & r) = (p | q) & (p | r) (sealed by its truth table through formal_logic.LOGIC_VERIFY): OR distributes over AND too - the law arithmetic does NOT have (a + bc is not (a+b)(a+c)). This is where Boolean algebra parts from the algebra of numbers.",
+     "seal": "distributive_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[absorption, SEALED] p & (p | q) = p (sealed by its truth table through formal_logic.LOGIC_VERIFY): the second factor is swallowed by the first.",
+     "seal": "absorption_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[absorption, the dual] p | (p & q) = p (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "seal": "absorption_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[De Morgan, SEALED] ~(p & q) = ~p | ~q (sealed by its truth table through formal_logic.LOGIC_VERIFY): the denial of a conjunction is the disjunction of the denials - 'not both' is 'at least one is not'.",
+     "seal": "de_morgan_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[De Morgan, the dual] ~(p | q) = ~p & ~q (sealed by its truth table through formal_logic.LOGIC_VERIFY): 'neither' is 'not this and not that'.",
+     "seal": "de_morgan_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[modus ponens, SEALED] p, p >> q |= q (sealed by its truth table through formal_logic.LOGIC_VERIFY: no row makes both premises true and the conclusion false). The form every deduction stands on.",
+     "seal": "modus_ponens"
+    },
+    {
+     "kind": "instance",
+     "claim": "[modus tollens, SEALED] p >> q, ~q |= ~p (sealed by its truth table through formal_logic.LOGIC_VERIFY): deny the consequent and the antecedent falls - the shape of refutation.",
+     "seal": "modus_tollens"
+    },
+    {
+     "kind": "instance",
+     "claim": "[hypothetical syllogism, SEALED] p >> q, q >> r |= p >> r (sealed by its truth table through formal_logic.LOGIC_VERIFY): implications chain, which is why a proof can be long.",
+     "seal": "hypothetical_syllogism"
+    },
+    {
+     "kind": "instance",
+     "claim": "[disjunctive syllogism, SEALED] p | q, ~p |= q (sealed by its truth table through formal_logic.LOGIC_VERIFY): eliminate one branch and the other remains - narrowing by elimination.",
+     "seal": "disjunctive_syllogism"
+    },
+    {
+     "kind": "instance",
+     "claim": "[affirming the consequent, SEALED AS A FALLACY] p >> q, q does NOT entail p: the seal records claimed_entailment = false, confirmed by the row p = False, q = True where both premises hold and the conclusion fails. 'If it rained the ground is wet; the ground is wet' does not give rain.",
+     "seal": "affirming_the_consequent"
+    },
+    {
+     "kind": "instance",
+     "claim": "[denying the antecedent, SEALED AS A FALLACY] p >> q, ~p does NOT entail ~q: sealed with claimed_entailment = false, the counter-row p = False, q = True. The engine seals what the table shows - a fallacy is kept as a fallacy, never dressed as a rule.",
+     "seal": "denying_the_antecedent"
+    },
+    {
+     "kind": "instance",
+     "claim": "[NAND is complete: NOT, SEALED] ~p = ~(p & p) (sealed by its truth table through formal_logic.LOGIC_VERIFY): NOT from a single NAND with both inputs tied together - the first step of Sheffer's stroke.",
+     "seal": "nand_not"
+    },
+    {
+     "kind": "instance",
+     "claim": "[NAND is complete: AND, SEALED] p & q = ~(~(p & q) & ~(p & q)) (sealed by its truth table through formal_logic.LOGIC_VERIFY): AND is a NAND followed by a NAND-as-NOT - two gates.",
+     "seal": "nand_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[NAND is complete: OR, SEALED] p | q = ~(~(p & p) & ~(q & q)) (sealed by its truth table through formal_logic.LOGIC_VERIFY): OR is De Morgan read through NAND - three gates. With NOT, AND and OR all rebuilt, every Boolean function is reachable from NAND alone: the one gate a whole computer can be wired from.",
+     "seal": "nand_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[NOR is complete: NOT, SEALED] ~p = ~(p | p) (sealed by its truth table through formal_logic.LOGIC_VERIFY): the dual stroke (Peirce's arrow).",
+     "seal": "nor_not"
+    },
+    {
+     "kind": "instance",
+     "claim": "[NOR is complete: OR, SEALED] p | q = ~(~(p | q) | ~(p | q)) (sealed by its truth table through formal_logic.LOGIC_VERIFY).",
+     "seal": "nor_or"
+    },
+    {
+     "kind": "instance",
+     "claim": "[NOR is complete: AND, SEALED] p & q = ~(~(p | p) | ~(q | q)) (sealed by its truth table through formal_logic.LOGIC_VERIFY). NOR alone is also complete - the Apollo guidance computer was built from one three-input NOR gate, repeated.",
+     "seal": "nor_and"
+    },
+    {
+     "kind": "instance",
+     "claim": "[minimal form, SEALED] (p & q) | (p & ~q) minimizes to p - one product term, and no equivalent sum-of-products has fewer (sealed through formal_logic.minimal_form: Quine-McCluskey prime implicants and an exhaustive minimum cover, exact to four variables). Absorption, read as a circuit: two gates become a wire.",
+     "seal": "minimal"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the postulates, CITED] Boole gave logic an algebra - the laws of thought as equations over 0 and 1 (1854); Sheffer showed the whole algebra rests on five independent postulates and that a single operation, the stroke (NAND), suffices to define the rest (1913). The postulate sets are CITED, never sealed: an axiom is chosen, not proven. Every law above is a THEOREM of those postulates, and each one is sealed by the only proof the two-element algebra needs - its truth table.",
+     "source": "G. Boole, The Laws of Thought (1854); H. M. Sheffer, A set of five independent postulates for Boolean algebras, Trans. AMS 14 (1913) 481-488"
+    },
+    {
+     "kind": "note",
+     "claim": "[the bound, stated] Every seal here is an exhaustive truth table over at most three variables - eight rows, complete and exact. The minimal_form check decides minimality exactly to FOUR variables (16 minterms, at most 13 prime implicants, an exhaustive cover); at five or more it returns NOT_APPLICABLE with the reason - bounded, never a guess. First-order logic (quantifiers) is not exposed by the verifier and is declined: a miss stays a miss.",
+     "source": "src/concordance/verifiers/formal_logic.py, _boolean.py"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Boolean algebra is one algebra with three faces: logic (this stick), circuits (computer_science.logic_gate - the 16 functions of two inputs) and sets (mathematics.set_algebra - union, intersection, complement obey the same laws). One Boolean core backs all three verifiers. Ties the computer-science stick and card_floor_computer_science.",
+     "source": "the one map; the computer-science stick; src/concordance/verifiers/_boolean.py"
+    }
+   ]
+  }
+ ]
 }
