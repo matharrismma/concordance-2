@@ -1,6 +1,6 @@
 """THE WARRANT — steward authority with a name, a term, and rotation without a gap.
 
-`docs/LESSONS_AND_HARDENING.md` H1, where two lessons met:
+`docs/archive/LESSONS_AND_HARDENING.md` H1, where two lessons met:
 
   * **L1 — a typed name is not authority.** `shelves.curate` once took the steward's name on faith,
     and C1b shipped that live. Closing it introduced a token, which fixed the hole and made this one.

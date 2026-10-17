@@ -2,7 +2,7 @@
 
 Purpose: **so we never drop the same thing twice.** Each procedure below exists because
 something was actually dropped, broken, or silently skipped. The matching incident is in
-[LESSONS.md](LESSONS.md).
+[LESSONS.md](../archive/LESSONS.md) (archived 2026-10-16 — history, not a live register).
 
 Every runbook in this project carries a **`Verified live <date>`** line. A runbook without
 one is presumed stale.
@@ -56,7 +56,7 @@ Policy: *the latest and best, but never lose the last — or the first.*
 2. Every runbook states `Verified live <date>` and marks claims ✅ (inspected) or ⚠️ (open).
 3. **Re-verify on deploy**: if a deploy changes topology, runtime, or endpoints, the
    runbook is updated in the same pass — not "later".
-4. When a doc is found wrong, record *why it drifted* in LESSONS.md, not just the fix.
+4. When a doc is found wrong, record *why it drifted* in the commit and the issue, not just the fix (the pre-2026-10 register is archived at `../archive/LESSONS.md`).
 
 ## SOP-5 — Migrations & cutovers
 

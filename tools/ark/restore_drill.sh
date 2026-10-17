@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # THE RESTORE DRILL — a backup is a backup only once it has been restored and checked. Runs ON THE BOX.
-# (docs/PROJECT_REVIEW_2026-10-03.md R1; Matt, 2026-10-03: "go on those".)
+# (docs/archive/PROJECT_REVIEW_2026-10-03.md R1; Matt, 2026-10-03: "go on those".)
 #
 # Takes the newest nightly tar (tools/backup.sh), verifies its sha256, restores it into a scratch directory,
 # runs the integrity check AGAINST THE RESTORED KEEPING (the ledger chain + every sealed CAS record), parses

@@ -379,6 +379,8 @@ Discoveries outside scope → the drift ledger.
   4. **Storyboards: wire into the companion/ask layer** — the pastoral layer may meet a person with
      the movement they stand in, with the framing guard ALWAYS attached; crisis still outranks all.
   5. **Voices: build voices.html** — the visible face of "one system meant to unify the church."
+     *(Editorial note, 2026-10-16: built 2026-07-28; the page was retired in the cut of 2026-08-05 and
+     `/voices.html` 301s to `/bible.html`. The contract text above is left as written.)*
   6. **Security sweep: resume as the next loop**, over the NEW surfaces especially.
   7. **proof.html: leave the historical run** — re-assay only when the fleet changes materially.
   8. **THE CAPSTONE (Matt, 2026-07-28, scope widened same day): once the program is complete, run
@@ -413,7 +415,7 @@ Every line is a gate result or a live measurement, never prose.
 | D4 · wire the shards | LIVE | 899 | RSS 2834/2809 → 1893/1908 MB per process; battery 33/33; IDF identical frozen vs resident |
 | D5 · acquisitions | LIVE | 903 | ISBE 1915 (9,380 articles, PD) + Clarke 854 ch + Gill 1,189 ch, all attributed |
 | D6 · security sweep | LIVE | 912 | 2 real holes closed (ICS injection; unsigned witnesses); signed report verified end-to-end in a browser |
-| D7 · null assay capstone | COMPLETE | 916 | `docs/NULL_ASSAY.md`; 1 unbacked claim corrected; **3 findings against our own theses**, memories corrected |
+| D7 · null assay capstone | COMPLETE | 916 | `docs/archive/NULL_ASSAY.md`; 1 unbacked claim corrected; **3 findings against our own theses**, memories corrected |
 
 **What this close-out does NOT claim.** §5 is not declared done by this session:
 - **§3/§5 private-key-on-the-wire: 5 endpoints still accept `private_key` inbound.** Mesh

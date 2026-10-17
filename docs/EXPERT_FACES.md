@@ -1,6 +1,7 @@
 # Expert Faces — the callable life-domain composites (Phase 3 design)
 
-*Design for review — no code deployed until Matt signs off (see docs/SPECIALIST_LAYER.md).*
+*Built and routed: `GET /faces` and `POST /face` ARE in `web/api.py` ROUTES (`src/concordance/faces.py`,
+`tests/test_faces.py`). The Phase-3 design brief this grew from is archived at `docs/archive/SPECIALIST_LAYER.md`.*
 
 A **face** is a callable servant for a life-domain — the social worker, the tutor, the steward, the
 theorist — the "hands and feet" of the one body (1 Cor 12; `project_witness_wire_levels_contributors_writers`).

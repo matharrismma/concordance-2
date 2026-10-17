@@ -77,15 +77,17 @@ PR body: one sentence + link to `https://narrowhighway.com/proof.html` as eviden
 | Health check | `https://narrowhighway.com/health` |
 
 **mcp.so** — edit the existing `concordance-engine` listing: swap the description for the
-longer copy above, set the URL to the remote `https://narrowhighway.com/mcp`, tool count 38.
+longer copy above, set the URL to the remote `https://narrowhighway.com/mcp`, tool count = the live
+`capabilities` count (38 when this was written; 102 as of 2026-10-16 — never paste a remembered number).
 
 ## After listing (watch the fruit)
 
 Two honest reads on the droplet:
-- `data/traffic.json` — first-party request tally by class. **As of 2026-07-08:**
+- `data/traffic.json` — first-party request tally by class. **As of 2026-07-08 (dated figures — re-read
+  the file for today's):**
   4,683 human requests (1,205 unique IPs), 1,257 agent requests, 10,157 bot/crawler hits.
-  Arrival is real; the top human page after `/` is `/almanac.html`.
-- `data/ledger/` — durable seals minted. **As of 2026-07-08: 26.** This is the number that
+  Arrival is real; the top human page after `/` was `/almanac.html` (retired 2026-08-05; it 301s to `/`).
+- `data/ledger/` — durable seals minted. **As of 2026-07-08: 26 (dated).** This is the number that
   matters: it counts how often the *moat itself* was used, not just browsed. The gap between
   1,257 agent requests and 26 seals is the whole reason to list — to convert arrival into
   verification.

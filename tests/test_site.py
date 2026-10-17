@@ -57,7 +57,9 @@ def test_identity_line_is_one_source():
     # the agent descriptors say the same thing in machine-register — two load-bearing claims (the exact
     # human wording is not): it does deterministic verification, and there is NO LLM in the loop. "model"
     # is reserved for "model of reality" now, so the anti-generation guarantee says "no LLM" to disambiguate.
-    for rel in ("docs/registry/server.json", "site/.well-known/mcp.json", "site/connect.html"):
+    # docs/registry/server.json was deleted 2026-10-16 (a duplicate of deploy/mcp-registry/server.json and
+    # site/.well-known/mcp.json); the served descriptor and the connect page carry the framing.
+    for rel in ("site/.well-known/mcp.json", "site/connect.html"):
         t = (_ROOT / rel).read_text(encoding="utf-8").lower()
         assert "deterministic verification" in t, f"{rel} lost the engine framing"
         assert "no llm in the loop" in t, f"{rel} lost the 'no LLM in the loop' guarantee"

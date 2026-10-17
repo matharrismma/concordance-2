@@ -183,7 +183,7 @@ concords with it). The engine seals what is checkable and labels the rest as dra
 | Capability | State |
 |---|---|
 | Hash-chained conversation record | ✅ live (`/threads`, `/thread/verify`) |
-| Conversation surface | ✅ live (`/ask.html` on .com and .org) |
+| Conversation surface | ✅ live — the Console at `/` on .com and .org (`/ask.html` retired 2026-08-05; it 301s to `/`) |
 | Portable Ed25519 identity | ✅ module exists (`identity.py`, `/identity` 200) |
 | Offices as modules | ✅ steward, coach, teachings, stacks, voice, badges |
 | **The Router** — the one who knows whom to call | ✅ **built + live** — `router.py`, `GET /route`, 15 tests |
@@ -192,7 +192,7 @@ concords with it). The engine seals what is checkable and labels the rest as dra
 | **Book of Days — written by you, indexed by us** | ✅ **built + live** — `bookofdays.py`, `POST /book`, 15 tests |
 | **Fork + deferred routing** | ✅ **built + live** — `branch.py`, `POST /fork` + `GET /thread/lineage` + `POST /defer`, 18 tests |
 | **Background inlet + return triggers** | ✅ **built + live** — `inlet.py`, `POST /inlet` + `POST /returns`, 13 tests |
-| `/mcp/`, `/openapi.json` | ❌ 404 — not mounted on 2.0 |
+| `/mcp` for outside AI clients | ✅ live — the dedicated MCP host `nh-mcp` (:8003, `docs/MCP_HOST.md`); `/openapi.json` is not served (the MCP catalog is the schema) |
 
 ## 6. Trust boundary
 
@@ -355,8 +355,8 @@ inscription, hand-drawn maps, red and black ink on cream.
 4. **Book of Days** (§4.3) — user-owned, readable, correctable.
 5. **Fork + deferred routing** (§4.4).
 6. **Background inlet + return triggers** (§4.5) — the promise of the whole thing.
-7. **The codex skin** (§7) over the existing `ask.html`.
-8. *(Optional)* mount `/mcp/` + `/openapi.json` for outside AI clients.
+7. **The codex skin** (§7) over the existing `ask.html` *(page retired 2026-08-05 — the Console at `/` is the surface now)*.
+8. ~~*(Optional)* mount `/mcp/` + `/openapi.json` for outside AI clients.~~ `/mcp` is live (`nh-mcp`, `docs/MCP_HOST.md`).
 
 Each step ships behind the gate, deploys per [SOP-1](SOP/SOP.md), and is archived per
 [SOP-3](SOP/SOP.md) — first, previous, current.
@@ -375,7 +375,8 @@ The page stays one book; the DISCERNMENT decides where things live. All determin
 * **Reading** (a book opened from the keeping) → keeps your page; notes file beside the work
   as commentary, never inside it.
 * **Superposition throughout**: one card, many stacks (stacks.py already does this); the
-  visual map of paths-to-answers renders from the existing card graph (brain.html machinery).
+  visual map of paths-to-answers renders from the existing card graph (`brain.html` is gone — reverted
+  2026-07-06, path retired 2026-08-05 → `/graph`; `explore.html` is the one visualization surface).
 
 The Apothecary (shipped today) is the pattern for every wisdom shelf: read + search one side,
 offered wisdom queued for curation on the other, safety and honest verdicts traveling with

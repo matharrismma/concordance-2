@@ -1,6 +1,6 @@
 """THE WARRANT — steward authority that ends, rotates, and says who acted.
 
-`docs/LESSONS_AND_HARDENING.md` H1, closing the gap C1b left. Closing L1 ("a typed name is not
+`docs/archive/LESSONS_AND_HARDENING.md` H1, closing the gap C1b left. Closing L1 ("a typed name is not
 authority") introduced a token, and that token was **one permanent secret, no expiry, no rotation,
 no record of who held it** — the precise opposite of L11, taken from Matt's own The Way v0.2:
 *"startup authority sunsets into the ordinary governance system."*

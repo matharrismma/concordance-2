@@ -1,5 +1,12 @@
 # THE MASTER ARCHITECTURE PLAN — the living document
 
+> **HISTORICAL PLAN (marked 2026-10-16).** Written 2026-07-28, last updated 2026-07-29, and not kept
+> alive after that. Read it as the plan of record for the July 2026 build, not as the current map. The
+> living references are [`ARCHITECTURE.md`](ARCHITECTURE.md), [`WORLD.md`](WORLD.md),
+> [`REMAINING.md`](REMAINING.md) and the umbrella issue
+> (https://github.com/matharrismma/concordance-2/issues/8). Pages named below that were retired in the
+> cut of 2026-08-05 are annotated inline; `_RETIRED` in `web/api.py` is the authority.
+
 Matt, 2026-07-28: "Prioritize what we build now and what we add in our master architecture
 plan. This will be our living document of every aspect of the project and our plans.
 We create SOPs and all Maps necessary to operate."
@@ -79,8 +86,11 @@ Each line: system — where it lives — what it guarantees.
 - Coach — K-3 reading tutor entry + curricula; badges; shared-study groups; journal/stacks.
 - Reference — bible.html (parallel WEB + original tongues), Harmony, Timeline, back-matter
   tables, Atlas (real coordinates), encyclopedia-as-cards, study quick-find (`study_index`),
-  narratives/storyboards (12 boards, 17 movements), voices.html (unify-the-church face).
+  narratives/storyboards (12 boards, 17 movements), voices.html (unify-the-church face; retired
+  2026-08-05 → `/bible.html`).
 - The Works, Codex, Brain, connection-MAP, proof/corrected/guarantees pages — receipts shown.
+  *(Retired 2026-08-05: works/corrected/guarantees fold into `/proof.html`; codex → `/`; brain → `/graph`.
+  `proof.html` is the page that remains.)*
 
 **The fellowship**
 - Covenant identity — 4 verses → PBKDF2 → Ed25519, keys born on device, server holds only
@@ -118,7 +128,7 @@ Each line: system — where it lives — what it guarantees.
    carriage return) and UNSIGNED WITNESSES in the
    moderation floor (three invented names could quarantine true content; anyone could edit
    another viewer's block list). Report/block/unblock now require fresh detached signatures
-   naming their exact target, and site/community.html mints a device-local reporting key so
+   naming their exact target, and site/community.html (retired 2026-08-05 → `/`) minted a device-local reporting key so
    the fix reaches the reader. Probed clean: consent (wrong signer / tampered scope / cross-
    agent / cross-verb / TTL cap / private-key smuggling), study routes (traversal, injection,
    oversize, NUL), card render (attribute breakout, javascript: URLs), ambiguous-ref last mile.
@@ -303,8 +313,9 @@ about what was not checked. A million cards of slop would be worse than 496,559 
 ## §5 SOPs and MAPS (what we operate by)
 
 **Standing SOPs** (`docs/SOP/`): SOP.md (general), CONTINUOUS_IMPROVEMENT.md
-(probe_usefulness → triage → fix → gate → deploy → push → re-probe), LESSONS.md.
-Also operative: DEPLOY.md, RUNBOOK.md, SELF_HOST.md, the gate ritual (§1 Operations).
+(probe_usefulness → triage → fix → gate → deploy → push → re-probe), LESSONS.md (archived 2026-10-16 →
+`archive/LESSONS.md`). Also operative: RUNBOOK.md (DEPLOY.md was merged into it 2026-10-16), SELF_HOST.md,
+the gate ritual (§1 Operations).
 
 **SOPs to write with the Commons** (each ships WITH its feature, not after):
 - SOP-CURATION — the review queue: automated pre-checks, steward judgment, promotion with
@@ -319,9 +330,10 @@ Also operative: DEPLOY.md, RUNBOOK.md, SELF_HOST.md, the gate ritual (§1 Operat
   promotion thresholds, the cold-storage freeze/thaw ritual + dependency audit.
 
 **Maps** (drawn, kept current):
-- The Nesting (one rooted tree) — live at /brain + /map; counts in the manifest.
+- The Nesting (one rooted tree) — live at `/graph` (`/brain.html` retired 2026-08-05 → `/graph`); counts in
+  the manifest.
 - Route/tool map — the registry IS the map (`web/api.py` ROUTES + MCP tools + goldens).
-- Deploy map — DEPLOY.md + deploy.sh (droplet, services, ports, staggered ritual).
+- Deploy map — RUNBOOK.md + deploy.sh (droplet, services, ports, staggered ritual).
 - Data map — data/*.jsonl registry in `corpus.load_cards` (the one load list); shard
   manifest (`data/shards/manifest.json`); what is tracked vs untracked (git discipline).
 - Community rings map — private / shelf-friends / commons; where each gate sits (to draw

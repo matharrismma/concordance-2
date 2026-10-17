@@ -1,6 +1,6 @@
 # THE LIVE PROBES — one per line; `#` lines are comments. Each: id, face (secular|witness|public), method, path, query|body,
 # expect [{at, eq|ne|in|contains|startswith|has|len|min_len|absent|exists|truthy}], known_miss (the assay's want list).
-# Every expectation below was verified live on 2026-10-03 (docs/PROJECT_REVIEW_2026-10-03.md; docs/THE_CAMEL_2026-10-03.md).
+# Every expectation below was verified live on 2026-10-03 (docs/archive/PROJECT_REVIEW_2026-10-03.md; docs/archive/THE_CAMEL_2026-10-03.md).
 # ── the hole: the nations' parts of the story, and after Christ the test ──────────────────────────────────────────────
 {"id": "ask.taoism.leads.with.the.shadow", "method": "POST", "path": "/ask", "body": {"text": "is there a connection between taoism and christianity"}, "expect": [{"at": "lead.id", "eq": "card_foreshadow_chinese"}, {"at": "path.type", "eq": "shadow"}, {"at": "path.anchor.ref", "eq": "John 14:6"}, {"at": "lead.excerpt", "min_len": 100}]}
 {"id": "ask.tao.te.ching.reaches.the.shelf", "method": "POST", "path": "/ask", "body": {"text": "what does the tao te ching say about the way"}, "expect": [{"at": "lead.shelf", "in": ["foreshadows", "signposts"]}]}

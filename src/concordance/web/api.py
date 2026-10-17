@@ -4031,7 +4031,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 # Full catalog on /mcp (existing clients keep working); PROFILE MOUNTS on
                 # /mcp/<name> — the assessment's §3.3 made deployment-real. A client that mounts
                 # /mcp/library sees and may call ONLY the library plane; a call across planes is
-                # refused by name. See docs/MCP_ASSESSMENT_2026-08-04.md and task #123.
+                # refused by name. See docs/archive/MCP_ASSESSMENT_2026-08-04.md and task #123.
                 from ..mcp.http import handle_http
                 profile, refusal = resolve_mcp_profile(u.path)
                 if refusal is not None:

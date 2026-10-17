@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # THE DECISION MEMORY, SEALED — tar + sha256 of the agent's decision memory (Matt's words, dated, verbatim)
 # onto the 12 TB ark and the box. The written continuity of every decision is one of the three things
-# that compound (docs/PROJECT_REVIEW_2026-10-03.md, R2: bus factor 1). Run daily by the Windows task
+# that compound (docs/archive/PROJECT_REVIEW_2026-10-03.md, R2: bus factor 1). Run daily by the Windows task
 # "NarrowHighway Memory Seal"; safe to run by hand any time. Known branches only: this drive, this box.
 set -eu
 MEM="${NH_MEMORY_DIR:-$HOME/.claude/projects/C--Users-hdven-OneDrive-Desktop/memory}"

@@ -1,6 +1,6 @@
 # THE PUNCH LIST — one item at a time, finished before the next is started
 
-> **The live routed sheet is now [`REMAINING.md`](REMAINING.md)** — every open item there carries a
+> **The live routed sheet is now [`REMAINING.md`](../REMAINING.md)** — every open item there carries a
 > `<subsystem>-<n>` ID (or a cross-cutting `commons-`/`seed-`/`record-` slug) that routes to
 > `/systems`, its SOP, and its code. This file is kept for its **unit definitions and completion
 > tests** (the `C#`/`H#` breakdowns REMAINING points back to); the surviving units are mapped there.
@@ -16,7 +16,7 @@ Each item names its own completion test, so "done" is not a judgement call.
 
 ## 0 · THE HARDENING  ← NEXT (from the lessons)
 
-`docs/LESSONS_AND_HARDENING.md` — thirteen measured lessons from 2026-07-30 and the seven units they
+`docs/archive/LESSONS_AND_HARDENING.md` — thirteen measured lessons from 2026-07-30 and the seven units they
 obligate (H1–H7). It goes FIRST because three of its items are things that are currently **wrong**,
 not merely missing: a steward token that never expires, a stale-read helper duplicated across eight
 pages, and a gate that names no owner. The Commons resumes at C1e once H1–H3 are closed.
@@ -60,7 +60,7 @@ v3 places 99.97% but stores nothing. **Done when** the address renders on the ca
   does not exist (the module is `ask.py`, with 14 importers). A wider sweep for a real archival
   target found only `grid_atlas.py` unwired from any production code path (0 src refs) — but it is
   tested (`test_grid_atlas.py` exercises its full surface) and named a strong aspect in
-  `docs/HARVEST.md`; it renders the axis atlas over the live `grid` scaffold. That is **latent, not
+  `docs/archive/HARVEST.md`; it renders the axis atlas over the live `grid` scaffold. That is **latent, not
   dead** — archiving it would remove a working, tested capability, so it stays. `inlet.py`, briefly
   eyed as a candidate, is live too (serves `POST /inlet` + returns). **Conclusion: no file here is
   safe to archive. This debt is closed as a documentation error, not a removal.**

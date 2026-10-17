@@ -41,7 +41,7 @@ def test_domain_counts_on_surfaces_match_live():
     secular, distinct = _verifier_counts()
     ok = {secular, distinct}
     surfaces = ["site/proof.html", "site/connect.html", "site/.well-known/mcp.json",
-                "docs/registry/server.json"]
+                "deploy/mcp-registry/server.json"]   # docs/registry/server.json deleted 2026-10-16 (a duplicate)
     bad = []
     for rel in surfaces:
         text = (_ROOT / rel).read_text(encoding="utf-8")
@@ -82,7 +82,7 @@ def test_no_unbounded_infallibility_claims():
     surfaces = list((_ROOT / "site").glob("*.html")) + [
         _ROOT / "site" / "llms.txt",
         _ROOT / "site" / ".well-known" / "mcp.json",
-        _ROOT / "docs" / "registry" / "server.json",
+        _ROOT / "deploy" / "mcp-registry" / "server.json",   # docs/registry/server.json deleted 2026-10-16
     ]
     bad = []
     for p in surfaces:

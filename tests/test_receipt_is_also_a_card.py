@@ -1,7 +1,7 @@
 """A minted receipt becomes a card, so the promise survives leaving this machine.
 
 CORRECTED 2026-08-01: the original justification ("19 of 20 advertised receipts answered 404")
-was a broken measurement — a CRLF artifact, retracted in docs/OPERATIONS_LOG.md. All 20 resolve.
+was a broken measurement — a CRLF artifact, retracted in docs/archive/OPERATIONS_LOG.md. All 20 resolve.
 
 What stands is structural: `data/cas/` is node-local — not deployed, not backed up — so a seal
 minted on one machine lives only there while the card citing it travels everywhere. 127 seals

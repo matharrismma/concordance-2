@@ -1,10 +1,10 @@
 # Narrow Highway — Handoff (2026-09-06)
 
 *Where the work stands and how to pick it up. For the whole picture of what the project **is**, read
-[`docs/WORLD.md`](WORLD.md) first — this handoff is **where we are and what's next**, not a
+[`docs/WORLD.md`](../WORLD.md) first — this handoff is **where we are and what's next**, not a
 re-explainer. For the full dated history behind every line below, read
-[`docs/OPERATIONS_LOG.md`](OPERATIONS_LOG.md) (newest entries at the bottom). Full open work, ID'd and
-routed: [`REMAINING.md`](REMAINING.md). A red team from Fable is being prepared for —
+[`docs/archive/OPERATIONS_LOG.md`](OPERATIONS_LOG.md) (newest entries at the bottom). Full open work, ID'd and
+routed: [`REMAINING.md`](../REMAINING.md). A red team from Fable is being prepared for —
 [`RED_TEAM_BRIEF_2026-09-06.md`](RED_TEAM_BRIEF_2026-09-06.md).*
 
 ---
@@ -63,13 +63,13 @@ every number against `/capabilities` + `/systems` before trusting it; a stale re
 | `5727c7d` | Keeping self-report records the phonetic-index fix; `"degraded"` now = stocking, not the ranker |
 | `a525611` | **Ranker facet 2: a phonetic guide never leads a bare subject lookup** — "gravity" led with ARPABET; pronunciation genre loses the exact-title boost; ask_probe 25/25 |
 | `32e5a36` | **Keeping's self-report catches up** — `systems.py` + the keeping SOP no longer call the fixed ranker issue "unsupported"; `"degraded"` deliberately left standing (unmeasured at scale) |
-| `32ed21a` | **The ranker: substance vs headword** — `corpus.SUBSTANCE_WEIGHT`, docs/HANDOFF's own #1 open item from the prior snapshot. Full detail + design rationale in `docs/OPERATIONS_LOG.md`'s newest entry and memory `ranker-substance-vs-headword`. |
+| `32ed21a` | **The ranker: substance vs headword** — `corpus.SUBSTANCE_WEIGHT`, docs/HANDOFF's own #1 open item from the prior snapshot. Full detail + design rationale in `docs/archive/OPERATIONS_LOG.md`'s newest entry and memory `ranker-substance-vs-headword`. |
 | `9fbb605` | **The Console joins the Deck** — `/console` now shares `/ask`'s thread + recall pipeline. Full detail in the operations log and memory `console-joins-the-deck`. |
 | `074cc51` | **Never forgets, part 1** — surfaced `recall.land`/`remember`'s existing (but silent) output on `/ask`'s typed-chat UI (`index.html`) |
 
 Earlier sessions' shipped work (`.com` face, the map, the subsystem constellation, tongues→Word, etc.)
 is unchanged and still live — see the previous revision of this file in git history or
-`docs/OPERATIONS_LOG.md` for that record; not re-listed here to keep this snapshot current rather than
+`docs/archive/OPERATIONS_LOG.md` for that record; not re-listed here to keep this snapshot current rather than
 ever-growing.
 
 All of the above: deployed, box == repo, Watchman-verified (live smoke tests, not just HTTP 200).
@@ -101,7 +101,7 @@ something else, don't discard the changes — that's someone else's in-progress 
 learning from that. Everything else here is **frozen behind the wedge, deliberately**, until it pulls.
 So this is the "when the wedge is validated, or Matt redirects" list — not a build queue to grind now.
 
-*The full, ID'd, routed list of everything remaining is [`REMAINING.md`](REMAINING.md) — each item a
+*The full, ID'd, routed list of everything remaining is [`REMAINING.md`](../REMAINING.md) — each item a
 `<subsystem>-<n>` that routes to `/systems`, its SOP, and its code. The IDs below in brackets are the
 routing IDs.*
 
@@ -137,7 +137,7 @@ routing IDs.*
    **grid**, the **Floor**, the **Bible atlas**.
 6. **Tracked gaps:** verifier domain coverage ~52%; OT→NT prophecy sweep not run; founders (Ellen G.
    White) gather pending (needs per-work `--start-after`); off-site backup durability; `find_verifier`
-   is referenced in the MCP tool description but unimplemented here; `docs/THE_MAP.md` has stale counts
+   is referenced in the MCP tool description but unimplemented here; `docs/THE_MAP.md` (deleted 2026-10-16; see `docs/WORLD.md`) has stale counts
    (superseded by `WORLD.md`); Lighthouse's 71 `verify_*` tools folded behind one `check`+`find_verifier`
    is a portable pattern for concordance-2's own 94-tool MCP surface — noted as an opportunity, not
    started.
@@ -170,9 +170,9 @@ from ~21.9KB to ~17.5KB (every pointer preserved, links intact) — no longer an
 
 ## Pointers
 
-- **Reference:** [`docs/WORLD.md`](WORLD.md) (all aspects + locations + a reviewer section).
+- **Reference:** [`docs/WORLD.md`](../WORLD.md) (all aspects + locations + a reviewer section).
 - **Live truth:** `GET /capabilities`, `GET /systems`, `https://narrowhighway.com/map.html`.
-- **The record:** `git log --oneline` (this handoff written at `32e5a36`); `docs/OPERATIONS_LOG.md`
+- **The record:** `git log --oneline` (this handoff written at `32e5a36`); `docs/archive/OPERATIONS_LOG.md`
   (newest entry: "All 3" — the Console + the ranker, 2026-09-02/03).
 - **Memory:** the auto-memory index (loaded each session) carries the constitution, the standing
   guidance, and the per-topic project/feedback notes — see `console-joins-the-deck_2026-09-02` and

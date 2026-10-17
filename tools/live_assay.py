@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """THE LIVE ASSAY WITH A RATCHET — ask the running engine the questions that found this week's bugs, every
-night, and let recall only rise. (docs/PROJECT_REVIEW_2026-10-03.md R3; Matt, 2026-10-03: "go on those".)
+night, and let recall only rise. (docs/archive/PROJECT_REVIEW_2026-10-03.md R3; Matt, 2026-10-03: "go on those".)
 
 CI runs 2,100 tests in fifty seconds and never touches the keeping. Five reach bugs in two days were found
 only by asking the live box: a chart lifted as a bodiless brief, the alignment gate hiding a signpost, two

@@ -1,7 +1,7 @@
 # REMAINING — the one routed sheet
 
 *What is left, each item with a **clear ID that IS its route**. Built 2026-09-05 by consolidating the
-scattered registers ([`GAPS.md`](GAPS.md) `G#`, [`PUNCHLIST.md`](PUNCHLIST.md) `C#`/`H#`, the
+scattered registers ([`GAPS.md`](GAPS.md) `G#`, [`PUNCHLIST.md`](archive/PUNCHLIST.md) `C#`/`H#`, the
 `task #NNN` comments, the `HANDOFF` frontier, every SOP's "unsupported" line, and the live `/systems`
 handicaps) into one taxonomy. There is no new problem under the sun: every item below already existed
 somewhere; this sheet only gives it a stable address.*

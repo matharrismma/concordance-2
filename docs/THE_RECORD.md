@@ -72,7 +72,7 @@ Every document a human reads is a **query rendered as prose**:
 | view | the query behind it |
 |---|---|
 | `GAPS.md` | `OPS.gaps.*` where state ≠ closed, ordered by harm |
-| `OPERATIONS_LOG.md` | `OPS.events.*` newest first |
+| `archive/OPERATIONS_LOG.md` | `OPS.events.*` newest first |
 | `MASTER_PLAN.md` §1 | `OPS.systems.*` where shipped |
 | `SOP/*.md` | `OPS.sop.*` |
 | `THE_RECORD.md` | this card and its children |
