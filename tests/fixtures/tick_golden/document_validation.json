@@ -1,0 +1,188 @@
+{
+ "entry": "document_validation",
+ "rc": 0,
+ "seals": {
+  "0605e158229e877a0a51b348301ed30c7e453b684d1c3f1dc0f4a89d3b12a406": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "11eeb1a33403eadfbde47fd77cbc710866969e3c7a1937a9789ef924cd587c38": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "2240e57484d30ff7275ac6041d4bf0b267647221cebcb07c811ec31d549f2c25": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "33359dd81e2f9a3f9e1dad39e2cf65afc845c0a687ac3398c245e70a78b51c31": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "48875f6510f20fc92b3776a83fdad5be5538568ea47d750a3a050cc076ca0f8f": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "77d6c27ed0cf76729e0ad0a700ae0930ac994644225876d39d8a0ada3b587957": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7c6e54d0577883dc5b07e89d7346085369f72db6456a9d9b060b086a5aec348e": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a72b7bef2e6956b7343a59e4ebdfb174e41396f402c2b792307a6503ab412b86": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a851a1c986cac0ce2da995d8101ce5cda5d1758a83c2634be4157967c16fd401": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "afcbf60bf77943ae9e0d81a77c7ebc92235be57c3480931b96e9cbe90916853f": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "b8b6aadd60525a86bc16f67c0c1e81b0e7f88b888b537d81e8471f9d62adcf6b": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d5fef05d88fdbcc324c7f00dbf4773ade276d09157e28ea69aa9c80e4f789658": {
+   "axis": "document_validation",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_document_validation_the_check_digits_sealed": {
+   "field": "document_validation",
+   "question": "Document validation - the check digits, sealed",
+   "references": [
+    "ISO 2108:2017, International Standard Book Number",
+    "H. P. Luhn, US Patent 2,950,048 (1960); ISO/IEC 7812-1",
+    "GS1 General Specifications, section 7.9 (check digit calculation)",
+    "J. A. Gallian, Error detection methods, ACM Computing Surveys 28 (1996) 504"
+   ],
+   "statement": "A check digit is a theorem of modular arithmetic: the weighted sum of a valid identifier is 0 mod 11 (ISBN-10) or 0 mod 10 (ISBN-13, EAN, UPC, Luhn).",
+   "ticks": [
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[an ISBN-10, SEALED] 0-306-40615-2 is valid (sealed through document_validation.DOC_VERIFY): weights 10 down to 1, sum 0 mod 11.",
+     "kind": "instance",
+     "seal": "48875f6510f20fc92b3776a83fdad5be5538568ea47d750a3a050cc076ca0f8f"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[the C book, SEALED] 0-13-110362-8, The C Programming Language (2nd ed.), is valid (sealed through document_validation.DOC_VERIFY): the sum is 88 = 8 x 11.",
+     "kind": "instance",
+     "seal": "77d6c27ed0cf76729e0ad0a700ae0930ac994644225876d39d8a0ada3b587957"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[the X, SEALED] 0-8044-2957-X is valid (sealed through document_validation.DOC_VERIFY): mod 11 has eleven residues, so one check value is 10 and is written X. The alphabet grew by one letter because the modulus is prime.",
+     "kind": "instance",
+     "seal": "b8b6aadd60525a86bc16f67c0c1e81b0e7f88b888b537d81e8471f9d62adcf6b"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[a transposition caught, SEALED AS INVALID] 0306460152 - the 0 and 6 of 0306406152 swapped - is invalid, sealed with claimed = false (sealed through document_validation.DOC_VERIFY). Mod 11 with distinct weights catches EVERY adjacent transposition: swapping digits a and b shifts the sum by a - b, never 0 mod 11.",
+     "kind": "instance",
+     "seal": "a72b7bef2e6956b7343a59e4ebdfb174e41396f402c2b792307a6503ab412b86"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[an ISBN-13, SEALED] 978-0-306-40615-7 is valid (sealed through document_validation.DOC_VERIFY) - the same book as the ISBN-10 above, re-coded under the 978 prefix with a new check digit, mod 10 with weights 1 and 3.",
+     "kind": "instance",
+     "seal": "7c6e54d0577883dc5b07e89d7346085369f72db6456a9d9b060b086a5aec348e"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[another, SEALED] 978-0-596-52068-7 is valid (sealed through document_validation.DOC_VERIFY): the weighted sum is 130.",
+     "kind": "instance",
+     "seal": "a851a1c986cac0ce2da995d8101ce5cda5d1758a83c2634be4157967c16fd401"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[Luhn, SEALED] 79927398713 passes Luhn (sealed through document_validation.DOC_VERIFY): double every second digit from the right, subtract 9 from any double above 9, and the sum is 0 mod 10. Every payment card number ends in a Luhn digit.",
+     "kind": "instance",
+     "seal": "33359dd81e2f9a3f9e1dad39e2cf65afc845c0a687ac3398c245e70a78b51c31"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[an IMEI, SEALED] 49-015420-323751-8 passes Luhn (sealed through document_validation.DOC_VERIFY): a phone's identity carries the same check as a card.",
+     "kind": "instance",
+     "seal": "0605e158229e877a0a51b348301ed30c7e453b684d1c3f1dc0f4a89d3b12a406"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[one digit wrong, SEALED AS INVALID] 79927398714 fails, sealed with claimed = false (sealed through document_validation.DOC_VERIFY). Luhn catches every single-digit error - the doubling-and-casting-out-nines makes each position's contribution a bijection on the digits.",
+     "kind": "instance",
+     "seal": "d5fef05d88fdbcc324c7f00dbf4773ade276d09157e28ea69aa9c80e4f789658"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[an EAN-13, SEALED] 4006381333931 is valid (sealed through document_validation.DOC_VERIFY): weights 1,3,1,3,... sum 0 mod 10.",
+     "kind": "instance",
+     "seal": "afcbf60bf77943ae9e0d81a77c7ebc92235be57c3480931b96e9cbe90916853f"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[the blind spot, SEALED] 4006831333931 - the 3 and 8 of the EAN above swapped - is ALSO valid (sealed through document_validation.DOC_VERIFY). Weights 1 and 3 differ by 2, so a swap of adjacent digits a, b shifts the sum by 2(a - b); when a - b = 5 that is 10, invisible mod 10. The code catches every single-digit error and most transpositions but not this one; the engine seals the limitation as an instance, not an exception.",
+     "kind": "instance",
+     "seal": "2240e57484d30ff7275ac6041d4bf0b267647221cebcb07c811ec31d549f2c25"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[a UPC-A, SEALED] 036000291452 is valid (sealed through document_validation.DOC_VERIFY): twelve digits, read as an EAN-13 with a leading zero - the two codes are one scheme.",
+     "kind": "instance",
+     "seal": "11eeb1a33403eadfbde47fd77cbc710866969e3c7a1937a9789ef924cd587c38"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[the designs, CITED] ISBN-10's mod 11 (ISO 2108), the mod-10 1/3 weighting of EAN and ISBN-13 (GS1), and Luhn's doubling (1960) are chosen designs: cited as postulates. What each design DETECTS is a theorem of modular arithmetic - sealed above by instance, proven in general by Gallian (1996): a prime modulus with distinct weights catches all single errors and all adjacent transpositions; mod 10 cannot catch them all, and the 5-apart swap is the proof.",
+     "kind": "postulate",
+     "source": "ISO 2108:2017; GS1 General Specifications 7.9; Luhn, US 2,950,048; Gallian, ACM Comput. Surv. 28 (1996) 504"
+    },
+    {
+     "by": "tools/tick.py document_validation",
+     "claim": "[on the one map] A check digit is an error-detecting code (card_floor_computer_science: parity and its generalizations), built from modular arithmetic (the number-theory floor: residues, a prime modulus) and judged by information theory (the information-theory stick: one redundant symbol buys detection, not correction). The engine never reads a card number or an identity - it checks a published example's arithmetic, nothing more.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

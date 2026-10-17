@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "bsd_formula",
+ "aliases": [
+  "bsd_formula",
+  "bsd_full",
+  "birch_formula",
+  "bsd_next"
+ ],
+ "handler": "bsd_formula",
+ "why_python": "calls verify_derivation itself (2x)"
+}

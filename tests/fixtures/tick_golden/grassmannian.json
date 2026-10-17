@@ -1,0 +1,99 @@
+{
+ "entry": "grassmannian",
+ "rc": 0,
+ "seals": {
+  "0edf5439db41e62efa66352fc1c281f20a9b5bb3b3f8e5bba9be425ce79580cc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "dim_gr_1_3"
+   ]
+  },
+  "4293a953bb429415361118e711a9264d8d50f027e1d230e45671f81fefe07105": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "plucker_minor_refused"
+   ]
+  },
+  "48aa937220b5b0cd169fe9d150d43777dcd76ce31d5e4ae811a0ae750286e3dc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "plucker_relation_gr24"
+   ]
+  },
+  "4b925088b8f596611934b10acaf658eab7db9823c741117d83b13afadd621051": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "dim_amplituhedron_k2_m4"
+   ]
+  },
+  "bc5521002a6d89f5f1e5c62ba0d4929a1e0bf7ad450ca74b14e12dc7d8c2c4b7": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "dim_gr_2_4"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_positive_grassmannian": {
+   "field": "mathematics",
+   "question": "The positive Grassmannian",
+   "references": [
+    "A. Postnikov, Total positivity, Grassmannians, and networks, arXiv:math/0609764 (2006)",
+    "N. Arkani-Hamed & J. Trnka, The Amplituhedron, JHEP 10 (2014) 030"
+   ],
+   "statement": "Positive geometry (the totally-nonnegative Grassmannian and the amplituhedron) computes planar N=4 super-Yang-Mills scattering amplitudes as a canonical form, with no Feynman diagrams. The mathematics is exact; whether NATURE's amplitudes ARE geometry — beyond the maximally-symmetric N=4 toy theory — is the open question, not the arithmetic.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the positive-Grassmannian reading, 2026-10-06",
+     "claim": "[the object] The positive Grassmannian Gr>=0(k,n) (Postnikov 2006) is the k x n matrices mod GL(k) whose maximal minors (Plucker coordinates) are all >= 0. Concretely, the totally positive 2x4 matrix [[1,1,1,1],[0,1,2,3]] has six minors p12=1, p13=2, p14=3, p23=1, p24=2, p34=1 — all strictly positive, so it lies in Gr>=0(2,4). Its 3-term Plucker relation holds exactly: p12*p34 + p14*p23 = 4 = p13*p24 (sealed; equivalently p12 p34 - p13 p24 + p14 p23 = 0).",
+     "kind": "witness",
+     "seal": "48aa937220b5b0cd169fe9d150d43777dcd76ce31d5e4ae811a0ae750286e3dc"
+    },
+    {
+     "by": "Narrow Highway - the positive-Grassmannian reading, 2026-10-06",
+     "claim": "[the dimension] dim Gr(k,n) = k(n-k); for Gr(2,4) that is 2*(4-2) = 4 (sealed). The positive part Gr>=0(2,4) is a 4-dimensional cell complex (Postnikov's positroid cells) — a real, combinatorial geometry, not a metaphor.",
+     "kind": "witness",
+     "seal": "bc5521002a6d89f5f1e5c62ba0d4929a1e0bf7ad450ca74b14e12dc7d8c2c4b7"
+    },
+    {
+     "by": "Narrow Highway - the positive-Grassmannian reading, 2026-10-06",
+     "claim": "[the atom - a simplex] The simplest positive Grassmannian, Gr>=0(1,3), has dimension 1*(3-1) = 2 (sealed): it is a triangle, the 2-simplex — points with positive coordinates, normalised. A simplex is the prototype of a positive geometry, and every positroid cell is glued from pieces of this kind.",
+     "kind": "witness",
+     "seal": "0edf5439db41e62efa66352fc1c281f20a9b5bb3b3f8e5bba9be425ce79580cc"
+    },
+    {
+     "by": "Narrow Highway - the positive-Grassmannian reading, 2026-10-06",
+     "claim": "[the amplituhedron's room] The physical (m=4) tree amplituhedron A(n,k,4) has dimension k*m = 4k; for k=2 that is 8 (sealed). The planar N=4 SYM amplitude is the unique canonical form with logarithmic singularities on the boundaries of this 8-dimensional positive space — the amplitude IS the geometry's volume form.",
+     "kind": "witness",
+     "seal": "4b925088b8f596611934b10acaf658eab7db9823c741117d83b13afadd621051"
+    },
+    {
+     "by": "Narrow Highway - the positive-Grassmannian reading, 2026-10-06",
+     "claim": "[positivity is a GATE - the core, concrete] The constraint has teeth: the 2x3 matrix [[1,1,1],[0,1,-1]] has minor p13 = det[[1,1],[0,-1]] = 1*(-1) - 1*0 = -1 < 0 (sealed), so it is TURNED BACK — not in Gr>=0(2,3) — by the very test that admits the totally positive matrix above. Admit-or-refuse: the boundary of the positive region is a real wall. This is the shape of the engine's own verifier (pass, or refuse), of which the core note below speaks — positivity as the gate.",
+     "kind": "witness",
+     "seal": "4293a953bb429415361118e711a9264d8d50f027e1d230e45671f81fefe07105"
+    },
+    {
+     "by": "Narrow Highway - the positive-Grassmannian reading, 2026-10-06",
+     "claim": "[the amplituhedron] Arkani-Hamed & Trnka (2013/14): the scattering amplitudes of planar N=4 super-Yang-Mills are the canonical form ('volume') of a positive geometry built from Gr>=0 — computed with NO Feynman diagrams and no sum over virtual particles; unitarity and locality emerge from positivity. It is a THIRD road to the same Yang-Mills amplitudes, beside perturbative Feynman diagrams and non-perturbative lattice MCMC (sealed on stick_yang_mills_existence_and_mass_gap).",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the positive-Grassmannian reading, 2026-10-06",
+     "claim": "[the open claim] This is established for PLANAR N=4 SUPER-YANG-MILLS — a maximally-symmetric toy theory — NOT for the Standard Model or QCD. That nature's amplitudes ARE geometry is a research program, not a proven fact about the physical world. Seal the arithmetic (the Plucker positivity and relation), attribute the program, the physical claim stays open — a beautiful structure, read as evidence, never a proof.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the positive-Grassmannian reading, 2026-10-06",
+     "claim": "[THE CORE — a map, not a launder] Positive geometry is the archetype of THIS engine's own architecture. Valid results are the canonical form of ADMISSIBILITY constraints: the gate (RED -> FLOOR -> WAY), the verifiers' pass-or-refuse (a claim is admissible or it is turned back — the minor is >= 0 or it is not), the one-way diode and airlock, will as the fuel and reality as the harness that refuses the reverse. As a scattering amplitude emerges from positivity with NO Feynman diagram, the engine's sealed truth emerges from the constraints with NO author — found, never produced by a generator stepping through paths (a generator picking its own path is a destructive act). This is a MAP (borrow the form), never a launder: the engine checks truth, it does not compute physics amplitudes; the likeness is the discernment, never a fit (the Hole).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

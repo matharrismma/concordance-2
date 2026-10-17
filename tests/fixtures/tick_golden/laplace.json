@@ -1,0 +1,64 @@
+{
+ "entry": "laplace",
+ "rc": 0,
+ "seals": {
+  "7694f9486cb24835d6e1100083bdd00b75f492fb997ff40e37b3b49cc66ad8a2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "laplace_pole_real_part_dissipation"
+   ]
+  },
+  "a89bd0f0e7f6fe7c269d03901a92561f727cb7113e2d92f84ce6fc681cfc0457": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "entropy_one_time_constant_decay"
+   ]
+  },
+  "f050db48ce013bfcabb4baf81aa0ab532341b7f3fd5aaa2b5b39d69bfa7923a5": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "laplace_pole_magnitude"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_laplace_differential_equations_and_where_entropy_fits": {
+   "field": "mathematics",
+   "question": "Laplace, differential equations, and where entropy fits",
+   "references": [
+    "Laplace: L{f'} = sF(s) - f(0); an ODE becomes a polynomial in s",
+    "poles at s = -sigma +/- i*omega: Re(s) = decay/dissipation, Im(s) = oscillation",
+    "the heat equation's irreversibility; Navier-Stokes energy inequality"
+   ],
+   "statement": "The Laplace transform turns d/dt into multiplication by s, so a linear differential equation becomes algebra in the s-plane - solve, then invert. A mode is s = -sigma + i*omega: the imaginary part is reversible oscillation, the real part is decay. Entropy is that real part - dissipation, the irreversible axis - the viscous term in Navier-Stokes, the one-way heat equation, the engine's own ratchet.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Laplace and entropy, 2026-10-07",
+     "claim": "[Laplace turns calculus into algebra - lift, solve, return] d/dt becomes multiplication by s, so the damped oscillator x'' + 2x' + 5x = 0 becomes s^2 + 2s + 5 = 0; its poles have real part -c/2m = -2/2 = -1 (sealed). Solve in the s-domain, invert back - the same lift-solve-return as stick_using_imaginary_numbers_c_completes_r_lift_and_return, and Fourier is this on the imaginary axis.",
+     "kind": "witness",
+     "seal": "7694f9486cb24835d6e1100083bdd00b75f492fb997ff40e37b3b49cc66ad8a2"
+    },
+    {
+     "by": "Narrow Highway - Laplace and entropy, 2026-10-07",
+     "claim": "[the s-plane geometrizes it - and here is WHERE ENTROPY FITS] The poles sit at s = -1 +/- 2i; the conjugate pair's product is (-1)^2 + 2^2 = 5 = k/m (sealed), in the LEFT half-plane. The REAL PART is the decay rate - dissipation, energy bleeding to heat, ENTROPY PRODUCTION; the IMAGINARY PART is oscillation (the reversible Fourier axis). Left half = decays = entropy rising = stable; right half = grows; the imaginary axis = lossless. Entropy is the real part of s.",
+     "kind": "witness",
+     "seal": "f050db48ce013bfcabb4baf81aa0ab532341b7f3fd5aaa2b5b39d69bfa7923a5"
+    },
+    {
+     "by": "Narrow Highway - Laplace and entropy, 2026-10-07",
+     "claim": "[entropy is the irreversible fall] A dissipative mode decays as e^(-sigma t); after one time constant only e^(-1) = 0.3679 (sealed) remains, and it cannot be run backward - the heat does not gather itself back into motion. In Navier-Stokes that is the viscous term nu*grad^2 u: the dissipation that smooths the flow and the energy inequality (energy only decreases) - the second law for the fluid, the dissipation side of stick_navier_stokes_dissonance_and_dispersion.",
+     "kind": "witness",
+     "seal": "a89bd0f0e7f6fe7c269d03901a92561f727cb7113e2d92f84ce6fc681cfc0457"
+    },
+    {
+     "by": "Narrow Highway - Laplace and entropy, 2026-10-07",
+     "claim": "[where entropy fits - the full placement] Entropy is the IRREVERSIBLE / DISSIPATIVE axis across the arc: the real part of s in Laplace (decay), the viscous term and energy inequality in Navier-Stokes (the second law for the flow), and the one-way HEAT equation (du/dt = grad^2 u - it diffuses but never un-diffuses) whose BACKWARD run is the de Bruijn-Newman deformation of zeta (stick_the_de_bruijn_newman_constant) - so entropy even threads the Riemann arc. It is the Boltzmann S = k ln W of stick_entropy_and_gravity written as a rate. And it is the engine's OWN arrow: the append-only ledger, the floor that only rises, the scribe's ratchet (stick_scribing...), the one-way diode/airlock (WILL=FUEL, REALITY=HARNESS) - a seal cannot be un-sealed. Laplace is the reversible machinery; entropy is the part of reality that is not. map, never launder: seal the arithmetic; entropy is found as the decay, not imposed.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

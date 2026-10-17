@@ -1,0 +1,47 @@
+{
+ "entry": "networking",
+ "rc": 0,
+ "seals": {
+  "457069ff1820df9db142ffb0e41371058cb153414222cb8b5d5dda7338b4020b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "addresses_in_a_slash_24_subnet_two_to_the_eighth"
+   ]
+  },
+  "af99fee32feafe44588695df60dccda72af423ecf9c4288d8218d3d53e7f28ac": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ipv4_address_space_two_to_the_thirty_two"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_networking_addresses_packets_and_capacity": {
+   "field": "",
+   "question": "Networking - addresses, packets, and capacity",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py networking",
+     "claim": "[addresses - the IPv4 space, SEALED] An IPv4 address is 32 bits, so there are 2^32 = about 4.3 billion of them (sealed) - and we ran out, which is why IPv6 (128 bits) exists. A /24 subnet holds 2^8 = 256 addresses (sealed). Addressing is just counting in binary. Ties card_floor_computer_science.",
+     "kind": "instance",
+     "seal": "af99fee32feafe44588695df60dccda72af423ecf9c4288d8218d3d53e7f28ac"
+    },
+    {
+     "by": "tools/tick.py networking",
+     "claim": "[a subnet is a power of two, SEALED] Splitting the address space into subnets is slicing powers of two: a /24 gives 2^8 = 256 (sealed), a /16 gives 2^16. The whole routing hierarchy is binary arithmetic on addresses. Ties card_floor_computer_science.",
+     "kind": "instance",
+     "seal": "457069ff1820df9db142ffb0e41371058cb153414222cb8b5d5dda7338b4020b"
+    },
+    {
+     "by": "tools/tick.py networking",
+     "claim": "[capacity - Shannon's limit] A channel carries at most C = B log2(1 + S/N) bits per second (Shannon) - no code beats it, the same capacity that bounds the information instrument. Packets, protocols (TCP/IP) and error-correction all live under that ceiling. On the one map, networking rests on computer science and the instruments. Ties card_floor_networking.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "riemann",
+ "aliases": [
+  "riemann"
+ ],
+ "handler": "riemann",
+ "params": [
+  {
+   "type": "float",
+   "default": 100.0
+  }
+ ],
+ "why_python": "takes arguments"
+}

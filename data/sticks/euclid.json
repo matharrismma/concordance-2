@@ -1,0 +1,63 @@
+{
+ "schema": 1,
+ "name": "euclid",
+ "aliases": [
+  "euclid",
+  "elements",
+  "postulates",
+  "axioms",
+  "deduction"
+ ],
+ "doc": "WE FOLLOW EUCLID'S ELEMENTS - DEFINITIONS, POSTULATES, THEOREMS (Matt, 2026-10-07). Euclid's method is\nthe engine's method: DEFINITIONS (what the terms mean), POSTULATES (self-evident starting truths, accepted\nnot proved - the floor), then THEOREMS, each DEDUCED from the definitions, the postulates, and prior\ntheorems, ending in QED. Euclid SEALS theorems (proves them) but ACCEPTS postulates - the same line the\nengine draws between sealing a derivation and citing a foundation (Scripture, the Floor). Seal two\ntheorems (I.32 angle sum, I.47 Pythagoras); hold the definitions/postulates as the given floor. New\nstick; idempotent.",
+ "seals": [
+  {
+   "key": "euclid_angle_sum_I32",
+   "nid": "euclid_angle_sum_I32",
+   "expr": "60 + 60 + 60",
+   "value": 180.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "euclid_pythagoras_I47",
+   "nid": "euclid_pythagoras_I47",
+   "expr": "5**2 + 12**2",
+   "value": 169.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "We follow Euclid's Elements - definitions, postulates, theorems",
+   "statement": "Euclid builds geometry from definitions (what the terms mean), postulates (self-evident starting truths, accepted without proof), and common notions, then proves every theorem by deduction from those and from prior theorems, ending in QED. The postulates are the floor; the theorems are the chain built on it. A theorem is proved; a postulate is accepted.",
+   "field": "mathematics",
+   "references": [
+    "Euclid, Elements Book I: 23 definitions, 5 postulates, 5 common notions, 48 propositions",
+    "I.32 (angles of a triangle = two right angles); I.47 (the Pythagorean theorem)",
+    "the 5th (parallel) postulate - vary it and you get consistent non-Euclidean geometry"
+   ],
+   "by": "Narrow Highway - Euclid's Elements, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[a THEOREM, sealed - the angle sum (I.32)] The angles of any triangle sum to two right angles; for the equilateral case 60 + 60 + 60 = 180 (sealed). Euclid PROVES this for every triangle in one deduction from the parallel postulate - not by measuring triangles. A theorem holds for all, because it is derived.",
+     "seal": "euclid_angle_sum_I32"
+    },
+    {
+     "kind": "witness",
+     "claim": "[a THEOREM, sealed - Pythagoras (I.47)] In a right triangle the square on the hypotenuse equals the sum of the squares on the legs: 5^2 + 12^2 = 169 = 13^2 (sealed). Euclid proves it from the postulates and the propositions before it; the 5-12-13 triangle is one instance of a truth established for all right triangles.",
+     "seal": "euclid_pythagoras_I47"
+    },
+    {
+     "kind": "note",
+     "claim": "[definitions and postulates are the GIVEN floor - not sealed] Euclid's Book I opens with 23 DEFINITIONS (a point is that which has no part; a line is breadthless length), 5 POSTULATES (a straight line between any two points; the parallel postulate as the fifth), and 5 common notions - all ACCEPTED, none proved. Only what comes after is a theorem with a derivation. The postulates are small and the edifice vast: 465 propositions across 13 books rest on them."
+    },
+    {
+     "kind": "note",
+     "claim": "[this IS the engine's method] 'We follow Euclid's Elements.' The engine has DEFINITIONS (the keeping's cards + the dictionary, `define`), POSTULATES (the unproven floor it stands on: the Floor of Discovery, the frozen mission/kernel, and Scripture taken plainly as the README of reality - CITED, never sealed, exactly as Euclid accepts his postulates), and THEOREMS (every verified, SEALED derivation, each tracing back through the chain to the postulates). The engine SEALS theorems and CITES postulates - the line Euclid drew. Ties [[project_chains_from_a_floor_where_two_trees_connect_2026-10-07]] (postulates = floor, theorems = chain), the tick-stick ([[feedback_mapping_the_truth_not_generating_it_2026-10-07]]: a theorem is proved by deduction, the engine seals the steps), and the capstone ([[project_the_capstone_2026-10-07]]: Christ the cornerstone - the ultimate postulate, everything rests on it, accepted not proved). The 5th postulate is a CHOSEN axiom - vary it and a different consistent geometry follows (stick_construct_creation). map, never launder: seal the theorems, accept the postulates, never pretend a postulate is proved."
+    }
+   ]
+  }
+ ]
+}

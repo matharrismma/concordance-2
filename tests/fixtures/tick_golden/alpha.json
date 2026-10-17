@@ -1,0 +1,48 @@
+{
+ "entry": "alpha",
+ "rc": 0,
+ "seals": {
+  "659c50144ee2eb6b69868fb43ce169896e1003fd6335cde217404fc42b29050f": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "alpha"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_fine_structure_constant": {
+   "field": "physics",
+   "question": "The fine-structure constant",
+   "references": [
+    "CODATA 2018 recommended values",
+    "A. S. Eddington, Relativity Theory of Protons and Electrons (1936) — the 1/137 claim"
+   ],
+   "statement": "Why does the fine-structure constant have the value alpha ~ 1/137.036, and is it truly constant across space and time? No accepted theory derives it from first principles; the open question is its value and its constancy, not its measurement.",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the fine-structure reading, 2026-10-05",
+     "claim": "alpha = e^2 / (2*eps0*h*c) = 7.2973525693e-03, so 1/alpha = 137.035999, computed from the engine's attested CODATA constants (numeric mode) — the measured value, as a fact",
+     "kind": "witness",
+     "seal": "659c50144ee2eb6b69868fb43ce169896e1003fd6335cde217404fc42b29050f"
+    },
+    {
+     "by": "Narrow Highway — the fine-structure reading, 2026-10-05",
+     "claim": "[the 137] 1/alpha = 137.035999 is NOT the integer 137: it is a measured dimensionless number, 137.035999084(21) in CODATA 2018. Eddington argued 1/alpha was exactly an integer (first 136, then 137); that is historical and false. The '137' that invites numerology is the rounded reciprocal of a measured quantity — base-independent as a magnitude, but its digit string is not a law.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway — the fine-structure reading, 2026-10-05",
+     "claim": "The claim that alpha varies measurably across space or time is tightly bounded: the Oklo natural reactor limits any change over ~2 billion years to |d(alpha)/alpha| below ~10^-7, and laboratory atomic-clock comparisons bound the present drift to parts in 10^17 per year. Reported astronomical variation (quasar absorption) is contested and not established. To the evidence, alpha is constant.",
+     "kind": "exclusion",
+     "source": "T. Damour & F. Dyson, Nucl. Phys. B 480 (1996) 37 (Oklo); CODATA 2018; atomic-clock bounds, e.g. Rosenband et al., Science 319 (2008) 1808"
+    },
+    {
+     "by": "Narrow Highway — the fine-structure reading, 2026-10-05",
+     "claim": "[discernment] The engine seals that alpha IS ~1/137.036 — the arithmetic and the measurement are facts. It does not endorse that 137 'means' anything beyond the measured constant; no first-principles derivation of its value is known, here or anywhere. Seal the value, cite the claims, endorse nothing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

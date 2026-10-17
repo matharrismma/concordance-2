@@ -1,0 +1,29 @@
+{
+ "entry": "count",
+ "rc": 0,
+ "seals": {
+  "89ab49bc7b3e2a0cda60cfce16b8d2696cb5a5606ab77492ef7c3cec836d7a3e": {
+   "axis": "number_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "zero_count"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_riemann_hypothesis": {
+   "field": "",
+   "question": "Riemann hypothesis",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the count, honest about its reach, 2026-10-05",
+     "claim": "Counted, NOT shown on the line: ζ has exactly 2,846,548,032 non-trivial zeros with 0 < Im(ρ) <= 1,000,000,000, by Turing's method (S(T) = -0.826, within Backlund's bound 5.77). The on-line sweep reaches height 1e7; this is the zero COUNT far beyond it — it extends the stick's reach, it does not assert these zeros lie on the critical line.",
+     "kind": "witness",
+     "seal": "89ab49bc7b3e2a0cda60cfce16b8d2696cb5a5606ab77492ef7c3cec836d7a3e"
+    }
+   ]
+  }
+ }
+}

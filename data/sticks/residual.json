@@ -1,0 +1,9 @@
+{
+ "schema": 1,
+ "name": "residual",
+ "aliases": [
+  "residual"
+ ],
+ "handler": "residual",
+ "why_python": "calls verify_derivation itself; needs data/zeta_zeros.jsonl in the keeping (NOT_APPLICABLE in an isolated one)"
+}

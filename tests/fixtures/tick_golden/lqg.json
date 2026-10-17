@@ -1,0 +1,69 @@
+{
+ "entry": "lqg",
+ "rc": 0,
+ "seals": {
+  "843da11c9604c3908a6aa8492ea54c070d8235bc2a7d3d472eeffa126f5f0928": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "immirzi_parameter"
+   ]
+  },
+  "9f87e0d7436c23f63289b7d76344817ef43a74f16571af3bc42149eb8ee3b0d7": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "lqg_min_area_quantum"
+   ]
+  },
+  "b24d6fdf619c085ed908e65e256fc474d5b146a8c0f7d6e1c890ac8c9cb6e5cb": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "planck_area"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_quantum_gravity": {
+   "field": "physics",
+   "question": "Quantum gravity",
+   "references": [
+    "C. Rovelli, Quantum Gravity, Cambridge University Press (2004)",
+    "C. Rovelli, L. Smolin, Discreteness of area and volume in quantum gravity, Nucl. Phys. B 442 (1995) 593",
+    "A. Ashtekar, J. Baez, A. Corichi, K. Krasnov, Quantum geometry and black hole entropy, Phys. Rev. Lett. 80 (1998) 904 (the Immirzi determination)"
+   ],
+   "statement": "Is gravity a quantum theory, and what quantizes it? The fourth force has no experimentally confirmed quantum field theory; general relativity and quantum mechanics are not yet joined. The open question is the mechanism, not the scale.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the loop-quantum-gravity reading, 2026-10-06",
+     "claim": "[the scale - where gravity meets the quantum] The Planck area is lP^2 = hbar*G/c^3 = 2.6123e-70 m^2 (Planck length lP = 1.6163e-35 m), sealed from the attested G, hbar, c. This is the firmly-established part: the scale at which a quantum theory of gravity must take over, built from the three constants of gravity (G), the quantum (hbar) and relativity (c). Nothing here is quantized yet - it is the scale, as a fact.",
+     "kind": "witness",
+     "seal": "b24d6fdf619c085ed908e65e256fc474d5b146a8c0f7d6e1c890ac8c9cb6e5cb"
+    },
+    {
+     "by": "Narrow Highway - the loop-quantum-gravity reading, 2026-10-06",
+     "claim": "[loop quantum gravity - discrete geometry] LQG quantizes general relativity background-independently: geometry itself is discrete. The area operator has eigenvalues A = 8*pi*gamma*lP^2 * sum sqrt(j(j+1)) over spin-network punctures; the smallest nonzero quantum (j=1/2) is A_min = 8*pi*gamma*(sqrt(3)/2)*lP^2 = 2.7726 lP^2 (sealed) - which, with the entropy-fixed Immirzi, is exactly 4*ln2. The ARITHMETIC of the construction is sealed; that physical area IS discrete is attributed, and unconfirmed.",
+     "kind": "witness",
+     "seal": "9f87e0d7436c23f63289b7d76344817ef43a74f16571af3bc42149eb8ee3b0d7"
+    },
+    {
+     "by": "Narrow Highway - the loop-quantum-gravity reading, 2026-10-06",
+     "claim": "[the Immirzi parameter] gamma = ln2/(pi*sqrt(3)) = 0.127384 (sealed), the one free number LQG must fix from outside - here by matching the Bekenstein-Hawking black-hole entropy to A/(4 lP^2) (Ashtekar-Baez-Corichi-Krasnov 1998). Its value, and even how to determine it, are debated (Meissner's count gives ~0.2375); that ambiguity is itself a mark of an unfinished theory.",
+     "kind": "witness",
+     "seal": "843da11c9604c3908a6aa8492ea54c070d8235bc2a7d3d472eeffa126f5f0928"
+    },
+    {
+     "by": "Narrow Highway - the loop-quantum-gravity reading, 2026-10-06",
+     "claim": "[the relational thread] LQG's background independence - no fixed stage; geometry defined only relationally - is the same conviction as relational quantum mechanics (Rovelli), already a sealed anchor here: substance is in the relations. Carlo Rovelli founds both. See stick_relational_quantum_mechanics.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the loop-quantum-gravity reading, 2026-10-06",
+     "claim": "[the Hole stays open] LQG is one candidate to quantize gravity; string theory is the other. Neither is experimentally confirmed; LQG makes few testable predictions and has an open semiclassical-limit problem (recovering smooth general relativity at large scale). Gravity remains the Hole the gauge unification (electroweak, and the GUT doorway on the fine-structure stick) does not hold. LQG is an attempt at the outline of what is missing, NOT a fit: here there is mathematical STRUCTURE but not yet EVIDENCE - narrowing is evidence, never proof, and a theory with no test has made no mark on reality yet.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

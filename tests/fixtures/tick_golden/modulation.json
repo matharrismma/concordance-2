@@ -1,0 +1,172 @@
+{
+ "entry": "modulation",
+ "rc": 0,
+ "seals": {
+  "13db0303d8b42c59ccf90c7c314148b4e814901065f8aa92a1e017a59b9ddbd5": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "eigenvalues_of_the_two_point_channel"
+   ]
+  },
+  "35cafef3293812051a9091303d954ce5353134bb0c51ee5431748b56ba7faa9a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fm_carrier_vanishes_at_beta_2_405"
+   ]
+  },
+  "4aeb1009af015fa1f9b1455ad306a9ce2cb626e3ed2fa60b37c76739c31ef941": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fm_carrier_share_bessel_j0_at_beta_1"
+   ]
+  },
+  "7fce3e3f22ef8e469d0c7e3849c6e253b66af44011d4ac768e8596a91d28bf35": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "powers_made_trivial_by_the_diagonal"
+   ]
+  },
+  "a0c0f35ae1c5f79877dacc722d4445ddcc320476f499d62f011a81a4da62aabe": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "the_matrix_along_its_own_axis"
+   ]
+  },
+  "a3e444fca33578b8777225b1231323fe4d7103c0be84191cb6370eaaed7b67b5": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "fm_modulation_index"
+   ]
+  },
+  "a55fa645d5cbe87f0d59bd2b6d8b0a6da95a97227610a8244a909c8cd9cd8b06": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "the_fourier_basis_is_unit"
+   ]
+  },
+  "c17775296cde29640d429b26fde19d41da55bab24bfb40eab3c8f524bad9c787": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "carson_rule_broadcast_fm"
+   ]
+  },
+  "d55951cce597ab238b3d9768d4f9ec769ff9fcb28594981bbca1dcea24f8bbfe": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "am_bandwidth_is_twice_the_message"
+   ]
+  },
+  "f754a55b809c027e11a9c850f7fa95db253290395358f52c1bf6498b4fe0842b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mixing_two_tones_makes_two_sidebands"
+   ]
+  },
+  "fd3349a5192e0ba0665b9a8d0036fd594de240d94594b1fe70715d8919001b3d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "am_sidebands_share_at_full_modulation"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_am_and_fm_with_diagonalization_a_message_rides_a_carrier_and": {
+   "field": "engineering",
+   "question": "AM and FM, with diagonalization - a message rides a carrier, and a channel is diagonal in the basis of sinusoids",
+   "references": [
+    "R. A. Fessenden (1906): amplitude modulation on the air; E. H. Armstrong (1933): wide-band FM",
+    "J. R. Carson, Notes on the theory of modulation, Proc. IRE 10 (1922) 57-64: the bandwidth rule",
+    "F. W. Bessel (1824): the functions that weight an FM carrier and its sidebands",
+    "J. Fourier (1822); the convolution theorem: a time-invariant system is diagonal in the sinusoids",
+    "A. Cayley (1858), C. Jordan (1870): eigenvalues and the diagonal form",
+    "1 Corinthians 14:7-10; Proverbs 25:11; Matthew 11:15",
+    "stick_every_matrix_is_a_rotation_and_a_stretch (the SVD); stick_the_complex_field_is_the_physics_of_waves (Fourier); stick_tensors_how_the_data_is_arranged_inside_the_bubbles"
+   ],
+   "statement": "A message rides a carrier as its amplitude or as its frequency. AM: two sidebands, a bandwidth of twice the message, at most a third of the power in the message. FM: Carson's rule, a modulation index, the carrier's share a Bessel function that vanishes at 2.405. Why either survives the channel: a linear time-invariant channel is diagonal in the basis of sinusoids - each frequency multiplied by one gain, nothing mixed - and diagonalization is the finding of that basis, the frame in which a matrix is only its eigenvalues, powers are trivial, and the most efficient vectors are the axes.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[AM - the message is the height] Multiply a 5 kHz message onto any carrier and the spectrum has the carrier and two sidebands, one 5 kHz above and one below: bandwidth 2 x 5000 = 10,000 Hz (sealed). The product of two cosines is a sum of two: cos3 cos1 = (cos2 + cos4)/2, sealed as 1 + the difference = 1. Mixing is addition in frequency - the Fourier stick's rotation, applied.",
+     "kind": "witness",
+     "seal": "d55951cce597ab238b3d9768d4f9ec769ff9fcb28594981bbca1dcea24f8bbfe"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[AM pays for its carrier] At full modulation the sidebands carry m^2/(2 + m^2) = 1/3 = 0.3333 of the power (sealed); the carrier, which says nothing, takes two thirds. AM is simple to receive and expensive to send: the message rides as amplitude, and so does every burst of noise.",
+     "kind": "witness",
+     "seal": "fd3349a5192e0ba0665b9a8d0036fd594de240d94594b1fe70715d8919001b3d"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[the identity that is the mixer] 1 + cos3 cos1 - (cos2 + cos4)/2 = 1 (sealed): the product-to-sum identity, judged against one because a zero can only be judged against something. Every mixer, every sideband, every heterodyne receiver is this one line of trigonometry.",
+     "kind": "witness",
+     "seal": "f754a55b809c027e11a9c850f7fa95db253290395358f52c1bf6498b4fe0842b"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[FM - the message is the pitch] Broadcast FM swings the carrier 75 kHz either way for a 15 kHz message: Carson's rule gives a bandwidth of 2 (75,000 + 15,000) = 180,000 Hz (sealed), and the modulation index beta = 75/15 = 5 (sealed). The message is in WHEN the wave crosses zero, not how high it goes - which is why amplitude noise cannot touch it (Armstrong 1933).",
+     "kind": "witness",
+     "seal": "c17775296cde29640d429b26fde19d41da55bab24bfb40eab3c8f524bad9c787"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[beta] 75 / 15 = 5 (sealed): the peak phase swing in radians, 286 degrees. The larger beta, the more sidebands carry the message and the wider the band: FM buys its quiet with bandwidth, a trade AM cannot make.",
+     "kind": "witness",
+     "seal": "a3e444fca33578b8777225b1231323fe4d7103c0be84191cb6370eaaed7b67b5"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[the carrier's share is a Bessel function] In FM the carrier's amplitude is J_0(beta): at beta = 1, J_0(1) = 0.765198 (sealed through its series, 21 terms) - the carrier keeps 76.5% of its amplitude and the sidebands take the rest, with J_1, J_2, ... weighting each pair. The total power never changes (sum of J_n^2 = 1, cited); FM only moves it.",
+     "kind": "witness",
+     "seal": "4aeb1009af015fa1f9b1455ad306a9ce2cb626e3ed2fa60b37c76739c31ef941"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[the carrier vanishes] At beta = 2.405 J_0 is zero: 1 + J_0(2.404826) = 0.9999998 (sealed, 31 terms) - the carrier disappears entirely and every watt is in the sidebands. Engineers set a transmitter's deviation by finding this null on a spectrum analyser: the zero of a Bessel function, measured in the air.",
+     "kind": "witness",
+     "seal": "35cafef3293812051a9091303d954ce5353134bb0c51ee5431748b56ba7faa9a"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[diagonalization - the frame where a matrix is only its numbers] A = [[2,1],[1,2]] has eigenvalues (4 +- sqrt(16 - 12))/2 = 3 and 1 (the larger sealed), along (1,1)/sqrt2 and (1,-1)/sqrt2. Seen along its own axis the matrix is just the number 3: v^T A v = 3 (sealed). Those two axes are exactly the two-point Fourier basis, and A is a circulant - a channel: the sinusoids are the eigenvectors of every time-invariant system (the convolution theorem, cited). That is why a message on a carrier survives a wire: the channel multiplies each frequency by one gain and mixes nothing.",
+     "kind": "witness",
+     "seal": "13db0303d8b42c59ccf90c7c314148b4e814901065f8aa92a1e017a59b9ddbd5"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[the matrix is just 3 along its axis] (1,1) A (1,1)^T / 2 = 3 (sealed): in the eigenbasis the whole 2x2 object is two numbers on a diagonal. The 'most efficient vectors' of the svd stick are these axes; a symmetric matrix's SVD IS its diagonalization.",
+     "kind": "witness",
+     "seal": "a0c0f35ae1c5f79877dacc722d4445ddcc320476f499d62f011a81a4da62aabe"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[powers made trivial] A^10 in the diagonal frame is diag(3^10, 1^10), trace 3^10 + 1 = 59,050 (sealed) - no multiplication of matrices at all. The Fibonacci stick's Binet formula is the same move; so is every transfer function on the Laplace stick's s-plane: diagonalize, then the hard thing is a product of numbers.",
+     "kind": "witness",
+     "seal": "7fce3e3f22ef8e469d0c7e3849c6e253b66af44011d4ac768e8596a91d28bf35"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[the basis is unit] (1/sqrt2)^2 + (1/sqrt2)^2 = 1 (sealed): the Fourier basis vector has length one, so the change of frame is a rotation (the spherical matrix) - it distorts nothing, and the energy of a signal is the same summed over time or over frequency (Parseval, the dot stick).",
+     "kind": "witness",
+     "seal": "a55fa645d5cbe87f0d59bd2b6d8b0a6da95a97227610a8244a909c8cd9cd8b06"
+    },
+    {
+     "by": "Narrow Highway - AM and FM, with diagonalization, 2026-10-08",
+     "claim": "[the discernment, and the guard] A channel that is diagonal in sinusoids is why radio works; a keeping that is diagonal in its domains is why the engine's gate can be a product of independent verifiers (the form measured 2026-10-08: the domains are nearly orthogonal). AM and FM are two ways to put one message on one carrier - the two surfaces of this engine put one keeping on two carriers, .com and .org, a LIKENESS kept as one. Scripture: 'there are, it may be, so many kinds of voices in the world, and none of them is without signification' (1 Cor 14:10) - many channels, each with meaning; 'A word fitly spoken is like apples of gold in pictures of silver' (Prov 25:11) - the right frame; 'He that hath ears to hear, let him hear' (Mt 11:15) - tuning. GUARDS: Carson's rule is an approximation (cited as such); the Bessel values are sealed through their series, not looked up; the engine likeness is a discernment. Eleven numbers sealed; the rest cited. Ties: svd, fourier, laplace, delta, fibonacci, tensor.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "entry": "euclid",
+ "rc": 0,
+ "seals": {
+  "7bf7357043b61d736b3054256d6ec65ea497bf4fd8f1025e41d418529bae5dde": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "euclid_angle_sum_I32"
+   ]
+  },
+  "a7f320a8cd6cb1b9b00e587d9e0bbe5d11c42e2c51a376773f414b6bdd7754a6": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "euclid_pythagoras_I47"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_we_follow_euclid_s_elements_definitions_postulates_theorems": {
+   "field": "mathematics",
+   "question": "We follow Euclid's Elements - definitions, postulates, theorems",
+   "references": [
+    "Euclid, Elements Book I: 23 definitions, 5 postulates, 5 common notions, 48 propositions",
+    "I.32 (angles of a triangle = two right angles); I.47 (the Pythagorean theorem)",
+    "the 5th (parallel) postulate - vary it and you get consistent non-Euclidean geometry"
+   ],
+   "statement": "Euclid builds geometry from definitions (what the terms mean), postulates (self-evident starting truths, accepted without proof), and common notions, then proves every theorem by deduction from those and from prior theorems, ending in QED. The postulates are the floor; the theorems are the chain built on it. A theorem is proved; a postulate is accepted.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Euclid's Elements, 2026-10-07",
+     "claim": "[a THEOREM, sealed - the angle sum (I.32)] The angles of any triangle sum to two right angles; for the equilateral case 60 + 60 + 60 = 180 (sealed). Euclid PROVES this for every triangle in one deduction from the parallel postulate - not by measuring triangles. A theorem holds for all, because it is derived.",
+     "kind": "witness",
+     "seal": "7bf7357043b61d736b3054256d6ec65ea497bf4fd8f1025e41d418529bae5dde"
+    },
+    {
+     "by": "Narrow Highway - Euclid's Elements, 2026-10-07",
+     "claim": "[a THEOREM, sealed - Pythagoras (I.47)] In a right triangle the square on the hypotenuse equals the sum of the squares on the legs: 5^2 + 12^2 = 169 = 13^2 (sealed). Euclid proves it from the postulates and the propositions before it; the 5-12-13 triangle is one instance of a truth established for all right triangles.",
+     "kind": "witness",
+     "seal": "a7f320a8cd6cb1b9b00e587d9e0bbe5d11c42e2c51a376773f414b6bdd7754a6"
+    },
+    {
+     "by": "Narrow Highway - Euclid's Elements, 2026-10-07",
+     "claim": "[definitions and postulates are the GIVEN floor - not sealed] Euclid's Book I opens with 23 DEFINITIONS (a point is that which has no part; a line is breadthless length), 5 POSTULATES (a straight line between any two points; the parallel postulate as the fifth), and 5 common notions - all ACCEPTED, none proved. Only what comes after is a theorem with a derivation. The postulates are small and the edifice vast: 465 propositions across 13 books rest on them.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - Euclid's Elements, 2026-10-07",
+     "claim": "[this IS the engine's method] 'We follow Euclid's Elements.' The engine has DEFINITIONS (the keeping's cards + the dictionary, `define`), POSTULATES (the unproven floor it stands on: the Floor of Discovery, the frozen mission/kernel, and Scripture taken plainly as the README of reality - CITED, never sealed, exactly as Euclid accepts his postulates), and THEOREMS (every verified, SEALED derivation, each tracing back through the chain to the postulates). The engine SEALS theorems and CITES postulates - the line Euclid drew. Ties [[project_chains_from_a_floor_where_two_trees_connect_2026-10-07]] (postulates = floor, theorems = chain), the tick-stick ([[feedback_mapping_the_truth_not_generating_it_2026-10-07]]: a theorem is proved by deduction, the engine seals the steps), and the capstone ([[project_the_capstone_2026-10-07]]: Christ the cornerstone - the ultimate postulate, everything rests on it, accepted not proved). The 5th postulate is a CHOSEN axiom - vary it and a different consistent geometry follows (stick_construct_creation). map, never launder: seal the theorems, accept the postulates, never pretend a postulate is proved.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

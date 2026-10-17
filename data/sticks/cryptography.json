@@ -1,0 +1,75 @@
+{
+ "schema": 1,
+ "name": "cryptography",
+ "aliases": [
+  "cryptography",
+  "rsa",
+  "public_key_cryptography",
+  "cipher"
+ ],
+ "doc": "CRYPTOGRAPHY - public keys and hard problems (Matt, 2026-10-09, down the domain list). Secrecy built on number\ntheory and computational hardness: RSA encrypts with a public key and decrypts with a private one, its security\nresting on the belief that FACTORING is hard (the P vs NP region); the one-time pad has PERFECT secrecy (Shannon).\nSEALED: the RSA round-trip (m -> c -> m by modular exponentiation) and Fermat's little theorem (why decryption\nrecovers the message). Rests on the instruments (number theory, information), P vs NP (hardness), and Riemann\n(the primes). Idempotent.",
+ "seals": [
+  {
+   "key": "encrypt",
+   "nid": "rsa_encrypt_m_pow_e_mod_n",
+   "expr": "4**3 % 33",
+   "value": 31,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "decrypt",
+   "nid": "rsa_decrypt_c_pow_d_mod_n_recovers_m",
+   "expr": "31**7 % 33",
+   "value": 4,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "fermat",
+   "nid": "fermats_little_theorem_a_pow_p_minus_1_mod_p",
+   "expr": "2**6 % 7",
+   "value": 1,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Cryptography - public keys and hard problems",
+   "by": "tools/tick.py cryptography",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the RSA round-trip - encrypt, SEALED] RSA with primes 3 and 11 (n = 33, public exponent e = 3): encrypting the message m = 4 is c = 4^3 mod 33 = 31 (sealed). Anyone with the public key can lock the message; the modular exponentiation is one-way without the private key.",
+     "seal": "encrypt"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the RSA round-trip - decrypt, SEALED] With the private exponent d = 7, decrypting is 31^7 mod 33 = 4 (sealed) - the original message returns. Public key locks, private key unlocks, and the two are mathematically inverse. The whole of asymmetric cryptography is this round-trip.",
+     "seal": "decrypt"
+    },
+    {
+     "kind": "instance",
+     "claim": "[why it works - Fermat's little theorem, SEALED] Decryption recovers the message because a^(p-1) = 1 mod p for prime p: for a = 2, p = 7, 2^6 mod 7 = 1 (sealed). This is the number theory that makes e and d inverse modulo phi(n) - RSA is built on the primes and on Fermat/Euler.",
+     "seal": "fermat"
+    },
+    {
+     "kind": "note",
+     "claim": "[security rests on hardness - the P vs NP region] RSA is secure only because FACTORING n back into its primes is believed hard - no known fast (polynomial) algorithm. That belief lives in the P vs NP region of the map: if P = NP, or a fast factoring algorithm were found, RSA would fall. Shor's quantum algorithm already factors fast IN PRINCIPLE (stick_quantum_factoring), which is why post-quantum cryptography is being built. Ties card_floor_p_vs_np.",
+     "source": "the RSA hardness assumption; integer factorisation; Shor's algorithm; card_floor_p_vs_np"
+    },
+    {
+     "kind": "note",
+     "claim": "[perfect secrecy - Shannon] One scheme is provably unbreakable: the one-time pad (XOR the message with a truly random key as long as the message, used once). Shannon proved it has PERFECT secrecy - the ciphertext reveals nothing about the message - because the key's entropy equals the message's. Its cost (a key as long as all traffic, never reused) is why we fall back to hardness-based schemes for everything else. Ties card_floor_the_instruments (information theory).",
+     "source": "the one-time pad; C. Shannon, perfect secrecy (1949); card_floor_the_instruments"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Cryptography stands on the instruments (number theory and information), the P vs NP region (its security IS a hardness assumption), and Riemann (it runs on the primes, whose distribution the zeta function governs). The applied domain where the Millennium problems become a daily tool: every secure connection bets that factoring is hard. Ties card_floor_cryptography.",
+     "source": "the one map; card_floor_cryptography; tools/seed_cryptography.py"
+    }
+   ]
+  }
+ ]
+}

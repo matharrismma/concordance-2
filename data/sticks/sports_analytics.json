@@ -1,0 +1,184 @@
+{
+ "schema": 1,
+ "name": "sports_analytics",
+ "aliases": [
+  "sports_analytics",
+  "sports",
+  "elo",
+  "pythagorean_expectation",
+  "games_behind"
+ ],
+ "doc": "SPORTS ANALYTICS - the published models, sealed (issue #11, 2026-10-16: reach, down the domain list).\nThrough sports_analytics.SPORT_VERIFY: Bill James's Pythagorean expectation (750 runs for, 600 against, and the\neven case), the Elo expected score at a 100-point gap, at equal ratings, and the 400-point gap that defines the\nscale as ten-to-one, the Elo update for a win and for a loss at K = 32, and games behind (a five-game gap and a\ntie). The Pythagorean exponent and Elo's logistic with its 400 are fitted conventions, CITED; the arithmetic is\nSEALED. Idempotent.",
+ "seals": [
+  {
+   "key": "pythagorean",
+   "domain": "sports_analytics",
+   "artifact": "SPORT_VERIFY",
+   "spec": {
+    "runs_scored": 750,
+    "runs_allowed": 600,
+    "pythag_exponent": 2.0,
+    "claimed_winning_pct": 0.61
+   }
+  },
+  {
+   "key": "pythagorean_even",
+   "domain": "sports_analytics",
+   "artifact": "SPORT_VERIFY",
+   "spec": {
+    "runs_scored": 600,
+    "runs_allowed": 600,
+    "pythag_exponent": 2.0,
+    "claimed_winning_pct": 0.5
+   }
+  },
+  {
+   "key": "elo_100",
+   "domain": "sports_analytics",
+   "artifact": "SPORT_VERIFY",
+   "spec": {
+    "elo_a": 1600,
+    "elo_b": 1500,
+    "claimed_expected_score_a": 0.64
+   }
+  },
+  {
+   "key": "elo_equal",
+   "domain": "sports_analytics",
+   "artifact": "SPORT_VERIFY",
+   "spec": {
+    "elo_a": 1500,
+    "elo_b": 1500,
+    "claimed_expected_score_a": 0.5
+   }
+  },
+  {
+   "key": "elo_400",
+   "domain": "sports_analytics",
+   "artifact": "SPORT_VERIFY",
+   "spec": {
+    "elo_a": 1500,
+    "elo_b": 1900,
+    "claimed_expected_score_a": 0.0909
+   }
+  },
+  {
+   "key": "elo_win",
+   "domain": "sports_analytics",
+   "artifact": "SPORT_VERIFY",
+   "spec": {
+    "elo_a_pre": 1600,
+    "elo_b_pre": 1500,
+    "actual_score_a": 1.0,
+    "elo_K": 32,
+    "claimed_elo_a_post": 1611.52
+   }
+  },
+  {
+   "key": "elo_loss",
+   "domain": "sports_analytics",
+   "artifact": "SPORT_VERIFY",
+   "spec": {
+    "elo_a_pre": 1600,
+    "elo_b_pre": 1500,
+    "actual_score_a": 0.0,
+    "elo_K": 32,
+    "claimed_elo_a_post": 1579.52
+   }
+  },
+  {
+   "key": "games_behind",
+   "domain": "sports_analytics",
+   "artifact": "SPORT_VERIFY",
+   "spec": {
+    "leader_wins": 50,
+    "leader_losses": 30,
+    "team_wins": 45,
+    "team_losses": 35,
+    "claimed_games_behind": 5.0
+   }
+  },
+  {
+   "key": "games_behind_tie",
+   "domain": "sports_analytics",
+   "artifact": "SPORT_VERIFY",
+   "spec": {
+    "leader_wins": 50,
+    "leader_losses": 30,
+    "team_wins": 50,
+    "team_losses": 30,
+    "claimed_games_behind": 0.0
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Sports analytics - Pythagorean expectation, Elo, games behind",
+   "statement": "A season's record is predicted from runs by a power law, a match by a logistic of the rating gap, and a standing by half the sum of two differences.",
+   "field": "sports_analytics",
+   "references": [
+    "B. James, Baseball Abstract (1980s) - the Pythagorean expectation",
+    "A. E. Elo, The Rating of Chessplayers, Past and Present (1978)",
+    "FIDE Rating Regulations (2024), article 8 - the expected-score table and K factors"
+   ],
+   "by": "tools/tick.py sports_analytics",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[Pythagorean expectation, SEALED] 750 runs scored, 600 allowed: W = 750^2 / (750^2 + 600^2) = 0.610 (sealed through sports_analytics.SPORT_VERIFY) - about 99 wins in 162. James's rule: a team's record follows from its run differential more faithfully than from its record so far.",
+     "seal": "pythagorean"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the even case, SEALED] Equal runs for and against give exactly 0.500 (sealed through sports_analytics.SPORT_VERIFY), whatever the exponent - the formula is symmetric.",
+     "seal": "pythagorean_even"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a 100-point Elo gap, SEALED] 1600 against 1500: E = 1 / (1 + 10^(-100/400)) = 0.640 (sealed through sports_analytics.SPORT_VERIFY). The stronger player is expected to score 64 percent - a win in nearly two games of three.",
+     "seal": "elo_100"
+    },
+    {
+     "kind": "instance",
+     "claim": "[equal ratings, SEALED] 1500 against 1500: 0.500 (sealed through sports_analytics.SPORT_VERIFY).",
+     "seal": "elo_equal"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the 400-point gap, SEALED] 1500 against 1900: E = 1 / (1 + 10^1) = 0.0909 (sealed through sports_analytics.SPORT_VERIFY). Four hundred points is DEFINED as ten-to-one odds - the 400 in the formula is the scale's unit, not a finding.",
+     "seal": "elo_400"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a win, SEALED] 1600 beats 1500 at K = 32: R' = 1600 + 32 (1 - 0.640) = 1611.52 (sealed through sports_analytics.SPORT_VERIFY). The favourite gains little for doing what was expected.",
+     "seal": "elo_win"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a loss, SEALED] The same player loses: R' = 1600 + 32 (0 - 0.640) = 1579.52 (sealed through sports_analytics.SPORT_VERIFY) - and loses 20.48 points, the surprise priced by the same expectation. Win and loss are not symmetric; expectation is the pivot.",
+     "seal": "elo_loss"
+    },
+    {
+     "kind": "instance",
+     "claim": "[games behind, SEALED] A leader at 50-30 and a team at 45-35: GB = ((50 - 45) + (35 - 30)) / 2 = 5.0 (sealed through sports_analytics.SPORT_VERIFY): half the sum of the two differences, so a half-game is possible when the teams have played different numbers of games.",
+     "seal": "games_behind"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a tie, SEALED] Identical records are 0.0 games behind (sealed through sports_analytics.SPORT_VERIFY).",
+     "seal": "games_behind_tie"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the models, CITED] The exponent 2 is James's original; the best fit for baseball is nearer 1.83 (and varies by sport) - a FITTED model, not a law. Elo's logistic with 400 and the K factor (FIDE uses 10, 20 and 40) are chosen conventions of a rating system. Cited as postulates: they work, so a prediction from them is inferred, never kept as fact; the standing is the fact.",
+     "source": "James, Baseball Abstract; Elo (1978); FIDE Rating Regulations (2024) art. 8"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] The three models are statistics (card_floor_statistics: a power-law share, a logistic expectation, an update that moves by the surprise) applied to the record of games. The Elo scale was built for chess (the chess stick holds the board; this stick holds the rating) and the probability stick holds the odds the 400 encodes.",
+     "source": "the one map; card_floor_statistics; the chess and probability sticks"
+    }
+   ]
+  }
+ ]
+}

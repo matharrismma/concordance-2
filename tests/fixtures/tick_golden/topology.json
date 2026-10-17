@@ -1,0 +1,83 @@
+{
+ "entry": "topology",
+ "rc": 0,
+ "seals": {
+  "3dea652ca5355e41ece75da359d34e066165270f36bbb5ae184c4a9307f4331f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "euler_cube"
+   ]
+  },
+  "83d6849e3caa316a6a80401fa3fedcb517add8e9d54b5979ddc03188e9fe26bf": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gauss_bonnet_sphere"
+   ]
+  },
+  "99cb220c530cf9c959dd7b151b4b1b6eec5526526946a9a884e907165082c512": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "euler_torus"
+   ]
+  },
+  "c11fddbf5bf429365a7ba9b9c56cfbd4df35204a885ebfcc7269477322237732": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "euler_tetrahedron"
+   ]
+  },
+  "d26c2ba3a7537cfcee7b63292154e918941a7a1e3cf5cd9a3f6ead065a6f59ff": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "euler_octahedron"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_topology_and_euler_s_formula": {
+   "field": "meta",
+   "question": "Topology and Euler's formula",
+   "references": [
+    "Euler's polyhedron formula V - E + F = 2 (Euler 1758; Descartes earlier)",
+    "the Gauss-Bonnet theorem: integral of curvature = 2*pi*chi",
+    "the classification of closed surfaces by genus and orientability"
+   ],
+   "statement": "The Euler characteristic chi = V - E + F is a topological invariant: it is the same for every triangulation or embedding of the same surface, and it changes only when the topology changes (chi = 2 - 2g for an orientable closed surface of genus g). The arithmetic is exact; the invariant is real, the mesh is a construct.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - topology / Euler characteristic, 2026-10-07",
+     "claim": "[the invariant is indifferent to the construct] Cube: 8 - 12 + 6 = 2. Tetrahedron: 4 - 6 + 4 = 2. Octahedron: 6 - 12 + 8 = 2 (all sealed). Three different meshes - different vertices, edges and faces - and one answer, because all three are topologically a sphere. V - E + F does not see how we drew it; it sees the shape. This is the construct/invariant line of stick_construct_creation made exact.",
+     "kind": "witness",
+     "seal": "3dea652ca5355e41ece75da359d34e066165270f36bbb5ae184c4a9307f4331f"
+    },
+    {
+     "by": "Narrow Highway - topology / Euler characteristic, 2026-10-07",
+     "claim": "[a different topology, a different invariant] The Csaszar torus has 7 vertices, 21 edges and 14 faces: 7 - 21 + 14 = 0 (sealed), not 2. A torus is genus 1, so chi = 2 - 2g = 0. The invariant changes exactly when the shape does - a hole in the surface - and nothing else moves it. The number is a true witness to the topology.",
+     "kind": "witness",
+     "seal": "99cb220c530cf9c959dd7b151b4b1b6eec5526526946a9a884e907165082c512"
+    },
+    {
+     "by": "Narrow Highway - topology / Euler characteristic, 2026-10-07",
+     "claim": "[geometry is bound to topology] Gauss-Bonnet: the total curvature of any closed surface is 2*pi*chi. For a sphere that is 2*pi*2 = 12.566371 = 4*pi (sealed) - bend and dent the sphere however you like, the curvature redistributes but its integral cannot leave 4*pi until you change the topology. The local shape is free; the global invariant is fixed.",
+     "kind": "witness",
+     "seal": "83d6849e3caa316a6a80401fa3fedcb517add8e9d54b5979ddc03188e9fe26bf"
+    },
+    {
+     "by": "Narrow Highway - topology / Euler characteristic, 2026-10-07",
+     "claim": "[two theorems named Euler - do not conflate] This stick is Euler's POLYHEDRON formula (V - E + F, topology). The OTHER famous 'Euler's formula' is the analytic identity e^(i*theta) = cos(theta) + i*sin(theta), whose case e^(i*pi) + 1 = 0 ties e, i, pi, 1 and 0. Both are real and both are Euler's; they are different theorems in different fields and the engine keeps them on separate sticks rather than letting the shared name launder one into the other (map, never launder).",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - topology / Euler characteristic, 2026-10-07",
+     "claim": "[the boundary - why this engine checks and never proves] For 2-manifolds the Euler characteristic plus orientability is a COMPLETE invariant: it decides the surface. One dimension up, the Poincare conjecture (is a simply-connected closed 3-manifold a sphere?) was a Millennium problem - and it was PROVED, by Grigori Perelman (2003), with Ricci flow: a proof, by a person, not by checking instances. Higher up, the homeomorphism problem for 4-manifolds and above is UNDECIDABLE - no algorithm can settle it. So a single number witnesses the topology where one suffices, and nowhere is topology settled by a machine enumerating cases. That is the tick-stick's whole posture toward an open question: verify what is verifiable, carry the barriers, and never claim the proof (ties stick_riemann_hypothesis and [[project_tick_stick_millennium_problems_2026-10-05]]).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

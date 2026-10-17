@@ -1,0 +1,149 @@
+{
+ "entry": "photography",
+ "rc": 0,
+ "seals": {
+  "17ae667f31dc4af254ebf6a5001fb482dfb93e2fb5897fcba88846b9d4df1b3e": {
+   "axis": "photography",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "1b9311a08ab01b9dc098e878b9a763360a841f548965e1b9f445f151fb8f8766": {
+   "axis": "photography",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "3ca0706572cbbdc4f50b6e320deaeb93436a6647176fa4e7d4625211024f54f3": {
+   "axis": "photography",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "3f06ef5fa2095e99cb18a29badd09c9c53369991eda97fa114526ce7e2a93548": {
+   "axis": "photography",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5d2e2a0134c9c7868ded1900f81d2d1fefd7f030530c6e6cf735644b59796cf5": {
+   "axis": "photography",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "c6f9df4756adb6be07021b69300209cb6cfed5d92fef03d74589225cb721b8f1": {
+   "axis": "photography",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "cb3a2011e8c5d068f3c6eb2afb1a292f3d7d81dff907a75d7555b752c83f3855": {
+   "axis": "photography",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "e3466a6672bf237c4b458136ab60c95a75f6d144283242b50afcf077c65f2986": {
+   "axis": "photography",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "e5cc03be92b3147bba9d5712514f7569d919ac3d68c0ffc99fc24337264f5936": {
+   "axis": "photography",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_photography_exposure_reciprocity_angle_of_view_hyperfocal": {
+   "field": "photography",
+   "question": "Photography - exposure, reciprocity, angle of view, hyperfocal",
+   "references": [
+    "ISO 2720:1974 - exposure meters and the APEX system (EV = log2(N^2/t) at ISO 100)",
+    "Kodak, the sunny-16 rule (film data sheets, 20th c.)",
+    "R. Kingslake, Optics in Photography (SPIE, 1992), ch. 4 and 5",
+    "H. M. Merklinger, The INs and OUTs of FOCUS (1992) - depth of field and hyperfocal"
+   ],
+   "statement": "A camera's settings are logarithms and tangents: EV counts stops in base 2, the angle of view is 2 atan(d/2f), and the hyperfocal distance is f^2/(N c) + f.",
+   "ticks": [
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[EV at f/8, 1/250, SEALED] EV = log2(64 x 250) = 13.97 (sealed through photography.PHOTO_VERIFY): the APEX scale, each unit one stop - a doubling of light.",
+     "kind": "instance",
+     "seal": "5d2e2a0134c9c7868ded1900f81d2d1fefd7f030530c6e6cf735644b59796cf5"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[sunny 16, SEALED] f/16 at 1/125 (the nearest click to 1/ISO at ISO 100) is EV 14.97, EV 15 (sealed through photography.PHOTO_VERIFY): the rule of thumb for direct sun, which is why a light meter reads 15 on a clear noon.",
+     "kind": "instance",
+     "seal": "3f06ef5fa2095e99cb18a29badd09c9c53369991eda97fa114526ce7e2a93548"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[reciprocity, SEALED] f/8 at 1/250 and f/11 at 1/125 are equivalent exposures (sealed through photography.PHOTO_VERIFY): one stop closed, one stop longer, the same light. f/11 is the nominal name of 8 sqrt 2 = 11.31; the 0.09 EV difference is the rounding of the f-stop series, inside the verifier's 0.1 EV window.",
+     "kind": "instance",
+     "seal": "17ae667f31dc4af254ebf6a5001fb482dfb93e2fb5897fcba88846b9d4df1b3e"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[one stop apart, SEALED AS NOT EQUIVALENT] f/8 at 1/250 and f/8 at 1/125 differ by one stop - sealed with claimed_equivalent = false (sealed through photography.PHOTO_VERIFY). Twice the time at the same aperture is twice the light; the engine seals the inequality as an inequality.",
+     "kind": "instance",
+     "seal": "1b9311a08ab01b9dc098e878b9a763360a841f548965e1b9f445f151fb8f8766"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[the normal lens, SEALED] 50 mm on a 36 mm frame sees 2 atan(36 / 100) = 39.6 deg across (sealed through photography.PHOTO_VERIFY) - the horizontal angle of the 'normal' lens, roughly the angle of comfortable attention.",
+     "kind": "instance",
+     "seal": "3ca0706572cbbdc4f50b6e320deaeb93436a6647176fa4e7d4625211024f54f3"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[wide, SEALED] 24 mm sees 73.7 deg (sealed through photography.PHOTO_VERIFY).",
+     "kind": "instance",
+     "seal": "c6f9df4756adb6be07021b69300209cb6cfed5d92fef03d74589225cb721b8f1"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[long, SEALED] 200 mm sees 10.3 deg (sealed through photography.PHOTO_VERIFY): the tangent is nearly linear here, so the angle falls almost as 1/f - four times the focal length, nearly a quarter of the angle.",
+     "kind": "instance",
+     "seal": "e3466a6672bf237c4b458136ab60c95a75f6d144283242b50afcf077c65f2986"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[hyperfocal at 50 mm f/8, SEALED] H = 50^2 / (8 x 0.030) + 50 = 10,467 mm = 10.47 m (sealed through photography.PHOTO_VERIFY). Focus there and everything from 5.2 m to infinity is acceptably sharp.",
+     "kind": "instance",
+     "seal": "cb3a2011e8c5d068f3c6eb2afb1a292f3d7d81dff907a75d7555b752c83f3855"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[at 24 mm f/8, SEALED] H = 576 / 0.24 + 24 = 2.42 m (sealed through photography.PHOTO_VERIFY): the square of the focal length is why wide lenses carry so much depth of field.",
+     "kind": "instance",
+     "seal": "e5cc03be92b3147bba9d5712514f7569d919ac3d68c0ffc99fc24337264f5936"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[the conventions, CITED] EV at ISO 100 is the APEX convention (ISO 2720); the f-stop series 1, 1.4, 2, 2.8, 4, 5.6, 8, 11, 16 names powers of sqrt 2 rounded; the 0.030 mm circle of confusion is a convention for a 36 mm frame viewed as an 8 x 10 print at arm's length - another viewer, another number. Cited, never sealed; the arithmetic they command is what is sealed.",
+     "kind": "postulate",
+     "source": "ISO 2720:1974; Kingslake, Optics in Photography (1992); Merklinger (1992)"
+    },
+    {
+     "by": "tools/tick.py photography",
+     "claim": "[on the one map] A camera is applied optics (card_floor_optics: the thin lens, the aperture, the circle of confusion) counted in logarithms (card_floor_logarithm: EV is a base-2 scale, every unit a doubling). The optics stick holds the lens; this stick holds the exposure.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

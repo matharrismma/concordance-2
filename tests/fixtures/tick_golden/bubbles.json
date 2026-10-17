@@ -1,0 +1,119 @@
+{
+ "entry": "bubbles",
+ "rc": 0,
+ "seals": {
+  "1468ff9e064ffc41411d489f0bdf1320e7922b1daae1a1f5887825f875a9ec9b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "plateau_four_edges_meet_at_tetrahedral_angle"
+   ]
+  },
+  "1e815e990e47d6ff055478f8bdec1fe34ef2ad41bf80a9af230d4261dfcc260b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "cosine_similarity_of_two_domains"
+   ]
+  },
+  "7b67ac5593e763d077564abcbeac2b548c022049e2625fda7f6c1c60957fadfd": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "plateau_three_films_meet_at_120"
+   ]
+  },
+  "85c9700d01a302824edac11b5c3f6a4eac9cf316208557ee7854f2d78d599e1f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "young_laplace_wall_between_joined_bubbles"
+   ]
+  },
+  "a9b5ec96899b27ecad573dcb68ef7e313d6330d15368ba38c5744c0264a26a39": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "superposition_weights_sum_to_one"
+   ]
+  },
+  "b3947e7ac59c9a1bb95110ce3067cdc440d57ac5490a330f47cddc14828c929f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "great_circle_arc_inside_the_sphere"
+   ]
+  },
+  "fea114d353cdaa12724a901eb9a3b5f4d5e72a46cdd906e673c9af3ea7a1859f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "kepler_packing_density"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_joined_bubbles_every_domain_a_sphere_in_a_form_clustered_by_": {
+   "field": "physics",
+   "question": "Joined bubbles - every domain a sphere in a form, clustered by likeness, connected along axes, a grid inside each",
+   "references": [
+    "J. Plateau, Statique experimentale et theorique des liquides (1873): the laws of foams",
+    "T. Young (1805), P.-S. Laplace (1806): pressure across a curved film, Delta p = 2 gamma / r",
+    "J. Kepler (1611) conjecture; T. Hales (1998, formally 2014): the densest packing is pi / (3 sqrt 2)",
+    "K. Schutte, B. L. van der Waerden (1953): the kissing number in three dimensions is 12",
+    "Job 38:31; Colossians 1:17; Ephesians 4:16",
+    "stick_parametrization_of_surfaces (the grid inside); stick_the_dot_abstracted (likeness = the dot product); stick_every_matrix_is_a_rotation_and_a_stretch"
+   ],
+   "statement": "A foam is not arbitrary: films meet three at a time at 120 degrees and edges four at a time at 109.47 - the minimum of surface forces the form. The wall between two joined bubbles has a curvature set by their difference. Equal spheres pack at 0.7405 and touch at most twelve others, so the axes along which domains connect are few. A component can be in two spheres by weight, the weights summing to one - whole, and simulable. Inside each sphere latitude-longitude gives every component a coordinate and every pair a distance; likeness between domains is the dot product on the unit sphere - found, never generated.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - joined bubbles in a form, 2026-10-08",
+     "claim": "[joined bubbles obey laws they did not choose] Plateau 1873: films meet three at a time at 360/3 = 120 degrees (sealed) and edges four at a time at arccos(-1/3) = 109.47 degrees (sealed). A foam's form is forced by the minimum of surface - 'they run inside of a form' (Matt): the form is the law the energy allows, not a choice.",
+     "kind": "witness",
+     "seal": "7b67ac5593e763d077564abcbeac2b548c022049e2625fda7f6c1c60957fadfd"
+    },
+    {
+     "by": "Narrow Highway - joined bubbles in a form, 2026-10-08",
+     "claim": "[four edges at the tetrahedral angle] arccos(-1/3) = 109.4712 degrees (sealed): the same angle as the bonds of methane and the diamond lattice. One number, three sciences; the geometry of least surface and the geometry of least repulsion agree.",
+     "kind": "witness",
+     "seal": "1468ff9e064ffc41411d489f0bdf1320e7922b1daae1a1f5887825f875a9ec9b"
+    },
+    {
+     "by": "Narrow Highway - joined bubbles in a form, 2026-10-08",
+     "claim": "[the wall between two domains] Young-Laplace: pressure is higher in the smaller bubble, and the shared wall between radii 1 and 2 has 1/r = 1/1 - 1/2, r = 2 (sealed), bulging into the larger. Two domains that touch share a wall whose curvature is set by their DIFFERENCE - the connection along the axis between them carries the sign of which is the tighter.",
+     "kind": "witness",
+     "seal": "85c9700d01a302824edac11b5c3f6a4eac9cf316208557ee7854f2d78d599e1f"
+    },
+    {
+     "by": "Narrow Highway - joined bubbles in a form, 2026-10-08",
+     "claim": "[how spheres pack, and how many they touch] The densest packing of equal spheres is pi/(3 sqrt2) = 0.7405 (sealed; Kepler 1611, Hales 1998), and each sphere touches at most 12 neighbours (cited): the axes along which a domain connects are few. A keeping of domains is a packing, and its connections are its contacts.",
+     "kind": "witness",
+     "seal": "fea114d353cdaa12724a901eb9a3b5f4d5e72a46cdd906e673c9af3ea7a1859f"
+    },
+    {
+     "by": "Narrow Highway - joined bubbles in a form, 2026-10-08",
+     "claim": "[superposition - a sphere in two places at once] |alpha|^2 + |beta|^2 = 0.6^2 + 0.8^2 = 1 (sealed): a component 36% in one sphere and 64% in another, whole. 'We can simulate that': a card assigned to two shelves by weight, both weights honest, summing to one - a soft membership, read as such, never a card in two places pretending to be two cards.",
+     "kind": "witness",
+     "seal": "a9b5ec96899b27ecad573dcb68ef7e313d6330d15368ba38c5744c0264a26a39"
+    },
+    {
+     "by": "Narrow Highway - joined bubbles in a form, 2026-10-08",
+     "claim": "[clustered by likeness] The cosine between two domain vectors (1,2) and (2,3) is 8/sqrt65 = 0.9923 (sealed): on the unit sphere likeness IS the dot product (the dot stick, the svd stick). The clustering of domains is a reading of angles between what the domains actually contain - found, never generated.",
+     "kind": "witness",
+     "seal": "1e815e990e47d6ff055478f8bdec1fe34ef2ad41bf80a9af230d4261dfcc260b"
+    },
+    {
+     "by": "Narrow Highway - joined bubbles in a form, 2026-10-08",
+     "claim": "[the grid inside each sphere] Latitude-longitude is the chart inside every sphere (the surfaces stick): from (0, 0) to (45 N, 45 E) the great-circle arc is arccos(cos45 cos45) = 60 degrees (sealed). Every component has coordinates and every pair a distance; this engine's call numbers (shelf.class.item) are exactly that chart, one per shelf.",
+     "kind": "witness",
+     "seal": "b3947e7ac59c9a1bb95110ce3067cdc440d57ac5490a330f47cddc14828c929f"
+    },
+    {
+     "by": "Narrow Highway - joined bubbles in a form, 2026-10-08",
+     "claim": "[the form we have, and the guard] The keeping as it stands: some thirty-six shelves, each a domain with its own call-number grid, joined by the connections shelf - the axes. Whether the spherical form is the MORE EFFICIENT one was measured on 2026-10-08 (the shelves' likeness, their clustering, how many singular directions carry them, whether a query's nearest spheres hold the engine's own answers); the numbers live in that assessment. Scripture: 'Canst thou bind the sweet influences of Pleiades, or loose the bands of Orion?' (Job 38:31) - clusters bound; 'by him all things consist' (Col 1:17); 'the whole body fitly joined together and compacted by that which every joint supplieth' (Eph 4:16) - joined along axes. GUARDS: Plateau's laws are for soap films; the likeness to domains is a discernment; the kissing number and Hales are cited; superposition here is a weighting, not quantum mechanics (the measurement stick keeps that). Seven numbers sealed; the rest cited.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

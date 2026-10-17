@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "name": "meteorology",
+ "aliases": [
+  "meteorology",
+  "weather",
+  "climate",
+  "the_atmosphere"
+ ],
+ "doc": "METEOROLOGY - the atmosphere as a heat engine (Matt, 2026-10-10, down the list). Air rising cools at the dry\nadiabatic lapse rate g/cp ~ 9.75 C/km; a mole of gas fills 22.4 L at STP (the ideal gas law). SEALED: the lapse\nrate and the molar volume. Rests on thermodynamics (the heat engine), earth science (the planet), statistics\n(forecasting is probabilistic). Idempotent.",
+ "seals": [
+  {
+   "key": "lapse",
+   "nid": "dry_adiabatic_lapse_rate_g_over_cp_c_per_km",
+   "expr": "9.8/1005*1000",
+   "value": 9.751243781094526,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "molar",
+   "nid": "ideal_gas_molar_volume_at_stp_litres",
+   "expr": "8.314*273.15/101325*1000",
+   "value": 22.412722427831234,
+   "tol": 1e-06,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Meteorology - the atmosphere as a heat engine",
+   "by": "tools/tick.py meteorology",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[air rising cools - the lapse rate, SEALED] A dry air parcel lifted expands and cools at g/cp = 9.8/1005*1000 = 9.75 C per kilometre (sealed). This adiabatic cooling makes clouds, storms and the whole vertical structure of weather - the atmosphere is a heat engine driven by the Sun. Ties card_floor_thermodynamics.",
+     "seal": "lapse"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the gas law - a mole fills 22.4 L, SEALED] At standard temperature and pressure a mole of any ideal gas fills RT/P = 8.314*273.15/101325 = 22.4 litres (sealed). Pressure, temperature and volume move together (PV = nRT) - the law behind every barometer and weather balloon. Ties card_floor_thermodynamics.",
+     "seal": "molar"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Meteorology rests on thermodynamics (the atmospheric heat engine), earth science (the rotating planet - the Coriolis effect, the oceans), and statistics (forecasts are probabilities, and chaos limits them). Ties card_floor_meteorology.",
+     "source": "the one map; the atmospheric heat engine; card_floor_meteorology; tools/seed_meteorology.py"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,64 @@
+{
+ "entry": "navier_stokes",
+ "rc": 0,
+ "seals": {
+  "47cf4fa79e0fd094250ed943ca9b5f3e8c313c3ba1ac42fe06a2989903520546": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ns_energy_supercritical_3d"
+   ]
+  },
+  "b2bd90d440293286c7cca74c0b35077327f05a3752ec23edf359e23fbc081dac": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ns_dispersion_group_over_phase"
+   ]
+  },
+  "d26fff54f88b6c5381795a5faeacf97320d4ab8bb1c9fb134c7a74c1452ff406": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ns_energy_critical_2d"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_navier_stokes_dissonance_and_dispersion": {
+   "field": "meta",
+   "question": "Navier-Stokes - dissonance and dispersion",
+   "references": [
+    "the Clay Millennium problem: 3D global existence and smoothness",
+    "Leray-Hopf weak solutions (1934); 2D global regularity (Ladyzhenskaya)",
+    "Caffarelli-Kohn-Nirenberg (1982): singular set has parabolic dimension <= 1"
+   ],
+   "statement": "Do smooth solutions of the 3D incompressible Navier-Stokes equations exist for all time, or can they blow up in finite time? Under the scaling symmetry the kinetic energy scales as lambda^(d-2): supercritical in 3D (+1), critical in 2D (0). Dispersion and viscous dissipation spread and damp energy; the nonlinear term cascades it toward small scales. The open question is whether dissipation always wins in 3D.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Navier-Stokes, 2026-10-07",
+     "claim": "[why 3D is almost the counter - supercritical scaling] Under u_lambda(x,t) = lambda u(lambda x, lambda^2 t) the energy integral of |u|^2 scales as lambda^(d-2); in 3D that exponent is 3 - 2 = 1 (sealed) > 0, so the conserved energy does NOT control the small scales where a singularity would form. That gap is the room a finite-time blow-up could hide in - the one place the narrowing method might meet a genuine singularity instead of a sealed answer.",
+     "kind": "witness",
+     "seal": "47cf4fa79e0fd094250ed943ca9b5f3e8c313c3ba1ac42fe06a2989903520546"
+    },
+    {
+     "by": "Narrow Highway - Navier-Stokes, 2026-10-07",
+     "claim": "[why 2D is proven - critical scaling] In 2D the exponent is 2 - 2 = 0 (sealed): the energy is scale-INVARIANT, the a-priori bound controls every scale, and global smoothness is a THEOREM. The method narrows cleanly exactly when the controlled quantity is critical or subcritical; 3D sits just past that line.",
+     "kind": "witness",
+     "seal": "d26fff54f88b6c5381795a5faeacf97320d4ab8bb1c9fb134c7a74c1452ff406"
+    },
+    {
+     "by": "Narrow Highway - Navier-Stokes, 2026-10-07",
+     "claim": "[dispersion vs concentration] A dispersive wave spreads: for omega ~ k^2 the group velocity is twice the phase velocity, 2k/k = 2 (sealed), so frequency components separate and the amplitude decays. Dispersion and viscous dissipation oppose the nonlinear cascade that would concentrate energy into a 'dissonant' singularity; whether they always prevail in 3D is the open question.",
+     "kind": "witness",
+     "seal": "b2bd90d440293286c7cca74c0b35077327f05a3752ec23edf359e23fbc081dac"
+    },
+    {
+     "by": "Narrow Highway - Navier-Stokes, 2026-10-07",
+     "claim": "[the honest marks] 3D global existence + smoothness is OPEN (Clay Millennium). Proven: 2D global regularity; Leray-Hopf weak solutions exist in 3D (uniqueness/smoothness unknown); Caffarelli-Kohn-Nirenberg - the singular set of a suitable weak solution has parabolic Hausdorff dimension at most 1. The engine seals the scaling arithmetic and the dispersion relation, cites the theorems, and marks 3D smoothness as the one unfired mark. 'Almost the counter' is held honestly: the narrowing might meet a singularity, not a proof. map, never launder (ties [[feedback_mapping_the_truth_not_generating_it_2026-10-07]]).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

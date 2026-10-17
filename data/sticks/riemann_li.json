@@ -1,0 +1,18 @@
+{
+ "schema": 1,
+ "name": "riemann_li",
+ "aliases": [
+  "riemann_li",
+  "li_criterion",
+  "li",
+  "riemann_next"
+ ],
+ "handler": "riemann_li",
+ "params": [
+  {
+   "type": "int",
+   "default": 30
+  }
+ ],
+ "why_python": "takes arguments"
+}

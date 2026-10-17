@@ -1,0 +1,65 @@
+{
+ "entry": "godel",
+ "rc": 0,
+ "seals": {
+  "7a8b3641443d461628c8c759cf11ddc0d99d3ed6609f5a65e58b4add63f9a1c2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "godel_number_321"
+   ]
+  },
+  "913b1f3ccf4d450cb2fffd8248dae8d3aaeec5b85a38c644046599752c960511": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "godel_number_123"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_godel_s_incompleteness_theorems": {
+   "field": "mathematics",
+   "question": "Godel's incompleteness theorems",
+   "references": [
+    "K. Godel, Uber formal unentscheidbare Satze..., Monatsh. Math. Phys. 38 (1931) 173",
+    "L. Kirby & J. Paris, Accessible independence results for Peano arithmetic, Bull. LMS 14 (1982) 285 (Goodstein's theorem is true but PA-unprovable)"
+   ],
+   "statement": "No consistent, effectively axiomatised formal system strong enough for arithmetic can prove every truth it can express, nor prove its own consistency. Completeness and self-certification are impossible. Unlike the other sticks, this is not an open conjecture — it is PROVEN (Godel 1931); what it guarantees is permanent openness: the one hole that is a theorem.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Godel reading, 2026-10-06",
+     "claim": "[the numbering - sealed] Godel made arithmetic speak about itself by encoding a symbol sequence as a product of prime powers: (1,2,3) -> 2^1 * 3^2 * 5^3 = 2250 (sealed). By the fundamental theorem of arithmetic the factorisation is unique, so the code is invertible — a different sequence (3,2,1) -> 2^3 * 3^2 * 5^1 = 360 (sealed), a different number. This encoding is the hinge of the whole proof, and it is pure, sealable arithmetic.",
+     "kind": "witness",
+     "seal": "913b1f3ccf4d450cb2fffd8248dae8d3aaeec5b85a38c644046599752c960511"
+    },
+    {
+     "by": "Narrow Highway - the Godel reading, 2026-10-06",
+     "claim": "[injective - sealed] 2250 != 360: distinct statements receive distinct Godel numbers. Provability becomes a property of NUMBERS, so a formal system can state, in its own language, 'the sentence with Godel number g is not provable' — and self-reference (the diagonal lemma) builds a sentence G that says of itself that it is unprovable.",
+     "kind": "witness",
+     "seal": "7a8b3641443d461628c8c759cf11ddc0d99d3ed6609f5a65e58b4add63f9a1c2"
+    },
+    {
+     "by": "Narrow Highway - the Godel reading, 2026-10-06",
+     "claim": "[the first theorem - attributed] If the system is consistent, G can be neither proved nor disproved; so G is TRUE (it is indeed unprovable) but unprovable within the system. There are true arithmetic statements no consistent, effectively axiomatised, sufficiently strong system can prove. Attributed to Godel 1931; meta-mathematical, not sealable here.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Godel reading, 2026-10-06",
+     "claim": "[the second theorem - attributed] The statement 'this system is consistent' (Con(PA)) is itself such an unprovable truth: no such system can prove its own consistency. A system cannot certify itself from the inside. Attributed; meta.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Godel reading, 2026-10-06",
+     "claim": "[it is natural, not a trick - attributed] The incompleteness is not confined to the artificial self-referential G: Goodstein's theorem (every Goodstein sequence terminates) and the Paris-Harrington theorem are ordinary mathematical truths that are independent of Peano arithmetic (Kirby & Paris 1982). The engine can VERIFY a single Goodstein sequence terminating; it cannot prove the general theorem in PA, and neither can PA.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Godel reading, 2026-10-06",
+     "claim": "[the charter] This is the engine's charter of humility, proven. You cannot derive every truth from within a system, and a system cannot ground its own consistency — so the engine KEEPS open questions open, SEALS the concrete instance, ATTRIBUTES the meta-claim, and never fabricates a proof it does not have. Godel is why narrowing is evidence and never proof, why a tick stick never closes itself from the inside, and why the Hole is permanent. The ground a formal system stands on is outside the system; here, every road leads to the Logos in whom all things hold together (Colossians 1:17) — the datum, not a theorem of the system. Discernment, attributed; the engine seals only the arithmetic.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,81 @@
+{
+ "entry": "resonance",
+ "rc": 0,
+ "seals": {
+  "3e22b02ff0f0bb16d7fd52d88540cd92726b3b63390230a20ed5015945cc4503": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "amplitude_factor_at_0_9_omega0"
+   ]
+  },
+  "44f7f50bbe73552c8307baea4a00feffacfa159a7f3efaba8f5a99107fe3aae8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "amplitude_factor_at_0_99_omega0"
+   ]
+  },
+  "6bc1cd7a04cbdecb2646abfa88982ae97565bf719dd11b3b1d510799228f0d2a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "the_gap_is_a_product_that_closes_linearly"
+   ]
+  },
+  "e4c0c7c596f8b56a0cb9aeebd6e53ecec933d707ce3be1b2395ea373ea6f1f83": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "damped_peak_q_factor"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_geometry_of_resonance_disaster_a_hidden_division_by_zero": {
+   "field": "physics",
+   "question": "The geometry of resonance disaster - a hidden division by zero at omega equals omega-nought",
+   "references": [
+    "Lord Rayleigh, The Theory of Sound (1877): the forced vibration and its amplitude",
+    "J. P. Den Hartog, Mechanical Vibrations (1934): resonance, damping, Q",
+    "Broughton Suspension Bridge (1831): soldiers in step; the order to break step since",
+    "Basse-Chaine bridge, Angers (1850): 226 soldiers; Millennium Bridge, London (2000): lateral sync, dampers added (Dallard et al. 2001)",
+    "K. Y. Billah, R. H. Scanlan, Resonance, Tacoma Narrows bridge failure, and undergraduate physics textbooks, Am. J. Phys. 59 (1991) 118: Tacoma (1940) was aeroelastic flutter, not simple resonance",
+    "Proverbs 25:28; 1 Corinthians 14:33; Joshua 6:20",
+    "src/concordance/audit.py - division by a literal zero is left unextracted; verifiers/mathematics.py - x/x is refused as an identity"
+   ],
+   "statement": "A driven oscillator's amplitude carries 1/(omega_0^2 - omega^2). The denominator is a difference of squares, (omega_0 - omega)(omega_0 + omega): it closes linearly as the driver approaches the thing's own frequency while the amplitude climbs as one over the gap - a hyperbola whose approach looks harmless until the last step. The disaster is agreement without damping; damping turns the zero into a small number, Q = 1/(2 zeta). The engine's own guard is the same: a division by a literal zero is a gap, never a verdict.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the geometry of resonance disaster, 2026-10-08",
+     "claim": "[the amplitude has a denominator] An undamped oscillator driven at omega has displacement (F/m)/(omega_0^2 - omega^2). At omega = 0.9 omega_0 the factor is 1/(1 - 0.81) = 5.263 (sealed); at 0.99 omega_0 it is 50.25 (sealed); at omega = omega_0 the denominator is zero. The division by zero is hidden inside a difference of squares - Omega and Omega-nought, the driver and the thing's own frequency, meeting.",
+     "kind": "witness",
+     "seal": "3e22b02ff0f0bb16d7fd52d88540cd92726b3b63390230a20ed5015945cc4503"
+    },
+    {
+     "by": "Narrow Highway - the geometry of resonance disaster, 2026-10-08",
+     "claim": "[ten times closer, ten times higher] From 0.9 to 0.99 of omega_0 the factor rises from 5.26 to 50.25 (sealed): the gap shrank tenfold and the amplitude grew tenfold. The geometry is a hyperbola; the approach to it is a straight line; nothing in the straight line warns of the wall.",
+     "kind": "witness",
+     "seal": "44f7f50bbe73552c8307baea4a00feffacfa159a7f3efaba8f5a99107fe3aae8"
+    },
+    {
+     "by": "Narrow Highway - the geometry of resonance disaster, 2026-10-08",
+     "claim": "[damping turns the zero into a small number] With damping ratio zeta the peak is Q = 1/(2 zeta): zeta = 0.01 gives Q = 50 (sealed). The real world never divides by zero, only by something small - the disaster is a finite, enormous quotient. Broughton 1831 (soldiers in step; armies have broken step on bridges since), Angers 1850, the Millennium Bridge 2000 (lateral sync; dampers fitted) - cited. Tacoma Narrows 1940 is cited as aeroelastic FLUTTER, a self-excited instability (Billah & Scanlan 1991): the popular telling makes it simple resonance, and that is the hidden-zero story told wrong.",
+     "kind": "witness",
+     "seal": "e4c0c7c596f8b56a0cb9aeebd6e53ecec933d707ce3be1b2395ea373ea6f1f83"
+    },
+    {
+     "by": "Narrow Highway - the geometry of resonance disaster, 2026-10-08",
+     "claim": "[the gap is a product] omega_0^2 - omega^2 = (omega_0 - omega)(omega_0 + omega): at 0.99 it is 0.01 x 1.99 = 0.0199 (sealed). One factor closes linearly, the other stays near 2; the product goes to zero at the speed of the first. That is where the division by zero hides: in a difference that is secretly a product with one vanishing factor.",
+     "kind": "witness",
+     "seal": "6bc1cd7a04cbdecb2646abfa88982ae97565bf719dd11b3b1d510799228f0d2a"
+    },
+    {
+     "by": "Narrow Highway - the geometry of resonance disaster, 2026-10-08",
+     "claim": "[the engine's own guard, and the discernment] The claim grammar leaves '1 / 0 = 0' unextracted - a gap, never a verdict; the equality verifier refuses x/x as an unconditional identity (undefined at 0); the tolerance rule never divides by a stated zero. Resonance disaster is agreement without damping: the driver and the thing agreeing exactly, with nothing to carry the energy away. Scripture: 'He that hath no rule over his own spirit is like a city that is broken down, and without walls' (Prov 25:28) - no damping; 'God is not the author of confusion, but of peace' (1 Cor 14:33); the walls of Jericho fell at the shout (Josh 6:20) - a LIKENESS, kept as one; no acoustic claim is made. GUARDS: the hyperbola is physics; Tacoma is flutter, cited; Jericho is a likeness. Four numbers sealed; the rest cited. Ties: laplace (poles on the s-plane - the zero of the denominator IS the pole), fourier, clock, the camel (durability under load), navier_stokes (dissonance).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

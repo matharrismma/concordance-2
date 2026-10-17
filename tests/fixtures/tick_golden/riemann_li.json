@@ -1,0 +1,52 @@
+{
+ "entry": "riemann_li",
+ "rc": 0,
+ "seals": {
+  "b54b254c12d2247b43d9f3055c0aabda4289c1f6acc6fb4857d3bc53a97a806f": {
+   "axis": "number_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "li_criterion"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_riemann_hypothesis": {
+   "field": "",
+   "question": "Riemann hypothesis",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py riemann_li",
+     "claim": "No zero of zeta lies off the critical line by way of a Li counterexample at n <= 10: every Keiper-Li coefficient lambda_n, n = 1..10, computed from the Taylor expansion of log xi(1/(1-z)) and cross-checked against lambda_1 = 1 + gamma/2 - log(4 pi)/2, is positive (sealed through number_theory.li_criterion). Li 1997: RH <=> lambda_n > 0 for all n >= 1, so a first RH failure by this route must lie beyond n = 10. number_theory.li_criterion: Li's criterion holds for n <= 10: every lambda_n > 0 (lambda_1 = 0.023095708966 = its closed form, lambda_10 = 2.279339); no RH counterexample by this route below 10",
+     "kind": "witness",
+     "seal": "b54b254c12d2247b43d9f3055c0aabda4289c1f6acc6fb4857d3bc53a97a806f"
+    },
+    {
+     "by": "tools/tick.py riemann_li",
+     "claim": "RH is equivalent to lambda_n > 0 for every n >= 1, where log xi(1/(1 - z)) = sum lambda_n z^n / n (Li's criterion); each lambda_n is a sum over the zeros, lambda_n = sum_rho [1 - (1 - 1/rho)^n], and under RH lambda_n ~ (n/2) log n (Bombieri-Lagarias).",
+     "kind": "equivalence",
+     "source": "X.-J. Li, The positivity of a sequence of numbers and the Riemann hypothesis, J. Number Theory 65 (1997); E. Bombieri, J. C. Lagarias, Complements to Li's criterion (1999)"
+    },
+    {
+     "by": "tools/tick.py riemann_li",
+     "claim": "RH is equivalent to Lambda = 0, where Lambda is the de Bruijn-Newman constant: the zeros of the heat-deformed xi, H_t(z), are all real for t >= Lambda and not all real for t < Lambda; RH is the statement that t = 0 is already on the real side.",
+     "kind": "equivalence",
+     "source": "N. G. de Bruijn (1950); C. M. Newman (1976): the constant defined, and the conjecture Lambda >= 0"
+    },
+    {
+     "by": "tools/tick.py riemann_li",
+     "claim": "Lambda >= 0 is PROVEN (Rodgers-Tao 2018: Newman's conjecture) and Lambda <= 0.2 is PROVEN (Platt-Trudgian 2021, sharpening Polymath15's 0.22 and Ki-Kim-Lee's < 1/2). The surviving window for the de Bruijn-Newman constant is the closed interval [0, 0.2]; RH is the statement that it is the left endpoint. If RH is true it is only barely so: the zeros cannot move further toward the real line than they are.",
+     "kind": "equivalence",
+     "source": "B. Rodgers, T. Tao, The de Bruijn-Newman constant is non-negative, Forum Math. Pi 8 (2020); D. Platt, T. Trudgian, The Riemann hypothesis is true up to 3*10^12 (2021) and the bound Lambda <= 0.2"
+    },
+    {
+     "by": "tools/tick.py riemann_li",
+     "claim": "[the surviving window, read] Direct: the zeros are on the line to height 10^7 (sealed) and counted to 10^12 (Turing). By elimination: Robin, Lagarias, Schoenfeld to 2*10^7, Nicolas with primes to 10^7, and now Li to n = 10 - none finds the counterexample. By theorem: the de Bruijn-Newman constant lies in [0, 0.2] and RH is Lambda = 0. Every link is sealed or cited; nothing is out of thin air; the chain is not closed. The next links by cost: Li to 60; the height past 10^7 (the open note names the precision that stops the C kernel); Platt-Trudgian's 3*10^12 as a cited bound beside the sealed 10^7.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

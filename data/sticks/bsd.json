@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "bsd",
+ "aliases": [
+  "bsd"
+ ],
+ "handler": "bsd_cli",
+ "params": [
+  {
+   "type": "str",
+   "default": "11a1"
+  }
+ ],
+ "why_python": "takes arguments"
+}

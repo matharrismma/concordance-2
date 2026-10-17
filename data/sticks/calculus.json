@@ -1,0 +1,78 @@
+{
+ "schema": 1,
+ "name": "calculus",
+ "aliases": [
+  "calculus",
+  "integrals",
+  "derivatives",
+  "integral",
+  "derivative",
+  "ftc",
+  "fundamental_theorem"
+ ],
+ "doc": "INTEGRALS AND DERIVATIVES (Matt, 2026-10-07). The Fundamental Theorem of Calculus: differentiation\nand integration are INVERSE operations. The integral of a derivative over [a,b] is the net change\nf(b) - f(a); the derivative of the area function gives back the integrand. Newton and Leibniz,\nindependently (1660s-80s). A floor under the whole arc (Maxwell's equations differential, least action\nan integral, Schrodinger a PDE). Seal an FTC instance, a power-rule area, and the derivative as a\nlimiting slope; mark the inverse symmetry + the notation construct. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "ftc_net_change",
+   "nid": "ftc_net_change",
+   "expr": "3**2 - 1**2",
+   "value": 8.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "power_rule_area",
+   "nid": "power_rule_area",
+   "expr": "2**3 / 3",
+   "value": 2.6666666666666665,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "derivative_limiting_slope",
+   "nid": "derivative_limiting_slope",
+   "expr": "((3.001)**2 - 3**2) / 0.001",
+   "value": 6.000999999999479,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Integrals and derivatives - the fundamental theorem",
+   "statement": "Differentiation and integration are inverse operations. For F' = f, the integral of f over [a,b] equals F(b) - F(a) (the net change), and the derivative of the area-so-far function returns the integrand. An area problem becomes subtraction; a rate problem becomes a limiting slope.",
+   "field": "mathematics",
+   "references": [
+    "the Fundamental Theorem of Calculus (Newton, Leibniz, 1660s-1680s)",
+    "power rule: integral of x^n = x^(n+1)/(n+1); d/dx x^n = n x^(n-1)",
+    "derivative as a limit: f'(x) = lim_{h->0} (f(x+h) - f(x))/h"
+   ],
+   "by": "Narrow Highway - integrals and derivatives, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[the fundamental theorem - the integral of a derivative is the net change] The integral of 2x over [1,3] is F(3) - F(1) with F(x) = x^2: 3^2 - 1^2 = 8 (sealed). The area under a rate from a to b is exactly the total change f(b) - f(a) - integration undoes differentiation.",
+     "seal": "ftc_net_change"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the power rule turns area into subtraction] The integral of x^2 over [0,2] is [x^3/3] from 0 to 2 = 2^3/3 = 2.666667 (sealed) - the area under the parabola, found by REVERSING the derivative (d/dx of x^3/3 is x^2). The antiderivative is the inverse of the derivative.",
+     "seal": "power_rule_area"
+    },
+    {
+     "kind": "witness",
+     "claim": "[the derivative as the limiting slope] For f(x) = x^2 at x = 3, the difference quotient (f(3.001) - f(3))/0.001 = 6.001 (sealed), approaching 6 = f'(3) = 2x as the step shrinks. The derivative is the limit of the slope of the chord as it collapses to a point - the instantaneous rate.",
+     "seal": "derivative_limiting_slope"
+    },
+    {
+     "kind": "note",
+     "claim": "[the inverse is a symmetry; the notation is a construct] The derivative and the integral are inverse - a symmetry (ties stick_the_symmetry). The notation is chosen, not given: Leibniz's dy/dx and the integral sign (an elongated S for 'summa') won over Newton's fluxions because the better construct made the inverse relationship visible on the page (ties stick_construct_creation; the Leibniz-Newton priority dispute is the notation war)."
+    },
+    {
+     "kind": "note",
+     "claim": "[a floor under the whole arc] Calculus is foundational beneath this session's physics: Maxwell's equations are differential, the principle of least action is an integral (stick_the_principle_of_least_action), the Schrodinger equation is a partial differential equation (stick_the_schrodinger_equation), and Navier-Stokes is a PDE whose smoothness is open (stick_navier_stokes_dissonance_and_dispersion). Newton and Leibniz are a chain root ([[project_chains_from_a_floor_where_two_trees_connect_2026-10-07]]). map, never launder: seal the arithmetic, attribute the theorem."
+    }
+   ]
+  }
+ ]
+}

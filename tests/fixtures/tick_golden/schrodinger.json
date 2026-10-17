@@ -1,0 +1,95 @@
+{
+ "entry": "schrodinger",
+ "rc": 0,
+ "seals": {
+  "2cc3ab8715275ba45a913c0e8495af9dceb4e57be3336e1601ebbd019483b764": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "hydrogen_ground_state_binding"
+   ]
+  },
+  "5e49818febabba4fa7e4a582598fcb6be63156d347bf0ab2e3521fa53e69d8d1": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "balmer_h_alpha_wavelength"
+   ]
+  },
+  "68acce001695532a84a31bee090a44d5782dc9c0b47666765463f5294584f0a2": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "hydrogen_n2_degeneracy"
+   ]
+  },
+  "7f16a88638016df755e0d7bb3ee178327a462c609ee6e6c162e9d287e1d5bf6a": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "particle_in_box_ground_state"
+   ]
+  },
+  "937ff67b0e6097f1e316d7f322e52d56e433de15e80abe08dfda69c3b6ecccbc": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "lyman_alpha_wavelength"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_schrodinger_equation": {
+   "field": "physics",
+   "question": "The Schrodinger equation",
+   "references": [
+    "E. Schrodinger, Ann. Phys. 384 (1926) 361 (the wave equation)",
+    "CODATA 2018 recommended values",
+    "N. Bohr (1913) / the hydrogen spectrum; J. Balmer (1885)"
+   ],
+   "statement": "The Schrodinger equation, i*hbar d(psi)/dt = H*psi, predicts the non-relativistic quantum world to extraordinary precision. What stays open is its INTERPRETATION — the measurement problem: how a superposition yields one observed outcome. The mathematics is settled and verified; the meaning is not.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Schrodinger-equation reading, 2026-10-06",
+     "claim": "[hydrogen - the gross structure] Solving the time-independent Schrodinger equation for the Coulomb potential gives the exact bound-state energies E_n = -(1/2) alpha^2 m_e c^2 / n^2 = -Rydberg/n^2. The ground state is E_1 = -2.179872e-18 J = -13.6057 eV (sealed as the binding magnitude — the SAME sealed Rydberg the fine-structure stick carries). The equation PRODUCES the orbital energies alpha sets.",
+     "kind": "witness",
+     "seal": "2cc3ab8715275ba45a913c0e8495af9dceb4e57be3336e1601ebbd019483b764"
+    },
+    {
+     "by": "Narrow Highway - the Schrodinger-equation reading, 2026-10-06",
+     "claim": "[the Balmer line - seen] The n=3->2 transition, 1/lambda = R_inf(1/2^2 - 1/3^2), gives lambda = 656.1 nm (sealed) — the red H-alpha line of hydrogen, matching the observed 656.28 nm to ~0.03% (the small gap is the proton-electron reduced-mass correction, R_H vs R_inf). A visible prediction of the Schrodinger equation.",
+     "kind": "witness",
+     "seal": "5e49818febabba4fa7e4a582598fcb6be63156d347bf0ab2e3521fa53e69d8d1"
+    },
+    {
+     "by": "Narrow Highway - the Schrodinger-equation reading, 2026-10-06",
+     "claim": "[the Lyman line - unseen] The same formula, one level lower (n=2->1), gives 1/lambda = R_inf(1/1^2 - 1/2^2) -> lambda = 121.5 nm (sealed) — Lyman-alpha, in the ULTRAVIOLET, invisible to the eye yet the strongest line of the hydrogen sky. One equation, one constant, the whole series (Lyman UV, Balmer visible, Paschen IR).",
+     "kind": "witness",
+     "seal": "937ff67b0e6097f1e316d7f322e52d56e433de15e80abe08dfda69c3b6ecccbc"
+    },
+    {
+     "by": "Narrow Highway - the Schrodinger-equation reading, 2026-10-06",
+     "claim": "[quantization from confinement - no alpha] The hydrogen levels come from the Coulomb potential, but the Schrodinger equation quantizes energy from BOUNDARY CONDITIONS alone: an electron in a 1 nm infinite square well has E_1 = h^2/(8 m_e L^2) = 0.376 eV (sealed), E_n = n^2 E_1. Confinement -> discreteness, with no Coulomb force and no alpha — the general lesson of the equation: a bound wave can only ring at certain pitches.",
+     "kind": "witness",
+     "seal": "7f16a88638016df755e0d7bb3ee178327a462c609ee6e6c162e9d287e1d5bf6a"
+    },
+    {
+     "by": "Narrow Highway - the Schrodinger-equation reading, 2026-10-06",
+     "claim": "[the quantum numbers - why the periodic table] Solving the equation gives three numbers per orbital (n, l, m) with 0 <= l < n and -l <= m <= l, so the n-th level holds exactly n^2 spatial states; n=2 holds 2^2 = 4 (the 2s and three 2p), sealed. With spin's factor of two that is 2n^2 electrons a shell — the shape of the periodic table falls out of the boundary conditions.",
+     "kind": "witness",
+     "seal": "68acce001695532a84a31bee090a44d5782dc9c0b47666765463f5294584f0a2"
+    },
+    {
+     "by": "Narrow Highway - the Schrodinger-equation reading, 2026-10-06",
+     "claim": "[the ladder] alpha threads the whole hydrogen spectrum: the Schrodinger equation gives the GROSS structure (E_n ~ alpha^2); the relativistic Dirac equation adds the FINE structure (spin-orbit, ~alpha^4, on stick_the_fine_structure_constant); QED adds the Lamb shift and the electron a_e (sealed in the four-forces reading). Three rungs, one constant — this is the first.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Schrodinger-equation reading, 2026-10-06",
+     "claim": "[the open question] The equation is exact and verified; its INTERPRETATION is not. The measurement problem — how, from a deterministic unitary evolution, a single outcome appears — has no established answer: Copenhagen, many-worlds, and relational quantum mechanics (Rovelli, a sealed anchor here — see stick_relational_quantum_mechanics) are live readings, none proven. Seal the arithmetic; the meaning stays the open question.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

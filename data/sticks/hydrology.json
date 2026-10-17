@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "name": "hydrology",
+ "aliases": [
+  "hydrology",
+  "the_water_cycle",
+  "watershed",
+  "rivers"
+ ],
+ "doc": "HYDROLOGY - the water cycle and the flow of rivers (Matt, 2026-10-10, down the list). River discharge is\nvelocity times cross-section (Q = v A); only a small fraction of Earth's water is fresh. SEALED: a discharge and\nthe freshwater percentage. Rests on earth science (the planet's water), chemistry (water as solvent) and\nmeteorology (precipitation). Idempotent.",
+ "seals": [
+  {
+   "key": "discharge",
+   "nid": "river_discharge_velocity_times_area_m3_s",
+   "expr": "2*5",
+   "value": 10,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "freshwater",
+   "nid": "percent_of_earths_water_that_is_fresh",
+   "expr": "100 - 97.5",
+   "value": 2.5,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Hydrology - the water cycle and the flow of rivers",
+   "by": "tools/tick.py hydrology",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the flow of a river - discharge, SEALED] Discharge is how much water passes per second: Q = v * A, velocity times cross-section. A stream 2 m/s across 5 m^2 carries 2*5 = 10 cubic metres per second (sealed). Conservation of mass (the continuity equation) governs every river, pipe and flood. Ties card_floor_earth_science.",
+     "seal": "discharge"
+    },
+    {
+     "kind": "instance",
+     "claim": "[how little is fresh, SEALED] Of all the water on Earth only 100 - 97.5 = 2.5 percent is fresh (sealed), and most of that is locked in ice and deep groundwater - a sliver is the rivers and lakes we drink from. The water cycle (evaporation, precipitation, runoff) keeps it moving. Ties card_floor_meteorology (precipitation).",
+     "seal": "freshwater"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Hydrology rests on earth science (the basins, the cycle), chemistry (water the universal solvent, carrying salts and life) and meteorology (precipitation is where the cycle touches the sky). The study of water in motion over and under the land. Ties card_floor_hydrology.",
+     "source": "the one map; the continuity equation; the water cycle; card_floor_hydrology; tools/seed_hydrology.py"
+    }
+   ]
+  }
+ ]
+}

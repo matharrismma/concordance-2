@@ -1,0 +1,94 @@
+{
+ "entry": "triode",
+ "rc": 0,
+ "seals": {
+  "298be0028fe76dec6ac32d3055c253f7ded74e51cacd0cc0c50a184587d490b2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "amplification_factor_gm_times_rp"
+   ]
+  },
+  "4e502bedb38874bcee1d7f64876829601f356897671d5d49394f5cee22c92695": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mean_free_path_at_a_millionth_of_a_torr"
+   ]
+  },
+  "dfea390f4f4875f34b58242c8e7577d4c901f6bc2d4b752cf9db1489be7338c0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "child_langmuir_double_the_voltage"
+   ]
+  },
+  "e47ddb4d596cb19d345406801c1c189eacf80e7ff27a25194ee859b1b9b29ca0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "eniac_watts_per_tube"
+   ]
+  },
+  "e7234de030004d5ee1e617ba97531e9a516ffeb0e704db2d20c1b08b962ecf2f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gain_in_decibels"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_vacuum_triode_a_small_voltage_at_the_grid_governs_a_larg": {
+   "field": "engineering",
+   "question": "The vacuum triode - a small voltage at the grid governs a large current; the gate as a component",
+   "references": [
+    "J. A. Fleming (1904): the thermionic valve - the diode, one-way",
+    "L. de Forest (1906-1907): the Audion - the grid",
+    "C. D. Child (1911), I. Langmuir (1913): space-charge-limited current, I = K V^(3/2)",
+    "W. H. Eccles, F. W. Jordan (1918): the trigger relay - two triodes, one bit",
+    "ENIAC (1945): 17,468 tubes, about 150 kW (M. H. Weik, 1961)",
+    "Proverbs 4:23; Matthew 12:34-35; James 3:4-5",
+    "stick_a_mechanical_computer (the Geneva drive); the vacuum-tube computer charter (docs/COMPONENTS.md); the Tesla valve / diode (one-way geometry)"
+   ],
+   "statement": "Cathode, grid, plate: a few volts at the grid govern a large current to the plate - the first amplifier and the first electronic switch, de Forest's Audion on Fleming's one-way valve. Space-charge-limited current goes as the three-halves power of the voltage: the electrons' own charge throttles the flow, by geometry alone. Gain is g_m times r_p. The vacuum is the point: at a millionth of a torr an electron crosses the gap without a collision; without the vacuum the component is a lamp. Two cross-coupled triodes hold one bit. A verifier is a triode: the claim at the grid, the keeping's current at the plate, passed exactly or cut off.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the vacuum triode, 2026-10-08",
+     "claim": "[three electrodes] A heated cathode emits; a plate at hundreds of volts collects; between them a grid at a few volts, in the way. The grid's small voltage sets how much current reaches the plate - de Forest's Audion (1906) on Fleming's valve (1904), the one-way diode that is also this engine's Tesla valve. With it the gain mu = g_m r_p: 2 mA/V x 10 kOhm = 20 (sealed) - the grid's volt becomes twenty at the plate.",
+     "kind": "witness",
+     "seal": "298be0028fe76dec6ac32d3055c253f7ded74e51cacd0cc0c50a184587d490b2"
+    },
+    {
+     "by": "Narrow Highway - the vacuum triode, 2026-10-08",
+     "claim": "[the three-halves law] Child 1911, Langmuir 1913: the current a vacuum gap will carry is limited by the charge already in flight, I = K V^(3/2) - doubling the voltage multiplies the current by 2^(3/2) = 2.828 (sealed). No material constant, no fitted parameter: the electrons' own charge throttles the flow, and the law is geometry and nothing else.",
+     "kind": "witness",
+     "seal": "dfea390f4f4875f34b58242c8e7577d4c901f6bc2d4b752cf9db1489be7338c0"
+    },
+    {
+     "by": "Narrow Highway - the vacuum triode, 2026-10-08",
+     "claim": "[gain] 20 log10(20) = 26.0 dB (sealed): one triode, one stage. A verifier is a triode: the claim is the grid, the keeping's current is the plate, and a small exact input governs a large output - or cuts it off entirely (a miss stays a miss). The gate is a component with a transfer curve, not a judgement.",
+     "kind": "witness",
+     "seal": "e7234de030004d5ee1e617ba97531e9a516ffeb0e704db2d20c1b08b962ecf2f"
+    },
+    {
+     "by": "Narrow Highway - the vacuum triode, 2026-10-08",
+     "claim": "[the vacuum is the point] At a millionth of a torr an N2 molecule's mean free path is kT/(sqrt2 pi d^2 p) = 51 m (sealed): the electrons cross the centimetre from cathode to plate without one collision. Remove the vacuum and the component is a lamp. The vacuum-tube computer (this engine's charter): discrete components whose behaviour is set by geometry, orchestrated, no oracle in the loop.",
+     "kind": "witness",
+     "seal": "4e502bedb38874bcee1d7f64876829601f356897671d5d49394f5cee22c92695"
+    },
+    {
+     "by": "Narrow Highway - the vacuum triode, 2026-10-08",
+     "claim": "[the first bit, and the cost] Eccles and Jordan 1918: two triodes cross-coupled hold one bit - each grid fed from the other's plate. ENIAC 1945: 17,468 tubes drew about 150 kW, 8.6 W per tube (sealed), with a tube failing every day or two (cited) - a computer that worked because its parts were few enough to find and replace. The mean time between failures ruled the design (the camel stick's durability tiers are the same arithmetic).",
+     "kind": "witness",
+     "seal": "e47ddb4d596cb19d345406801c1c189eacf80e7ff27a25194ee859b1b9b29ca0"
+    },
+    {
+     "by": "Narrow Highway - the vacuum triode, 2026-10-08",
+     "claim": "[the grid, and the guard] Scripture: 'Keep thy heart with all diligence; for out of it are the issues of life' (Prov 4:23) - the grid governs the issue; 'out of the abundance of the heart the mouth speaketh... a good man out of the good treasure of the heart bringeth forth good things' (Mt 12:34-35) - the plate current follows the grid; 'the ships... are turned about with a very small helm' (Jas 3:4) - the small input governing the large. GUARDS: the triode-as-verifier is a likeness; the ENIAC figures are cited; Child-Langmuir assumes planar space-charge-limited flow (cited); the mean free path uses an N2 diameter of 3.7 Angstrom. Five numbers sealed; the rest cited. Ties: geneva (the mechanical computer), diagrams (the schematic), laplace (the transfer function), the camel (durability), the Tesla valve (one-way).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

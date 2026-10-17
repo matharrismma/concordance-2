@@ -1,0 +1,175 @@
+{
+ "entry": "philosophy",
+ "rc": 0,
+ "seals": {
+  "04a7271c68d8ae415f564637e8f4ad54115d3a755a78a30d970850df8daaf051": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "0bb0f6f787889fff5aa3227690c268aa9bbb77eb61e0089505ff3c6c4cc8ffcf": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "24532c35f1e49a3de8bb82e93d8fe7175d34c21788a88d92391384bf8fc3dddb": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5eeea2b2a618a9ca84da64fb517fef12d880215cf0612226cc7415e32c12f966": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "66c7d7d8b3afce595171a9d2a36f2f6de4c21089846c46ed17382cde242fa972": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "6c0e71913fe075acbe653b0c3da17899bbf184beafd8f247505e7848e2c7fdf0": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "6dc0673ce642ac8c2e27013faf99128d6f257eddace3f224944512fe4ca11cd6": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "92afc2a1430aae89d9261bd0138d5d19c7f3183c3f4faa335e2c014f66cf682c": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "9ae35e23effbc536ed2afd2882d17f498b8551456e96496897a4bbccfb6e81c5": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "9ec3505c842887afd51fafb15871cca931d1dc4f53831552aeaf073ce46faf84": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "cb58d64f252997c81cfb50a1d04a0e6689814dfc7ac1fbea8ba03de0ff2c677d": {
+   "axis": "philosophy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_philosophy_modality_ethics_knowledge_and_identity_sealed": {
+   "field": "philosophy",
+   "question": "Philosophy - modality, ethics, knowledge and identity, sealed",
+   "references": [
+    "S. Kripke, Semantical considerations on modal logic, Acta Phil. Fennica 16 (1963) 83",
+    "I. Kant, Critique of Pure Reason (1781), Introduction - a priori and a posteriori",
+    "G. W. Leibniz, Discourse on Metaphysics (1686) section 9; M. Black, The identity of indiscernibles, Mind 61 (1952) 153",
+    "J. S. Mill, Utilitarianism (1863); Kant, Groundwork (1785); Aristotle, Nicomachean Ethics; Hobbes, Leviathan (1651)"
+   ],
+   "statement": "The analytic checks of philosophy are decidable where they are formal: a modal contradiction, a framework's criterion, the source of a claim's warrant, the equality of two property sets.",
+   "ticks": [
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[necessary and possible, SEALED] A claim held necessarily true and possibly true is consistent (sealed through philosophy.PHIL_VERIFY): what must be, can be. The principle box P implies diamond P is axiom D - valid in every serial frame, so in the systems T, S4 and S5 (the verifier files it under K).",
+     "kind": "instance",
+     "seal": "0bb0f6f787889fff5aa3227690c268aa9bbb77eb61e0089505ff3c6c4cc8ffcf"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[necessary but impossible, SEALED AS A CONTRADICTION] Necessarily true AND not possibly true is inconsistent - sealed with claimed_consistent = false (sealed through philosophy.PHIL_VERIFY). Box P and not-diamond P cannot both hold: a thing that must be the case cannot also be a thing that cannot be. The engine seals the contradiction as a contradiction.",
+     "kind": "instance",
+     "seal": "cb58d64f252997c81cfb50a1d04a0e6689814dfc7ac1fbea8ba03de0ff2c677d"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[contingent, SEALED] Not necessary but possible is consistent (sealed through philosophy.PHIL_VERIFY): the contingent - true in some worlds, false in others - is where most of what we say lives.",
+     "kind": "instance",
+     "seal": "24532c35f1e49a3de8bb82e93d8fe7175d34c21788a88d92391384bf8fc3dddb"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[consequentialism, SEALED] Consequentialism judges an act by its outcomes: true (sealed through philosophy.PHIL_VERIFY). Mill's greatest happiness is the type.",
+     "kind": "instance",
+     "seal": "92afc2a1430aae89d9261bd0138d5d19c7f3183c3f4faa335e2c014f66cf682c"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[deontology, SEALED] Deontology does not: false (sealed through philosophy.PHIL_VERIFY) - the act's conformity to duty is the measure (Kant's categorical imperative), whatever follows.",
+     "kind": "instance",
+     "seal": "9ec3505c842887afd51fafb15871cca931d1dc4f53831552aeaf073ce46faf84"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[virtue ethics, SEALED] Virtue ethics does not: false (sealed through philosophy.PHIL_VERIFY) - the agent's character is the measure (Aristotle).",
+     "kind": "instance",
+     "seal": "6c0e71913fe075acbe653b0c3da17899bbf184beafd8f247505e7848e2c7fdf0"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[contractarianism, SEALED] Contractarianism does not: false (sealed through philosophy.PHIL_VERIFY) - what rational agents would agree to is the measure (Hobbes, Rawls).",
+     "kind": "instance",
+     "seal": "66c7d7d8b3afce595171a9d2a36f2f6de4c21089846c46ed17382cde242fa972"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[a priori, SEALED] A claim that needs no observation is a priori (sealed through philosophy.PHIL_VERIFY): Kant's 7 + 5 = 12, known by reason alone.",
+     "kind": "instance",
+     "seal": "6dc0673ce642ac8c2e27013faf99128d6f257eddace3f224944512fe4ca11cd6"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[a posteriori, SEALED] A claim that needs observation is a posteriori - sealed with claimed_is_a_priori = false (sealed through philosophy.PHIL_VERIFY): that water boils at 100 C at one atmosphere is learned by the thermometer, not the armchair.",
+     "kind": "instance",
+     "seal": "5eeea2b2a618a9ca84da64fb517fef12d880215cf0612226cc7415e32c12f966"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[Leibniz's law, SEALED] Two objects with the same properties - red, round, heavy, in any order - are identical under the law (sealed through philosophy.PHIL_VERIFY): the property SETS are equal.",
+     "kind": "instance",
+     "seal": "04a7271c68d8ae415f564637e8f4ad54115d3a755a78a30d970850df8daaf051"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[and its contrapositive, SEALED] Red, round, heavy against red, round, light: not identical, sealed with claimed false (sealed through philosophy.PHIL_VERIFY). One differing property is enough; the engine names it.",
+     "kind": "instance",
+     "seal": "9ae35e23effbc536ed2afd2882d17f498b8551456e96496897a4bbccfb6e81c5"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[the principles, CITED] Axiom D (what is necessary is possible), the taxonomy of the four frameworks, Kant's a priori / a posteriori line, and Leibniz's law are PRINCIPLES, cited never sealed. Leibniz's law has two halves: the indiscernibility of identicals (uncontroversial) and the identity of indiscernibles - the half the verifier implements - which Black (1952) disputed with two qualitatively identical spheres. What is sealed is the set comparison; whether sameness of properties IS identity is left as the dispute it is.",
+     "kind": "postulate",
+     "source": "Kripke (1963); Kant, Critique of Pure Reason, Introduction; Leibniz, Discourse section 9; Black, Mind 61 (1952) 153"
+    },
+    {
+     "by": "tools/tick.py philosophy",
+     "claim": "[on the one map] Modal logic is propositional logic with two more operators (the formal-logic stick: box and diamond are duals, like and and or under negation). The frameworks are the discernment the mind does (card_floor_the_mind) made explicit. The engine seals what is decidable and declines what is wise: which framework is RIGHT is not a check, and a miss stays a miss.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

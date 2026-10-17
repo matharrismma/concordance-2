@@ -1,0 +1,121 @@
+{
+ "entry": "prime_waves",
+ "rc": 0,
+ "seals": {
+  "2f2f5a8d5ceba6013db21d05610b3d2d2d38c90e432b65ee4a837ac7863f8d8d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "first_prime_wave_period_in_log_x"
+   ]
+  },
+  "44d825891e14bb6d6820fb58ba8b437f4df67bab438e09c3f86e4eea8c8f20d1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "li_of_100"
+   ]
+  },
+  "73710690fec73d1e35c3fcf6e4661b6a94bbe9a10b5815c6ee6e1fd4f176f8b1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "milu_355_over_113_minus_pi"
+   ]
+  },
+  "7ad21d8861ae9eea20d900c5dea151cb0c67ba581cd729713b9176182f1983fa": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "x_over_log_x_at_100"
+   ]
+  },
+  "81e70864e1f64aeedc14e65c8538d12571e3ccb18b13e7ec4566a5b910e3fe06": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "explicit_formula_constant_log_2pi"
+   ]
+  },
+  "e05ad378ef7a05edc2af86f9d687a4553cefe72a112908afbc308e758ba26791": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "first_prime_wave_x_factor_per_cycle"
+   ]
+  },
+  "e721015c69aab59e15422936b085bb0c6e239a40a204fc44d52edd0debb2f2c9": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "li_100_minus_the_25_primes"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_a_torus_and_the_waveforms_inside_the_prime_numbers_the_zeros": {
+   "field": "number_theory",
+   "question": "A torus, and the waveforms inside the prime numbers - the zeros of zeta as the music the primes are made of",
+   "references": [
+    "B. Riemann, Ueber die Anzahl der Primzahlen unter einer gegebenen Groesse (1859)",
+    "H. von Mangoldt (1895): the explicit formula psi(x) = x - sum x^rho/rho - log 2pi - (1/2) log(1 - x^-2)",
+    "A. M. Odlyzko: the zeros of zeta computed to great height; gamma_1 = 14.134725...",
+    "B. Mazur, W. Stein, Prime Numbers and the Riemann Hypothesis (2016): the prime waves drawn",
+    "L. Kronecker (1884), H. Weyl (1916): an irrational winding on the torus is dense",
+    "Zu Chongzhi (5th c.): the Milu 355/113",
+    "1 Corinthians 14:7-8; Psalm 19:1-4; Job 38:7",
+    "stick_riemann_hypothesis (the zeros verified to T = 1000 on this node)"
+   ],
+   "statement": "Riemann's explicit formula writes the prime staircase as a smooth main term plus one wave per zero of zeta: amplitude sqrt(x) over the zero, frequency gamma in log x - music periodic in the logarithm, not in x. The first wave repeats every factor 1.56 in x. The smooth count misses by a few at 100 (li(100) = 30.1 against 25 primes) and the waves make up exactly the difference. On a torus two frequencies close their orbit only when their ratio is rational; the prime waves' frequencies are, as far as is known, incommensurable, so their joint motion fills the torus and never repeats: the primes look random and are not.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - waveforms inside the primes, on a torus, 2026-10-08",
+     "claim": "[the primes are a staircase with waves on it] Riemann 1859, von Mangoldt 1895: psi(x) = x - sum over zeros x^rho/rho - log 2pi - (1/2) log(1 - x^-2). The main term is x; then one wave per zero rho = 1/2 + i gamma, of amplitude sqrt(x)/|rho| and frequency gamma in log x; the constant log 2pi = 1.8379 (sealed) is the one term with no wave in it. The staircase of the primes is EXACTLY this sum.",
+     "kind": "witness",
+     "seal": "81e70864e1f64aeedc14e65c8538d12571e3ccb18b13e7ec4566a5b910e3fe06"
+    },
+    {
+     "by": "Narrow Highway - waveforms inside the primes, on a torus, 2026-10-08",
+     "claim": "[the first wave] gamma_1 = 14.134725 - the first zero, verified on this node's Riemann stick (cited there, sealed to T = 1000). Its wave repeats every 2 pi / gamma_1 = 0.4445 in log x (sealed): each cycle x grows by the factor e^{0.4445} = 1.560 (sealed). The music of the primes is periodic in the LOGARITHM - every octave of x, not every step.",
+     "kind": "witness",
+     "seal": "2f2f5a8d5ceba6013db21d05610b3d2d2d38c90e432b65ee4a837ac7863f8d8d"
+    },
+    {
+     "by": "Narrow Highway - waveforms inside the primes, on a torus, 2026-10-08",
+     "claim": "[one cycle per factor of 1.56] e^(2 pi / 14.134725) = 1.5597 (sealed): between 100 and 156, between 156 and 243, the first wave completes one swing. The higher zeros swing faster and softer; together they draw the staircase's every step.",
+     "kind": "witness",
+     "seal": "e05ad378ef7a05edc2af86f9d687a4553cefe72a112908afbc308e758ba26791"
+    },
+    {
+     "by": "Narrow Highway - waveforms inside the primes, on a torus, 2026-10-08",
+     "claim": "[how far the smooth count is off] li(100) = 30.126 (sealed) against pi(100) = 25 primes (cited): off by 5.126 (sealed); 100/log 100 = 21.71 (sealed) from the other side. The waves are what remains after the smooth part - and they sum to the exact staircase, not an approximation of it.",
+     "kind": "witness",
+     "seal": "44d825891e14bb6d6820fb58ba8b437f4df67bab438e09c3f86e4eea8c8f20d1"
+    },
+    {
+     "by": "Narrow Highway - waveforms inside the primes, on a torus, 2026-10-08",
+     "claim": "[the other smooth guess] 100/log(100) = 21.7147 (sealed), Gauss's first estimate, undershoots; li(x) overshoots here and (Littlewood 1914, cited) the sign of li(x) - pi(x) changes infinitely often, first somewhere below 1.4 x 10^316 (Skewes, Bays-Hudson): the waves cross the smooth line both ways.",
+     "kind": "witness",
+     "seal": "7ad21d8861ae9eea20d900c5dea151cb0c67ba581cd729713b9176182f1983fa"
+    },
+    {
+     "by": "Narrow Highway - waveforms inside the primes, on a torus, 2026-10-08",
+     "claim": "[the miss the waves must make up] li(100) - 25 = 5.126 (sealed): five and an eighth primes' worth of wave at x = 100. Nothing is missing from the formula; this is the sum of the waves at that point, with its sign.",
+     "kind": "witness",
+     "seal": "e721015c69aab59e15422936b085bb0c6e239a40a204fc44d52edd0debb2f2c9"
+    },
+    {
+     "by": "Narrow Highway - waveforms inside the primes, on a torus, 2026-10-08",
+     "claim": "[a torus] Two frequencies on a torus close their orbit only when their ratio is rational: with ratio 355/113 the orbit closes after 113 turns, and 355/113 - pi = 2.668e-07 (sealed) is how little that orbit differs from the one with ratio pi, which never closes - an irrational winding is dense (Kronecker-Weyl, cited). The prime waves' frequencies gamma_n are, as far as is known, incommensurable: their joint motion fills the torus and never repeats. That is why the primes look random and are not.",
+     "kind": "witness",
+     "seal": "73710690fec73d1e35c3fcf6e4661b6a94bbe9a10b5815c6ee6e1fd4f176f8b1"
+    },
+    {
+     "by": "Narrow Highway - waveforms inside the primes, on a torus, 2026-10-08",
+     "claim": "[what is sealed, what is cited, and the guard] The Riemann stick holds the zeros on the line to T = 1000; this stick reads them as waveforms and the torus as their stage. The explicit formula is a theorem (von Mangoldt), cited; the sqrt(x) amplitude of every wave IS the Riemann hypothesis, not assumed here (without it some waves are larger); the incommensurability of the gamma_n is conjectural, cited; 'the music of the primes' is a likeness (du Sautoy). Scripture: 'if the trumpet give an uncertain sound, who shall prepare himself to the battle?' (1 Cor 14:8) - distinct notes; 'their line is gone out through all the earth' (Ps 19:4), speech without words; 'the morning stars sang together' (Job 38:7). Seven numbers sealed; the rest cited. Ties: riemann, zeta, hilbert_polya (the zeros as a spectrum), fourier, surfaces (the torus), gue (the spacings).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,61 @@
+{
+ "entry": "jevons",
+ "rc": 0,
+ "seals": {
+  "0fbeee0cf3703d7bcc4a945591aeef27f2a75f46cd5f97dc981eb8b8f9acb918": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "jevons_naive_saving"
+   ]
+  },
+  "97712201deb7bafe3ac3fd3449090ff2a3b5f009fb5552aea015930d6551ddb0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "jevons_backfire"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_jevons_paradox": {
+   "field": "economics",
+   "question": "Jevons' paradox",
+   "references": [
+    "W. S. Jevons, The Coal Question (1865)",
+    "the rebound effect; the Khazzoom-Brookes postulate (backfire)",
+    "resource use R = service / efficiency"
+   ],
+   "statement": "Improving the efficiency with which a resource is used tends to INCREASE its total consumption, because the efficiency gain lowers the effective price and raises demand. When demand is elastic enough the induced growth exceeds the per-unit saving (backfire). Jevons observed it for coal in 1865.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Jevons' paradox, 2026-10-07",
+     "claim": "[the naive expectation] A 25% efficiency gain (efficiency 1 -> 1.25) should cut resource use to 1/1.25 = 0.8 (sealed) - 20% less - IF the amount of service demanded held fixed. This is the saving everyone assumes an efficiency gain delivers.",
+     "kind": "witness",
+     "seal": "0fbeee0cf3703d7bcc4a945591aeef27f2a75f46cd5f97dc981eb8b8f9acb918"
+    },
+    {
+     "by": "Narrow Highway - Jevons' paradox, 2026-10-07",
+     "claim": "[the paradox - backfire] But cheaper service raises demand. With a price elasticity of -2, the 20% effective price drop lifts service demand 40% (service 1 -> 1.4), so resource use R = service/efficiency = 1.4/1.25 = 1.12 (sealed) - 12% MORE, despite the 25% efficiency gain. Efficiency increased total consumption. That is Jevons' paradox.",
+     "kind": "witness",
+     "seal": "97712201deb7bafe3ac3fd3449090ff2a3b5f009fb5552aea015930d6551ddb0"
+    },
+    {
+     "by": "Narrow Highway - Jevons' paradox, 2026-10-07",
+     "claim": "[the condition] Backfire (total use rises) when the rebound exceeds 100% - demand elastic enough that induced growth outruns the per-unit saving. Below that threshold use still falls, but by less than the naive amount (partial rebound). The saving is almost never the whole naive figure.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - Jevons' paradox, 2026-10-07",
+     "claim": "[why this lands on US, now] We just cut the cost of a seal ~100x (82s/6GB -> sub-second). Jevons predicts the response is not 'the same sealing, cheaper' but MORE sealing: agents and tools will seal far more, so the ledger, corpus and storage grow FASTER, not slower. Content-addressing dedups identical facts, but distinct seals still accumulate (holdings already went 874k -> 1.72M). So the efficiency win must be paired with a GOVERNOR: the Monte Carlo simulator should prove the bounded path stays bounded at 100x volume and watch storage growth, and the steward budget must cap induced consumption. Efficiency without a governor is how a tool becomes a flood.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - Jevons' paradox, 2026-10-07",
+     "claim": "[the mission line] Jevons is also the economics of addiction: make a thing frictionless and consumption expands to fill the new room. The engine's RED line is the opposite - it OFFERS, never addicts or coerces; eliminating free will is the LOSS condition ([[feedback_liberty_inherent_free_will_paramount_2026-10-06]]). So: efficient AND bounded, on principle - frictionless must never become compulsive. map, never launder.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

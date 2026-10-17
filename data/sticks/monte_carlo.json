@@ -1,0 +1,76 @@
+{
+ "schema": 1,
+ "name": "monte_carlo",
+ "aliases": [
+  "monte_carlo",
+  "montecarlo",
+  "monte",
+  "mc",
+  "sampling"
+ ],
+ "doc": "MONTE CARLO (Matt, 2026-10-07: 'mint Monte Carlo'). Estimate by random sampling: the sample mean -> the\ntrue mean (law of large numbers), with standard error ~ 1/sqrt(N) - a dimension-independent rate, which is\nwhy it beats grid quadrature in high dimensions. Averaging N iid samples divides the variance by N. The\nengine uses Monte Carlo to SIMULATE paths and experiences (seeded, N trials, assert invariants), but never\nlets a random estimate SEAL a truth: a Monte Carlo result is evidence with an error bar, never a proof.\nNew stick; idempotent.",
+ "seals": [
+  {
+   "key": "mc_se_n100",
+   "nid": "mc_se_n100",
+   "expr": "1 / (100 ** 0.5)",
+   "value": 0.1,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "mc_se_n10000",
+   "nid": "mc_se_n10000",
+   "expr": "1 / (10000 ** 0.5)",
+   "value": 0.01,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "mc_variance_over_n",
+   "nid": "mc_variance_over_n",
+   "expr": "1.0 / 4",
+   "value": 0.25,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Monte Carlo",
+   "statement": "Estimate a quantity by averaging random samples: the sample mean converges to the true value (law of large numbers), and the standard error falls as sigma/sqrt(N). The rate 1/sqrt(N) does not depend on the dimension, which is why Monte Carlo beats grid methods in high dimensions - and why it is always an estimate with an error bar, never a proof.",
+   "field": "meta",
+   "references": [
+    "the law of large numbers: the sample mean -> the expected value",
+    "standard error of the mean = sigma / sqrt(N) (the 1/sqrt(N) rate)",
+    "Buffon's needle (1777); Monte Carlo integration; Metropolis (1953) = MCMC"
+   ],
+   "by": "Narrow Highway - Monte Carlo, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[the 1/sqrt(N) law] The standard error of a unit-variance Monte Carlo mean is 1/sqrt(N): at N=100 it is 1/sqrt(100) = 0.1 (sealed). The estimate is unbiased; this is just the spread of the average. The rate is slow and honest - which is the point.",
+     "seal": "mc_se_n100"
+    },
+    {
+     "kind": "witness",
+     "claim": "[100x the samples, 10x the accuracy] At N=10000 the standard error is 1/sqrt(10000) = 0.01 (sealed). Going from 100 to 10000 samples - a hundredfold - cuts the error only tenfold. No quantity of sampling turns the error bar into zero: a Monte Carlo result narrows, it never closes to a proof.",
+     "seal": "mc_se_n10000"
+    },
+    {
+     "kind": "witness",
+     "claim": "[variance averaging] Averaging N independent samples divides the variance by N: for N=4, the factor is 1/4 = 0.25 (sealed), so the standard error falls by 1/sqrt(4) = 1/2. The mean stays centered on the truth; only its uncertainty shrinks, as 1/sqrt(N).",
+     "seal": "mc_variance_over_n"
+    },
+    {
+     "kind": "note",
+     "claim": "[what it is, and its superpower] Monte Carlo replaces an intractable sum or integral with the average of random draws (law of large numbers). Its 1/sqrt(N) error is DIMENSION-INDEPENDENT, so in high dimensions it crushes grid quadrature (whose error is ~ N^(-1/d)). Buffon's needle, Monte Carlo integration, and MCMC (Metropolis 1953 - a Monte Carlo method that draws its samples by walking a Markov chain, ties stick_markov_chains_and_mcmc) are all this one idea."
+    },
+    {
+     "kind": "note",
+     "claim": "[how the engine uses it - and the line it does not cross] Monte Carlo is the engine's method for SIMULATING paths and experiences: seeded random journeys and inputs, N trials, asserting the invariants that mean it does not break down (no unhandled error, every seal re-verifies, the ledger chain never forks, each seal stays within its resource bound) with every failing case a replayable seed. But a random estimate NEVER seals a truth here: a Monte Carlo result is evidence with an error bar (~1/sqrt(N)), a map of confidence, never a proof. Sample to FIND and to STRESS; seal only what verifies exactly (ties [[feedback_mapping_the_truth_not_generating_it_2026-10-07]]). map, never launder."
+    }
+   ]
+  }
+ ]
+}

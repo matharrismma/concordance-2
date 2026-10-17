@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "semantics",
+ "aliases": [
+  "semantics",
+  "semantic_relations",
+  "synonymy",
+  "wordnet"
+ ],
+ "handler": "semantics",
+ "why_python": "structurally data, but its linguistics seals are INCOMPLETE in an isolated keeping (needs the linguistics shelf), so it could not be pinned byte-identical here — migrate when it can be verified"
+}

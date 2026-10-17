@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "schoenfeld",
+ "aliases": [
+  "schoenfeld"
+ ],
+ "handler": "schoenfeld",
+ "params": [
+  {
+   "type": "int",
+   "default": 2000000
+  }
+ ],
+ "why_python": "takes arguments"
+}

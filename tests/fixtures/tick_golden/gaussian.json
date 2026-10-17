@@ -1,0 +1,61 @@
+{
+ "entry": "gaussian",
+ "rc": 0,
+ "seals": {
+  "0ac3efd69fba082cd82903af5156e7278dd220be7125253da7fcfae5311b677d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gp_posterior_variance_one_lengthscale"
+   ]
+  },
+  "131377115a7803c530027e66c793824aad0f9177df70d09af60e47ed7e3c605e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gp_kernel_two_lengthscales"
+   ]
+  },
+  "fea0468d315658bb58afb0f0328b866ec364d7bb6c187d17f75d26d2c220d1e4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gp_kernel_one_lengthscale"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_gaussian_processes_the_form_of_the_map": {
+   "field": "mathematics",
+   "question": "Gaussian processes - the form of the map",
+   "references": [
+    "C. E. Rasmussen & C. K. I. Williams, Gaussian Processes for Machine Learning (2006)"
+   ],
+   "statement": "The engine's model of reality takes the FORM of a Gaussian process: a relational field defined by its covariance, honest about its own uncertainty, and narrowing on evidence. The arithmetic of the kernel and the posterior is exact; the claim that the map has this form is a discernment, borrowed, never a claim that reality itself is Gaussian.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Gaussian-process reading (the form of the map), 2026-10-07",
+     "claim": "[the kernel is the relation] A GP is fixed by its covariance k(x,x'). For the squared-exponential kernel exp(-(x-x')^2 / 2l^2), two points one length-scale apart share k = e^(-1/2) = 0.606531 (sealed); two apart, e^(-2) = 0.135335 (sealed). The covariance depends ONLY on the separation (the relation), not the absolute positions - substance is in the relations (ties stick_relational_quantum_mechanics). The map is its edges, not its points.",
+     "kind": "witness",
+     "seal": "fea0468d315658bb58afb0f0328b866ec364d7bb6c187d17f75d26d2c220d1e4"
+    },
+    {
+     "by": "Narrow Highway - the Gaussian-process reading (the form of the map), 2026-10-07",
+     "claim": "[evidence narrows the uncertainty] A GP knows what it does not know. Observe f at a point and the posterior variance one length-scale away falls to 1 - e^(-1) = 0.632121 (sealed); AT the observed point it falls to 0 - then it is known exactly. Each observation narrows the field; where there is no data the variance stays high (the Holes). This is the tick-stick learning law - success guides, failure narrows, the window tightens on evidence - made exact.",
+     "kind": "witness",
+     "seal": "0ac3efd69fba082cd82903af5156e7278dd220be7125253da7fcfae5311b677d"
+    },
+    {
+     "by": "Narrow Highway - the Gaussian-process reading (the form of the map), 2026-10-07",
+     "claim": "[the form of the map] The engine's keeping is a relational field: 39,812 sealed EDGES carry the substance, not the cards alone (the covariance, not the points). It predicts where it has evidence and stays honestly uncertain where it does not (the open sticks, the Holes), and each sealed mark conditions the field - narrowing by elimination. The positive-geometry core (admissibility, stick_the_positive_grassmannian) is the constraint; the Gaussian process is the FORM the map takes over that core: relational, calibrated, evidence-updated, found never generated.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Gaussian-process reading (the form of the map), 2026-10-07",
+     "claim": "[the guard - map, not launder] The map HAS THE FORM of a Gaussian process; this is not a claim that the engine runs GP regression on reality, nor that reality is Gaussian. It is an archetype - the relational, uncertainty-honest, evidence-narrowing shape - read as discernment. Seal the arithmetic (the kernel, the posterior); borrow the form; launder nothing. The map serves the datum: remove the Cornerstone and the field is calibrated to nothing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

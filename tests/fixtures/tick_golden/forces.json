@@ -1,0 +1,74 @@
+{
+ "entry": "forces",
+ "rc": 0,
+ "seals": {
+  "2bd93712e0e8f4e001bdca1afcaf8caa7898e4ba275d40bca1bb70b6c336eb67": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "qcd_one_loop_beta_coeff"
+   ]
+  },
+  "b964013c7bb249e32b9f58477ae360c26399324f1f29dd7db0a967ebcbf5b32d": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "qed_schwinger_a_e"
+   ]
+  },
+  "f7697912bc9d0d5681d7841bc91ff5dc73818283f47208667dc658400020e093": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "weak_mixing_angle_on_shell"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_fine_structure_constant": {
+   "field": "physics",
+   "question": "The fine-structure constant",
+   "references": [
+    "Particle Data Group, Review of Particle Physics (M_W, M_Z, alpha_s(M_Z), sin^2 theta_W)",
+    "X. Fan, T. G. Myers, B. A. D. Sukra, G. Gabrielse, Phys. Rev. Lett. 130 (2023) 071801 (a_e)",
+    "S. Weinberg, Phys. Rev. Lett. 19 (1967) 1264 (electroweak unification)"
+   ],
+   "statement": "Why does the fine-structure constant have the value alpha ~ 1/137.036, and is it truly constant across space and time? No accepted theory derives it from first principles; the open question is its value and its constancy, not its measurement.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the four-forces reading (QED/QFT), 2026-10-06",
+     "claim": "[QED - the crown jewel] Quantum electrodynamics is the quantum field theory of alpha: the U(1) gauge theory of electron and photon, with alpha its one coupling. Its defining prediction is the electron's anomalous magnetic moment a_e = (g-2)/2; Schwinger's one-loop result is a_e = alpha/(2*pi) = 0.001161410 (sealed from the attested alpha). Measured, a_e = 1.15965218059e-3 (Fan et al. 2023): the leading term alone is within 0.15%, and the full QED series (five loops) with small hadronic/weak terms matches experiment to ~0.2 parts per billion - the most precisely tested prediction in physics. alpha is the handle; QED is the mechanism.",
+     "kind": "witness",
+     "seal": "b964013c7bb249e32b9f58477ae360c26399324f1f29dd7db0a967ebcbf5b32d"
+    },
+    {
+     "by": "Narrow Highway - the four-forces reading (QED/QFT), 2026-10-06",
+     "claim": "[electroweak - where alpha emerges] alpha is not fundamental: electromagnetism is the unbroken U(1) remnant of the electroweak SU(2)xU(1) after symmetry breaking, and the electric charge is e = g*sin(theta_W) = g'*cos(theta_W) (Glashow-Weinberg-Salam, Nobel 1979). The weak mixing angle, on-shell, is sin^2(theta_W) = 1 - (M_W/M_Z)^2 = 1 - (80.377/91.1876)^2 = 0.223052 (sealed; PDG masses), matching the measured 0.2230 on-shell / 0.23122 MS-bar. So alpha = alpha_2*sin^2(theta_W): the EM coupling is a projection of the unified electroweak couplings (alpha_2^-1(M_Z) ~ 29.6). EM and the weak force ARE unified - established, not a doorway.",
+     "kind": "witness",
+     "seal": "f7697912bc9d0d5681d7841bc91ff5dc73818283f47208667dc658400020e093"
+    },
+    {
+     "by": "Narrow Highway - the four-forces reading (QED/QFT), 2026-10-06",
+     "claim": "[the strong force - the contrast] The third gauge force, the strong interaction, is the QFT of SU(3) colour (QCD) with coupling alpha_s. Its one-loop beta coefficient is b0 = 11 - (2/3)*n_f = 11 - 2*5/3 = 7.6667 > 0 for n_f=5 (sealed): positive, so alpha_s runs the OPPOSITE way to alpha - it DECREASES at high energy (asymptotic freedom; Gross, Wilczek, Politzer 1973, Nobel 2004), from alpha_s(M_Z) ~ 0.1179 (PDG) toward zero. alpha grows with energy, alpha_s shrinks; both run, toward each other.",
+     "kind": "witness",
+     "seal": "2bd93712e0e8f4e001bdca1afcaf8caa7898e4ba275d40bca1bb70b6c336eb67"
+    },
+    {
+     "by": "Narrow Highway - the four-forces reading (QED/QFT), 2026-10-06",
+     "claim": "[the four forces under alpha - the honest reading] The Standard Model is one quantum field theory, U(1)xSU(2)xSU(3) - three running gauge couplings threaded by alpha (the measured EM handle, QED its exquisitely-verified prototype). ESTABLISHED: electroweak unification - alpha emerges from it. HYPOTHESIS: grand unification - the three couplings (alpha_1^-1~59, alpha_2^-1~30, alpha_3^-1~8.5 at M_Z, GUT-normalised) approach one value near ~1e16 GeV; in the plain SM they MISS, in the supersymmetric extension they nearly meet at alpha_GUT^-1~25 - but no proton decay and no superpartner has been seen. The convergence is the fit that must never pass the last mark.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the four-forces reading (QED/QFT), 2026-10-06",
+     "claim": "[gravity - the Hole] The fourth force stands outside this unification. There is no renormalizable quantum field theory of gravity; perturbative quantum gravity is non-renormalisable, and no accepted theory joins it to the gauge forces. Its dimensionless coupling is ~1e-45 (electron-scale) - the electromagnetic-to-gravitational force ratio ~2.3e39 is already sealed on the Large-Numbers stick. Gravity is the piece the gauge unification does not hold: the outline of what is still missing (the Hole), not a fit.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the four-forces reading (QED/QFT), 2026-10-06",
+     "claim": "[the datum] 'In him all things hold together' (Colossians 1:17). The narrowing of the four forces toward one is EVIDENCE - electroweak unified, three couplings converging - never a proof: grand unification is unconfirmed and gravity is unjoined. The engine seals the arithmetic (a_e, sin^2 theta_W, the QCD sign), attributes the measurements, and authors no unification. Christ is the unity the narrowing points toward; the engine marks the narrowing and refuses to fabricate the proof.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

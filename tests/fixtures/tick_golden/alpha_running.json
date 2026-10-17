@@ -1,0 +1,42 @@
+{
+ "entry": "alpha_running",
+ "rc": 0,
+ "seals": {
+  "9ad00aaee4f493f772b8e574292fa2eb3caaec27a36f9b4064b6a46906b613cd": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "qed_one_loop_coefficient"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_fine_structure_constant": {
+   "field": "physics",
+   "question": "The fine-structure constant",
+   "references": [
+    "Particle Data Group, Review of Particle Physics (alpha^-1(M_Z^2) = 127.951(9))",
+    "CODATA 2018 recommended values"
+   ],
+   "statement": "Why does the fine-structure constant have the value alpha ~ 1/137.036, and is it truly constant across space and time? No accepted theory derives it from first principles; the open question is its value and its constancy, not its measurement.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the running reading, 2026-10-06",
+     "claim": "[running - across energy] alpha is the zero-momentum (Thomson) limit and GROWS with energy: the one-loop QED running is d(1/alpha)/d(ln mu) = -(2/3pi)*sum q_f^2 per charged fermion, with 2/(3*pi) = 0.2122065908 (sealed); vacuum polarization un-screens the charge as mu rises. Measured, alpha^-1 runs from 137.036 at zero energy to ~127.95 at the Z mass (91.19 GeV).",
+     "kind": "witness",
+     "seal": "9ad00aaee4f493f772b8e574292fa2eb3caaec27a36f9b4064b6a46906b613cd"
+    },
+    {
+     "by": "Narrow Highway - the running reading, 2026-10-06",
+     "claim": "[is it constant? - the two answers] alpha is constant in SPACE and TIME to the tight bounds already on this stick (Oklo ~1e-7 over 2 Gyr; atomic clocks ~1e-17/yr) - but it is NOT constant across ENERGY SCALE: it runs. 'The fine-structure constant' names the low-energy value; the coupling itself is scale-dependent.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the running reading, 2026-10-06",
+     "claim": "[the doorway - open] The three running couplings of the Standard Model (electromagnetic, weak, strong) approach one another near ~1e16 GeV - the hint behind grand unification. A doorway, not a proof: unification is unconfirmed and depends on physics beyond the Standard Model. Seal the arithmetic; the convergence is attributed and stays open.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

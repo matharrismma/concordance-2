@@ -1,0 +1,66 @@
+{
+ "entry": "logistics",
+ "rc": 0,
+ "seals": {
+  "6bae8c85a17ca66a9610dce8c53c92a35d7c18b02c988bd88f2d710a9e346e40": {
+   "axis": "operations_research",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "8f4c8f834bf693596262243547fdfef631df65028484c9b0b223ecb321e98f65": {
+   "axis": "operations_research",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a0bb6e9559bcc464324e532360e10bc31f7b578924d5861342dcecbeaa9c37b9": {
+   "axis": "operations_research",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_logistics_the_optimization_core_verified_and_sealed": {
+   "field": "",
+   "question": "Logistics - the optimization core, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py logistics",
+     "claim": "[the knapsack optimum] Three items (weight, value) = (2,3), (3,4), (4,5) in a bag of capacity 5: the best is items 1 and 2 - weight 5, value 7 (sealed by dynamic programming through operations_research.OR_VERIFY). The exact optimum of an NP-hard problem, found cheaply here because the capacity is small - exactly the solve path's point.",
+     "kind": "instance",
+     "seal": "8f4c8f834bf693596262243547fdfef631df65028484c9b0b223ecb321e98f65"
+    },
+    {
+     "by": "tools/tick.py logistics",
+     "claim": "[feasibility] The point x=2, y=3 satisfies x + y <= 10 and x >= 0 (sealed) - the EXCLUDE jaw: a candidate that breaks a constraint is cut; one that holds survives.",
+     "kind": "instance",
+     "seal": "6bae8c85a17ca66a9610dce8c53c92a35d7c18b02c988bd88f2d710a9e346e40"
+    },
+    {
+     "by": "tools/tick.py logistics",
+     "claim": "[assignment cost] Worker 0 to job 1 (cost 2) and worker 1 to job 0 (cost 6) total 8 (sealed) - the cost of a stated matching, the kernel of routing and scheduling.",
+     "kind": "instance",
+     "seal": "a0bb6e9559bcc464324e532360e10bc31f7b578924d5861342dcecbeaa9c37b9"
+    },
+    {
+     "by": "tools/tick.py logistics",
+     "claim": "[the model] The constraints are linear and the costs and durations are known and fixed - the model under which the optimum is exact. Real demand, traffic and times are uncertain; there the answer is a bounded estimate (get close), not an exact optimum.",
+     "kind": "postulate",
+     "source": "operations_research.OR_VERIFY; the solve path (card_floor_the_solve_path)"
+    },
+    {
+     "by": "tools/tick.py logistics",
+     "claim": "[on the solve path] Logistics IS the solve path applied: exclude the infeasible (the moat on the constraints), find the optimum where it is cheap (knapsack DP, LP), and get close with a proven bound where exact is NP-hard at scale (the approximation door). Demand forecasts and real-world variance are declined.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

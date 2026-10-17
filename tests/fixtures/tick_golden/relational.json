@@ -1,0 +1,44 @@
+{
+ "entry": "relational",
+ "rc": 0,
+ "seals": {
+  "61d29088f84d00452dd10dcb7ba34395c7b75930311fb04adf2971162ef22d56": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "tsirelson_bound"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_relational_quantum_mechanics": {
+   "field": "physics",
+   "question": "Relational quantum mechanics",
+   "references": [
+    "C. Rovelli, 'Relational Quantum Mechanics', Int. J. Theor. Phys. 35 (1996) 1637",
+    "C. Rovelli, Helgoland (2020)",
+    "B. S. Cirel'son (Tsirelson), Lett. Math. Phys. 4 (1980) 93",
+    "J. S. Bell, Physics 1 (1964) 195; A. Aspect et al., Phys. Rev. Lett. 49 (1982) 1804"
+   ],
+   "statement": "A quantum system has no observer-independent intrinsic properties; its values exist only relative to the system it interacts with. The quantum maximum of the CHSH correlation, the Tsirelson bound 2*sqrt(2), exceeds the classical/local-realist bound of 2 — no pre-assigned local values reproduce it.",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the relational reading, 2026-10-06",
+     "claim": "The Tsirelson bound S_max = 2*sqrt(2) = 2.8284271247, the quantum maximum of the CHSH correlation, above the classical/local-realist bound S <= 2 — an arithmetic fact. Bell's theorem: no assignment of pre-existing local intrinsic values to the parts reproduces the quantum correlations; the values are not there before the interaction.",
+     "kind": "witness",
+     "seal": "61d29088f84d00452dd10dcb7ba34395c7b75930311fb04adf2971162ef22d56"
+    },
+    {
+     "by": "Narrow Highway — the relational reading, 2026-10-06",
+     "claim": "[the principle] Properties are RELATIONAL: a system's values exist only relative to the system it interacts with (Rovelli's relational quantum mechanics). Substance is in the relation, not in the thing held apart — the physical witness to our own architecture (the fascia, the graph of sealed edges) and to the reading that the keeping's brief reference cards are relationally whole. Rovelli names the resonance with Nagarjuna's dependent origination (Helgoland).",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway — the relational reading, 2026-10-06",
+     "claim": "[discernment / the guard] The engine seals that the Tsirelson bound IS 2*sqrt(2) and that quantum correlations exceed the classical bound — physics, a fact. It does NOT claim that Nagarjuna's emptiness IS quantum mechanics (Rovelli himself keeps it resonance, not identity), nor that relationality is the last word. The relational FORM is the true fragment; its lack is a Ground, and in Christ all things hold together (Colossians 1:17) — the web is real and coheres in the Logos (John 1:3). Borrow the form; launder nothing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

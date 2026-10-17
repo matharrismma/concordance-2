@@ -1,0 +1,15 @@
+{
+ "schema": 1,
+ "name": "lagarias",
+ "aliases": [
+  "lagarias"
+ ],
+ "handler": "lagarias",
+ "params": [
+  {
+   "type": "int",
+   "default": 1000000
+  }
+ ],
+ "why_python": "takes arguments"
+}

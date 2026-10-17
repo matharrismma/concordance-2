@@ -1,0 +1,76 @@
+{
+ "schema": 1,
+ "name": "information_theory",
+ "aliases": [
+  "information_theory_stick",
+  "information_theory",
+  "info_theory"
+ ],
+ "doc": "INFORMATION THEORY - SEALED through information_theory.INFO_VERIFY. Idempotent.",
+ "seals": [
+  {
+   "key": "entropy",
+   "domain": "information_theory",
+   "artifact": "INFO_VERIFY",
+   "spec": {
+    "probabilities": [
+     0.5,
+     0.5
+    ],
+    "claimed_entropy_bits": 1.0
+   }
+  },
+  {
+   "key": "hamming",
+   "domain": "information_theory",
+   "artifact": "INFO_VERIFY",
+   "spec": {
+    "string_a": "10110",
+    "string_b": "11010",
+    "claimed_hamming": 2
+   }
+  },
+  {
+   "key": "bsc",
+   "domain": "information_theory",
+   "artifact": "INFO_VERIFY",
+   "spec": {
+    "bsc_error_rate": 0.0,
+    "claimed_capacity_bits": 1.0
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Information theory - the measure of a message, verified and sealed",
+   "by": "tools/tick.py information_theory_stick",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the bit] A fair coin has Shannon entropy H = -sum p log2 p = 1.000 bit (sealed through information_theory.INFO_VERIFY) - the unit of information, the answer to one yes/no question. This is the logarithm on the solve path, measuring a choice.",
+     "seal": "entropy"
+    },
+    {
+     "kind": "instance",
+     "claim": "[distance in code] The Hamming distance between 10110 and 11010 is 2 - two positions differ (sealed); the number of single-bit errors that separate two codewords, the basis of error-correction.",
+     "seal": "hamming"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a clean channel] A binary symmetric channel with error rate 0 has capacity C = 1 - H2(0) = 1 bit per use (sealed) - Shannon's limit, the most a channel can carry.",
+     "seal": "bsc"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the ground] Shannon's 1948 axioms: information is -sum p log p, and a channel has a hard capacity no code can beat. Sealed where applied; the theory is the floor the whole digital world stands on.",
+     "source": "C. E. Shannon (1948); information_theory.INFO_VERIFY"
+    },
+    {
+     "kind": "note",
+     "claim": "[declined] The MEANING or value of a message is not information in this sense - the engine measures the message's surprise and the channel's limit, not what the message is worth.",
+     "source": "src/concordance/verifiers/information_theory.py; the logarithm floor"
+    }
+   ]
+  }
+ ]
+}

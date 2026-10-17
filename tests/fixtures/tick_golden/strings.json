@@ -1,0 +1,47 @@
+{
+ "entry": "strings",
+ "rc": 0,
+ "seals": {
+  "78aa2d859eef99ad115804f0fa9da1b1502db4386008e2caa2be63be65072394": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "string_bosonic_critical_dim"
+   ]
+  },
+  "a90b9209bd8a21bec286a73d45c41ad42109c879f65feb380650f0f7ee00402c": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "string_superstring_dim"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_quantum_gravity": {
+   "field": "",
+   "question": "Quantum gravity",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the string-theory reading, 2026-10-06",
+     "claim": "[string theory - the bosonic critical dimension] In string theory the graviton is a vibration of a closed string. The string's zero-point energy regularises (via the Riemann zeta value zeta(-1) = -1/12) to a = (D-2)/24; a massless photon in the spectrum requires a = 1, which forces (26-2)/24 = 1 (sealed) -> D = 26, the critical dimension of the bosonic string (24 transverse dimensions). The arithmetic is exact; it is not a claim that spacetime has 26 dimensions.",
+     "kind": "witness",
+     "seal": "78aa2d859eef99ad115804f0fa9da1b1502db4386008e2caa2be63be65072394"
+    },
+    {
+     "by": "Narrow Highway - the string-theory reading, 2026-10-06",
+     "claim": "[the superstring] Adding worldsheet supersymmetry drops the count: 8 transverse dimensions, 8 + 2 = 10 (sealed) -> D = 10, the critical dimension of superstring theory (M-theory lifts it to 11). Again sealed arithmetic, not a measurement of the world.",
+     "kind": "witness",
+     "seal": "a90b9209bd8a21bec286a73d45c41ad42109c879f65feb380650f0f7ee00402c"
+    },
+    {
+     "by": "Narrow Highway - the string-theory reading, 2026-10-06",
+     "claim": "[the second candidate - the Hole stays open] String theory is the OTHER candidate to quantize gravity, beside loop quantum gravity: it contains a graviton and is finite, but it REQUIRES 10 or 11 dimensions and supersymmetry, and NONE of that has been observed. Same status as LQG - mathematical STRUCTURE, no experimental EVIDENCE. Two candidates, neither a fit; gravity remains the Hole the gauge unification does not hold. Seal the arithmetic; the physical claim stays open.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

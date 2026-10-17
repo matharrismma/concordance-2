@@ -1,0 +1,69 @@
+{
+ "entry": "monte_carlo",
+ "rc": 0,
+ "seals": {
+  "0e7545034c0930d8a986dbafe87844094711c154cabfe7ef189cb44b182e260f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mc_se_n100"
+   ]
+  },
+  "1668d79270d2e2b960f2446b64f84bda03b04e297658ac1031d29da1acda71b1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mc_se_n10000"
+   ]
+  },
+  "34533337b6bd7621608217188e0117d1ac8f8d02878a35324267993889aebbfc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mc_variance_over_n"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_monte_carlo": {
+   "field": "meta",
+   "question": "Monte Carlo",
+   "references": [
+    "the law of large numbers: the sample mean -> the expected value",
+    "standard error of the mean = sigma / sqrt(N) (the 1/sqrt(N) rate)",
+    "Buffon's needle (1777); Monte Carlo integration; Metropolis (1953) = MCMC"
+   ],
+   "statement": "Estimate a quantity by averaging random samples: the sample mean converges to the true value (law of large numbers), and the standard error falls as sigma/sqrt(N). The rate 1/sqrt(N) does not depend on the dimension, which is why Monte Carlo beats grid methods in high dimensions - and why it is always an estimate with an error bar, never a proof.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Monte Carlo, 2026-10-07",
+     "claim": "[the 1/sqrt(N) law] The standard error of a unit-variance Monte Carlo mean is 1/sqrt(N): at N=100 it is 1/sqrt(100) = 0.1 (sealed). The estimate is unbiased; this is just the spread of the average. The rate is slow and honest - which is the point.",
+     "kind": "witness",
+     "seal": "0e7545034c0930d8a986dbafe87844094711c154cabfe7ef189cb44b182e260f"
+    },
+    {
+     "by": "Narrow Highway - Monte Carlo, 2026-10-07",
+     "claim": "[100x the samples, 10x the accuracy] At N=10000 the standard error is 1/sqrt(10000) = 0.01 (sealed). Going from 100 to 10000 samples - a hundredfold - cuts the error only tenfold. No quantity of sampling turns the error bar into zero: a Monte Carlo result narrows, it never closes to a proof.",
+     "kind": "witness",
+     "seal": "1668d79270d2e2b960f2446b64f84bda03b04e297658ac1031d29da1acda71b1"
+    },
+    {
+     "by": "Narrow Highway - Monte Carlo, 2026-10-07",
+     "claim": "[variance averaging] Averaging N independent samples divides the variance by N: for N=4, the factor is 1/4 = 0.25 (sealed), so the standard error falls by 1/sqrt(4) = 1/2. The mean stays centered on the truth; only its uncertainty shrinks, as 1/sqrt(N).",
+     "kind": "witness",
+     "seal": "34533337b6bd7621608217188e0117d1ac8f8d02878a35324267993889aebbfc"
+    },
+    {
+     "by": "Narrow Highway - Monte Carlo, 2026-10-07",
+     "claim": "[what it is, and its superpower] Monte Carlo replaces an intractable sum or integral with the average of random draws (law of large numbers). Its 1/sqrt(N) error is DIMENSION-INDEPENDENT, so in high dimensions it crushes grid quadrature (whose error is ~ N^(-1/d)). Buffon's needle, Monte Carlo integration, and MCMC (Metropolis 1953 - a Monte Carlo method that draws its samples by walking a Markov chain, ties stick_markov_chains_and_mcmc) are all this one idea.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - Monte Carlo, 2026-10-07",
+     "claim": "[how the engine uses it - and the line it does not cross] Monte Carlo is the engine's method for SIMULATING paths and experiences: seeded random journeys and inputs, N trials, asserting the invariants that mean it does not break down (no unhandled error, every seal re-verifies, the ledger chain never forks, each seal stays within its resource bound) with every failing case a replayable seed. But a random estimate NEVER seals a truth here: a Monte Carlo result is evidence with an error bar (~1/sqrt(N)), a map of confidence, never a proof. Sample to FIND and to STRESS; seal only what verifies exactly (ties [[feedback_mapping_the_truth_not_generating_it_2026-10-07]]). map, never launder.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

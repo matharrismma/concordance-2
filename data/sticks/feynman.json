@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "feynman",
+ "aliases": [
+  "feynman",
+  "least_action",
+  "path_integral",
+  "action"
+ ],
+ "handler": "feynman",
+ "why_python": "calls verify_derivation itself (3x)"
+}

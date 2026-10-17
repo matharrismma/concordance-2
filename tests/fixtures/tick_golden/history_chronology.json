@@ -1,0 +1,201 @@
+{
+ "entry": "history_chronology",
+ "rc": 0,
+ "seals": {
+  "1662be1b443092af348e70bad16c481155693baa2b9eb1949e607c589b2ba054": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "367d27a94676fd7eb887af1ae2501755a4e62253ae395723cd28f5c72d417813": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "3c2e2211cb77fdfd0de5dd53552c60084d57291e22eeeb1f2f9d953f15c3e885": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "42c2187f1716d11a7b608fa172dbf3fdd1f80e4575d7ad61d295d8683f267742": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "5a9ff6f0ef8383d52ab3a002b841f5e0fbb4e186960f4aa4eaa99baf9415fb8d": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "7764f5532ef0579eb8ba4763ea93387432ca227513e7745faf59da7120f9a720": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "895d228c371b81dceec39f07fe79ae43b64417948f0108838afd58ed190d6100": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "9312679d4df04d54a3b0b01d2b324367447b4d91fbefcdf101a122cd9681a1b8": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "aaceb8c9e51f772da505bb3e7b0a7579771313738525c681f05359d146da6dc6": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "ade84c804d0e64dcee1f4ad45fa26330d5b9e860fe6ade940c554cd0a420c949": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "eb36a31920a96196f2ef79208a51c42f6436d1cd883afb3743542717bb29a095": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "eef1ae5a61a3ff670c404c633d221820e005e684676bf0e1f460e0cad80af8bf": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "ef840d5fd3fc91004e46cb0e48849817b47c752ffd1c947347a8c6b647c4bca8": {
+   "axis": "history_chronology",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_history_and_chronology_counting_years_with_no_year_zero": {
+   "field": "history_chronology",
+   "question": "History and chronology - counting years with no year zero",
+   "references": [
+    "Dionysius Exiguus, Liber de Paschate (AD 525) - the anno Domini count",
+    "Bede, De temporum ratione (AD 725) - counting backward from the Incarnation",
+    "E. G. Richards, Mapping Time: The Calendar and its History (1998), ch. 2",
+    "ISO 8601 / astronomical year numbering: year 0 = 1 BC (Cassini, 1740)"
+   ],
+   "statement": "A span of years is an exact integer: signed subtraction within an era, and from_BCE + to_CE - 1 across the boundary, because the Christian era has no year 0.",
+   "ticks": [
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[within an era, SEALED] From Rome's traditional founding, 753 BC, to the republic, 509 BC, is 244 years (sealed through history_chronology.HIST_VERIFY): both dates in one era, signed subtraction is exact.",
+     "kind": "instance",
+     "seal": "9312679d4df04d54a3b0b01d2b324367447b4d91fbefcdf101a122cd9681a1b8"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[Hastings to Columbus, SEALED] 1066 to 1492 is 426 years (sealed through history_chronology.HIST_VERIFY).",
+     "kind": "instance",
+     "seal": "367d27a94676fd7eb887af1ae2501755a4e62253ae395723cd28f5c72d417813"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[the bicentennial, SEALED] 1776 to 1976 is 200 years (sealed through history_chronology.HIST_VERIFY) - judged exactly, so 199 and 201 would both be refused. A count of years is an integer claim.",
+     "kind": "instance",
+     "seal": "aaceb8c9e51f772da505bb3e7b0a7579771313738525c681f05359d146da6dc6"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[across the boundary, SEALED] From Caesar's death, 44 BC, to the fall of Constantinople, AD 1453, is 44 + 1453 - 1 = 1496 years (sealed through history_chronology.HIST_VERIFY) - not 1497. The missing year is the missing year zero.",
+     "kind": "instance",
+     "seal": "895d228c371b81dceec39f07fe79ae43b64417948f0108838afd58ed190d6100"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[the rule itself, SEALED] 1 BC to AD 1 is ONE year (sealed through history_chronology.HIST_VERIFY): the year before the era and the first year of it are adjacent. Any span that crosses the boundary is one less than the sum.",
+     "kind": "instance",
+     "seal": "ade84c804d0e64dcee1f4ad45fa26330d5b9e860fe6ade940c554cd0a420c949"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[Rome founded to Rome fallen, SEALED] 753 BC to AD 476 is 1228 years (sealed through history_chronology.HIST_VERIFY): the Western empire's span as the textbooks give it.",
+     "kind": "instance",
+     "seal": "eef1ae5a61a3ff670c404c633d221820e005e684676bf0e1f460e0cad80af8bf"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[1776 is the 18th century, SEALED] ceil(1776 / 100) = 18 (sealed through history_chronology.HIST_VERIFY): the century a year belongs to is one more than its hundreds, except at a round hundred.",
+     "kind": "instance",
+     "seal": "7764f5532ef0579eb8ba4763ea93387432ca227513e7745faf59da7120f9a720"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[the year 100, SEALED] ceil(100 / 100) = 1: the year 100 is the LAST year of the first century (sealed through history_chronology.HIST_VERIFY), because the first century ran AD 1 to AD 100 - a hundred years with no zero to start from.",
+     "kind": "instance",
+     "seal": "ef840d5fd3fc91004e46cb0e48849817b47c752ffd1c947347a8c6b647c4bca8"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[the year 2000, SEALED] 2000 is in the 20th century (sealed through history_chronology.HIST_VERIFY). The millennium parties were a year early: the 21st began on 1 January 2001.",
+     "kind": "instance",
+     "seal": "42c2187f1716d11a7b608fa172dbf3fdd1f80e4575d7ad61d295d8683f267742"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[and 2001, SEALED] 2001 is the first year of the 21st (sealed through history_chronology.HIST_VERIFY).",
+     "kind": "instance",
+     "seal": "eb36a31920a96196f2ef79208a51c42f6436d1cd883afb3743542717bb29a095"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[an era label, SEALED] -44 is BC (BCE) (sealed through history_chronology.HIST_VERIFY): negative is before the era.",
+     "kind": "instance",
+     "seal": "3c2e2211cb77fdfd0de5dd53552c60084d57291e22eeeb1f2f9d953f15c3e885"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[and AD, SEALED] 1453 is AD (CE) (sealed through history_chronology.HIST_VERIFY).",
+     "kind": "instance",
+     "seal": "5a9ff6f0ef8383d52ab3a002b841f5e0fbb4e186960f4aa4eaa99baf9415fb8d"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[a decade, SEALED] 1985 is in the decade beginning 1980 (sealed through history_chronology.HIST_VERIFY): floor to the ten.",
+     "kind": "instance",
+     "seal": "1662be1b443092af348e70bad16c481155693baa2b9eb1949e607c589b2ba054"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[the era, CITED] The anno Domini count is Dionysius Exiguus's (525), carried backward by Bede (725) with no year zero - Roman numerals had none. Astronomers (Cassini 1740) and ISO 8601 insert a year 0 = 1 BC so that subtraction works across the boundary. Two conventions, both cited; the engine seals under the historian's (no zero) and names the rule in every cross-era count. Whether Dionysius placed the Incarnation correctly (Herod died 4 BC) is a question of evidence, declined here.",
+     "kind": "postulate",
+     "source": "Dionysius Exiguus (525); Bede, De temporum ratione (725); Richards, Mapping Time (1998); ISO 8601"
+    },
+    {
+     "by": "tools/tick.py history_chronology",
+     "claim": "[on the one map] Chronology is the calendar's integer axis (card_floor_the_calendar: the era, the leap rule, the Julian day line that has no gap at the boundary) applied to the record of events. The ephemeris stick counts the same line in days; this one counts it in years and watches the one place the years skip.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

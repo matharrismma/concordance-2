@@ -1,0 +1,57 @@
+{
+ "entry": "earth_science",
+ "rc": 0,
+ "seals": {
+  "52fb25dd85235e1e4bf15625a4ecb013146f3113acab923ca040f49bd9724c6b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "radiometric_fraction_after_two_half_lives"
+   ]
+  },
+  "da1235aa4513486792eb632c57816310a37d536e983587efc308823b0966d824": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "richter_energy_factor_per_magnitude_unit"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_earth_science_the_planet_read_in_deep_time": {
+   "field": "",
+   "question": "Earth science - the planet, read in deep time",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py earth_science",
+     "claim": "[radiometric dating - reading deep time, SEALED] A radioactive isotope halves every half-life, so after two half-lives a quarter remains: (1/2)^2 = 0.25 (sealed). Measuring the ratio of parent to daughter dates a rock - uranium-lead gives the age of the Earth, 4.54 billion years. It is the first-order decay law, the same one chemical kinetics seals; geology borrows the clock from physical chemistry.",
+     "kind": "instance",
+     "seal": "52fb25dd85235e1e4bf15625a4ecb013146f3113acab923ca040f49bd9724c6b"
+    },
+    {
+     "by": "tools/tick.py earth_science",
+     "claim": "[seismology - the Richter scale, SEALED] Earthquake magnitude is logarithmic: each unit is ten times the ground motion and 10^1.5 = 31.6 times the energy (sealed). A magnitude 7 releases about a thousand times the energy of a magnitude 5. Seismic waves also X-ray the interior - how we know the Earth has a liquid outer core.",
+     "kind": "instance",
+     "seal": "da1235aa4513486792eb632c57816310a37d536e983587efc308823b0966d824"
+    },
+    {
+     "by": "tools/tick.py earth_science",
+     "claim": "[plate tectonics - the mantle is a heat engine] The crust rides plates driven by convection in the mantle: the Earth's internal heat (radioactive decay plus primordial heat) rising and sinking, a heat engine bounded by the second law. Continents drift, oceans open and close, mountains rise. Ties card_floor_thermodynamics.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py earth_science",
+     "claim": "[minerals and the rock cycle are chemistry] Rocks are assemblages of minerals, and minerals are crystal chemistry - silicates, carbonates, oxides, each a definite composition and lattice. The rock cycle (igneous, sedimentary, metamorphic) is chemistry and physics run over deep time. Ties card_floor_chemistry.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py earth_science",
+     "claim": "[on the one map - deep time is what life needs] Earth science rests on physical chemistry (the decay clock), chemistry (minerals), and thermodynamics (the mantle engine), and it hands biology the one thing evolution requires: DEEP TIME. Radiometric dating proves the 4.5-billion-year stage on which the tree of life grew. Ties card_floor_biology and card_floor_physical_chemistry.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

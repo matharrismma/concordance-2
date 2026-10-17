@@ -1,0 +1,12 @@
+{
+ "schema": 1,
+ "name": "sources_crosscheck",
+ "aliases": [
+  "sources_crosscheck",
+  "sources",
+  "tables",
+  "crosscheck"
+ ],
+ "handler": "sources_crosscheck",
+ "why_python": "reads the untrusted ark (CONCORDANCE_ARK_MILLENNIUM) and the stick's own sealed count"
+}

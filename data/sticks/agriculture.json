@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "name": "agriculture",
+ "aliases": [
+  "agriculture",
+  "farming",
+  "agronomy",
+  "crops"
+ ],
+ "doc": "AGRICULTURE - feeding the world from soil, sun, and chemistry (Matt, 2026-10-10, down the list). Crops fix\ncarbon by photosynthesis (glucose, C6H12O6) and need fixed nitrogen (the Haber-Bosch process, N2 + 3H2 -> 2NH3,\nwhich feeds roughly half the world). SEALED: ammonia per mole of nitrogen, and the molar mass of glucose. Rests\non biology (the crop), chemistry (fertilizer and photosynthesis) and ecology (the agro-ecosystem). Idempotent.",
+ "seals": [
+  {
+   "key": "haber",
+   "nid": "ammonia_mass_per_mole_n2_haber_bosch_g",
+   "expr": "2*17",
+   "value": 34,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "glucose",
+   "nid": "molar_mass_of_glucose_c6h12o6_g_mol",
+   "expr": "6*12 + 12*1 + 6*16",
+   "value": 180,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Agriculture - soil, sun, and chemistry into food",
+   "by": "tools/tick.py agriculture",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[fixing nitrogen - Haber-Bosch, SEALED] Plants need nitrogen they cannot take from the air; the Haber-Bosch process makes ammonia, N2 + 3H2 -> 2NH3, 2*17 = 34 g of ammonia per 28 g of nitrogen (sealed). Synthetic fertilizer from this reaction feeds roughly half the world's population - chemistry became bread. Ties card_floor_chemistry.",
+     "seal": "haber"
+    },
+    {
+     "kind": "instance",
+     "claim": "[fixing carbon - photosynthesis, SEALED] A crop builds sugar from air and water: 6 CO2 + 6 H2O -> C6H12O6 + 6 O2, and glucose has molar mass 6*12 + 12*1 + 6*16 = 180 g/mol (sealed). Sunlight drives it; the harvest is stored sunlight. Ties card_floor_biology and card_floor_chemistry.",
+     "seal": "glucose"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Agriculture rests on biology (the crop and livestock), chemistry (fertilizer, photosynthesis, the soil's reactions) and ecology (pests, pollinators, the 10 percent rule that makes plants cheaper food than meat). The applied science that turns soil, sun and chemistry into food. Ties card_floor_agriculture.",
+     "source": "the one map; Haber-Bosch; photosynthesis; card_floor_agriculture; tools/seed_agriculture.py"
+    }
+   ]
+  }
+ ]
+}

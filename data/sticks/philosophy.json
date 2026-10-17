@@ -1,0 +1,215 @@
+{
+ "schema": 1,
+ "name": "philosophy",
+ "aliases": [
+  "philosophy",
+  "modal_logic",
+  "leibniz",
+  "a_priori",
+  "ethics"
+ ],
+ "doc": "PHILOSOPHY - the analytic checks, sealed (issue #11, 2026-10-16: reach, down the domain list). Through\nphilosophy.PHIL_VERIFY: modal consistency (necessary-and-possible sealed consistent, necessary-but-impossible\nsealed INCONSISTENT with claimed false, contingent sealed consistent), the four ethical frameworks on whether they\njudge by outcomes, the a priori / a posteriori distinction on Kant's own examples, and Leibniz's law on equal and\nunequal property sets. The principles are CITED - the axiom D of modal logic, the taxonomy of ethics, the\nidentity of indiscernibles and its dispute; the classifications are SEALED. Idempotent.",
+ "seals": [
+  {
+   "key": "modal_consistent",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "is_necessarily_true": true,
+    "is_possibly_true": true,
+    "claimed_consistent": true
+   }
+  },
+  {
+   "key": "modal_contradiction",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "is_necessarily_true": true,
+    "is_possibly_true": false,
+    "claimed_consistent": false
+   }
+  },
+  {
+   "key": "modal_contingent",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "is_necessarily_true": false,
+    "is_possibly_true": true,
+    "claimed_consistent": true
+   }
+  },
+  {
+   "key": "consequentialist",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "framework_name": "consequentialist",
+    "claimed_focuses_on_outcomes": true
+   }
+  },
+  {
+   "key": "deontological",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "framework_name": "deontological",
+    "claimed_focuses_on_outcomes": false
+   }
+  },
+  {
+   "key": "virtue",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "framework_name": "virtue_ethics",
+    "claimed_focuses_on_outcomes": false
+   }
+  },
+  {
+   "key": "contractarian",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "framework_name": "contractarian",
+    "claimed_focuses_on_outcomes": false
+   }
+  },
+  {
+   "key": "a_priori",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "claim_requires_observation": false,
+    "claimed_is_a_priori": true
+   }
+  },
+  {
+   "key": "a_posteriori",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "claim_requires_observation": true,
+    "claimed_is_a_priori": false
+   }
+  },
+  {
+   "key": "identical",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "object_a_properties": [
+     "red",
+     "round",
+     "heavy"
+    ],
+    "object_b_properties": [
+     "round",
+     "red",
+     "heavy"
+    ],
+    "claimed_are_identical": true
+   }
+  },
+  {
+   "key": "not_identical",
+   "domain": "philosophy",
+   "artifact": "PHIL_VERIFY",
+   "spec": {
+    "object_a_properties": [
+     "red",
+     "round",
+     "heavy"
+    ],
+    "object_b_properties": [
+     "red",
+     "round",
+     "light"
+    ],
+    "claimed_are_identical": false
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Philosophy - modality, ethics, knowledge and identity, sealed",
+   "statement": "The analytic checks of philosophy are decidable where they are formal: a modal contradiction, a framework's criterion, the source of a claim's warrant, the equality of two property sets.",
+   "field": "philosophy",
+   "references": [
+    "S. Kripke, Semantical considerations on modal logic, Acta Phil. Fennica 16 (1963) 83",
+    "I. Kant, Critique of Pure Reason (1781), Introduction - a priori and a posteriori",
+    "G. W. Leibniz, Discourse on Metaphysics (1686) section 9; M. Black, The identity of indiscernibles, Mind 61 (1952) 153",
+    "J. S. Mill, Utilitarianism (1863); Kant, Groundwork (1785); Aristotle, Nicomachean Ethics; Hobbes, Leviathan (1651)"
+   ],
+   "by": "tools/tick.py philosophy",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[necessary and possible, SEALED] A claim held necessarily true and possibly true is consistent (sealed through philosophy.PHIL_VERIFY): what must be, can be. The principle box P implies diamond P is axiom D - valid in every serial frame, so in the systems T, S4 and S5 (the verifier files it under K).",
+     "seal": "modal_consistent"
+    },
+    {
+     "kind": "instance",
+     "claim": "[necessary but impossible, SEALED AS A CONTRADICTION] Necessarily true AND not possibly true is inconsistent - sealed with claimed_consistent = false (sealed through philosophy.PHIL_VERIFY). Box P and not-diamond P cannot both hold: a thing that must be the case cannot also be a thing that cannot be. The engine seals the contradiction as a contradiction.",
+     "seal": "modal_contradiction"
+    },
+    {
+     "kind": "instance",
+     "claim": "[contingent, SEALED] Not necessary but possible is consistent (sealed through philosophy.PHIL_VERIFY): the contingent - true in some worlds, false in others - is where most of what we say lives.",
+     "seal": "modal_contingent"
+    },
+    {
+     "kind": "instance",
+     "claim": "[consequentialism, SEALED] Consequentialism judges an act by its outcomes: true (sealed through philosophy.PHIL_VERIFY). Mill's greatest happiness is the type.",
+     "seal": "consequentialist"
+    },
+    {
+     "kind": "instance",
+     "claim": "[deontology, SEALED] Deontology does not: false (sealed through philosophy.PHIL_VERIFY) - the act's conformity to duty is the measure (Kant's categorical imperative), whatever follows.",
+     "seal": "deontological"
+    },
+    {
+     "kind": "instance",
+     "claim": "[virtue ethics, SEALED] Virtue ethics does not: false (sealed through philosophy.PHIL_VERIFY) - the agent's character is the measure (Aristotle).",
+     "seal": "virtue"
+    },
+    {
+     "kind": "instance",
+     "claim": "[contractarianism, SEALED] Contractarianism does not: false (sealed through philosophy.PHIL_VERIFY) - what rational agents would agree to is the measure (Hobbes, Rawls).",
+     "seal": "contractarian"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a priori, SEALED] A claim that needs no observation is a priori (sealed through philosophy.PHIL_VERIFY): Kant's 7 + 5 = 12, known by reason alone.",
+     "seal": "a_priori"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a posteriori, SEALED] A claim that needs observation is a posteriori - sealed with claimed_is_a_priori = false (sealed through philosophy.PHIL_VERIFY): that water boils at 100 C at one atmosphere is learned by the thermometer, not the armchair.",
+     "seal": "a_posteriori"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Leibniz's law, SEALED] Two objects with the same properties - red, round, heavy, in any order - are identical under the law (sealed through philosophy.PHIL_VERIFY): the property SETS are equal.",
+     "seal": "identical"
+    },
+    {
+     "kind": "instance",
+     "claim": "[and its contrapositive, SEALED] Red, round, heavy against red, round, light: not identical, sealed with claimed false (sealed through philosophy.PHIL_VERIFY). One differing property is enough; the engine names it.",
+     "seal": "not_identical"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the principles, CITED] Axiom D (what is necessary is possible), the taxonomy of the four frameworks, Kant's a priori / a posteriori line, and Leibniz's law are PRINCIPLES, cited never sealed. Leibniz's law has two halves: the indiscernibility of identicals (uncontroversial) and the identity of indiscernibles - the half the verifier implements - which Black (1952) disputed with two qualitatively identical spheres. What is sealed is the set comparison; whether sameness of properties IS identity is left as the dispute it is.",
+     "source": "Kripke (1963); Kant, Critique of Pure Reason, Introduction; Leibniz, Discourse section 9; Black, Mind 61 (1952) 153"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Modal logic is propositional logic with two more operators (the formal-logic stick: box and diamond are duals, like and and or under negation). The frameworks are the discernment the mind does (card_floor_the_mind) made explicit. The engine seals what is decidable and declines what is wise: which framework is RIGHT is not a check, and a miss stays a miss.",
+     "source": "the one map; the formal-logic stick; card_floor_the_mind"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,66 @@
+{
+ "entry": "information_theory",
+ "rc": 0,
+ "seals": {
+  "09cfd062bc70577a95963fa8350871839fced936c663ffb4090483e958ce1021": {
+   "axis": "information_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "96781ed8c5c004dd39926c18fcb0631684d0f4af9b8a4b4006d7a570e8bb6214": {
+   "axis": "information_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "ca78855e99416219f6c304f52d74315f3164bef8f8f033c4ca441761d319f693": {
+   "axis": "information_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_information_theory_the_measure_of_a_message_verified_and_sea": {
+   "field": "",
+   "question": "Information theory - the measure of a message, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py information_theory_stick",
+     "claim": "[the bit] A fair coin has Shannon entropy H = -sum p log2 p = 1.000 bit (sealed through information_theory.INFO_VERIFY) - the unit of information, the answer to one yes/no question. This is the logarithm on the solve path, measuring a choice.",
+     "kind": "instance",
+     "seal": "96781ed8c5c004dd39926c18fcb0631684d0f4af9b8a4b4006d7a570e8bb6214"
+    },
+    {
+     "by": "tools/tick.py information_theory_stick",
+     "claim": "[distance in code] The Hamming distance between 10110 and 11010 is 2 - two positions differ (sealed); the number of single-bit errors that separate two codewords, the basis of error-correction.",
+     "kind": "instance",
+     "seal": "ca78855e99416219f6c304f52d74315f3164bef8f8f033c4ca441761d319f693"
+    },
+    {
+     "by": "tools/tick.py information_theory_stick",
+     "claim": "[a clean channel] A binary symmetric channel with error rate 0 has capacity C = 1 - H2(0) = 1 bit per use (sealed) - Shannon's limit, the most a channel can carry.",
+     "kind": "instance",
+     "seal": "09cfd062bc70577a95963fa8350871839fced936c663ffb4090483e958ce1021"
+    },
+    {
+     "by": "tools/tick.py information_theory_stick",
+     "claim": "[the ground] Shannon's 1948 axioms: information is -sum p log p, and a channel has a hard capacity no code can beat. Sealed where applied; the theory is the floor the whole digital world stands on.",
+     "kind": "postulate",
+     "source": "C. E. Shannon (1948); information_theory.INFO_VERIFY"
+    },
+    {
+     "by": "tools/tick.py information_theory_stick",
+     "claim": "[declined] The MEANING or value of a message is not information in this sense - the engine measures the message's surprise and the channel's limit, not what the message is worth.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

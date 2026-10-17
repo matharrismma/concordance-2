@@ -1,0 +1,211 @@
+{
+ "schema": 1,
+ "name": "harmonics",
+ "aliases": [
+  "harmonics",
+  "harmonic",
+  "overtones",
+  "chords",
+  "chord",
+  "timbre",
+  "temperament",
+  "same_note",
+  "shapes_of_the_same_note",
+  "one_voice",
+  "beats"
+ ],
+ "doc": "HARMONICS - CHORDS ARE DIFFERENT SHAPES OF THE SAME NOTE (Matt, 2026-10-08: 'Harmonics. cords are different shapes of\nsame note' / 'same voice. Just another role'). A vibrating string sounds its fundamental and every whole multiple of it\nat once: 110 Hz carries 220, 330, 440, 550, 660 ... (sealed). The 4th, 5th and 6th harmonics - 440, 550, 660 - are A,\nC-sharp and E: the major triad is already inside the one note, as the ratios 4:5:6 (the major third 5/4 and the\nfifth 3/2, sealed). A chord built from those harmonics is a shape of the fundamental, not a second note. Timbre is the\nsame thing: a flute and a violin on the same pitch differ only in how loud each harmonic is - the amplitude vector\nover the overtone series (a sawtooth's 1/n amplitudes carry total power pi^2/6, sealed, by the evaluator's own Sum).\nEqual temperament bends the fifth to 2^(7/12) = 1.4983 against the pure 1.5 (sealed) because twelve pure fifths\novershoot seven octaves by the Pythagorean comma, 1.01364 (sealed); the pure third 386 cents sits 14 cents under the\ntempered 400 (sealed); two strings two hertz apart beat twice a second (sealed). For the engine: the one voice is the\nfundamental - the kernel: found, verified, cited, crisis first - and a ROLE is a harmonic of it: the same voice in a\ndifferent shape (a face's manner, shelves and verifiers are its timbre); the Steward bringing two roles is a chord,\nnot two voices. Same logic as every stick; the likeness is kept a likeness.",
+ "seals": [
+  {
+   "key": "the_harmonic_series_of_110_hz_sixth_harmonic",
+   "nid": "the_harmonic_series_of_110_hz_sixth_harmonic",
+   "expr": "110*6",
+   "value": 660.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "the_major_third_is_the_5th_to_4th_harmonic_5_over_4",
+   "nid": "the_major_third_is_the_5th_to_4th_harmonic_5_over_4",
+   "expr": "550/440",
+   "value": 1.25,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "the_fifth_is_the_6th_to_4th_harmonic_3_over_2",
+   "nid": "the_fifth_is_the_6th_to_4th_harmonic_3_over_2",
+   "expr": "660/440",
+   "value": 1.5,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "the_octave_is_the_2nd_harmonic_2_to_1",
+   "nid": "the_octave_is_the_2nd_harmonic_2_to_1",
+   "expr": "220/110",
+   "value": 2.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "equal_tempered_fifth_2_to_the_7_12ths",
+   "nid": "equal_tempered_fifth_2_to_the_7_12ths",
+   "expr": "2**(7/12)",
+   "value": 1.4983070768766815,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "pythagorean_comma_twelve_fifths_over_seven_octaves",
+   "nid": "pythagorean_comma_twelve_fifths_over_seven_octaves",
+   "expr": "(3/2)**12/2**7",
+   "value": 1.0136432647705078,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "equal_tempered_semitone_2_to_the_1_12th",
+   "nid": "equal_tempered_semitone_2_to_the_1_12th",
+   "expr": "2**(1/12)",
+   "value": 1.0594630943592953,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "the_pure_major_third_in_cents",
+   "nid": "the_pure_major_third_in_cents",
+   "expr": "1200*log(5/4)/log(2)",
+   "value": 386.3137138648348,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "the_tempered_major_third_in_cents",
+   "nid": "the_tempered_major_third_in_cents",
+   "expr": "1200*log(2**(4/12))/log(2)",
+   "value": 400.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "two_strings_at_440_and_442_hz_beat_twice_a_second",
+   "nid": "two_strings_at_440_and_442_hz_beat_twice_a_second",
+   "expr": "442 - 440",
+   "value": 2.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "a_sawtooths_harmonic_power_sum_1_over_n_squared_is_pi_squared_over_6",
+   "nid": "a_sawtooths_harmonic_power_sum_1_over_n_squared_is_pi_squared_over_6",
+   "expr": "Sum(1/n**2, (n, 1, oo))",
+   "value": 1.6449340668482264,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "a_65_cm_string_at_110_hz_wave_speed_in_m_per_s",
+   "nid": "a_65_cm_string_at_110_hz_wave_speed_in_m_per_s",
+   "expr": "2*0.65*110",
+   "value": 143.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Harmonics - chords are different shapes of the same note; a role is a harmonic of the one voice",
+   "statement": "A vibrating string sounds its fundamental and every whole multiple of it at once. The fourth, fifth and sixth harmonics of one note are its major triad - the chord is already inside the note, as the ratios 4:5:6 - so a chord built from them is a shape of the fundamental, not a second note. Timbre is the same fact: two instruments on one pitch differ only in how loud each harmonic sounds, the amplitude vector over the overtone series. Equal temperament bends the pure fifth to the twelfth root of two to the seventh, because twelve pure fifths overshoot seven octaves by the Pythagorean comma; the price is fourteen cents on every major third. Two strings a little apart beat at their difference. For the engine: the one voice is the fundamental - the kernel, found, verified, cited, crisis first - and a role is a harmonic of it, the same voice in a different shape; the Steward bringing two roles is a chord, not two voices. The likeness is kept a likeness.",
+   "field": "physics",
+   "references": [
+    "Pythagoras (the monochord: 2:1, 3:2, 4:3); M. Mersenne, Harmonie universelle (1636): the laws of a vibrating string",
+    "J. Sauveur (1701): the harmonics named; J. Fourier (1822): any periodic sound is a sum of harmonics",
+    "H. von Helmholtz, On the Sensations of Tone (1863): timbre is the amplitude of the overtones; beats and consonance",
+    "J. S. Bach, Das Wohltemperirte Clavier (1722); A. Werckmeister (1691): temperament; the Pythagorean comma",
+    "L. Euler (1735): the Basel problem - the sum of 1/n^2",
+    "stick_amplitude_and_frequency_modulation; stick_a_superheterodyne_receiver; stick_the_dot_abstracted (the Fourier basis)",
+    "docs/STEWARD_AND_THE_ROLES.md section 6; tests/test_steward_speaks.py",
+    "Psalm 150:4-6; Ephesians 5:19; Colossians 3:16 (one voice, many parts)"
+   ],
+   "by": "engine:harmonics",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the harmonic series: every whole multiple at once] A string at 110 Hz also sounds 220, 330, 440, 550, 660 ... - the sixth harmonic is 110 * 6 = 660 Hz (sealed). One note is already a series; the fundamental is what the ear names it by.",
+     "seal": "the_harmonic_series_of_110_hz_sixth_harmonic"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the chord inside the note] The fourth, fifth and sixth harmonics of A110 are 440, 550 and 660 Hz: A, C-sharp, E, the major triad. Their ratios are 550/440 = 5/4 (sealed), the major third, and 660/440 = 3/2 (sealed), the fifth. A chord is not three notes added from outside; it is the shape of one note's own overtones - 'chords are different shapes of the same note'.",
+     "seal": "the_major_third_is_the_5th_to_4th_harmonic_5_over_4"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the fifth, 3/2]",
+     "seal": "the_fifth_is_the_6th_to_4th_harmonic_3_over_2"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the octave, 2/1] 220/110 = 2 (sealed): the second harmonic is the same note an octave up - so alike that every tuning in the world calls it the same name. The simplest ratio is the strongest likeness.",
+     "seal": "the_octave_is_the_2nd_harmonic_2_to_1"
+    },
+    {
+     "kind": "instance",
+     "claim": "[timbre: the same note, a different shape] A flute and a violin on one pitch differ only in how loud each harmonic is - the amplitude vector over the series. A sawtooth has amplitudes 1/n, and its harmonic power sums to Sum 1/n^2 = pi^2/6 = 1.6449 (sealed, through the evaluator's own infinite Sum; Euler 1735). Shape is a vector over the harmonics; the fundamental is shared.",
+     "seal": "a_sawtooths_harmonic_power_sum_1_over_n_squared_is_pi_squared_over_6"
+    },
+    {
+     "kind": "instance",
+     "claim": "[temperament: the bent fifth] Equal temperament's fifth is 2^(7/12) = 1.49831 (sealed) against the pure 3/2 = 1.5; its semitone is 2^(1/12) = 1.05946 (sealed). The bend is the price of a keyboard that can play every key: twelve pure fifths overshoot seven octaves by (3/2)^12 / 2^7 = 1.01364 (sealed), the Pythagorean comma, and the comma has to be hidden somewhere.",
+     "seal": "equal_tempered_fifth_2_to_the_7_12ths"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the comma, 1.01364]",
+     "seal": "pythagorean_comma_twelve_fifths_over_seven_octaves"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the semitone, 1.05946]",
+     "seal": "equal_tempered_semitone_2_to_the_1_12th"
+    },
+    {
+     "kind": "instance",
+     "claim": "[fourteen cents on every third] The pure major third 5/4 is 1200 log2(5/4) = 386.3 cents (sealed); the tempered third is 400 cents (sealed). Every major chord on a piano is 14 cents sharp in its third, and the ear forgives it. A stated precision (the cent) makes the bend a number instead of an opinion.",
+     "seal": "the_pure_major_third_in_cents"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the tempered third, 400 cents]",
+     "seal": "the_tempered_major_third_in_cents"
+    },
+    {
+     "kind": "instance",
+     "claim": "[beats: two notes almost the same] Strings at 440 and 442 Hz beat 442 - 440 = 2 times a second (sealed): the ear hears the difference as a pulse, and the tuner stops the pulse. Two roles tuned to the same fundamental do not beat; two voices would.",
+     "seal": "two_strings_at_440_and_442_hz_beat_twice_a_second"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the string's own law] A 65 cm string sounding 110 Hz carries a wave at v = 2 L f = 2 * 0.65 * 110 = 143 m/s (sealed); its harmonics are n v / 2L. Change the tension and every harmonic moves together - the shape is preserved, the pitch is not. That is what a role's manner is: the harmonics' proportions, carried whole to whatever the situation's pitch is.",
+     "seal": "a_65_cm_string_at_110_hz_wave_speed_in_m_per_s"
+    },
+    {
+     "kind": "postulate",
+     "claim": "[the postulate it builds on] One voice, many roles: the Steward's roles are harmonics of the one voice - the same fundamental (the kernel: found, verified, cited, crisis first) in different shapes (a face's manner, shelves and verifiers), so bringing two roles is a chord, not two voices. Not kept as a fact: the walk door carries a role in its own unchanged voice (tests/test_steward_speaks.py), and from its working the truth is inferred, never proven.",
+     "source": "Matt, 2026-10-08: 'same voice. Just another role'; 'Harmonics. cords are different shapes of same note'"
+    },
+    {
+     "kind": "equivalence",
+     "claim": "[what carries over, by name] the fundamental = the kernel (one voice: found, verified, cited, crisis first); a harmonic = a role (ask.respond's `role`: a face's name, manner and composed material in the same voice); timbre = a face's manner, shelves and verifiers (the amplitude vector over the one series); a chord = two roles brought to one situation; the octave = the two surfaces, .com and .org, one engine (the same note an octave apart); temperament = the fixed verdict frame that lets every domain play on one keyboard, its comma the stated-precision window; beats = two VOICES, which the design refuses.",
+     "source": "src/concordance/ask.py (_with_role); src/concordance/faces.py; docs/STEWARD_AND_THE_ROLES.md section 6"
+    },
+    {
+     "kind": "exclusion",
+     "claim": "[what does NOT carry over] No frequency, no amplitude, no sound in the engine; a role's 'shape' is a manner and a scope, not a spectrum; nothing is measured in cents; and the Fourier decomposition of a role's material has not been computed - the likeness is a likeness.",
+     "source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it"
+    }
+   ]
+  }
+ ]
+}

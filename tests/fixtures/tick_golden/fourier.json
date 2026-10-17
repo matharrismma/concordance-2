@@ -1,0 +1,103 @@
+{
+ "entry": "fourier",
+ "rc": 0,
+ "seals": {
+  "4621e5dd7077352d7899f3b9559d8cdb66936dc86d7775b5c2ae1728649fa3b2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "frequency_turn_rate"
+   ]
+  },
+  "64a7fb6d641a81927707e2f67108274a91a7f3ec07d1bf293234738ecdfc5c44": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "test_note_cancels"
+   ]
+  },
+  "a67f02770f0b561faa0f845584846c26b199dcfefa1d0e8f340bc898c6b5ac2a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "mult_is_rotation"
+   ]
+  },
+  "ab2148ea89686ea55f5df176d39b8e337c97c2278029f12acae4aa997e2691a1": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "test_note_accumulates"
+   ]
+  },
+  "b04097b9d855ae5468c0988166f8feab046b2599ecf49c0da62c3368db379d17": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "complex_exponential_growth"
+   ]
+  },
+  "e24ded3a3b374e5ca9adb814b9a14a26a64cba66c9d8af65c7a121571bd87c08": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "addition_is_interference"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_complex_field_is_the_physics_of_waves": {
+   "field": "mathematics",
+   "question": "The complex field is the physics of waves",
+   "references": [
+    "complex multiplication: |z1 z2| = |z1||z2|, arg(z1 z2) = arg z1 + arg z2",
+    "the phasor e^(i*omega*t), omega = 2*pi*f; the Fourier/DFT correlation",
+    "orthogonality: sum of the N-th roots of unity = 0 (off-note cancels)"
+   ],
+   "statement": "In the complex field the two operations are the two wave physics: MULTIPLICATION is rotation (e^(i*theta) adds the angle, keeps the length), ADDITION is interference (phasors add as vectors - in phase reinforce, opposite cancel), and the EXPONENTIAL of a complex number e^(a+bi) = e^a(cos b + i sin b) is the spiral that joins growth to rotation. Frequency is how fast a vector turns. The Fourier transform spins a signal against these phasors; a matched note accumulates, an unmatched one cancels - so we can test the note.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - Fourier / rotation / the note, 2026-10-07",
+     "claim": "[multiplication is rotation] Multiplying by a unit complex number is a pure rotation - it adds the angle and keeps the length. Rotating (1,0) by 60 degrees lands on (cos60, sin60) = (0.5, 0.8660254), whose length^2 is 0.5^2 + 0.8660254^2 = 1 (sealed). Times i rotates 90 degrees; times i again, 180 = -1 - which is WHY i^2 = -1 (stick_complex_numbers_bombelli_and_the_square_root_of_minus_one).",
+     "kind": "witness",
+     "seal": "a67f02770f0b561faa0f845584846c26b199dcfefa1d0e8f340bc898c6b5ac2a"
+    },
+    {
+     "by": "Narrow Highway - Fourier / rotation / the note, 2026-10-07",
+     "claim": "[frequency is how fast a vector turns] A phasor e^(i*omega*t) is a vector turning at angular rate omega = 2*pi*f. For the note A4 (440 Hz) it turns 2*pi*440 = 2764.60 radians per second (sealed). Frequency is not an abstraction - it is literally the turning rate of a rotating vector.",
+     "kind": "witness",
+     "seal": "4621e5dd7077352d7899f3b9559d8cdb66936dc86d7775b5c2ae1728649fa3b2"
+    },
+    {
+     "by": "Narrow Highway - Fourier / rotation / the note, 2026-10-07",
+     "claim": "[spin until it unravels - the matched note accumulates] To test a note, spin the data against that note's phasor and sum. If the frequency MATCHES, every sample points the same way and they ADD: a 4-sample matched correlation = 1+1+1+1 = 4 (sealed). The component stands still relative to the probe and accumulates - it unravels.",
+     "kind": "witness",
+     "seal": "ab2148ea89686ea55f5df176d39b8e337c97c2278029f12acae4aa997e2691a1"
+    },
+    {
+     "by": "Narrow Highway - Fourier / rotation / the note, 2026-10-07",
+     "claim": "[or it cancels - the note is absent] If the frequency does NOT match, the samples point every which way and CANCEL: the real parts of a mismatched 4-sample correlation sum to 1+0+(-1)+0 = 0 (sealed). Accumulate or cancel - that binary is the test: WE CAN TEST THE NOTE. (Ties the roots-of-unity orthogonality of stick_dirichlet_s_theorem_think_of_polar_coordinates.)",
+     "kind": "witness",
+     "seal": "64a7fb6d641a81927707e2f67108274a91a7f3ec07d1bf293234738ecdfc5c44"
+    },
+    {
+     "by": "Narrow Highway - Fourier / rotation / the note, 2026-10-07",
+     "claim": "[addition is interference] Phasors ADD as vectors: two in-phase unit waves reinforce, 1 + 1 = 2 (sealed, constructive), while opposite waves cancel, 1 + (-1) = 0 (destructive). Addition is interference - the same reinforce/cancel that made the note-test accumulate to 4 or vanish to 0 above.",
+     "kind": "witness",
+     "seal": "e24ded3a3b374e5ca9adb814b9a14a26a64cba66c9d8af65c7a121571bd87c08"
+    },
+    {
+     "by": "Narrow Highway - Fourier / rotation / the note, 2026-10-07",
+     "claim": "[the exponential of a complex number - the spiral] e^(a+bi) = e^a (cos b + i sin b): the real part a is GROWTH (modulus e^a), the imaginary part b is ROTATION (angle b). For a = 0.5 the magnitude is e^0.5 = 1.648721 (sealed); the e^(ib) factor always has modulus 1 (pure rotation). This one object - the complex exponential, a spiral - unifies growth and oscillation; it is the phasor e^(i*omega*t), the Schrodinger wavefunction, the AC steady state, and Euler's e^(i*pi) + 1 = 0 (e, i, pi, 1, 0).",
+     "kind": "witness",
+     "seal": "b04097b9d855ae5468c0988166f8feab046b2599ecf49c0da62c3368db379d17"
+    },
+    {
+     "by": "Narrow Highway - Fourier / rotation / the note, 2026-10-07",
+     "claim": "[what this is, and the ties] This is the Fourier transform: correlate a signal with rotating phasors at every frequency; resonance (accumulation) reveals which frequencies are present - spin until it unravels. It rests on complex multiplication as rotation (the floor, stick_complex_numbers_bombelli_and_the_square_root_of_minus_one), the unit circle and roots of unity (stick_the_smith_chart_the_cayley_transform), and it makes 'test the note' a verifiable, sealable operation (spin -> accumulate = present / cancel = absent), tying the temperament thread (the Pythagorean comma). map, never launder: the engine seals the arithmetic of the test; it does not claim to hear.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

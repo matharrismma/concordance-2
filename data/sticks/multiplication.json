@@ -1,0 +1,72 @@
+{
+ "schema": 1,
+ "name": "multiplication",
+ "aliases": [
+  "multiplication",
+  "replication",
+  "exponential_growth",
+  "scaling",
+  "fruitful"
+ ],
+ "doc": "GOD WORKS IN MULTIPLICATION - ADDITION IS SUBTRACTION THROUGH LOSS (Matt, 2026-10-07: 'Anything that\nscales is a solid system, but God works in Multiplication ... we look for the exponential that allows for\nreplication'). A REPLICATOR (each whole copy makes another) grows 2^n; a linear ADDER against any resource\nloss nets backward. The engine must grow by REPLICATION - whole, self-sufficient copies spreading (the\nark, the mesh, Gen 3's 'every copy is whole') - not by accretion. Seal exponential vs additive-under-loss.\nNew stick; idempotent.",
+ "seals": [
+  {
+   "key": "replication_exponential",
+   "nid": "replication_exponential",
+   "expr": "2 ** 10",
+   "value": 1024.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "addition_is_subtraction_under_loss",
+   "nid": "addition_is_subtraction_under_loss",
+   "expr": "100 * 0.9 + 1",
+   "value": 91.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "multiplication_outruns_loss",
+   "nid": "multiplication_outruns_loss",
+   "expr": "2 * 0.9",
+   "value": 1.8,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "God works in multiplication - addition is subtraction through loss",
+   "statement": "A thing that replicates - each whole copy makes another - grows exponentially (2^n); a thing that is added to linearly, against any loss of resources, goes backward. The question is never how much we add, but whether each one makes more than one. Growth that lasts is multiplicative; the engine spreads by replication - whole copies, in every direction.",
+   "field": "meta",
+   "references": [
+    "exponential 2^n (replication) vs linear n (addition)",
+    "Genesis 1:28 'be fruitful and multiply'; Mark 4:8 thirty/sixty/a hundredfold",
+    "Gen 3 charter: EVERY COPY IS WHOLE (node sync); the ark; the mesh"
+   ],
+   "by": "Narrow Highway - multiplication, not addition, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[God works in multiplication - the exponential of replication] A thing that REPLICATES - each whole copy makes another - grows as 2^n: ten doublings is 2^10 = 1024 (sealed), not ten. This is the seed that yields thirty, sixty, a hundredfold (Mark 4:8), the mustard seed, 'be fruitful and multiply' (Genesis 1:28). Multiplication, not addition.",
+     "seal": "replication_exponential"
+    },
+    {
+     "kind": "witness",
+     "claim": "[addition is subtraction through loss] Add linearly against any resource loss and you go backward: a base of 100 losing 10% and gaining 1 is 100*0.9 + 1 = 91 (sealed) - less than you started with. Addition cannot outrun loss; it is subtraction in slow motion (the second law and Jevons both press on the additive system - stick_jevons_paradox).",
+     "seal": "addition_is_subtraction_under_loss"
+    },
+    {
+     "kind": "witness",
+     "claim": "[multiplication outruns the loss] A REPLICATOR survives what addition cannot: double and lose 10% and the net factor is 2*0.9 = 1.8 (sealed) > 1 - still growing. The exponential clears the loss rate where the linear bleeds out. The question is never 'how much do we add?' but 'does each one make more than one?'",
+     "seal": "multiplication_outruns_loss"
+    },
+    {
+     "kind": "note",
+     "claim": "[the engine's growth law] 'Anything that scales is a solid system, but God works in multiplication.' The engine grows by REPLICATION, not accretion: whole, self-sufficient copies spreading in every direction - the ark, the mesh, Gen 3's EVERY COPY IS WHOLE (node sync proven) - each node a complete seed that can seed others. Not a swarm of partial agents (one body, no swarm) but whole copies that each carry the whole. That is the exponential that allows for replication; addition against the world's losses only bleeds. Ties the sower, the ark (spread the seeds in every direction), and the higher floor (the ratchet). map, never launder: seal the arithmetic; growth is replicative, found not forced."
+    }
+   ]
+  }
+ ]
+}

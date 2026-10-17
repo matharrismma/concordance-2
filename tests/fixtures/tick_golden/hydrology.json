@@ -1,0 +1,47 @@
+{
+ "entry": "hydrology",
+ "rc": 0,
+ "seals": {
+  "76b742f4d8604a560e257602337db0fdbf6f69f30b5119dafc143b059a74dd70": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "river_discharge_velocity_times_area_m3_s"
+   ]
+  },
+  "ad65002c337a1bd526a75a96a0c8e6172a739ba77f7c5453a8ef41d4ea7e61ca": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "percent_of_earths_water_that_is_fresh"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_hydrology_the_water_cycle_and_the_flow_of_rivers": {
+   "field": "",
+   "question": "Hydrology - the water cycle and the flow of rivers",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py hydrology",
+     "claim": "[the flow of a river - discharge, SEALED] Discharge is how much water passes per second: Q = v * A, velocity times cross-section. A stream 2 m/s across 5 m^2 carries 2*5 = 10 cubic metres per second (sealed). Conservation of mass (the continuity equation) governs every river, pipe and flood. Ties card_floor_earth_science.",
+     "kind": "instance",
+     "seal": "76b742f4d8604a560e257602337db0fdbf6f69f30b5119dafc143b059a74dd70"
+    },
+    {
+     "by": "tools/tick.py hydrology",
+     "claim": "[how little is fresh, SEALED] Of all the water on Earth only 100 - 97.5 = 2.5 percent is fresh (sealed), and most of that is locked in ice and deep groundwater - a sliver is the rivers and lakes we drink from. The water cycle (evaporation, precipitation, runoff) keeps it moving. Ties card_floor_meteorology (precipitation).",
+     "kind": "instance",
+     "seal": "ad65002c337a1bd526a75a96a0c8e6172a739ba77f7c5453a8ef41d4ea7e61ca"
+    },
+    {
+     "by": "tools/tick.py hydrology",
+     "claim": "[on the one map] Hydrology rests on earth science (the basins, the cycle), chemistry (water the universal solvent, carrying salts and life) and meteorology (precipitation is where the cycle touches the sky). The study of water in motion over and under the land. Ties card_floor_hydrology.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

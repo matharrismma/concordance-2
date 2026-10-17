@@ -1,0 +1,66 @@
+{
+ "entry": "astronomy",
+ "rc": 0,
+ "seals": {
+  "52420fcd6c8a4b0f2c605507bcc1d7130caa03d546c39d75fd008b7609758050": {
+   "axis": "astronomy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "54b684847fc4f277f296db71766b45eac629368a3923182957ba06255a643001": {
+   "axis": "astronomy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "572d6c71739b4772b398b062f23898113288d51b2b842aab5a035d0995b6831e": {
+   "axis": "astronomy",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_astronomy_orbits_and_distances_verified_and_sealed": {
+   "field": "",
+   "question": "Astronomy - orbits and distances, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py astronomy_stick",
+     "claim": "[Kepler's third law] The Earth: period 1 year, semi-major axis 1 AU, so T^2 = a^3 = 1 (sealed through astronomy.ASTRO_VERIFY) - the harmony of the spheres, the square of the year is the cube of the distance.",
+     "kind": "instance",
+     "seal": "54b684847fc4f277f296db71766b45eac629368a3923182957ba06255a643001"
+    },
+    {
+     "by": "tools/tick.py astronomy_stick",
+     "claim": "[gravity holds the orbit] The Sun pulls the Earth with F = G m1 m2 / r^2 = 3.54e22 N (sealed) - Newton's law, the same force that drops an apple.",
+     "kind": "instance",
+     "seal": "572d6c71739b4772b398b062f23898113288d51b2b842aab5a035d0995b6831e"
+    },
+    {
+     "by": "tools/tick.py astronomy_stick",
+     "claim": "[the parallax ladder] A star with parallax 0.1 arcsecond is 1/0.1 = 10 parsecs away (sealed) - the first rung of the distance ladder, trigonometry on the Earth's orbit.",
+     "kind": "instance",
+     "seal": "52420fcd6c8a4b0f2c605507bcc1d7130caa03d546c39d75fd008b7609758050"
+    },
+    {
+     "by": "tools/tick.py astronomy_stick",
+     "claim": "[the ground] Newtonian gravity and Kepler's laws - sealed where applied, and themselves the low-field limit of general relativity (cited). The universe's large-scale model (dark matter, dark energy) is inferred from evidence, carried, not kept as fact.",
+     "kind": "postulate",
+     "source": "J. Kepler (1619); I. Newton (1687); astronomy.ASTRO_VERIFY"
+    },
+    {
+     "by": "tools/tick.py astronomy_stick",
+     "claim": "[declined] Cosmological interpretation, the existence and nature of dark matter, and the fate of the universe are declined; the engine seals the orbital arithmetic.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

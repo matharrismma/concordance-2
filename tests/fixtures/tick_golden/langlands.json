@@ -1,0 +1,57 @@
+{
+ "entry": "langlands",
+ "rc": 0,
+ "seals": {
+  "4b0e318407bd437111850a84d7294697a942fa8ed034f3a86e6449d06f0379dc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "langlands_11a1_ap_3"
+   ]
+  },
+  "53f71ff2723d1b0bdac7044fbf2191f79cab476dd0559382679c4df19bbadb66": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "langlands_11a1_ap_2"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_langlands_program": {
+   "field": "mathematics",
+   "question": "The Langlands program",
+   "references": [
+    "R. P. Langlands, letter to A. Weil (1967)",
+    "A. Wiles, Modular elliptic curves and Fermat's Last Theorem, Ann. Math. 141 (1995) 443",
+    "C. Breuil, B. Conrad, F. Diamond, R. Taylor, J. AMS 14 (2001) 843 (modularity for all E/Q)",
+    "L. Lafforgue, Invent. Math. 147 (2002) 1 (Langlands for GL(n) over function fields)"
+   ],
+   "statement": "Is there a grand unification of mathematics — a precise correspondence between Galois representations (number theory) and automorphic forms (harmonic analysis), with their L-functions equal? The full program is a web of conjectures, largely OPEN over number fields; specific cases are proven. The open question is the general correspondence, not the proven pillars.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Langlands reading, 2026-10-07",
+     "claim": "[modularity - the curve side meets the form side, p=2] For the elliptic curve 11a1 (y^2 + y = x^3 - x^2 - 10x - 20), counting points over F_2 gives #E(F_2) = 5, so the trace of Frobenius is a_2 = (2+1) - 5 = -2 (sealed). The SAME number -2 is the q^2 coefficient of the weight-2 level-11 newform eta(z)^2 eta(11z)^2. A point-count on a cubic and a coefficient of a modular form - two unrelated computations - agree: this is the degree-2 Langlands reciprocity (modularity).",
+     "kind": "witness",
+     "seal": "53f71ff2723d1b0bdac7044fbf2191f79cab476dd0559382679c4df19bbadb66"
+    },
+    {
+     "by": "Narrow Highway - the Langlands reading, 2026-10-07",
+     "claim": "[modularity, p=3] Over F_3, #E(F_3) = 5 for the same curve, so a_3 = (3+1) - 5 = -1 (sealed) - exactly the q^3 coefficient of the same newform. The agreement is not a coincidence to be checked prime by prime forever; modularity (Taniyama-Shimura-Weil) says it holds for ALL p, proven for every elliptic curve over Q (Wiles; Breuil-Conrad-Diamond-Taylor 2001).",
+     "kind": "witness",
+     "seal": "4b0e318407bd437111850a84d7294697a942fa8ed034f3a86e6449d06f0379dc"
+    },
+    {
+     "by": "Narrow Highway - the Langlands reading, 2026-10-07",
+     "claim": "[the proven pillars] Modularity IS the GL(2) case of Langlands reciprocity over Q - and the road by which Fermat's Last Theorem was proven (Wiles 1995). The abelian GL(1) case is class field theory, whose automorphic L-functions are the Riemann zeta and Dirichlet L-functions (ties stick_riemann_hypothesis). The full correspondence over FUNCTION fields is proven (Drinfeld; L. Lafforgue, Fields Medal 2002). These are the sealed/proven marks on the stick.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Langlands reading, 2026-10-07",
+     "claim": "[the open vision] The general program - GL(n) over number fields, the automorphy of arbitrary Galois representations, the geometric Langlands correspondence - remains a web of conjectures: the grand unification of number theory, representation theory and harmonic analysis. Like the four forces under alpha, it is a unity the proven cases POINT AT without completing. Seal the instances (a_p), attribute the conjecture, keep it open - narrowing is evidence, never proof.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,52 @@
+{
+ "entry": "closed_class_pos",
+ "rc": 0,
+ "seals": {
+  "10d88c31e45c1cd27be4ddd526c247686d3a4af41e0a97358262a794d070295a": {
+   "axis": "linguistics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a801eb7442e0b5b1445f28cae144656184a53eea1006c4417ca9de7fb4cab36a": {
+   "axis": "linguistics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_closed_class_part_of_speech_the_function_words": {
+   "field": "",
+   "question": "Closed-class part of speech - the function words",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py closed_class_pos",
+     "claim": "[a closed class, SEALED] 'the' is an article (sealed through linguistics.LING_VERIFY). The function words - articles, prepositions, pronouns, conjunctions, auxiliaries, determiners - are a finite, enumerable set, so their part of speech is deterministic.",
+     "kind": "instance",
+     "seal": "a801eb7442e0b5b1445f28cae144656184a53eea1006c4417ca9de7fb4cab36a"
+    },
+    {
+     "by": "tools/tick.py closed_class_pos",
+     "claim": "[another, SEALED] 'and' is a conjunction (sealed).",
+     "kind": "instance",
+     "seal": "10d88c31e45c1cd27be4ddd526c247686d3a4af41e0a97358262a794d070295a"
+    },
+    {
+     "by": "tools/tick.py closed_class_pos",
+     "claim": "[open class declines - the offline floor] A noun/verb/adjective/adverb depends on usage and morphology; the engine DECLINES open-class POS rather than guess. Syntax is kept closed-class only by choice; deep parsing is the declined floor. 0 false positives: a POS is confirmed only by membership in the curated closed-class set.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py closed_class_pos",
+     "claim": "[on the one map - comprehensive linguistics, step 4] Closed-class POS joins the linguistics floor (card_floor_indo_european) with phonology, morphology, etymology, transliteration and semantics.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "genomics",
+ "aliases": [
+  "genomics",
+  "genetic_code",
+  "genetics_stick"
+ ],
+ "handler": "genomics",
+ "why_python": "calls verify_derivation itself (4x)"
+}

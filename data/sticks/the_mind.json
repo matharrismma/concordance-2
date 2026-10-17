@@ -1,0 +1,62 @@
+{
+ "schema": 1,
+ "name": "the_mind",
+ "aliases": [
+  "the_mind",
+  "neuroscience",
+  "neuron",
+  "cognition"
+ ],
+ "doc": "THE MIND - matter aware of itself (Matt, 2026-10-09, down the domain list). The top rung of the emergence\nladder: physics -> chemistry -> life -> mind. The NEURON signals by electrochemistry (the membrane potential, a\nNernst voltage); the brain COMPUTES (networks, information); it is metabolically expensive (a fifth of the body's\nenergy for a fiftieth of its mass). SEALED: the Nernst factor at body temperature, and the brain's energy ratio.\nIts one OPEN END is the hard problem of consciousness - why there is subjective experience at all - which the\nengine DECLINES, a miss that stays a miss. Idempotent.",
+ "seals": [
+  {
+   "key": "nernst",
+   "nid": "nernst_factor_per_decade_at_body_temp_mv",
+   "expr": "8.314*310/96485*2.302585092994046*1000",
+   "value": 61.50743290228817,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "energy",
+   "nid": "brain_energy_share_over_mass_share_ratio",
+   "expr": "20/2",
+   "value": 10.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The mind - the neuron, computation, and the hard problem",
+   "by": "tools/tick.py the_mind",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the neuron signals by electrochemistry, SEALED] A nerve impulse is a wave of voltage across a membrane, set by ion gradients through the Nernst equation. At body temperature (310 K) the Nernst factor is RT/F times ln 10 = 61.5 mV per tenfold concentration ratio (sealed). The resting potential (about -70 mV) and every action potential are this electrochemistry - the mind runs on the same cell biology and ion physics as the rest of life. Ties card_floor_physical_chemistry (the Nernst voltage) and card_floor_biology.",
+     "seal": "nernst"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the expensive organ, SEALED] The brain is about 2 percent of body mass but burns about 20 percent of the body's resting energy - a ratio of 20/2 = 10 (sealed). Thought is costly; awareness is paid for in glucose and oxygen, a steep local order bought with a larger disorder (the second law). Ties card_floor_thermodynamics and card_floor_biology.",
+     "seal": "energy"
+    },
+    {
+     "kind": "note",
+     "claim": "[the brain computes] A neuron sums weighted inputs and fires past a threshold; networks of them learn, represent and predict. The brain is an information processor - neural coding, memory, inference - which is why artificial neural networks borrow its shape. Ties card_floor_the_instruments (the information instrument) and, through computation, the whole engine.",
+     "source": "neural coding; McCulloch-Pitts and the perceptron; computational neuroscience; card_floor_the_instruments"
+    },
+    {
+     "kind": "note",
+     "claim": "[the hard problem - DECLINED, the open edge] Everything above is the EASY problem: how the brain processes information, which is physical and sealable. The HARD problem is why there is subjective experience at all - why it is like something to be a mind. No measurement reaches it; it is not a physical quantity the engine can seal. So the engine DECLINES it and marks it as the floor's open end - a miss that stays a miss, mapped honestly, never laundered into a theorem. Ties card_floor_the_capstone (the limit of what can be sealed).",
+     "source": "D. Chalmers, the hard problem of consciousness; the easy/hard distinction; map, never launder"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] The mind rests on physical chemistry and biology (the neuron is electrochemistry in a cell), thermodynamics (the expensive brain), and the instruments (it computes). It is the top rung of the emergence ladder - matter that became life and then became aware - and its open end, the hard problem, is the one place the ladder runs past what can be sealed. Ties card_floor_the_mind.",
+     "source": "the one map; the emergence ladder; card_floor_the_mind; tools/seed_the_mind.py"
+    }
+   ]
+  }
+ ]
+}

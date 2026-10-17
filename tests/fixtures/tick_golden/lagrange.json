@@ -1,0 +1,62 @@
+{
+ "entry": "lagrange",
+ "rc": 0,
+ "seals": {
+  "8f0e09446e07923acbab2f656fb02dee1324add7457fd9e17d83a34caf106351": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "lagrange_nearby_point"
+   ]
+  },
+  "b9ca8c3b4862f4e033f2c973dc585c99b6310b82652dffff526efc17d09ecfd4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "lagrange_shadow_price"
+   ]
+  },
+  "cb19105209dcbd0376cf1207f83ad02d240beb741e9b877477e7cf4bcf9d872e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "lagrange_constrained_max"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_lagrange_multipliers": {
+   "field": "mathematics",
+   "question": "Lagrange multipliers",
+   "references": [
+    "J.-L. Lagrange, Mecanique analytique (1788)",
+    "Karush (1939); Kuhn & Tucker (1951) — the inequality-constraint (KKT) extension"
+   ],
+   "statement": "The method of constrained optimization: to extremize f subject to g = 0, solve grad f = lambda grad g together with the constraint. The arithmetic is exact and settled; it is kept here as a sealed witness of how a constraint selects the solution and prices its own boundary.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the Lagrange-multiplier reading, 2026-10-07",
+     "claim": "[the constraint picks the point] Maximize f = x*y subject to g: x + y = 10. The condition grad f = lambda grad g gives (y, x) = lambda(1, 1), so x = y = lambda; with the constraint, x = y = 5 and the maximum is 5*5 = 25 (sealed). A nearby point on the SAME line, (4, 6), gives 4*6 = 24 < 25 (sealed) - the constrained optimum is a real extremum, and it is the constraint, not the objective alone, that selects it.",
+     "kind": "witness",
+     "seal": "cb19105209dcbd0376cf1207f83ad02d240beb741e9b877477e7cf4bcf9d872e"
+    },
+    {
+     "by": "Narrow Highway - the Lagrange-multiplier reading, 2026-10-07",
+     "claim": "[lambda is the shadow price] The multiplier is not bookkeeping: lambda = d(max)/d(budget). Here max(c) = (c/2)^2 for the constraint x+y=c, so lambda = c/2 = 10/2 = 5 (sealed) - relax the budget from 10 to 11 and the maximum rises by about 5. The multiplier is the marginal VALUE of the boundary - the bridge from Lagrange to the KKT conditions and to every shadow-price in economics and operations research.",
+     "kind": "witness",
+     "seal": "b9ca8c3b4862f4e033f2c973dc585c99b6310b82652dffff526efc17d09ecfd4"
+    },
+    {
+     "by": "Narrow Highway - the Lagrange-multiplier reading, 2026-10-07",
+     "claim": "[the principle - structure does the work] At the optimum grad f is PARALLEL to grad g: you cannot increase the objective without breaking the constraint. This is the machinery under Lagrangian mechanics (Euler-Lagrange, with multipliers carrying the constraints) and so under the least-action principle (ties stick_the_principle_of_least_action); the same conditions, with inequalities, are the KKT conditions behind constrained optimization in the engine's economics and operations_research verifiers. 'The constraint does the work' made exact.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - the Lagrange-multiplier reading, 2026-10-07",
+     "claim": "[the engine's own shape - map, not launder] The engine is constraint-shaped: the gate is the constraint g, admissibility (the positive-geometry core, stick_the_positive_grassmannian) is the feasible region, and a sealed truth is the extremum found WITHIN the constraints - found, never generated. Reality is the harness; the multiplier is the price of its boundary. This is a mathematical fact read as discernment: borrow the form, launder nothing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

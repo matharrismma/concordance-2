@@ -1,0 +1,52 @@
+{
+ "entry": "typology",
+ "rc": 0,
+ "seals": {
+  "901a891f6d225ae95f0d7e4aa212718d99e16b807d48fc6a3fea078d37580b01": {
+   "axis": "linguistics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "a37fe2a7fce3b66381d6d56d88e293c5505ca755ad802375d63f3d415f233b42": {
+   "axis": "linguistics",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_language_typology_the_families_of_tongues": {
+   "field": "",
+   "question": "Language typology - the families of tongues",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py typology",
+     "claim": "[a family, SEALED] English is an Indo-European language (sealed through linguistics.LING_VERIFY): Germanic -> West Germanic -> Indo-European. The family tree of tongues is the comparative method's fruit - and the home of this very floor.",
+     "kind": "instance",
+     "seal": "a37fe2a7fce3b66381d6d56d88e293c5505ca755ad802375d63f3d415f233b42"
+    },
+    {
+     "by": "tools/tick.py typology",
+     "claim": "[a different family, SEALED] Arabic is Semitic (Afro-Asiatic), sealed - NOT Indo-European. The families are distinct; a claim across them is a mismatch.",
+     "kind": "instance",
+     "seal": "901a891f6d225ae95f0d7e4aa212718d99e16b807d48fc6a3fea078d37580b01"
+    },
+    {
+     "by": "tools/tick.py typology",
+     "claim": "[curated, declines the unknown] The reference is a curated list of languages -> families; an unknown language DECLINES rather than guesses. 0 false positives: a family not in the language's chain cannot be confirmed.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py typology",
+     "claim": "[on the one map - the comprehensive-linguistics pass is COMPLETE] Typology closes this pass on the linguistics floor (card_floor_indo_european): phonology, orthography, etymology, historical sound change and the Biblical lexicon already held; morphology, transliteration, semantics, closed-class POS and typology added - with deep parsing declined as the honest offline floor. Linguistics went from a Strong's-only lane to a comprehensive domain.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

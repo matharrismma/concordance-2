@@ -1,0 +1,11 @@
+{
+ "schema": 1,
+ "name": "alpha_orbitals",
+ "aliases": [
+  "alpha_orbitals",
+  "orbitals",
+  "suborbitals"
+ ],
+ "handler": "alpha_orbitals",
+ "why_python": "calls verify_derivation itself (4x)"
+}

@@ -1,0 +1,31 @@
+{
+ "entry": "riemann",
+ "rc": 0,
+ "seals": {
+  "42102dd3ac78ee75aceca9815631ab599da2fc1c3dd58fc4482f7c5b7b46fe39": {
+   "axis": "number_theory",
+   "overall": "PASS",
+   "verifiers": [
+    "critical_line"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_riemann_hypothesis": {
+   "field": "",
+   "question": "Riemann hypothesis",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py riemann",
+     "claim": "every non-trivial zero of zeta with 0 < Im(s) <= 100 lies on the critical line (29 zeros; the on-line count equals Backlund's strip count)",
+     "kind": "bound",
+     "seal": "42102dd3ac78ee75aceca9815631ab599da2fc1c3dd58fc4482f7c5b7b46fe39",
+     "unit": "height T",
+     "up_to": 100.0
+    }
+   ]
+  }
+ }
+}

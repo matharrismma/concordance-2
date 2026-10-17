@@ -1,0 +1,135 @@
+{
+ "entry": "labor",
+ "rc": 0,
+ "seals": {
+  "2f25e814ea88b618518583add8008d7dd8555552ce965aca7415199498fd54c8": {
+   "axis": "labor",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "4df17708b227afc2a3358d219d6aaab3200d515bf3388e139b573a3076544060": {
+   "axis": "labor",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "52817510f34cb4d99bbf0b1157a56461713306291b2da62470ab78133f691160": {
+   "axis": "labor",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "6ec2d7a6ca82b61469db116cbb9758c52f9850a432e114e040b12d6cc8ec23ba": {
+   "axis": "labor",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "8e55a880207dbfe5859f77fcb11d2f8787454187d17bdef86b3301503b76c6d7": {
+   "axis": "labor",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "c066e81e4aab68ddb7aa433dd3f8794643e82795c7cd7734c087a89b81137902": {
+   "axis": "labor",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "d43a6dd7479f05acff5f01357dcdc1a21f085f318c61c00ff3c53d1a2d7f14d6": {
+   "axis": "labor",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  },
+  "e0e777f4e5c4e9c9a70e98ba6def0caa9a20fa61ac53a958bf83334f7cfab633": {
+   "axis": "labor",
+   "overall": "PASS",
+   "verifiers": [
+    "x"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_labor_wages_overtime_and_the_minimum_sealed": {
+   "field": "labor",
+   "question": "Labor - wages, overtime and the minimum, sealed",
+   "references": [
+    "Fair Labor Standards Act of 1938, 29 U.S.C. section 206 (minimum wage) and section 207 (overtime)",
+    "29 U.S.C. 206(a)(1)(C): $7.25 per hour, effective 24 July 2009",
+    "U.S. Office of Personnel Management: 2,087 and 2,080 hours as the work-year conventions"
+   ],
+   "statement": "Pay is arithmetic over a rate, hours and the statute's multipliers: gross, time and a half past forty, the 2080-hour year, and a floor the rate must meet.",
+   "ticks": [
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[gross pay, SEALED] $18.50 x 45 h = $832.50 (sealed through labor.LABOR_VERIFY) - the straight product, before the statute touches it.",
+     "kind": "instance",
+     "seal": "8e55a880207dbfe5859f77fcb11d2f8787454187d17bdef86b3301503b76c6d7"
+    },
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[the FLSA week, SEALED] 40 h at $18.50 plus 5 h at 1.5 x $18.50: $740.00 + $138.75 = $878.75 (sealed through labor.LABOR_VERIFY; 29 U.S.C. 207). The forty-first hour costs the employer half again as much - the premium is the law's lever against the long week.",
+     "kind": "instance",
+     "seal": "6ec2d7a6ca82b61469db116cbb9758c52f9850a432e114e040b12d6cc8ec23ba"
+    },
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[the premium alone, SEALED] Ten overtime hours at $10 pay $150 (sealed through labor.LABOR_VERIFY): 1.5 x 10 x 10.",
+     "kind": "instance",
+     "seal": "52817510f34cb4d99bbf0b1157a56461713306291b2da62470ab78133f691160"
+    },
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[salary to hourly, SEALED] $52,000 a year is $25.00 an hour (sealed through labor.LABOR_VERIFY): 52 weeks x 40 hours = 2080.",
+     "kind": "instance",
+     "seal": "d43a6dd7479f05acff5f01357dcdc1a21f085f318c61c00ff3c53d1a2d7f14d6"
+    },
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[hourly to salary, SEALED] $20 an hour is $41,600 a year (sealed through labor.LABOR_VERIFY): the same 2080, the mirror direction.",
+     "kind": "instance",
+     "seal": "e0e777f4e5c4e9c9a70e98ba6def0caa9a20fa61ac53a958bf83334f7cfab633"
+    },
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[take-home at a flat rate, SEALED] $1000 gross at a 28 percent total rate leaves $720 (sealed through labor.LABOR_VERIFY). A flat rate is a model of withholding; real brackets are the tax code's, declined here.",
+     "kind": "instance",
+     "seal": "2f25e814ea88b618518583add8008d7dd8555552ce965aca7415199498fd54c8"
+    },
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[the floor met, SEALED] $7.25 an hour meets the federal minimum of $7.25 (sealed through labor.LABOR_VERIFY): the floor is inclusive.",
+     "kind": "instance",
+     "seal": "4df17708b227afc2a3358d219d6aaab3200d515bf3388e139b573a3076544060"
+    },
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[the floor missed, SEALED AS NON-COMPLIANT] $7.00 does not - sealed with claimed_compliant = false (sealed through labor.LABOR_VERIFY). A quarter under the statute is under the statute; the engine seals the negative as a negative.",
+     "kind": "instance",
+     "seal": "c066e81e4aab68ddb7aa433dd3f8794643e82795c7cd7734c087a89b81137902"
+    },
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[the statute, CITED] Time and a half past forty hours (29 U.S.C. 207) and $7.25 (29 U.S.C. 206, since 2009) are LAW, not theorems - chosen by Congress, changeable by Congress, exceeded by many states; cited as postulates. The 2080-hour year is a convention (OPM also uses 2,087); the flat tax rate is a simplification. What is sealed is the arithmetic each one commands.",
+     "kind": "postulate",
+     "source": "29 U.S.C. 206, 207; U.S. OPM fact sheet on the 2,087-hour year"
+    },
+    {
+     "by": "tools/tick.py labor",
+     "claim": "[on the one map] Wages are the economics floor's price of labour (card_floor_economics) bounded by statute (the law stick: a rule with a citation, applied exactly). The engine seals the pay a rule produces and declines what the rule should be.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

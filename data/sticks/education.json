@@ -1,0 +1,52 @@
+{
+ "schema": 1,
+ "name": "education",
+ "aliases": [
+  "education",
+  "learning",
+  "pedagogy",
+  "the_classroom"
+ ],
+ "doc": "EDUCATION - how a mind learns and is taught (Matt, 2026-10-10, down the list). Memory fades on a forgetting\ncurve (retention ~ e^-t/S), beaten by spaced repetition and the testing effect; text has a measurable reading\nlevel (Flesch). SEALED: the 1/e retention after one time-constant, and a Flesch reading-ease score. Rests on the\nmind (learning and memory) and statistics (assessment). Teaching is training. Idempotent.",
+ "seals": [
+  {
+   "key": "forgetting",
+   "nid": "forgetting_curve_retention_one_over_e",
+   "expr": "1/2.718281828459045",
+   "value": 0.36787944117144233,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "flesch",
+   "nid": "flesch_reading_ease_15_wps_1_5_syllables",
+   "expr": "206.835 - 1.015*15 - 84.6*1.5",
+   "value": 64.71000000000002,
+   "tol": 1e-06,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Education - how a mind learns and is taught",
+   "by": "tools/tick.py education",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[memory fades - the forgetting curve, SEALED] Without review, retention falls as e^(-t/S): after one time-constant only 1/e = 0.368 (sealed), about a third, remains. Ebbinghaus measured it on himself. The fix is SPACED repetition and the TESTING effect - recall, not reread - which flatten the curve. Teaching is training the memory. Ties card_floor_the_mind.",
+     "seal": "forgetting"
+    },
+    {
+     "kind": "instance",
+     "claim": "[text has a reading level - Flesch, SEALED] Readability is measurable: Flesch reading ease = 206.835 - 1.015*(words/sentence) - 84.6*(syllables/word); at 15 words per sentence and 1.5 syllables per word that is 64.7 (sealed), plain standard English. Shorter sentences and words read easier - a formula, not a taste. Ties card_floor_statistics.",
+     "seal": "flesch"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Education rests on the mind (learning is neural change, memory is storage) and statistics (assessment, item response, the measurement of learning). Teaching is training: present, recall, space, test - the same loop by which any system is taught. Ties card_floor_education.",
+     "source": "the one map; Ebbinghaus; the testing effect; teaching-is-training; card_floor_education"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,344 @@
+{
+ "entry": "joints",
+ "rc": 0,
+ "seals": {
+  "11b210819e8d17d4b9f6fa60aa75c9abcc7958324d77767dc9f5ceca225b771b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gram_schmidt_residual_norm"
+   ]
+  },
+  "140a5602f6f1c57dac13024e192bc640c305dc26738770004296cb7491163dc5": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "planck_meets_rayleigh_jeans_at_x_0_01"
+   ]
+  },
+  "1962ddac2d9ca0b9c94db97aa2e892e3ddd81aa630682025cf5c06561c7bd14f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "tangent_line_distance_equals_the_radius"
+   ]
+  },
+  "21f254910e7cff4ab1ec83680fdb6a86f198a65b0d33709b8aa40cd9fdb99317": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "the_angle_is_the_inner_product_45_degrees"
+   ]
+  },
+  "2eae40737c7713ca81f523c4ad9287c5d5b805af1982138b069b30a8449679f0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "born_probability_of_plus_read_in_zero"
+   ]
+  },
+  "3f36a144b6bede2942194be9478bf55bbbc3f3c1d7b8c402bd51fde99cda9dbc": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "resolution_of_identity_in_a_rotated_basis"
+   ]
+  },
+  "4815d6acd7e83280c05bdd3f21f05afcc6b747fb0e093279b1382abb4f613c14": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "two_lines_meet_where_two_equations_agree_x"
+   ]
+  },
+  "581c3d7d5c29e88b38f2945bbb92999f900c1abe42f20de1f595d2a6571674b8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "cauchy_schwarz_slack_never_negative"
+   ]
+  },
+  "5cce66db0265536f954721f33f2f42ef71afbcb867cb9ddc1e1e50f570bc2527": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "bohr_correspondence_hydrogen_n_100"
+   ]
+  },
+  "5d720178109f7f1f93bf23e67c08c848e53a920f44c8eae8e191cfc2e2eda36d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "sine_and_cosine_orthogonal_one_plus_zero"
+   ]
+  },
+  "5fe543ca6613da0c4f7763ebfef42f1abb9e64e2faf79653cf44a20ba5786e5b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "zero_point_energy_omega_1e15_eV"
+   ]
+  },
+  "6492bbc1be1856865c0c0fafe8603b5e39a55513341ba238c81b617546793090": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "orthonormal_kets_kronecker_one_plus_zero"
+   ]
+  },
+  "70c6a140dce1cd1a980ef194ac1e9c2a82657a50c7576bff6f7200116135bf6d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "pythagoras_is_the_norm_3_4_5"
+   ]
+  },
+  "7fe8c9c75fea9a66357d5d29de0a14b3a64d585da20eac43b08d452fd142409f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "sine_norm_squared_is_pi"
+   ]
+  },
+  "a25aa16c671a696c86c6f5ddcec59f606d3b778ffe94c325054baa5ae4c3093f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "triangle_area_by_the_determinant"
+   ]
+  },
+  "b3809c24aac36f06d12260d1c75c8a6b856ac6254886094dd87e1678ac165726": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "de_broglie_wavelength_1keV_electron_pm"
+   ]
+  },
+  "b70f7c270cb264cc242b22879907704524b7d49e9a733be8934e184bae317e0e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "compton_shift_at_90_degrees_pm"
+   ]
+  },
+  "c010899296718b3dea28748800706323a0d9a402f316becc580b66bf5718b4d2": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ehrenfest_mean_follows_the_classical_cosine"
+   ]
+  },
+  "d458bfb49bd1d9d7cd1edf0c12c3e9e19f50c45acb789399bc61188f627e2d1d": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "normalized_overlap_is_a_cosine"
+   ]
+  },
+  "db56118e7fc4991d5fe39c82a63e513f27d893c5d9c50ee0107ba327108396b3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "bra_ket_of_1_2_3_and_4_5_6"
+   ]
+  },
+  "ec91d3b879fa1c14bccc7a0eeb71c411eff3e668ec76de84b7c27b3bfb5f2e36": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "engine_cosine_of_a_query_against_a_card"
+   ]
+  },
+  "fab554eb12066552a54f8d05b559fae4b6a70b8158a53a7e475dd4885475b2f8": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "gabor_bandwidth_of_a_1ms_pulse_hz"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_where_two_domains_connect_geometry_to_algebra_algebra_to_qua": {
+   "field": "mathematics",
+   "question": "Where two domains connect - geometry to algebra, algebra to quantum mechanics, quantum mechanics to classical physics; the inner product is the joint, and the engine is a Hilbert space only where that is checkable",
+   "references": [
+    "R. Descartes, La Geometrie (1637): geometry done by algebra - the coordinate",
+    "Euclid, Elements I.47 (Pythagoras); Hero's formula; the determinant as area (Cauchy 1815)",
+    "D. Hilbert (1912); J. von Neumann, Mathematische Grundlagen der Quantenmechanik (1932): the Hilbert space",
+    "P. A. M. Dirac (1925: [A,B] = i hbar {A,B}; 1930, 1939: bra and ket)",
+    "F. Riesz (1907): every bra is a ket's dual; J. P. Gram (1883), E. Schmidt (1907): orthonormalization",
+    "M. Born (1926): |<phi|psi>|^2; M. Planck (1900); Lord Rayleigh (1900), J. Jeans (1905)",
+    "N. Bohr (1920): the correspondence principle; P. Ehrenfest (1927); L. de Broglie (1924); A. H. Compton (1923)",
+    "D. Gabor (1946): the uncertainty of a signal, Delta t Delta f >= 1/(4 pi)",
+    "docs/OUR_FORM_MEASURED_2026-10-08.md: 882,022 cards, 124 domains, the sparse index - the engine's own space, measured",
+    "Colossians 1:17; Ephesians 4:16 ('joined and held together by every joint'); Proverbs 25:2",
+    "stick_the_dot_abstracted (the delta is the dot product); stick_singular_value_decomposition; stick_tensors; stick_bubbles_joined; stick_the_schrodinger_equation; stick_the_standard_model_chain"
+   ],
+   "statement": "Two domains connect at a point that both can compute. Geometry and algebra connect at Descartes' joint: a point is a pair of numbers, a line is an equation, Pythagoras is the norm <v|v>, and the angle between two directions is their inner product - length and angle, the whole of geometry, read off sums of products. Algebra and quantum mechanics connect at the same joint: a state is a ket, a question is a bra, <phi|psi> is the overlap, |<phi|psi>|^2 is where it may be found, the basis kets are orthonormal (the delta is the dot product), and the sum of the projections resolves the identity - in any orthonormal basis. Quantum mechanics and classical physics connect where the quantum is small against the rest: Planck's law becomes Rayleigh-Jeans as h nu / kT -> 0; the hydrogen line n -> n-1 becomes the orbit's own frequency as n grows; the mean position of a wave packet follows Newton's path (Ehrenfest); a particle has a wavelength (de Broglie) and a photon a recoil (Compton); the uncertainty principle is the bandwidth theorem every wave obeys (Gabor), quantum only because p = hbar k. The engine is a Hilbert space in the literal, finite, real sense: cards are kets, a query is a bra, the ranking score is their normalized inner product, a domain is a projector, and completeness is no orphans. Nothing else of bra-ket carries over - no complex amplitudes, no Born rule, no superposition of a card, no unitary evolution, no non-commuting observables: a verifier is a deterministic measurement that leaves the card as it was. The likeness is kept a likeness.",
+   "ticks": [
+    {
+     "by": "engine:joints",
+     "claim": "[geometry meets algebra: the norm] Descartes made a point a pair of numbers; then Euclid I.47 is a sum of squares: the length of (3, 4) is sqrt(9 + 16) = 5 (sealed). Pythagoras is <v|v>. The joint is exact: every length geometry draws, algebra computes, and the same number comes out.",
+     "kind": "instance",
+     "seal": "70c6a140dce1cd1a980ef194ac1e9c2a82657a50c7576bff6f7200116135bf6d"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[geometry meets algebra: the angle] The angle between (1, 0) and (1, 1) is acos of their normalized inner product, 1/sqrt 2, which is 45 degrees (sealed). An angle - the thing a protractor measures - is an inner product divided by two lengths. Geometry's two primitives, length and angle, are both the same algebraic operation.",
+     "kind": "instance",
+     "seal": "21f254910e7cff4ab1ec83680fdb6a86f198a65b0d33709b8aa40cd9fdb99317"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[a curve is an equation] The circle x^2 + y^2 = 25 and the line 3x + 4y = 25 touch at (3, 4): the line's distance from the origin is 25/sqrt(9 + 16) = 5 (sealed), exactly the radius - tangency, a geometric fact, read off two equations. Descartes' La Geometrie (1637) is this joint made a method.",
+     "kind": "instance",
+     "seal": "1962ddac2d9ca0b9c94db97aa2e892e3ddd81aa630682025cf5c06561c7bd14f"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[two lines meet where two equations agree] x + y = 5 and x - y = 1 meet at x = (5 + 1)/2 = 3 (sealed), y = 2. An intersection is a solution; a solution is an intersection. The engine's resolve of a claim across two verifiers is this: a point both equations hold.",
+     "kind": "instance",
+     "seal": "4815d6acd7e83280c05bdd3f21f05afcc6b747fb0e093279b1382abb4f613c14"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[area is a determinant] The triangle (0,0), (4,0), (0,3) has area |4*3 - 0*0|/2 = 6 (sealed): half the determinant of its edge vectors. The determinant - a number algebra computes from a table - IS the area geometry sees; the sign is the orientation. One joint, two faces.",
+     "kind": "instance",
+     "seal": "a25aa16c671a696c86c6f5ddcec59f606d3b778ffe94c325054baa5ae4c3093f"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[bras and kets: the overlap] <phi|psi> for phi = (1, 2, 3) and psi = (4, 5, 6) is 1*4 + 2*5 + 3*6 = 32 (sealed). A ket is a column of numbers; a bra is the row that reads it; the bracket is the inner product. Dirac's notation (1939) names the two halves of the joint geometry and algebra already shared.",
+     "kind": "instance",
+     "seal": "db56118e7fc4991d5fe39c82a63e513f27d893c5d9c50ee0107ba327108396b3"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[the overlap never exceeds the lengths: Cauchy-Schwarz] <phi|phi><psi|psi> - <phi|psi>^2 = 14*77 - 32^2 = 54 (sealed), never negative. So the normalized overlap 32/sqrt(14*77) = 0.9746 (sealed) is a cosine: no state overlaps another more than itself. This is the inequality that makes a ranking score a score - bounded by one, equal to one only for the thing itself.",
+     "kind": "instance",
+     "seal": "581c3d7d5c29e88b38f2945bbb92999f900c1abe42f20de1f595d2a6571674b8"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[normalized overlap = a cosine] 32/sqrt(14*77) = 0.97463 (sealed): the same cosine the angle mark computed, now read as 'how alike two states are'. Geometry's angle, algebra's inner product, quantum mechanics' overlap: one number.",
+     "kind": "instance",
+     "seal": "d458bfb49bd1d9d7cd1edf0c12c3e9e19f50c45acb789399bc61188f627e2d1d"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[Born: the square of the overlap] |<0|+>|^2 = (1/sqrt 2)^2 = 1/2 (sealed): a qubit in |+> = (|0> + |1>)/sqrt 2 is found in |0> half the time. The probability is the squared inner product - the joint where algebra becomes physics. Cited as the Born rule (1926), a postulate; the arithmetic is sealed.",
+     "kind": "instance",
+     "seal": "2eae40737c7713ca81f523c4ad9287c5d5b805af1982138b069b30a8449679f0"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[orthonormal kets: the delta is the dot product] <0|1> = 1*0 + 0*1 = 0, judged as 1 + 0 = 1 (sealed); <0|0> = 1. The basis kets are orthonormal: <i|j> = delta_ij. The Kronecker delta IS the dot product of basis vectors (stick_the_dot_abstracted) - the same joint, seen from the basis.",
+     "kind": "instance",
+     "seal": "6492bbc1be1856865c0c0fafe8603b5e39a55513341ba238c81b617546793090"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[Gram-Schmidt: making the joint orthonormal] From (1, 1) and (1, 0): e1 = (1, 1)/sqrt 2; the residual of (1, 0) is (1/2, -1/2), of norm sqrt(1/4 + 1/4) = 1/sqrt 2 = 0.70711 (sealed), so e2 = (1, -1)/sqrt 2 and <e1|e2> = 0. Any basis becomes an orthonormal one by subtracting projections - the engine's domains are made disjoint by the same subtraction (stick_tensors: the principal axes).",
+     "kind": "instance",
+     "seal": "11b210819e8d17d4b9f6fa60aa75c9abcc7958324d77767dc9f5ceca225b771b"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[the identity resolved - in ANY orthonormal basis] psi = (3, 4): in the rotated basis u = (1, 1)/sqrt 2, w = (1, -1)/sqrt 2 the projections are 7/sqrt 2 and -1/sqrt 2, whose squares sum to 49/2 + 1/2 = 25 (sealed) = <psi|psi>. Sum over i of |i><i| = 1: the projections onto a complete basis give back the whole, whichever basis. Completeness is the property that nothing is lost in the reading.",
+     "kind": "instance",
+     "seal": "3f36a144b6bede2942194be9478bf55bbbc3f3c1d7b8c402bd51fde99cda9dbc"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[the sum becomes an integral: function space] On [0, 2 pi], <sin|cos> = int sin x cos x dx = 0 (sealed as 1 + 0 = 1) and <sin|sin> = int sin^2 x dx = pi (sealed). The inner product of two functions is the same joint with the index made continuous; sines and cosines are an orthogonal basis (Fourier) - the waveforms the torus stick ran on primes live in this space.",
+     "kind": "instance",
+     "seal": "5d720178109f7f1f93bf23e67c08c848e53a920f44c8eae8e191cfc2e2eda36d"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[the norm of a wave] int_0^{2 pi} sin^2 x dx = pi = 3.14159 (sealed): so sin x / sqrt pi is a unit ket in L^2[0, 2 pi]. Normalization in function space is the same division by a length as on (3, 4).",
+     "kind": "instance",
+     "seal": "7fe8c9c75fea9a66357d5d29de0a14b3a64d585da20eac43b08d452fd142409f"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[Planck meets Rayleigh-Jeans] Planck's law divided by the classical law is x/(e^x - 1) with x = h nu / kT; at x = 0.01 it is 0.995008 (sealed). As the quantum h nu becomes small against kT the quantum law becomes the classical one; as x grows the classical law runs off to the ultraviolet catastrophe. The joint is the low-frequency limit, and the point where they part is x ~ 1.",
+     "kind": "instance",
+     "seal": "140a5602f6f1c57dac13024e192bc640c305dc26738770004296cb7491163dc5"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[Bohr's correspondence] The hydrogen line n -> n-1 has frequency R(1/(n-1)^2 - 1/n^2); the classical orbit's frequency at n is 2R/n^3. Their ratio at n = 100 is 100^3/2 * (1/99^2 - 1/100^2) = 1.01520 (sealed), and -> 1 as n -> infinity. Large quantum numbers reproduce classical orbits: Bohr's correspondence principle (1920), the first stated joint between the two domains.",
+     "kind": "instance",
+     "seal": "5cce66db0265536f954721f33f2f42ef71afbcb867cb9ddc1e1e50f570bc2527"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[de Broglie: the particle has a wavelength] An electron of 1 keV has lambda = h/sqrt(2 m E) = 38.78 pm (sealed) - the atomic scale, which is why electrons diffract off crystals (Davisson-Germer 1927). The classical particle and the wave meet at p = h/lambda; the joint is a number any beam can test.",
+     "kind": "instance",
+     "seal": "b3809c24aac36f06d12260d1c75c8a6b856ac6254886094dd87e1678ac165726"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[Compton: the wave has a recoil] A photon scattered at 90 degrees lengthens by h/(m_e c) = 2.4263 pm (sealed), the Compton wavelength - momentum and energy conserved as for two billiard balls, with a wave's wavelength. Newton's collision meets Planck's quantum in one measured shift (1923).",
+     "kind": "instance",
+     "seal": "b70f7c270cb264cc242b22879907704524b7d49e9a733be8934e184bae317e0e"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[Ehrenfest: the mean follows Newton] For a coherent oscillator state the expectation <x>(t) = x0 cos(omega t) EXACTLY as the classical particle moves; at omega = 2, t = pi/6 the classical path gives cos(pi/3) = 0.5 (sealed), and the quantum mean sits on it. Ehrenfest (1927): d<p>/dt = -<dV/dx>. The means obey Newton; the spread is what is new.",
+     "kind": "instance",
+     "seal": "c010899296718b3dea28748800706323a0d9a402f316becc580b66bf5718b4d2"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[where they part: the zero point] A quantum oscillator at omega = 10^15 rad/s has ground energy hbar omega / 2 = 0.32911 eV (sealed) where the classical floor is zero. This is a connection point of the other kind - the place the two domains are seen to differ by a measurable amount (liquid helium never freezes at one atmosphere; vibrational spectra start half a quantum up). Naming the spot where two domains part is as much a joint as naming where they agree.",
+     "kind": "instance",
+     "seal": "5fe543ca6613da0c4f7763ebfef42f1abb9e64e2faf79653cf44a20ba5786e5b"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[uncertainty is the bandwidth theorem] A pulse of duration sigma_t = 1 ms has bandwidth sigma_f >= 1/(4 pi * 0.001) = 79.58 Hz (sealed) - Gabor's limit (1946), classical signal theory. Multiply by h and it is Delta E Delta t >= hbar/2; set p = hbar k and it is Delta x Delta p >= hbar/2. The uncertainty principle is what every wave obeys; quantum mechanics is where matter is a wave. The joint is the Fourier transform.",
+     "kind": "instance",
+     "seal": "fab554eb12066552a54f8d05b559fae4b6a70b8158a53a7e475dd4885475b2f8"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[the engine as a Hilbert space - the literal part] A query is a bag of counts (salary 1, latin 1), a card another (salary 2, latin 1, french 1); their inner product is 3 and the normalized overlap 3/sqrt(2*6) = 0.86603 (sealed) is the ranking score. So: cards are kets, a query is a bra, the score is <query|card> over the lengths, a domain is the projector |d><d| the router applies, and 'no orphans' is the resolution of the identity - every card reachable through its shelf. A finite-dimensional real inner-product space is complete, hence a Hilbert space, literally (von Neumann 1932). Measured: 882,022 kets, 124 domains (docs/OUR_FORM_MEASURED).",
+     "kind": "witness",
+     "seal": "ec91d3b879fa1c14bccc7a0eeb71c411eff3e668ec76de84b7c27b3bfb5f2e36"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[what carries over, by name] ket = card; bra = query (a linear functional on the keeping: Riesz 1907 - in a finite real space the bra IS the transposed ket); <bra|ket> = the ranking score; |d><d| = the domain router (idempotent: routing twice is routing once); orthogonal domains = disjoint vocabularies; Gram-Schmidt = making the domains disjoint (the principal axes of stick_tensors); Sum |i><i| = 1 = no orphans; Cauchy-Schwarz = no card matches a query better than the query matches itself (a score is bounded by one). Each of these is checkable on the live index and is used as stated, nothing more.",
+     "kind": "equivalence",
+     "source": "J. von Neumann (1932); F. Riesz (1907); docs/OUR_FORM_MEASURED_2026-10-08.md; stick_tensors; stick_the_dot_abstracted"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[a postulate it builds on] The Born rule: the probability of finding |psi> in |phi> is |<phi|psi>|^2 (Born 1926). Not kept as a fact: taken as the working rule of the quantum joint, and every sealed instance above that uses it (|<0|+>|^2 = 1/2) works - so the truth is inferred there, never proven here.",
+     "kind": "postulate",
+     "source": "M. Born, Zur Quantenmechanik der Stossvorgaenge (1926)"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[a postulate it builds on] The state postulate: a physical state is a ray in a Hilbert space and an observable is a Hermitian operator on it (von Neumann 1932). The bras, kets and orthonormal bases sealed above work under it; its truth is inferred from a century of working, not proven by any seal.",
+     "kind": "postulate",
+     "source": "J. von Neumann, Mathematische Grundlagen der Quantenmechanik (1932); P. A. M. Dirac (1930)"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[a postulate it builds on] Dirac's quantization rule: the commutator [A, B] = i hbar {A, B} of the classical Poisson bracket (Dirac 1925) - the stated joint between the two mechanics. The correspondence instances sealed above (Planck -> Rayleigh-Jeans, Bohr n = 100, Ehrenfest) work under it.",
+     "kind": "postulate",
+     "source": "P. A. M. Dirac, The Fundamental Equations of Quantum Mechanics (1925)"
+    },
+    {
+     "by": "engine:joints",
+     "claim": "[what does NOT carry over - do not blindly apply bra-ket] (1) No complex amplitudes: the engine's space is real; there is no phase and no interference between cards. (2) No Born rule: a verdict is not a probability; a verifier is a deterministic measurement with eigenvalues HOLDS and BROKEN (and INCOMPLETE is no measurement, not a third eigenvalue), returning the same answer every time - by design, zero false positives. (3) No superposition of a card: a card is on one shelf; the 'superposition' of stick_bubbles is metadata, two addresses for one kept thing, not an amplitude. (4) No unitary evolution: nothing rotates the state between readings; the keeping changes only by minting. (5) No non-commuting observables: verifiers commute, run in any order, and a measurement leaves the card as it was - there is no uncertainty principle in the engine because nothing conjugate is being measured. (6) No entanglement: a connection between two cards is an edge, not a non-separable state. Where a term is not on the list above it is a likeness, and a likeness is kept a likeness.",
+     "kind": "exclusion",
+     "source": "Matt, 2026-10-08: 'don't blindly apply bra-ket'; feedback_mapping_the_truth_not_generating_it; stick_bubbles_joined; stick_the_dot_abstracted"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,48 @@
+{
+ "entry": "lnh",
+ "rc": 0,
+ "seals": {
+  "15c2185276bb49018d677e9c86f7b3c67aa48dd04c22311b68fc4f774af1ec7c": {
+   "axis": "physical_constants",
+   "overall": "PASS",
+   "verifiers": [
+    "N1"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_dirac_s_large_numbers_hypothesis": {
+   "field": "physics",
+   "question": "Dirac's Large Numbers Hypothesis",
+   "references": [
+    "P. A. M. Dirac, The Cosmological Constants, Nature 139 (1937) 323",
+    "P. A. M. Dirac, A New Basis for Cosmology, Proc. Roy. Soc. A 165 (1938) 199"
+   ],
+   "statement": "The large dimensionless ratios of nature are all near 10^40 and, Dirac conjectured, causally linked — so the gravitational constant would weaken as the universe ages (G proportional to 1/t). It is a physical conjecture about whether a coincidence of magnitudes is a law.",
+   "ticks": [
+    {
+     "by": "Narrow Highway — the large-numbers reading, 2026-10-05",
+     "claim": "The electromagnetic-to-gravitational force ratio between a proton and an electron, N1 = e^2 / (4*pi*eps0*G*m_p*m_e) = 2.268661e+39 (~10^39.4), computed from the engine's attested CODATA constants — the first of Dirac's large numbers, as an arithmetic fact",
+     "kind": "witness",
+     "seal": "15c2185276bb49018d677e9c86f7b3c67aa48dd04c22311b68fc4f774af1ec7c"
+    },
+    {
+     "by": "Narrow Highway — the large-numbers reading, 2026-10-05",
+     "claim": "[the coincidence] Dirac's second large number is the age of the universe in atomic time units, N2 = T_Hubble / (e^2/(4*pi*eps0*m_e*c^3)) ~ 10^40.7 — within about one order of magnitude of N1. The Large Numbers Hypothesis is the conjecture that this nearness is not accidental but a relation, from which Dirac drew G proportional to 1/t. N2 rests on the Hubble time, a measured cosmological quantity, not a constant — so it is cited, not sealed.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway — the large-numbers reading, 2026-10-05",
+     "claim": "The hypothesis's physical prediction — a time-varying G — is strongly constrained by observation: lunar laser ranging bounds |G_dot/G| below a few * 10^-13 per year, far smaller than the ~10^-10 per year a Dirac 1/t law needs; Big Bang nucleosynthesis and the Oklo natural reactor bound the variation of the constants over billions of years. The causal hypothesis is disfavored.",
+     "kind": "exclusion",
+     "source": "J. G. Williams, S. G. Turyshev, D. H. Boggs, Phys. Rev. Lett. 93 (2004) 261101 (lunar laser ranging); A. I. Shlyakhter, Nature 264 (1976) 340 and T. Damour & F. Dyson, Nucl. Phys. B 480 (1996) 37 (the Oklo reactor)"
+    },
+    {
+     "by": "Narrow Highway — the large-numbers reading, 2026-10-05",
+     "claim": "[discernment] The engine seals that N1 IS ~2.27*10^39 — the arithmetic is a fact. It does not endorse that N1 and N2 being near 10^40 is a law; a coincidence of magnitudes is not one, and the observational bounds above weigh against the causal claim. Seal the arithmetic, cite the conjecture, endorse nothing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

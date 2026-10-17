@@ -1,0 +1,120 @@
+{
+ "entry": "millennium_map",
+ "rc": 0,
+ "seals": {
+  "6404e2ed1e95d495aa2917e5f23c4ba0197515246c7b64568cd71557e19f9ab0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "myers_diameter_bound_on_the_unit_s3"
+   ]
+  },
+  "9be97fa46484fd42e71fa01cea8d48d24fe2a32fb83a5dba5d6f868647583691": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "xi_functional_equation_at_s_0_3"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_birch_and_swinnerton_dyer_conjecture": {
+   "field": "",
+   "question": "Birch and Swinnerton-Dyer conjecture",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py millennium_map",
+     "claim": "[the joints, cited] On the one map this stick connects to Riemann at the one L-function machinery (xi(s) = xi(1 - s) sealed on the Riemann stick; L(11a1, 1) sealed here by the same approximate functional equation), to Hodge at the Tate conjecture (Artin-Tate 1966, Milne 1975), and to P versus NP at Manin 1971: if Sha is finite the rank is computable, and today it is not known to be.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_hodge_conjecture": {
+   "field": "",
+   "question": "Hodge conjecture",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py millennium_map",
+     "claim": "[the joints, cited] On the one map this stick connects to BSD at the Tate conjecture - Hodge's arithmetic twin, equivalent for an elliptic surface over a finite field to BSD for its fibre (Tate 1965, Artin-Tate 1966, Milne 1975); to Riemann and P versus NP at Deligne 1974, whose weights are the finite-field shadow of Hodge theory; to Poincare at Bochner 1946 (sealed on the Poincare stick).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_navier_stokes_existence_and_smoothness": {
+   "field": "",
+   "question": "Navier-Stokes existence and smoothness",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py millennium_map",
+     "claim": "[the joints, cited] On the one map this stick connects to Yang-Mills at the renormalization group (the Kolmogorov scale sealed here, the running coupling sealed there) and to Poincare at Arnold 1966 - Euler flow as geodesic flow on the volume-preserving diffeomorphisms, the geometric analysis Perelman's proof lives in; it has not produced regularity. No joint with Riemann - a miss, recorded.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_p_versus_np": {
+   "field": "",
+   "question": "P versus NP",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py millennium_map",
+     "claim": "[the joints, cited - restated for precision, 2026-10-09] On the one map this stick connects to Riemann and Hodge at Deligne 1974 - the Weil conjectures, the Riemann hypothesis for varieties over FINITE FIELDS, a theorem; the Riemann hypothesis itself stays open - whose positivity Mulmuley's geometric complexity theory leans on (the one road not excluded by a barrier); to Riemann at the Diophantine form of RH (Davis-Matiyasevich-Robinson 1976); to BSD at Manin 1971 (finite Sha makes the rank computable); to Yang-Mills at the NP-hard sign problem (Troyer-Wiese 2005).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_poincare_conjecture": {
+   "field": "",
+   "question": "Poincare conjecture",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py millennium_map",
+     "claim": "[the joint with Hodge, sealed] Myers 1941: a complete manifold with Ric >= (n - 1)k has diameter at most pi/sqrt(k), with equality on the round sphere - the unit S^3 at k = 1 has diameter pi (sealed). Bochner 1946: positive Ricci curvature admits no non-zero harmonic one-form, so b_1 = 0 - the harmonic forms of Hodge theory vanishing under the very hypothesis Hamilton 1982 starts from. Hodge's tool and Poincare's hypothesis meet on the sphere.",
+     "kind": "witness",
+     "seal": "6404e2ed1e95d495aa2917e5f23c4ba0197515246c7b64568cd71557e19f9ab0"
+    }
+   ]
+  },
+  "stick_riemann_hypothesis": {
+   "field": "",
+   "question": "Riemann hypothesis",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py millennium_map",
+     "claim": "[the joint with BSD, sealed] Zeta and L(E,s) are one machinery - an Euler product, a functional equation about a centre, a critical line. The completed zeta xi(s) = pi^(-s/2) Gamma(s/2) zeta(s) satisfies xi(s) = xi(1 - s): checked at s = 0.3, the ratio xi(0.3)/xi(0.7) = 1 (sealed, gamma and zeta evaluated here). The BSD stick's L(11a1, 1) = 0.2538 is computed by the same approximate functional equation with the root number in place of the symmetry. Modularity (Wiles 1995) is what gives L(E,s) its continuation; the Grand Riemann Hypothesis names both at once.",
+     "kind": "witness",
+     "seal": "9be97fa46484fd42e71fa01cea8d48d24fe2a32fb83a5dba5d6f868647583691"
+    },
+    {
+     "by": "tools/tick.py millennium_map",
+     "claim": "[the joints, cited] On the one map (card_floor_millennium) this stick connects to Yang-Mills at the GUE statistics (Montgomery 1973, Odlyzko 1987, Verbaarschot 1994 - the spacing witness already sealed here), to Hodge and P versus NP at the Weil conjectures - the Riemann hypothesis over finite fields, proven by Deligne 1974, while the hypothesis itself stays open - and to P versus NP at the Diophantine form of RH (Davis-Matiyasevich-Robinson 1976). No joint with Navier-Stokes was found - a miss, recorded.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_yang_mills_existence_and_mass_gap": {
+   "field": "",
+   "question": "Yang-Mills existence and mass gap",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py millennium_map",
+     "claim": "[the joints, cited] On the one map this stick connects to Riemann at the GUE statistics - the low-lying spectrum of the lattice Dirac operator follows chiral random matrix theory (Verbaarschot 1994) as the zeta zeros follow GUE (sealed on the Riemann stick); to Navier-Stokes at the renormalization group (Wilson 1974; Forster-Nelson-Stephen 1977 for the stirred fluid), where in both the continuum limit of a finite system is the question; and to P versus NP at the sign problem, NP-hard (Troyer-Wiese 2005).",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

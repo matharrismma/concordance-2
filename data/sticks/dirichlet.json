@@ -1,0 +1,65 @@
+{
+ "schema": 1,
+ "name": "dirichlet",
+ "aliases": [
+  "dirichlet",
+  "dirichlets_theorem",
+  "arithmetic_progressions",
+  "l_function",
+  "characters",
+  "roots_of_unity"
+ ],
+ "doc": "DIRICHLET'S THEOREM / THINK OF POLAR COORDINATES (Matt, 2026-10-07). If gcd(a,d)=1 the progression\na, a+d, a+2d, ... holds infinitely many primes, split evenly among the phi(d) coprime classes. The proof\nruns on Dirichlet characters chi: every value chi(n) is a ROOT OF UNITY - modulus 1, pure phase, a point on\nthe unit circle in polar coordinates. Orthogonality is unit vectors summing to zero around the circle (a\nFourier transform on (Z/dZ)*); the crux is L(1,chi) != 0. Seal 'on the unit circle' and 'the roots sum to\nzero'; the same circle as the whole arc. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "character_on_unit_circle",
+   "nid": "character_on_unit_circle",
+   "expr": "0.5**2 + 0.75",
+   "value": 1.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "roots_of_unity_sum_zero",
+   "nid": "roots_of_unity_sum_zero",
+   "expr": "1 + (-0.5) + (-0.5)",
+   "value": 0.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Dirichlet's theorem - think of polar coordinates",
+   "statement": "For gcd(a,d)=1 there are infinitely many primes congruent to a modulo d, equidistributed among the phi(d) coprime residue classes. The proof uses Dirichlet characters, whose values are roots of unity - points on the unit circle, pure phase - and the non-vanishing L(1, chi) != 0 for non-principal chi.",
+   "field": "meta",
+   "references": [
+    "Dirichlet (1837): primes in arithmetic progressions",
+    "Dirichlet L-function L(s, chi) = prod_p (1 - chi(p) p^-s)^-1",
+    "orthogonality of characters on (Z/dZ)* - a finite Fourier transform",
+    "the crux L(1, chi) != 0 for non-principal chi"
+   ],
+   "by": "Narrow Highway - Dirichlet's theorem / polar coordinates, 2026-10-07",
+   "marks": [
+    {
+     "kind": "witness",
+     "claim": "[the character lives on the unit circle - the polar-coordinate hint] A Dirichlet character maps each residue to a root of unity: modulus exactly 1, radius fixed, only the angle varies. The primitive cube root omega = e^(2 pi i/3) has |omega|^2 = (-1/2)^2 + (sqrt3/2)^2 = 0.5^2 + 0.75 = 1 (sealed). In polar coordinates r = 1 and chi is pure phase - which is why the right picture is polar, not Cartesian.",
+     "seal": "character_on_unit_circle"
+    },
+    {
+     "kind": "witness",
+     "claim": "[orthogonality = unit vectors summing around the circle] The cube roots satisfy 1 + omega + omega^2 = 0; the real part is 1 + (-1/2) + (-1/2) = 0 (sealed) and the imaginary parts cancel by conjugate symmetry. n equally spaced unit arrows sum to the center. Dirichlet isolates the class a (mod d) by exactly this cancellation - summing a non-principal character over a period gives zero. It is a Fourier transform on the group (Z/dZ)*, i.e. harmonic analysis on the circle.",
+     "seal": "roots_of_unity_sum_zero"
+    },
+    {
+     "kind": "note",
+     "claim": "[the crux, cited not reproved] The theorem turns on L(1, chi) != 0 for every non-principal character; that single non-vanishing keeps each residue class's density of primes positive. The engine seals the root-of-unity arithmetic and CITES Dirichlet's theorem - it does not re-derive the non-vanishing. The L-functions L(s, chi) are the zeta family's siblings (stick_the_zeta_function); GRH is the same critical line Re = 1/2 for all of them."
+    },
+    {
+     "kind": "note",
+     "claim": "[the same circle as the whole arc] The character values on the unit circle are the SAME circle as the Smith/Cayley |Gamma| = 1 (stick_the_smith_chart_the_cayley_transform), the finite-field |alpha| = sqrt(q) (stick_finite_field_riemann), and the self-adjoint <-> unitary spectrum (stick_hilbert_polya). The dual of an abelian symmetry group lives on the circle: rotations, roots of unity, polar coordinates. This is stick_the_symmetry wearing its harmonic-analysis face. map, never launder: a point at angle 2 pi k / n is geometry, never a sign to be read."
+    }
+   ]
+  }
+ ]
+}
