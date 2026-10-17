@@ -495,6 +495,30 @@ class Corpus:
             (cid for cids in self._cids_by_call.values() for cid in cids),
             key=lambda cid: (self._call_of(cid), self._title_of(cid)))
 
+    # THE PERSISTED SHAPE (issue #10, corpus_cache.py). `_state` is the one list of what __init__ derives;
+    # `_restore` builds a Corpus from it without running __init__ — the same objects a fresh build would
+    # hold, with the runtime-only parts (the search cache, its lock) made fresh. Add a derived attribute to
+    # __init__ -> add it here, or a cache-loaded corpus silently lacks it (corpus_cache keys on this file's
+    # content, so the old files miss — but a missing field would not).
+    _STATE_FIELDS = (("cards", "cards"), ("min_idf", "min_idf"), ("n", "_n"), ("froze", "_froze"),
+                     ("by_token", "_by_token"), ("df_extra", "_df_extra"), ("frozen", "_frozen"),
+                     ("frozen_shelf_counts", "_frozen_shelf_counts"), ("call_tree", "_call_tree"),
+                     ("cids_by_call", "_cids_by_call"), ("public_sorted", "_public_sorted"))
+
+    def _state(self) -> Dict[str, Any]:
+        """Everything a cold process needs to be THIS corpus — the structures corpus_cache persists."""
+        return {k: getattr(self, attr) for k, attr in self._STATE_FIELDS}
+
+    @classmethod
+    def _restore(cls, state: Dict[str, Any]) -> "Corpus":
+        """A Corpus from a persisted state (corpus_cache.load) — no tokenizing, no sorting, no __init__."""
+        c = cls.__new__(cls)
+        for k, attr in cls._STATE_FIELDS:
+            setattr(c, attr, state[k])
+        c._search_cache = {}
+        c._search_lock = threading.Lock()
+        return c
+
     def _call_of(self, cid: str) -> str:
         c = self.cards.get(cid)
         if c is not None:
@@ -1033,12 +1057,163 @@ _DEFAULT_LOCK = threading.Lock()
 LOAD_PHASES: Dict[str, Any] = {}
 
 
+# THE EXTRA CARD SOURCES — every sibling JSONL that joins cards.jsonl in the one keeping (read by load_cards
+# when no explicit path is given, in this order). Module-level so the corpus cache (corpus_cache.py) can
+# key on exactly the files the load would read — see source_files().
+EXTRA_CARD_SOURCES = (
+    "receipt_cards.jsonl",     # every minted seal, carded — see cas._mint_receipt_card
+    "acquired_cards.jsonl",    # cards a person CHOSE from the want list's options
+                               # (tools/shepherd_rounds.py --choose; source-to-source)
+    "verified_cards.jsonl", "reference_cards.jsonl", "keystone_seeds.jsonl",
+    "nesting_seeds.jsonl", "ncs_seeds.jsonl", "works_cards.jsonl", "theory_cards.jsonl",
+    # Orphan seeders wired in 2026-09-26 ("let them fill the gaps") — each a distinct
+    # shelf the coherence audit found minted-but-never-loaded, no duplicate of the above:
+    # the tools reference, the strategy concordance (patterns×arenas), the canonical
+    # forms + worked calculations, and the cross-domain bridge cards (browsable, distinct
+    # from the *_bridges edge overlays). Small; resident on core.
+    "tool_cards.jsonl", "strategy_cards.jsonl", "principle_cards.jsonl", "calculation_cards.jsonl", "bridge_cards.jsonl",
+    "fieldkit_cards.jsonl", "playbook_cards.jsonl", "systems_cards.jsonl",
+    # Collective intelligence — the measured natural systems (ants/bees/birds/orcas)
+    # mapped to the engine's mechanisms (keeping/conductor/mesh/witness-wire). The
+    # "systems of the world" made first-class. Minted by card_collective_intelligence.py.
+    "collective_intelligence_cards.jsonl",
+    "access_tools_cards.jsonl",   # the connection to lawful free tools (logistics: tag onto paid carriers)
+    "church_cards.jsonl",         # the churches, calibrated from their own confessions (not judged)
+    "contributors_cards.jsonl",   # the builders of the Floor (historians/scientists/mathematicians), credited with love
+    "chain_cards.jsonl",          # discovery-chain nodes: the floor spine + builder cards for a lineage (tools/seed_standard_model_chain.py); edges live in chain_bridges.jsonl
+    "religions_cards.jsonl",      # the pre-Christian faiths as foreshadow (Acts 17) + the test of the spirits (1 John 4)
+    "survival_cards.jsonl",       # the field library — outdoor/survival/bushcraft/homestead, PD sources (serve the off-grid + destitute)
+    "comms_cards.jsonl",          # the communications shelf — radio & field comms (FCC/ITU/NOAA PD) for the mesh + off-grid (the whisper layer beside the field library)
+    "firstaid_cards.jsonl",       # the first-aid shelf — conservative field medicine (US Army FM 4-25.11 / CDC / WHO PD): stop bleeding, breathing, shock, rehydrate
+    "navigation_cards.jsonl",     # the navigation shelf — map/compass/celestial land nav (US Army FM 3-25.26 PD): find the way with no battery
+    "power_cards.jsonl",          # the off-grid power shelf — solar/battery/inverter/generator safety (DOE/NREL PD): keep the lights + the radio on
+    "sanitation_cards.jsonl",     # the sanitation shelf — hygiene/waste/disease prevention (WHO/CDC/Army PD): the disciplines that stop post-disaster illness
+    "water_cards.jsonl",          # the water shelf — the household water SYSTEM (EPA/CDC/FEMA PD): storage, rainwater, wells, filter types (beside survival's find/purify)
+    "food_cards.jsonl",           # the food-growing shelf — garden/soil/seed/season (USDA PD): raising food, beside survival's preserving
+    # The trades — a CARD CATALOGUE of the public-domain practical arts (mechanics,
+    # carpentry, masonry, blacksmithing, agriculture), pre-1929 Internet Archive
+    # scans verified PD, multilingual. The HARE: light cards; the full texts stay on
+    # the drive and ship on demand (the tortoise). Minted by tools/card_archive_pd.py.
+    "trades_cards.jsonl",
+    # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
+    # one card per verse. Academics first. Spines root in the Word.
+    "scripture_spines.jsonl", "scripture_cards.jsonl",
+    # The foundational integer sequences (academics: mathematics). `oeis_*` is the
+    # LEGACY slot (OEIS is CC-BY-NC-SA, refused by the license gate); `sequence_*` is
+    # the license-clean COMPUTED set that supersedes it (tools/card_sequences.py).
+    "oeis_spine.jsonl", "oeis_cards.jsonl",
+    "sequence_spine.jsonl", "sequence_cards.jsonl",
+    # The tree of life — the recognizable organisms (academics: biology).
+    "taxonomy_spine.jsonl", "taxonomy_cards.jsonl",
+    # OpenStax — the open textbooks (calculus, physics, chemistry, biology, …),
+    # CC-BY 4.0, gathered section by section: modern mathematics and theory for the
+    # reference section. Free to reuse WITH attribution (kept on each card).
+    # Minted by tools/card_openstax.py (--slug one book / --all the shelf).
+    "openstax_spine.jsonl", "openstax_cards.jsonl",
+    # The Country Studies — the LoC Federal Research Division / US Army Area Handbook
+    # series, public domain (17 U.S.C. §105), one overview card per nation linked to the
+    # full PD text. The PD original via loc.gov (not a mirror / restricted scan).
+    # Minted by tools/card_country_studies.py.
+    "country_studies_spine.jsonl", "country_studies_cards.jsonl",
+    # The languages of the earth — PHOIBLE/Glottolog (academics: linguistics).
+    "language_spine.jsonl", "language_cards.jsonl",
+    # More stored sources — RFCs (internet standards), Matthew Henry commentary,
+    # Spurgeon sermons, and the Compendium of Physical Activities (METs).
+    "reference_extra_spines.jsonl", "reference_extra_cards.jsonl",
+    # Acquired: the Great Books — Project Gutenberg (~77k stub cards -> the full text).
+    "gutenberg_spine.jsonl", "gutenberg_cards.jsonl",
+    # Acquired: history — dated events from Wikidata (CC0), stub -> the full record.
+    "history_spine.jsonl", "history_cards.jsonl",
+    # The study tables (Harmony of the Gospels + the OT/NT/Church-History
+    # Timeline) carded, so the events are IN the keeping — findable by /search,
+    # walkable in the graph/brain, routable by wayfinding — and not marooned
+    # behind their own two routes. Minted by tools/card_study_tables.py.
+    "study_spines.jsonl", "study_cards.jsonl",
+    # The Biblical Encyclopedia as Cards — Easton's 3,962 entries, stub+link
+    # into /characters, boxed by category (the card-catalog drawers). Minted by
+    # tools/card_encyclopedia.py.
+    "encyclopedia_cards.jsonl",
+    # The SWORD Bible dictionaries (distinct from Easton's above) — minted by
+    # tools/card_sword_dicts.py but was an ORPHAN SEEDER (never loaded); registered
+    # 2026-09-26 by the coherence audit. Inert until the file is minted + deployed.
+    "sword_dict_cards.jsonl",
+    # The domain reference cores (GAPS G1/G2): a spine per domain the engine
+    # can actually check, plus one WORKED-CHECK card per claim — the inputs,
+    # the engine's verdict, and the falsehood it refuses. Substance minted from
+    # runs that happened; nothing minted for an unproven domain.
+    "domain_core_cards.jsonl",
+    # The commentaries carded VERSE BY VERSE (44,371 cards, avg 1,462 chars of
+    # the commentator's own PD words, 99% linked to their verse by a found
+    # edge). Rides the `commentary` shelf -> the `word` shard, so the bodies
+    # are frozen freight and the resident cost is a stub.
+    "commentary_verse_cards.jsonl",
+    # The practical stores carded (seeding loop, practical pass 1): the
+    # apothecary monographs, the verified almanac, the coach curriculum —
+    # substance we already held that had no card at all.
+    "practical_cards.jsonl",
+    # Nave topical index SCANNED into topics + speaks_to edges (structure
+    # taken, the work's own text left with the work).
+    "topical_cards.jsonl",
+    # THE RECURRING ARCHITECTURE (tools/card_doctrine.py) — concepts gathered
+    # from Matt's six planning documents, which describe one pattern in six
+    # materials. Carried as concepts, never adopted as policy: each card names
+    # its document and says where the idea already bears weight here.
+    "doctrine_cards.jsonl",
+    # ISBE 1915 (D5) — 9,380 scholarly stub cards; the full public-domain
+    # article renders from data/acquisitions/isbe.db on the card page.
+    "isbe_cards.jsonl",
+    # THE ETYMOLOGIES (2026-10-08, Matt: "Etymology and phonics") — Webster 1913's origin
+    # of ~49k headwords, one card each (tools/card_etymology.py, public domain); read by
+    # wordcraft.verify_origin so "salary comes from Latin" is judged from the source.
+    "etymology_cards.jsonl",
+    # THE MILLENNIUM SOURCES (2026-10-09, Matt: "find all 17 and add them") — the papers, tables
+    # and problem descriptions the seven Millennium sticks cite, one reference card each
+    # (tools/card_millennium_sources.py): the bibliographic record, the canonical and the free
+    # copy, the license AS FOUND, the want it fills and the stick it serves. Metadata, never
+    # the papers' text; the two found tables are held on the ark and cross-checked, not carded.
+    "millennium_cards.jsonl",
+    # The Corpus — technical, academic cards minted from the stored sources
+    # (nuclides, stars, foods, ports, indicators, …); always growing.
+    "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl",
+    # The harvested map — inline SEMANTIC edges minted as sealed connection cards
+    # (cites, proof-texts, sections, families, grafts) so the constellation reflects
+    # the whole keeping. The member_of skeleton stays the floor tree's (tools/mint_edges.py).
+    "minted_edges.jsonl",
+)
+
+# the git-tracked edge overlays grafted reciprocally onto both cards at load (see _apply_bridges)
+BRIDGE_OVERLAYS = ("reference_bridges.jsonl", "keystone_bridges.jsonl",
+                   "nesting_bridges.jsonl", "works_bridges.jsonl", "element_bridges.jsonl",
+                   "ncs_bridges.jsonl", "chain_bridges.jsonl")
+
+
 def _cards_path() -> Path:
     env = os.environ.get("CONCORDANCE_CARDS_JSONL", "").strip()
     if env:
         return Path(env)
     data = os.environ.get("CONCORDANCE_DATA_DIR", "").strip()
     return (Path(data) if data else Path("data")) / "cards.jsonl"
+
+
+def source_files(path: Optional[Path] = None) -> List[Path]:
+    """Every file `load_cards(path)` would read, that exists: the main cards file and — with no explicit path —
+    each extra card source, the prophecy signposts and each bridge overlay. The corpus cache (corpus_cache.py)
+    keys on exactly this list, so a change to any one of them is a miss. Empty when the main file is absent
+    (load_cards then loads nothing at all)."""
+    p = path or _cards_path()
+    if not p.exists():
+        return []
+    out = [p]
+    if path is None:
+        out.extend(p.parent / x for x in EXTRA_CARD_SOURCES if (p.parent / x).exists())
+        from . import prophecy as _prophecy
+        sp = _prophecy._file()
+        if not sp.exists():
+            sp = p.parent / "prophecy" / "signposts.jsonl"
+        if sp.exists():
+            out.append(sp)
+        out.extend(p.parent / x for x in BRIDGE_OVERLAYS if (p.parent / x).exists())
+    return out
 
 
 def load_cards(path: Optional[Path] = None,
@@ -1169,124 +1344,7 @@ def load_cards(path: Optional[Path] = None,
     if path is None:
         #   works_cards.jsonl — The Works: every worked, engine-sealed demonstration carded as a
         #                       seed in the keeping (minted by compendium.build_all, data-only)
-        for extra in ("receipt_cards.jsonl",     # every minted seal, carded — see cas._mint_receipt_card
-                      "acquired_cards.jsonl",    # cards a person CHOSE from the want list's options
-                                                 # (tools/shepherd_rounds.py --choose; source-to-source)
-                      "verified_cards.jsonl", "reference_cards.jsonl", "keystone_seeds.jsonl",
-                      "nesting_seeds.jsonl", "ncs_seeds.jsonl", "works_cards.jsonl", "theory_cards.jsonl",
-                      # Orphan seeders wired in 2026-09-26 ("let them fill the gaps") — each a distinct
-                      # shelf the coherence audit found minted-but-never-loaded, no duplicate of the above:
-                      # the tools reference, the strategy concordance (patterns×arenas), the canonical
-                      # forms + worked calculations, and the cross-domain bridge cards (browsable, distinct
-                      # from the *_bridges edge overlays). Small; resident on core.
-                      "tool_cards.jsonl", "strategy_cards.jsonl", "principle_cards.jsonl", "calculation_cards.jsonl", "bridge_cards.jsonl",
-                      "fieldkit_cards.jsonl", "playbook_cards.jsonl", "systems_cards.jsonl",
-                      # Collective intelligence — the measured natural systems (ants/bees/birds/orcas)
-                      # mapped to the engine's mechanisms (keeping/conductor/mesh/witness-wire). The
-                      # "systems of the world" made first-class. Minted by card_collective_intelligence.py.
-                      "collective_intelligence_cards.jsonl",
-                      "access_tools_cards.jsonl",   # the connection to lawful free tools (logistics: tag onto paid carriers)
-                      "church_cards.jsonl",         # the churches, calibrated from their own confessions (not judged)
-                      "contributors_cards.jsonl",   # the builders of the Floor (historians/scientists/mathematicians), credited with love
-                      "chain_cards.jsonl",          # discovery-chain nodes: the floor spine + builder cards for a lineage (tools/seed_standard_model_chain.py); edges live in chain_bridges.jsonl
-                      "religions_cards.jsonl",      # the pre-Christian faiths as foreshadow (Acts 17) + the test of the spirits (1 John 4)
-                      "survival_cards.jsonl",       # the field library — outdoor/survival/bushcraft/homestead, PD sources (serve the off-grid + destitute)
-                      "comms_cards.jsonl",          # the communications shelf — radio & field comms (FCC/ITU/NOAA PD) for the mesh + off-grid (the whisper layer beside the field library)
-                      "firstaid_cards.jsonl",       # the first-aid shelf — conservative field medicine (US Army FM 4-25.11 / CDC / WHO PD): stop bleeding, breathing, shock, rehydrate
-                      "navigation_cards.jsonl",     # the navigation shelf — map/compass/celestial land nav (US Army FM 3-25.26 PD): find the way with no battery
-                      "power_cards.jsonl",          # the off-grid power shelf — solar/battery/inverter/generator safety (DOE/NREL PD): keep the lights + the radio on
-                      "sanitation_cards.jsonl",     # the sanitation shelf — hygiene/waste/disease prevention (WHO/CDC/Army PD): the disciplines that stop post-disaster illness
-                      "water_cards.jsonl",          # the water shelf — the household water SYSTEM (EPA/CDC/FEMA PD): storage, rainwater, wells, filter types (beside survival's find/purify)
-                      "food_cards.jsonl",           # the food-growing shelf — garden/soil/seed/season (USDA PD): raising food, beside survival's preserving
-                      # The trades — a CARD CATALOGUE of the public-domain practical arts (mechanics,
-                      # carpentry, masonry, blacksmithing, agriculture), pre-1929 Internet Archive
-                      # scans verified PD, multilingual. The HARE: light cards; the full texts stay on
-                      # the drive and ship on demand (the tortoise). Minted by tools/card_archive_pd.py.
-                      "trades_cards.jsonl",
-                      # The plumb-line: the whole Bible in the original tongues (Greek NT + Hebrew OT),
-                      # one card per verse. Academics first. Spines root in the Word.
-                      "scripture_spines.jsonl", "scripture_cards.jsonl",
-                      # The foundational integer sequences (academics: mathematics). `oeis_*` is the
-                      # LEGACY slot (OEIS is CC-BY-NC-SA, refused by the license gate); `sequence_*` is
-                      # the license-clean COMPUTED set that supersedes it (tools/card_sequences.py).
-                      "oeis_spine.jsonl", "oeis_cards.jsonl",
-                      "sequence_spine.jsonl", "sequence_cards.jsonl",
-                      # The tree of life — the recognizable organisms (academics: biology).
-                      "taxonomy_spine.jsonl", "taxonomy_cards.jsonl",
-                      # OpenStax — the open textbooks (calculus, physics, chemistry, biology, …),
-                      # CC-BY 4.0, gathered section by section: modern mathematics and theory for the
-                      # reference section. Free to reuse WITH attribution (kept on each card).
-                      # Minted by tools/card_openstax.py (--slug one book / --all the shelf).
-                      "openstax_spine.jsonl", "openstax_cards.jsonl",
-                      # The Country Studies — the LoC Federal Research Division / US Army Area Handbook
-                      # series, public domain (17 U.S.C. §105), one overview card per nation linked to the
-                      # full PD text. The PD original via loc.gov (not a mirror / restricted scan).
-                      # Minted by tools/card_country_studies.py.
-                      "country_studies_spine.jsonl", "country_studies_cards.jsonl",
-                      # The languages of the earth — PHOIBLE/Glottolog (academics: linguistics).
-                      "language_spine.jsonl", "language_cards.jsonl",
-                      # More stored sources — RFCs (internet standards), Matthew Henry commentary,
-                      # Spurgeon sermons, and the Compendium of Physical Activities (METs).
-                      "reference_extra_spines.jsonl", "reference_extra_cards.jsonl",
-                      # Acquired: the Great Books — Project Gutenberg (~77k stub cards -> the full text).
-                      "gutenberg_spine.jsonl", "gutenberg_cards.jsonl",
-                      # Acquired: history — dated events from Wikidata (CC0), stub -> the full record.
-                      "history_spine.jsonl", "history_cards.jsonl",
-                      # The study tables (Harmony of the Gospels + the OT/NT/Church-History
-                      # Timeline) carded, so the events are IN the keeping — findable by /search,
-                      # walkable in the graph/brain, routable by wayfinding — and not marooned
-                      # behind their own two routes. Minted by tools/card_study_tables.py.
-                      "study_spines.jsonl", "study_cards.jsonl",
-                      # The Biblical Encyclopedia as Cards — Easton's 3,962 entries, stub+link
-                      # into /characters, boxed by category (the card-catalog drawers). Minted by
-                      # tools/card_encyclopedia.py.
-                      "encyclopedia_cards.jsonl",
-                      # The SWORD Bible dictionaries (distinct from Easton's above) — minted by
-                      # tools/card_sword_dicts.py but was an ORPHAN SEEDER (never loaded); registered
-                      # 2026-09-26 by the coherence audit. Inert until the file is minted + deployed.
-                      "sword_dict_cards.jsonl",
-                      # The domain reference cores (GAPS G1/G2): a spine per domain the engine
-                      # can actually check, plus one WORKED-CHECK card per claim — the inputs,
-                      # the engine's verdict, and the falsehood it refuses. Substance minted from
-                      # runs that happened; nothing minted for an unproven domain.
-                      "domain_core_cards.jsonl",
-                      # The commentaries carded VERSE BY VERSE (44,371 cards, avg 1,462 chars of
-                      # the commentator's own PD words, 99% linked to their verse by a found
-                      # edge). Rides the `commentary` shelf -> the `word` shard, so the bodies
-                      # are frozen freight and the resident cost is a stub.
-                      "commentary_verse_cards.jsonl",
-                      # The practical stores carded (seeding loop, practical pass 1): the
-                      # apothecary monographs, the verified almanac, the coach curriculum —
-                      # substance we already held that had no card at all.
-                      "practical_cards.jsonl",
-                      # Nave topical index SCANNED into topics + speaks_to edges (structure
-                      # taken, the work's own text left with the work).
-                      "topical_cards.jsonl",
-                      # THE RECURRING ARCHITECTURE (tools/card_doctrine.py) — concepts gathered
-                      # from Matt's six planning documents, which describe one pattern in six
-                      # materials. Carried as concepts, never adopted as policy: each card names
-                      # its document and says where the idea already bears weight here.
-                      "doctrine_cards.jsonl",
-                      # ISBE 1915 (D5) — 9,380 scholarly stub cards; the full public-domain
-                      # article renders from data/acquisitions/isbe.db on the card page.
-                      "isbe_cards.jsonl",
-                      # THE ETYMOLOGIES (2026-10-08, Matt: "Etymology and phonics") — Webster 1913's origin
-                      # of ~49k headwords, one card each (tools/card_etymology.py, public domain); read by
-                      # wordcraft.verify_origin so "salary comes from Latin" is judged from the source.
-                      "etymology_cards.jsonl",
-                      # THE MILLENNIUM SOURCES (2026-10-09, Matt: "find all 17 and add them") — the papers, tables
-                      # and problem descriptions the seven Millennium sticks cite, one reference card each
-                      # (tools/card_millennium_sources.py): the bibliographic record, the canonical and the free
-                      # copy, the license AS FOUND, the want it fills and the stick it serves. Metadata, never
-                      # the papers' text; the two found tables are held on the ark and cross-checked, not carded.
-                      "millennium_cards.jsonl",
-                      # The Corpus — technical, academic cards minted from the stored sources
-                      # (nuclides, stars, foods, ports, indicators, …); always growing.
-                      "source_spines.jsonl", "source_cards.jsonl", "web_cache.jsonl",
-                      # The harvested map — inline SEMANTIC edges minted as sealed connection cards
-                      # (cites, proof-texts, sections, families, grafts) so the constellation reflects
-                      # the whole keeping. The member_of skeleton stays the floor tree's (tools/mint_edges.py).
-                      "minted_edges.jsonl"):
+        for extra in EXTRA_CARD_SOURCES:
             xp = p.parent / extra
             if not xp.exists():
                 continue
@@ -1315,9 +1373,7 @@ def load_cards(path: Optional[Path] = None,
                     c = _signpost_card(rec)
                     if c is not None and c["id"] not in out:
                         _keep(c)
-        for overlay in ("reference_bridges.jsonl", "keystone_bridges.jsonl",
-                        "nesting_bridges.jsonl", "works_bridges.jsonl", "element_bridges.jsonl",
-                        "ncs_bridges.jsonl", "chain_bridges.jsonl"):
+        for overlay in BRIDGE_OVERLAYS:
             _apply_bridges(out, p.parent / overlay)
     _ph["extras_ms"] = round((_pc() - _t_extras) * 1000.0, 1)
     _ph["frozen_df_ms"] = round(_ph["frozen_df_ms"], 1)
@@ -1507,6 +1563,7 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
         with _DEFAULT_LOCK:
             if _DEFAULT is None:
                 from time import perf_counter as _pc
+                from . import corpus_cache as _cc
                 from . import frozen_cache as _fc
                 from .systems import rss_kb as _rss
                 df: Dict[str, int] = {}
@@ -1514,6 +1571,42 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                 LOAD_PHASES.clear()
                 _t0 = _pc()
                 _r0 = _rss()
+                # THE CORPUS CACHE (issue #10, corpus_cache.py): the whole built index, keyed on every file the
+                # load would read + the freeze set + this module's own source. A hit RESTORES the corpus — no
+                # parsing, no tokenizing, no sorting — and returns here; a miss builds exactly as before and
+                # saves the result after the build (below), so the next boot loads. Off: the old path, untouched.
+                cc_state, cc_key, cc_path = "off", None, None
+                cc_load_ms = cc_save_ms = 0.0
+                cc_saved = cc_pruned = None
+                _p_main = path or _cards_path()
+                if _cc.enabled() and _p_main.exists():
+                    cc_state = "miss"
+                    try:
+                        cc_key = _cc.make_key(source_files(path), frozen_shelves(),
+                                              code=_cc.code_fingerprint([Path(__file__)]))
+                        cc_path = _cc.cache_path(_p_main.parent, cc_key)
+                    except OSError:
+                        cc_key = cc_path = None
+                    if cc_key is not None and _cc.mode() != "rebuild" and cc_path.exists():
+                        _tc = _pc()
+                        got = _cc.load(cc_path, cc_key)
+                        cc_load_ms = (_pc() - _tc) * 1000.0
+                        if got is not None:
+                            _DEFAULT = Corpus._restore(got)
+                            del got
+                            _r3 = _rss()
+                            LOAD_PHASES.update({
+                                "load_cards_ms": 0.0, "index_build_ms": 0.0,
+                                "total_ms": round((_pc() - _t0) * 1000.0, 1),
+                                "resident_cards": len(_DEFAULT.cards), "frozen_index": len(_DEFAULT._frozen),
+                                "df_tokens": len(_DEFAULT._df_extra),
+                                "frozen_cache": "bypassed",            # the corpus cache holds its tables too
+                                "corpus_cache": "hit", "corpus_cache_load_ms": round(cc_load_ms, 1),
+                                "corpus_cache_file": str(cc_path),
+                                "rss_kb_total_delta": ((_r3 - _r0) if (_r0 is not None and _r3 is not None)
+                                                       else None)})
+                            return _DEFAULT
+                        cc_state = "stale"                 # a file was there and did not verify: rebuilt below
                 # THE FROZEN CACHE (2026-10-08). The frozen shelves' document-frequency table and compact index
                 # are pure functions of the files that hold frozen cards; a boot whose inputs are unchanged loads
                 # them instead of tokenizing every frozen card again, and (v3) reads from each cached file only
@@ -1592,6 +1685,15 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                 _DEFAULT = Corpus(cards, df_extra=df, frozen_idx=fz)
                 _t2 = _pc()
                 _r3 = _rss()
+                if cc_key is not None and cc_path is not None:
+                    # SAVE for the next boot — after the build, outside total_ms, so the phases above still
+                    # describe the build itself. A failed write is "no cache", logged, never a failed boot.
+                    _ts = _pc()
+                    cc_saved = _cc.save(cc_path, cc_key, _DEFAULT._state())
+                    cc_pruned = _cc.prune(cc_path) if cc_saved else 0
+                    cc_save_ms = (_pc() - _ts) * 1000.0
+                    if not cc_saved:
+                        _log.warning("corpus cache: could not write %s (the next boot rebuilds)", cc_path)
 
                 def _delta(a, b):
                     return (b - a) if (a is not None and b is not None) else None
@@ -1605,6 +1707,9 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                                     "cache_read_ms": round(cache_read_ms, 1), "cache_decode_ms": round(cache_decode_ms, 1),
                                     "cache_save_ms": round(cache_save_ms, 1),
                                     "cached_contributors": cached_names, "cached_skip_files": cached_skip,
+                                    "corpus_cache": cc_state, "corpus_cache_saved": cc_saved,
+                                    "corpus_cache_save_ms": round(cc_save_ms, 1), "corpus_cache_pruned": cc_pruned,
+                                    "corpus_cache_file": (str(cc_path) if cc_path is not None else None),
                                     "rss_kb_cache_delta": _delta(_r0, _r1), "rss_kb_load_delta": _delta(_r1, _r2),
                                     "rss_kb_index_delta": _delta(_r2, _r3), "rss_kb_total_delta": _delta(_r0, _r3)})
     return _DEFAULT

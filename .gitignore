@@ -160,3 +160,6 @@ data/pd_texts/
 
 # published book binaries — box-side, never committed (metadata index IS tracked)
 site/library/*.epub
+
+# the corpus cache (corpus_cache.py): derived from the keeping, rebuilt on any change — never tracked
+data/.cache/
