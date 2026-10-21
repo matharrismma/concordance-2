@@ -26,11 +26,21 @@ own. Every check and every seal crosses the HTTP boundary back to this one engin
 The witness **record** (seals surfaced, badges, professions, consent, moderation); the **community**
 (mesh, groups, formation, flock, push, lighthouse node); the **experience** layer (Console, coach,
 trajectory, steward, decks, playbook, and the witness surfacing of teachings/parable); and the
-**Scribe** (its first landed tool). These call the core; they do not reimplement it.
+**Scribe**. These call the core; they do not reimplement it.
 
-> Migration status: the boundary is carved and the `.org` app is scaffolded with the Scribe proven
-> against the core. The listed ancillary modules still live in this repo and are moved behind the
-> HTTP client incrementally; this document is the agreed destination, not a completed move.
+**The Console was evaluated for the core and did not fit (2026-10-20).** Its spine is engine-shaped
+(ask → find/verify/cite → answer + trail + one next step) and composes the core's `/ask` door — but
+the Console as it stood was welded to the ancillary layer: the cloned voice (RADIO, box-side personal
+content), the public-domain witness cloud, the coach/shepherd weave, the book render, keep/scribe.
+Keeping it in the core would drag all of that into the engine, so it moves to `witness` too. The
+engine keeps the primitive doors it composes (`/ask`, `/verify`, `/search`, `/read`, `/resolve`,
+`/word_study`); the Console is rebuilt in the app as a composition over them.
+
+> Migration status: the boundary is carved; the `.org` app has the **Scribe** (a loop over `/verify`)
+> and the **Console spine** (a composition over `/ask`) landed and proven against the core. The
+> remaining listed modules still live in this repo and move behind the HTTP client incrementally —
+> built in the app, proven, cut over, then removed here — so the engine always answers. Order:
+> `witness`'s `docs/MIGRATION.md`.
 
 ## The contract the `.org` app depends on
 
