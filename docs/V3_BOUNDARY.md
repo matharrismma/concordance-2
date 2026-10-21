@@ -1,7 +1,7 @@
 # V3 — this repo is the core
 
 **Decision (2026-10-20).** Narrow Highway splits into a pure **core engine** (this repo,
-`concordance-2`) and an **application layer** (`narrowhighway-org`, a separate repo). The core
+`concordance-2`) and an **application layer** (`witness` — github.com/matharrismma/witness — a separate repo). The core
 serves `narrowhighway.com` and the `api.`/MCP door; the ancillary layer serves `narrowhighway.org`
 and calls the core over HTTP.
 
@@ -21,7 +21,7 @@ own. Every check and every seal crosses the HTTP boundary back to this one engin
 - **The doors:** the HTTP dispatcher (`web/api.py`) and the MCP server (`mcp/`), core + library
   profiles, the gate/kernel. `EngineConfig(surface=...)` and `branding` stay here as the shared seam.
 
-## What moved to `narrowhighway-org`
+## What moved to `witness`
 
 The witness **record** (seals surfaced, badges, professions, consent, moderation); the **community**
 (mesh, groups, formation, flock, push, lighthouse node); the **experience** layer (Console, coach,
