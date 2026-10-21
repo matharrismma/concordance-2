@@ -77,7 +77,10 @@ narrowhighway.com {
 narrowhighway.org {
 	encode gzip zstd
 	route {
-		reverse_proxy 127.0.0.1:8001 {
+		# V3 (2026-10-21): .org is served by the witness app (matharrismma/witness, nh-org.service
+		# on :8010), which calls this core over HTTP. Rollback to the core's own witness surface is
+		# :8001 (still running). Snapshot of the box's /etc/caddy/Caddyfile; never deployed from here.
+		reverse_proxy 127.0.0.1:8010 {
 			lb_try_duration 10s
 			lb_try_interval 250ms
 		}
