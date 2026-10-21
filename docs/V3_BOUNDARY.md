@@ -36,11 +36,17 @@ Keeping it in the core would drag all of that into the engine, so it moves to `w
 engine keeps the primitive doors it composes (`/ask`, `/verify`, `/search`, `/read`, `/resolve`,
 `/word_study`); the Console is rebuilt in the app as a composition over them.
 
-> Migration status: the boundary is carved; the `.org` app has the **Scribe** (a loop over `/verify`)
-> and the **Console spine** (a composition over `/ask`) landed and proven against the core. The
-> remaining listed modules still live in this repo and move behind the HTTP client incrementally —
-> built in the app, proven, cut over, then removed here — so the engine always answers. Order:
-> `witness`'s `docs/MIGRATION.md`.
+> **Migration complete, and the shape is settled (2026-10-21).** The `witness` app landed every
+> surface — Scribe, the full Console (spine, Word/cloud/shepherd, voice, keep, book render), the
+> record, community and study/coach — each composing this core's doors. `narrowhighway.org` is now
+> served by the app (`nh-org.service`), which owns those enriched surfaces and **passes every other
+> path through to this core**, so the full witness site stays whole.
+>
+> **No core code was removed, and none needs to be.** The app is a thin front, not a replacement:
+> this core still serves `.com` directly (the Console is the home on both faces) and backs every door
+> the app calls and proxies. Deleting the "moved" modules would break `.com` or the app. V3's shape is
+> one engine with two fronts — `.com` served by this core, `.org` by the app over it. The only thing
+> that would free code to remove is a separate product decision to narrow `.com` to a lean library.
 
 ## The contract the `.org` app depends on
 
