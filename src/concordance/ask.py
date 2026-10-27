@@ -1524,6 +1524,37 @@ def _lead_card(card: Dict[str, Any]) -> Dict[str, Any]:
 # never composed). It sets up the ONE full card that follows — not a wall of equal snippets.
 _FOUND_LEAD = "Here's the clearest thing the keeping holds on this — in its own words, with its source:"
 
+# The honest null for a weak lead: say we don't hold it, and point to what the engine CAN do, rather
+# than present a card that only token-matched. Mirrors the shape of the "no real how-to" branch below.
+_NO_CONFIDENT_LEAD = ("I don't hold a confident answer to that. I can check a claim and seal it — a "
+                      "number, a ratio, a conversion — or find a passage by its reference. Bring one of "
+                      "those and I'll return it in its own words.")
+_LOOK_ELSEWHERE = [{"label": "What do you need right now?", "ref": "/situations.html"},
+                   {"label": "Check a claim", "ref": "/"},
+                   {"label": "Search the whole library", "ref": "/read.html"}]
+
+
+def _covers_the_asking(card: Dict[str, Any], text: str, corpus_obj: Any = None) -> bool:
+    """The RESONANCE FLOOR: does the lead card actually cover the asking — specifically its rarest (most
+    identifying) content token? A hit that matched only a COMMON token ("capital" in "the capital of
+    France", where the card is about "human capital") is not an answer. 'Rarest' is by the keeping's own
+    token frequencies (`_by_token`), so the floor is corpus-adaptive — no tuned threshold. Returns True
+    (don't suppress) when the asking is too thin to discriminate: fewer than two content tokens the
+    keeping actually holds."""
+    want = {w for w in _content_tokens(text) if len(w) >= 4}
+    if len(want) < 2:
+        return True
+    if corpus_obj is None:
+        corpus_obj = corpus.default_corpus()
+    by_token = getattr(corpus_obj, "_by_token", {}) or {}
+    df = {w: len(by_token.get(w, ())) for w in want}
+    present = [w for w in want if df[w] > 0]
+    if len(present) < 2:                                     # too little the keeping holds to discriminate
+        return True
+    rarest = min(present, key=lambda w: (df[w], w))
+    lead_tokens = _content_tokens((card.get("title") or "") + " " + (card.get("body") or ""))
+    return rarest in lead_tokens
+
 
 def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
                   gate_just_opened: bool = False) -> Dict[str, Any]:
@@ -2276,6 +2307,15 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
     # pull — `base` already carries the honest "went and found it, kept it" line. Keep it rather than
     # paper over it with the generic lead (this is what the spy test guards: a pull that cards must
     # SAY it went and got it). Otherwise, the librarian's warm handoff.
+    # RESONANCE FLOOR (the "human capital theory" bug, live 2026-10): the generic librarian lead must
+    # actually cover the asking's rarest, most identifying token — else it is a token-match, not an
+    # answer, and we say so. Only the GENERIC lead is gated (base.message is None): a verified/lookup
+    # answer or a tortoise-pull line returned earlier or set base.message, and is never second-guessed.
+    if base.get("message") is None and not _covers_the_asking(hits[0], text):
+        return _witnessed({**base, "kind": "found", "results": [],
+                           "message": _NO_CONFIDENT_LEAD, "resources": _LOOK_ELSEWHERE},
+                          text, witness, gate_just_opened)
+
     out = {**base, "kind": "found", "message": base.get("message") or _FOUND_LEAD,
            "lead": _lead_card(hits[0]), "results": [corpus._brief(c) for c in hits]}
     cloud = _connected_cloud(hits[0].get("id"))
