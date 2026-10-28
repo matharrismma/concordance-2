@@ -32,6 +32,14 @@
    "value": 24,
    "tol": 1e-12,
    "domain": "mathematics"
+  },
+  {
+   "key": "tm5count",
+   "nid": "five_state_two_symbol_turing_machines_naive_transition_count",
+   "expr": "(4*5+1)**(2*5)",
+   "value": 16679880978201,
+   "tol": 1e-06,
+   "domain": "mathematics"
   }
  ],
  "sticks": [
@@ -68,6 +76,26 @@
      "kind": "note",
      "claim": "[on the one map] Computer science rests on the instruments (the bit is Shannon information; logic is the formal-logic instrument), P vs NP (computability and complexity), and the mind (which computes - neural networks borrow the brain's shape). The engine is itself one such machine, a deterministic computation over the keeping. Ties card_floor_computer_science.",
      "source": "the one map; card_floor_computer_science; tools/seed_computer_science.py"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the Busy Beaver search space, SEALED] BB(n) is the most steps an n-state 2-symbol Turing machine can run before halting - uncomputable in general (knowing it would decide the halting problem). The space for n=5 is enormous: each of the 2n=10 transition cells is HALT or one of 4n=20 moves, so (4*5+1)^(2*5) = 21^10 = 16,679,880,978,201 candidate machines (sealed). That BB(5) was pinned at all is a feat of exhaustive, machine-checked deciding.",
+     "seal": "tm5count"
+    },
+    {
+     "kind": "note",
+     "claim": "[BB(5) PROVEN, BB(6) OPEN - cited, not sealed here] In 2024 the bbchallenge Collaboration proved BB(5) = 47,176,870 in the Coq proof assistant (Coq-BB5), ending a 60-year problem: every decider in the pipeline (Loops, n-gram Closed Position Set, Finite Automata Reduction, Weighted FAR, Closed Tape Language) is itself proved correct in Coq, and each machine's (non-)halting carries a machine-checkable certificate. We CITE this - we did not recompute the Coq proof. BB(6) stays OPEN (astronomically large). This is the open frontier of computability; it ties the halting problem (undecidable, Turing 1936) and card_floor_p_vs_np.",
+     "source": "The bbchallenge Collaboration, BB(5) = 47,176,870 (Coq-BB5, 2024), arXiv:2509.12337; https://bbchallenge.org; https://wiki.bbchallenge.org"
+    },
+    {
+     "kind": "note",
+     "claim": "[ETH-refutation CLAIM - pending verification, NOT sealed, does NOT touch P vs NP] In October 2026 OpenAI and Anthropic each posted a claimed refutation of the Exponential Time Hypothesis (Impagliazzo-Paturi 1999: 3-SAT needs 2^(Omega(n))), describing a deterministic 3-SAT algorithm in 2^(e*n) time for every fixed e>0, with Lean/Coq formalizations. STATUS: UNVERIFIED - not peer-reviewed, under independent review (Impagliazzo, Paturi, R. Williams); the Lean-formalized statement is reported WEAKER than the paper's claim. ETH is STRONGER than P != NP, so even if it holds this does NOT give P = NP - the P vs NP floor stays open. Held as a CLAIM, cited never sealed, until an independent kernel-check passes: the machine-check is the proof, not the announcement.",
+     "source": "OpenAI, 'The Exponential Time Hypothesis is False' (github.com/openai/math, Oct 2026); Anthropic (hexagonmath.org/2610.00577v1); Impagliazzo & Paturi (1999); under review by R. Williams et al."
+    },
+    {
+     "kind": "note",
+     "claim": "[the logarithm is the unit of information - Petzold's Code] All of this rests on the logarithm, the root of the one map: log2(N) is exactly the number of BITS to name N things (a byte = 2^8 = 256, so log2(256) = 8 bits), and Shannon entropy is the expected log - the logarithm is the bridge from the continuous to the discrete and the measure of information itself. Charles Petzold's 'Code: The Hidden Language of Computer Hardware and Software' (2nd expanded ed., 2022) builds this from the ground up - codes as languages (Morse, Braille, binary), relays to logic gates to adders to memory to a working computer - the coherent, LLM-free account of how a machine computes. Ties card_floor_logarithm and the instruments.",
+     "source": "C. Petzold, 'Code: The Hidden Language of Computer Hardware and Software', 2nd ed. (Microsoft Press, 2022); Shannon (1948); card_floor_logarithm"
     }
    ]
   }
