@@ -103,6 +103,35 @@ for _p in PILLARS:
     CARDS.append(_card(_pid(_p["key"]), "reference", _p["title"], _p["body"],
                        ["computer science", "pillar", _p["key"], "one map"]))
 
+CARDS.append(_card(
+    "card_cs_busy_beaver", "reference",
+    "The Busy Beaver function — BB(5) proved, BB(6) open",
+    "BB(n), the Busy Beaver function (Rado 1962), is the most steps an n-state 2-symbol Turing machine can run "
+    "before halting. It is UNCOMPUTABLE in general - a value of BB would decide the halting problem (undecidable, "
+    "Turing 1936). In 2024 the bbchallenge Collaboration PROVED BB(5) = 47,176,870 in the Coq proof assistant "
+    "(Coq-BB5; arXiv:2509.12337), ending a 60-year problem: every decider (Loops, n-gram Closed Position Set, "
+    "Finite Automata Reduction, Weighted FAR, Closed Tape Language) is itself proved correct in Coq, and each "
+    "machine carries a machine-checkable certificate. This is CITED, not recomputed here; the engine seals only "
+    "the search-space count (21^10 candidate 5-state machines). BB(6) stays OPEN (astronomically large) - the open "
+    "frontier of computability. Ties the halting problem and card_floor_p_vs_np.",
+    ["busy beaver", "busy beaver function", "BB(5)", "BB(6)", "Rado", "Turing machine", "halting problem",
+     "undecidable", "uncomputable", "Coq-BB5", "bbchallenge", "computability", "computer science", "one map"],
+    ref=STICK))
+CARDS.append(_card(
+    "card_cs_eth", "reference",
+    "The Exponential Time Hypothesis — and the 2026 refutation claim",
+    "The Exponential Time Hypothesis (ETH; Impagliazzo & Paturi 1999) holds that 3-SAT on n variables cannot be "
+    "solved in subexponential time 2^(o(n)) - a hardness assumption STRONGER than P != NP, and the base of much "
+    "fine-grained complexity (SETH-based lower bounds for edit distance, orthogonal vectors, and more). In October "
+    "2026 OpenAI and Anthropic each posted a CLAIMED refutation: a deterministic 3-SAT algorithm in 2^(e*n) time "
+    "for every fixed e > 0, with Lean/Coq formalizations. STATUS: a CLAIM, UNVERIFIED - not peer-reviewed, under "
+    "independent review (Impagliazzo, Paturi, R. Williams); the Lean-formalized statement is reported weaker than "
+    "the paper. Even if it holds it does NOT give P = NP - ETH is strictly stronger, so the P vs NP floor stays "
+    "open. Held as cited, never sealed, until an independent kernel-check passes: the machine-check is the proof, "
+    "not the announcement. Ties card_floor_p_vs_np and card_cs_busy_beaver.",
+    ["exponential time hypothesis", "ETH", "SETH", "3-SAT", "subexponential", "Impagliazzo", "Paturi",
+     "fine-grained complexity", "P vs NP", "Williams", "complexity", "computer science", "one map"]))
+
 
 def _edge(a: str, b: str, rel: str, ev: str) -> dict:
     return {"a": a, "b": b, "relationship": rel, "evidence": ev}
@@ -119,6 +148,14 @@ def _bridges() -> List[dict]:
 
 
 BRIDGES: List[dict] = _bridges()
+BRIDGES.append(_edge("card_cs_busy_beaver", FLOOR, "part_of",
+                     "the Busy Beaver function - the concrete uncomputable frontier of computability"))
+BRIDGES.append(_edge("card_cs_busy_beaver", _pid("computability"), "connects_at",
+                     "BB(n) is uncomputable - the halting problem made a concrete function; BB(5) proved in Coq, BB(6) open"))
+BRIDGES.append(_edge("card_cs_eth", FLOOR, "part_of",
+                     "the Exponential Time Hypothesis - a complexity hardness assumption and its 2026 refutation claim"))
+BRIDGES.append(_edge("card_cs_eth", F_PNP, "connects_at",
+                     "ETH is stronger than P != NP; the 2026 refutation claim is cited and pending, and does not resolve P vs NP"))
 
 
 def known_nodes() -> set:
