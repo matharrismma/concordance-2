@@ -368,7 +368,7 @@ CHAINS: List[dict] = [
                "positive proportion (Selberg 1942), a third (Levinson 1974), two fifths (Conrey 1989) - and the "
                "computations: Turing's method (1953), Odlyzko's tables (1987), Platt and Trudgian to 3·10^12 (2021). "
                "The open end stands on the last links."),
-         bands=["riemann", "primes", "zeta", "prime number theorem"],
+         bands=["riemann", "Riemann hypothesis", "primes", "zeta", "prime number theorem"],
          roots=["euler_1737", "legendre_1798"],
          edges=[("dirichlet_1837", "euler_1737"), ("gauss_1849", "legendre_1798"), ("chebyshev_1852", "legendre_1798"),
                 ("riemann_1859", "dirichlet_1837"), ("riemann_1859", "gauss_1849"), ("riemann_1859", "chebyshev_1852"),
@@ -387,7 +387,7 @@ CHAINS: List[dict] = [
                "order of vanishing of L(E, s). Then Cassels' pairing on Sha (1962), Coates-Wiles (1977), Gross-Zagier "
                "(1986), Kolyvagin (1989) - ranks zero and one are theorems - and a majority of curves (2014). The open "
                "end is rank two and above."),
-         bands=["elliptic curves", "L-functions", "heights", "rank"],
+         bands=["Birch-Swinnerton-Dyer", "BSD", "elliptic curves", "L-functions", "heights", "rank"],
          roots=["poincare_1901", "hasse_1936"],
          edges=[("mordell_1922", "poincare_1901"), ("weil_1929", "mordell_1922"), ("neron_1965", "weil_1929"),
                 ("weil_1949", "hasse_1936"), (src("wiles_1995"), "weil_1949"), ("cassels_1962", "weil_1929"),
@@ -442,7 +442,7 @@ CHAINS: List[dict] = [
                "(1972), the three barriers - relativization (1975), natural proofs (1997), algebrization (2009) - the "
                "circuit lower bounds (Blum 1984, Find-Golovnev-Hirsch-Kulikov 2016), the separation past the barriers "
                "(Williams 2011), the road not excluded (Mulmuley-Sohoni 2001). The open end stands on the last three."),
-         bands=["complexity", "p vs np", "circuits", "barriers"],
+         bands=["complexity", "p vs np", "P versus NP", "circuits", "barriers"],
          roots=["turing_1936", "shannon_1949"],
          edges=[("hartmanis_stearns_1965", "turing_1936"), ("cobham_1965", "turing_1936"), ("edmonds_1965", "turing_1936"),
                 (src("cook_1971"), "hartmanis_stearns_1965"), (src("cook_1971"), "cobham_1965"), (src("cook_1971"), "shannon_1949"),
@@ -462,7 +462,7 @@ CHAINS: List[dict] = [
                "(Griffiths 1968), mixed Hodge theory (Deligne 1971), the Kähler form refuted (Voisin 2002), the "
                "statement as the Clay Institute keeps it (Deligne 2000). The open end: the rational projective case from "
                "dimension four."),
-         bands=["hodge", "algebraic cycles", "harmonic forms", "periods"],
+         bands=["hodge", "Hodge conjecture", "algebraic cycles", "harmonic forms", "periods"],
          roots=["riemann_1857", "lefschetz_1924"],
          edges=[("de_rham_1931", "lefschetz_1924"), ("hodge_1941", "riemann_1857"), ("hodge_1941", "de_rham_1931"),
                 (src("hodge_1950"), "hodge_1941"), (src("atiyah_hirzebruch_1962"), src("hodge_1950")),
@@ -476,7 +476,7 @@ CHAINS: List[dict] = [
                "(1982). Geometric analysis: the heat-flow method of Eells and Sampson (1964), Hamilton's Ricci flow "
                "(1982). They become one in Hamilton's program for the singularities (1995), which Perelman completed "
                "(2002-2003); the write-ups of Kleiner-Lott, Morgan-Tian and Cao-Zhu are the receipts. The end is CLOSED."),
-         bands=["poincare", "ricci flow", "geometrization", "three-manifolds"],
+         bands=["poincare", "Poincare conjecture", "ricci flow", "geometrization", "three-manifolds"],
          roots=["poincare_1904", "eells_sampson_1964"],
          edges=[("thurston_1982", "poincare_1904"), (src("hamilton_1982"), "eells_sampson_1964"),
                 ("hamilton_1995", src("hamilton_1982")), ("hamilton_1995", "thurston_1982"),

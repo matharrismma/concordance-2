@@ -556,7 +556,9 @@ def _prefer_full_coverage(hits: List[Dict[str, Any]], text: str) -> List[Dict[st
         return hits
 
     def _cov(c: Dict[str, Any]) -> int:
-        return len(want & _content_tokens((c.get("title") or "") + " " + (c.get("body") or "")))
+        hay = " ".join([c.get("title") or "", c.get("body") or "", c.get("excerpt") or "",
+                        " ".join(c.get("bands") or [])])   # bands carry the distinctive name ("Hodge conjecture")
+        return len(want & _content_tokens(hay))
 
     best = max(range(len(hits)), key=lambda i: _cov(hits[i]))
     if best and _cov(hits[best]) > _cov(hits[0]):
@@ -1535,12 +1537,15 @@ _LOOK_ELSEWHERE = [{"label": "What do you need right now?", "ref": "/situations.
 
 
 def _covers_the_asking(card: Dict[str, Any], text: str, corpus_obj: Any = None) -> bool:
-    """The RESONANCE FLOOR: does the lead card actually cover the asking — specifically its rarest (most
-    identifying) content token? A hit that matched only a COMMON token ("capital" in "the capital of
-    France", where the card is about "human capital") is not an answer. 'Rarest' is by the keeping's own
-    token frequencies (`_by_token`), so the floor is corpus-adaptive — no tuned threshold. Returns True
-    (don't suppress) when the asking is too thin to discriminate: fewer than two content tokens the
-    keeping actually holds."""
+    """The RESONANCE FLOOR: does the lead card actually cover the asking? It must carry the rarest (most
+    identifying) content token AND at least two of the asking's tokens. A hit that shares only one word —
+    even the rarest ("hodge" in "the Hodge conjecture", where the card is Bochner's Hodge THEORY; or
+    "capital" in "the capital of France", where the card is "human capital") — is not an answer. 'Rarest'
+    is by the keeping's own token frequencies (`_by_token`), so the floor is corpus-adaptive, no tuned
+    threshold. Coverage is read from title+body+excerpt+BANDS, because the distinctive name of a node
+    ("Hodge conjecture") lives in its bands, not its prose. Returns True (don't suppress) when the asking
+    is too thin to discriminate: fewer than two content tokens the keeping actually holds. Suppression
+    yields an honest null, never a wrong lead."""
     want = {w for w in _content_tokens(text) if len(w) >= 4}
     if len(want) < 2:
         return True
@@ -1551,9 +1556,11 @@ def _covers_the_asking(card: Dict[str, Any], text: str, corpus_obj: Any = None) 
     present = [w for w in want if df[w] > 0]
     if len(present) < 2:                                     # too little the keeping holds to discriminate
         return True
+    hay = _content_tokens(" ".join([card.get("title") or "", card.get("body") or "",
+                                    card.get("excerpt") or "", " ".join(card.get("bands") or [])]))
     rarest = min(present, key=lambda w: (df[w], w))
-    lead_tokens = _content_tokens((card.get("title") or "") + " " + (card.get("body") or ""))
-    return rarest in lead_tokens
+    covered = {w for w in present if w in hay}
+    return rarest in covered and len(covered) >= 2
 
 
 def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,

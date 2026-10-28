@@ -43,3 +43,24 @@ def test_floor_does_not_suppress_when_the_keeping_holds_too_little():
     # neither token is in the keeping -> cannot discriminate -> don't suppress
     empty = _FakeCorpus({})
     assert ask._covers_the_asking({"title": "z", "body": ""}, "quokka numbat population", empty) is True
+
+
+# "hodge" is rare (one chain); "conjecture" is common (every Millennium node). The Hodge-test bug:
+# a lead sharing only the rarest token ("hodge") was NOT suppressed, so Bochner's Hodge-THEORY card led.
+_HODGE = _FakeCorpus({"hodge": ["h1"], "conjecture": ["m1", "m2", "m3", "m4"],
+                      "harmonic": ["h1", "b1"], "cycles": ["h1"]})
+
+
+def test_floor_nulls_a_lead_sharing_only_the_rarest_token():
+    # Bochner (Hodge THEORY): has "hodge", lacks "conjecture" -> only ONE of two -> suppress
+    bochner = {"title": "S. Bochner 1946 - Vector fields and Ricci curvature",
+               "body": "harmonic forms and the Hodge decomposition of a Riemannian manifold"}
+    assert ask._covers_the_asking(bochner, "the Hodge conjecture", _HODGE) is False
+
+
+def test_floor_passes_a_lead_that_covers_the_name_via_bands():
+    # the Hodge-conjecture node carries the distinctive name in its BANDS, not its prose
+    floor = {"title": "The Hodge chain - from periods to the classes that are not cycles",
+             "body": "Riemann's periods, Lefschetz's (1,1) theorem, Hodge's harmonic integrals",
+             "bands": ["hodge", "Hodge conjecture", "algebraic cycles"]}
+    assert ask._covers_the_asking(floor, "the Hodge conjecture", _HODGE) is True
