@@ -70,3 +70,38 @@ def test_omitting_a_prime_divisor_of_n_minus_1_is_rejected():
                              "factors": [f for f in full.witness["factors"] if f[0] in (2, 3)]})
     ok, why = C.check(trimmed)
     assert not ok, why
+
+
+def test_polynomial_root_certificate_checks():
+    cert = C.certify_polynomial_root([1, -5, 6], 2)        # x^2-5x+6 = (x-2)(x-3)
+    ok, why = C.check(cert)
+    assert ok, why
+    cert2 = C.certify_polynomial_root([2, -1, -3], "3/2")  # 2x^2-x-3 = (2x-3)(x+1); 3/2 is a root
+    ok2, why2 = C.check(cert2)
+    assert ok2, why2
+
+
+def test_forged_polynomial_root_is_rejected():
+    import pytest
+    with pytest.raises(ValueError):
+        C.certify_polynomial_root([1, -5, 6], 4)           # p(4)=2, not a root — producer refuses
+    forged = C.Certificate("polynomial_root", {"coeffs": [1, -5, 6], "verdict": "root"}, {"root": "4"})
+    ok, _ = C.check(forged)                                 # and the independent checker rejects the lie
+    assert not ok
+
+
+def test_linear_system_certificate_checks():
+    cert = C.certify_linear_system([[2, 1], [1, 3]], [5, 10], [1, 3])   # [[2,1],[1,3]]·[1,3]=[5,10]
+    ok, why = C.check(cert)
+    assert ok, why
+
+
+def test_forged_linear_system_is_rejected():
+    import pytest
+    with pytest.raises(ValueError):
+        C.certify_linear_system([[2, 1], [1, 3]], [5, 10], [1, 2])     # [1,2] does not solve
+    forged = C.Certificate("linear_system",
+                           {"verdict": "solves", "A": [["2", "1"], ["1", "3"]], "b": ["5", "10"]},
+                           {"x": ["1", "2"]})
+    ok, _ = C.check(forged)
+    assert not ok

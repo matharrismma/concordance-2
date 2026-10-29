@@ -339,6 +339,12 @@ def verify_linear_system(spec: Dict[str, Any]) -> VerifierResult:
             "b_target": b.tolist(), "A_times_x": actual_b.tolist(),
             "formula": "A x = b"}
     if _arrays_close(actual_b, b, rel=1e-5, abs_=1e-7):
+        try:                                            # a typed, independently re-checkable witness (exact rational)
+            from . import certificate as _cert
+            data["certificate"] = _cert.to_dict(
+                _cert.certify_linear_system(spec.get("matrix"), spec.get("vec_b"), spec.get("claimed_solution")))
+        except Exception:  # noqa: BLE001 — advisory; attaches only when x solves EXACTLY; never breaks the verdict
+            pass
         return confirm(name, f"A x = b verified ({b.tolist()})", data)
     return mismatch(name, f"A·x = {actual_b.tolist()}, claimed solution gives wrong b (target {b.tolist()})", data)
 

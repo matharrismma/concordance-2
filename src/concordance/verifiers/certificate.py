@@ -19,6 +19,7 @@ no I/O, no deps — a tiny trust anchor, like a Coq-checked decider.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from fractions import Fraction
 from typing import Any, Dict, List, Tuple
 
 SCHEMA = 1
@@ -91,6 +92,84 @@ def certify_primality(n: int) -> Certificate:
 
 
 # ── the INDEPENDENT checker (the trust anchor — pure, minimal, recursive) ─────────────────────────
+def _as_fraction(v: Any) -> Fraction:
+    """An EXACT rational from an int, Fraction, float (its exact binary value), or a 'p/q'/'p' string.
+    Bool and anything else raise — a certificate never silently rounds."""
+    if isinstance(v, bool):
+        raise ValueError("bool is not a number")
+    if isinstance(v, Fraction):
+        return v
+    if isinstance(v, int):
+        return Fraction(v)
+    if isinstance(v, float):
+        return Fraction(v)                 # the float's exact binary value; a non-exact witness won't check
+    if isinstance(v, str):
+        return Fraction(v)                 # "3" or "3/2"
+    raise ValueError(f"not an exact rational: {v!r}")
+
+
+def _poly_eval(coeffs: List[int], x: Fraction) -> Fraction:
+    """Horner, exact: p(x) for integer coeffs, highest degree first."""
+    acc = Fraction(0)
+    for c in coeffs:
+        acc = acc * x + Fraction(int(c))
+    return acc
+
+
+def _matvec(A: List[List[Fraction]], x: List[Fraction]) -> List[Fraction]:
+    return [sum((row[j] * x[j] for j in range(len(x))), Fraction(0)) for row in A]
+
+
+def certify_polynomial_root(coeffs: List[int], root: Any) -> Certificate:
+    """Witness that `root` (a rational) is a root of the integer-coefficient polynomial `coeffs`
+    (highest degree first). Finding the root is the work; the check is one exact evaluation."""
+    cf = [int(c) for c in coeffs]
+    r = _as_fraction(root)
+    if _poly_eval(cf, r) != 0:
+        raise ValueError(f"{root!r} is not a root of the polynomial")
+    return Certificate("polynomial_root", {"coeffs": cf, "verdict": "root"}, {"root": str(r)})
+
+
+def certify_linear_system(A: List[List[Any]], b: List[Any], x: List[Any]) -> Certificate:
+    """Witness that `x` solves A x = b exactly (rational A, b, x). Solving is O(n^3); checking is one matvec."""
+    AF = [[_as_fraction(v) for v in row] for row in A]
+    bF = [_as_fraction(v) for v in b]
+    xF = [_as_fraction(v) for v in x]
+    if not AF or len(AF) != len(bF) or any(len(row) != len(xF) for row in AF):
+        raise ValueError("shape mismatch")
+    if _matvec(AF, xF) != bF:
+        raise ValueError("x does not solve A x = b")
+    return Certificate("linear_system",
+                       {"verdict": "solves", "A": [[str(v) for v in row] for row in AF],
+                        "b": [str(v) for v in bF]},
+                       {"x": [str(v) for v in xF]})
+
+
+def _check_polynomial_root(c: Certificate) -> Tuple[bool, str]:
+    try:
+        coeffs = [int(v) for v in c.claim["coeffs"]]
+        r = _as_fraction(c.witness["root"])
+    except Exception:  # noqa: BLE001
+        return False, "malformed polynomial-root certificate"
+    if _poly_eval(coeffs, r) == 0:
+        return True, f"p({r}) = 0 — exact rational root (degree {max(0, len(coeffs) - 1)})"
+    return False, f"p({r}) != 0 — not a root"
+
+
+def _check_linear_system(c: Certificate) -> Tuple[bool, str]:
+    try:
+        A = [[_as_fraction(v) for v in row] for row in c.claim["A"]]
+        b = [_as_fraction(v) for v in c.claim["b"]]
+        x = [_as_fraction(v) for v in c.witness["x"]]
+    except Exception:  # noqa: BLE001
+        return False, "malformed linear-system certificate"
+    if not A or len(A) != len(b) or any(len(row) != len(x) for row in A):
+        return False, "shape mismatch"
+    if _matvec(A, x) == b:
+        return True, f"A·x == b exactly ({len(A)}x{len(x)} system)"
+    return False, "A·x != b — x does not solve the system"
+
+
 def check(cert: Any) -> Tuple[bool, str]:
     """Re-confirm a certificate WITHOUT trusting or re-running the producer. Returns (ok, detail).
 
@@ -104,6 +183,10 @@ def check(cert: Any) -> Tuple[bool, str]:
     a composite masquerading as prime) fails here.
     """
     c = cert if isinstance(cert, Certificate) else from_dict(cert)
+    if c.kind == "polynomial_root":
+        return _check_polynomial_root(c)
+    if c.kind == "linear_system":
+        return _check_linear_system(c)
     if c.kind != "primality":
         return False, f"unknown certificate kind {c.kind!r}"
     try:

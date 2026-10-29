@@ -103,6 +103,11 @@ def verify_root(art: Dict[str, Any]) -> VerifierResult:
     val = _poly_eval(coeffs, r)
     data = {"coeffs": coeffs, "x": _fmt(r), "value": _fmt(val)}
     if val == 0:
+        try:                                            # a typed, independently re-checkable witness
+            from . import certificate as _cert
+            data["certificate"] = _cert.to_dict(_cert.certify_polynomial_root(coeffs, str(r)))
+        except Exception:  # noqa: BLE001 — advisory; never let it break the verdict
+            pass
         return confirm(name, f"x = {_fmt(r)} is a root (the polynomial evaluates to 0)", data)
     return mismatch(name, f"x = {_fmt(r)} is not a root (the polynomial evaluates to {_fmt(val)}, not 0)", data)
 
