@@ -59,6 +59,9 @@
                 display:inline-flex; align-items:center; gap:.42em }
   .mode button+button{ border-left:1px solid var(--brass) }
   .mode button[aria-pressed="true"]{ background:var(--brass); color:var(--paper) }
+  /* visually-hidden live region: the coach's answer is ANNOUNCED to assistive tech even in read mode
+     (no TTS needed) — "driven by voice alone AND read as text alone" (docs/CONSOLE.md). */
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0 }
   .mode button svg{ width:.92em; height:.92em }
 
   main.page{ flex:1 0 auto; padding:2.1rem 0 1rem }
@@ -201,7 +204,8 @@
     </span>
   </header>
 
-  <main class="page" id="page">
+  <p id="sr-answer" class="sr-only" aria-live="polite" aria-atomic="true"></p>
+  <main class="page" id="page" role="region" aria-label="The answer">
     <p class="greet" id="greet">Speak or type anything — a verse, a question, a note to keep. I'll find it,
       check it, and read it to you; the page holds still while you listen, or rests while you read.</p>
   </main>
@@ -309,6 +313,8 @@ function verdictBadge(verdict){
 
 function render(r){
   window._lastSpoken = r.spoken || r.caption || '';
+  const _sr = document.getElementById('sr-answer');   // announce the answer to assistive tech (read mode too)
+  if(_sr){ _sr.textContent = [r.headline, r.spoken || r.caption || ''].filter(Boolean).join('. '); }
   let html = '';
   if(r.headline) html += '<div class="headline">'+esc(r.headline)+'</div>';
   html += verdictBadge(r.verdict);
