@@ -54,6 +54,15 @@ def verify_primality(spec: Dict[str, Any]) -> VerifierResult:
     actual = _is_prime(nf)
     data = {"n": nf, "actual_prime": actual, "claimed_prime": bool(claimed),
             "rule": "primality via trial division up to √n"}
+    # A typed, INDEPENDENTLY-CHECKABLE certificate for the verdict (certificate.check re-confirms it
+    # without re-running this verifier): a Pratt/Lucas witness for a prime, a factor for a composite.
+    # Additive and guarded — the certificate is a bonus, never the verdict; a huge n or any failure omits it.
+    if 2 <= nf <= 10**12:
+        try:
+            from . import certificate as _cert
+            data["certificate"] = _cert.to_dict(_cert.certify_primality(nf))
+        except Exception:  # noqa: BLE001 — advisory; never let it break the verdict
+            pass
     if actual == bool(claimed):
         return confirm(name, f"{nf} is{' ' if actual else ' NOT '}prime (matches claim)", data)
     return mismatch(name, f"{nf} is{' ' if actual else ' NOT '}prime, claimed {bool(claimed)}", data)
