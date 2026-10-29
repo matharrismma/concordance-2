@@ -124,11 +124,16 @@ CARDS.append(_card(
     "solved in subexponential time 2^(o(n)) - a hardness assumption STRONGER than P != NP, and the base of much "
     "fine-grained complexity (SETH-based lower bounds for edit distance, orthogonal vectors, and more). In October "
     "2026 OpenAI and Anthropic each posted a CLAIMED refutation: a deterministic 3-SAT algorithm in 2^(e*n) time "
-    "for every fixed e > 0, with Lean/Coq formalizations. STATUS: a CLAIM, UNVERIFIED - not peer-reviewed, under "
-    "independent review (Impagliazzo, Paturi, R. Williams); the Lean-formalized statement is reported weaker than "
-    "the paper. Even if it holds it does NOT give P = NP - ETH is strictly stronger, so the P vs NP floor stays "
-    "open. Held as cited, never sealed, until an independent kernel-check passes: the machine-check is the proof, "
-    "not the announcement. Ties card_floor_p_vs_np and card_cs_busy_beaver.",
+    "for every fixed e > 0, with a Lean formalization. STATUS: a CLAIM, UNVERIFIED - not peer-reviewed, under "
+    "independent review (Impagliazzo, Paturi, R. Williams). A source audit of the OpenAI Lean (Oct 2026) finds the "
+    "STATEMENT genuine: a uniform, fully-correct (answer iff satisfiable), subexponential 2^(o(n)) decider claim "
+    "with no density, oracle, or large-n qualification, sorry-free in its statement and final-theorem files - the "
+    "time bound is 2^(A * n * (loglog n)^2 / sqrt(log n)), whose exponent is o(n). What stays UNVERIFIED is the "
+    "PROOF across all its dependency modules (a Lean kernel / comparator run that pins the permitted axioms to "
+    "propext, Quot.sound, Classical.choice) and the machine model's faithfulness. Even if it holds it does NOT "
+    "give P = NP - ETH is strictly stronger, so the P vs NP floor stays open. Held as cited, never sealed, until "
+    "that kernel-check passes: the machine-check is the proof, not the announcement. Ties card_floor_p_vs_np and "
+    "card_cs_busy_beaver.",
     ["exponential time hypothesis", "ETH", "SETH", "3-SAT", "subexponential", "Impagliazzo", "Paturi",
      "fine-grained complexity", "P vs NP", "Williams", "complexity", "computer science", "one map"]))
 
