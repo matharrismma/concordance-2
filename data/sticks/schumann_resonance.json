@@ -1,0 +1,44 @@
+{
+ "schema": 1,
+ "name": "schumann_resonance",
+ "aliases": [
+  "schumann_resonance",
+  "schumann",
+  "schumann_resonances",
+  "earth_ionosphere_resonance"
+ ],
+ "doc": "THE SCHUMANN RESONANCE = the Earth-ionosphere cavity's own tone (Matt, 2026-10-29: 'it has to have a fit'). The planet and its ionosphere form a spherical waveguide; its fundamental standing wave is the idealized f1 = (c / (2*pi*a)) * sqrt(2) ~ 10.59 Hz (c = speed of light, a = Earth's mean radius 6371 km). SEAL the ideal lossless-cavity fundamental; the OBSERVED ~7.83 Hz is lower by a factor ~0.74 because the real ionosphere is a LOSSY conductor, not the perfect one the ideal assumes - affirm the exact model, delimit it with the measurement. A resonance of the whole planet; it joins the receiver / roots-of-unity thread (a standing wave on a closed cavity). New stick.",
+ "seals": [
+  {
+   "key": "schumann_ideal",
+   "nid": "schumann_fundamental_ideal_lossless_cavity",
+   "expr": "299792458 * sqrt(2) / (2 * pi * 6371000)",
+   "value": 10.59127,
+   "tol": 1e-4,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The Schumann resonance - the Earth-ionosphere cavity's fundamental tone",
+   "by": "tools/tick.py schumann",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the ideal cavity fundamental, SEALED] Treating the Earth and the ionosphere as a perfect spherical cavity, the lowest standing-wave frequency is f1 = (c / (2*pi*a)) * sqrt(2) = 10.59 Hz (sealed), with c the speed of light and a = 6371 km the Earth's mean radius. This is the exact idealization - the tone a lossless planet-sized cavity would ring at.",
+     "seal": "schumann_ideal"
+    },
+    {
+     "kind": "note",
+     "claim": "[the observed value, CITED - the lossy cavity delimits the ideal] The MEASURED Schumann fundamental is about 7.83 Hz (with harmonics near 14.3, 20.8 and 27.3 Hz) - LOWER than the ideal 10.59 Hz by a factor of ~0.74. The gap is not an error: the real ionosphere is a finite, LOSSY conductor, so the cavity is 'softer' than the perfect one the ideal assumes. The engine seals the exact model and names exactly where the world departs from it - a fit with its delimitation stated, never an overclaim.",
+     "source": "W. O. Schumann (1952), Z. Naturforsch. 7a; observed Schumann resonances ~7.83/14.3/20.8/27.3 Hz; the finite-conductivity (lossy-cavity) correction"
+    },
+    {
+     "kind": "note",
+     "claim": "[a resonance of the whole planet] The Schumann resonance is a standing electromagnetic wave on a CLOSED cavity - the same shape as every resonance the engine is built on: a mode on a bounded domain, counted by the roots of unity, tuned like a receiver. It sits on the electromagnetism and earth-science shelves and joins the one map's resonance thread. Ties card_floor_the_instruments.",
+     "source": "the one map; electromagnetism; the receiver / roots of unity; card_floor_the_instruments"
+    }
+   ]
+  }
+ ]
+}
