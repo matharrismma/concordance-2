@@ -963,6 +963,17 @@ class Corpus:
                 s *= 3.0                              # a how-to question prefers the field library
             elif c.get("shelf") == "theories":
                 s *= THEORY_WEIGHT                     # a theory is load-bearing (Matt 2026-08-02)
+            # PHRASE / BANDS COVERAGE (2026-10-29): a card whose TITLE+BANDS carry the WHOLE asked
+            # phrase is almost always THE card for it — "the Hodge conjecture", "busy beaver",
+            # "exponential time hypothesis" were buried under cards that merely repeat one common
+            # token. A within-tier PROMOTE, never a suppression: fires ONLY on a multi-token ask,
+            # lifts ONLY a card that covers EVERY asked content word in its title/bands, and never
+            # pronunciation — so it cannot touch a bare one-word lookup (invariant VIII) and only
+            # ever multiplies a score the subject partition already admitted (cf. VI/VII).
+            if len(asked) >= 2 and c.get("shelf") != "pronunciation":
+                _hay = set(_tokens(str(c.get("title", "")) + " " + " ".join(c.get("bands") or [])))
+                if _hay and asked <= _hay:
+                    s *= 4.0           # a full-phrase title/bands match edges out a one-token THEORY hit
             # STIGMERGY (ants): a well-travelled trail leads WITHIN its tier — multiplies the base
             # score like the boosts above, capped, so it never crosses tiers. 1.0 when gated off.
             s *= _stig.boost_factor(c.get("id"))
