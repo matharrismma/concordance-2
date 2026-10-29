@@ -105,3 +105,25 @@ def test_forged_linear_system_is_rejected():
                            {"x": ["1", "2"]})
     ok, _ = C.check(forged)
     assert not ok
+
+
+def test_certificate_rides_the_sealed_record_and_rechecks():
+    """The spine: a certificate carried through record_from_derivation survives into the sealed
+    WitnessRecord, and recheck_all re-confirms it from the record ALONE — and catches a tamper."""
+    from concordance import receipts
+    cert = C.to_dict(C.certify_primality(97))
+    result = {"verdict": "CONFIRMED", "steps": 1, "confirmed_steps": 1,
+              "trail": [{"id": "number_theory.primality", "domain": "number_theory",
+                         "claim": "97 is prime", "status": "CONFIRMED", "uses": [],
+                         "link_ok": True, "spec_hash": "", "certificate": cert}]}
+    rec = receipts.record_from_derivation(result, domain="number_theory").to_dict()
+    carried = [(vr.get("data") or {}).get("certificate") for vr in rec["verifier_results"]]
+    assert any(isinstance(c, dict) and c.get("kind") == "primality" for c in carried), \
+        "the certificate did not ride into the sealed record"
+    rows = C.recheck_all(rec)
+    assert rows and all(r["ok"] for r in rows), f"re-check from the sealed record failed: {rows}"
+    for vr in rec["verifier_results"]:                     # forge the sealed verdict...
+        c = (vr.get("data") or {}).get("certificate")
+        if c:
+            c["claim"]["verdict"] = "composite"
+    assert any(not r["ok"] for r in C.recheck_all(rec)), "a tampered sealed certificate slipped through"

@@ -96,7 +96,10 @@ def record_from_derivation(result: Dict[str, Any], *, domain: str = "mathematics
             # a re-fetcher can rehash the spec they hold to confirm it is the one that was checked.
             data={"claim": redact.redact(str(e.get("claim", "")))[0], "domain": e.get("domain", ""),
                   "uses": e.get("uses", []), "link_ok": e.get("link_ok", True),
-                  "spec_hash": str(e.get("spec_hash", ""))},
+                  "spec_hash": str(e.get("spec_hash", "")),
+                  # the independently re-checkable witness rides into the permanent seal, so a re-fetcher
+                  # can re-verify the verdict without trusting us (certificate.recheck_all / .check).
+                  **({"certificate": e["certificate"]} if isinstance(e.get("certificate"), dict) else {})},
         )
         for i, e in enumerate(trail)
     )

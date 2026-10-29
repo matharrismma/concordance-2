@@ -241,3 +241,16 @@ def check(cert: Any) -> Tuple[bool, str]:
         return True, f"{n} is prime by Lucas (base {a}, prime factors of n-1 = {sorted(set(qs))})"
 
     return False, f"unknown verdict {verdict!r}"
+
+
+def recheck_all(record: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Re-verify every independently-checkable certificate carried in a sealed record's
+    verifier_results — the payoff of the spine: a fetched seal can be re-confirmed WITHOUT trusting
+    the engine that produced it. One row per certificate found: {name, kind, ok, detail}."""
+    out: List[Dict[str, Any]] = []
+    for vr in (record.get("verifier_results") or []):
+        cert = (vr.get("data") or {}).get("certificate") if isinstance(vr, dict) else None
+        if isinstance(cert, dict):
+            ok, detail = check(cert)
+            out.append({"name": vr.get("name"), "kind": cert.get("kind"), "ok": ok, "detail": detail})
+    return out

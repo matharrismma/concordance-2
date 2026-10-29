@@ -317,6 +317,10 @@ def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:
         _framing = {k: _g[k] for k in ("framing_question", "need", "example", "route") if k in _g}
         if _framing:
             entry["guidance"] = _framing
+        # the one internal-data field that DOES travel: a typed, independently re-checkable certificate —
+        # a witness anyone can re-verify without trusting this engine — carried into the trail and the seal.
+        if isinstance(_g.get("certificate"), dict):
+            entry["certificate"] = _g["certificate"]
         if missing:
             entry["missing_refs"] = missing
         if unconfirmed:
