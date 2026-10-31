@@ -34,8 +34,13 @@ def test_build_writes_one_train_file_per_face(tmp_path):
         '{"text": "The opening is the path: one next step.", "card": "card_playbook_the_game", "shelf": "playbook"}\n', encoding="utf-8")
     (tmp_path / "faces" / "frames" / "face_coach.txt").write_text("Keep going; the next step is enough.\n", encoding="utf-8")
     counts = face_lora.build(tmp_path, tmp_path / "lora")
-    assert counts["face_coach"] == 2 and counts["face_bard"] == 0
-    assert (tmp_path / "lora" / "face_coach" / "train.jsonl").exists()
+    from concordance import faces
+    tracked = {fid: sum(len(v) for v in faces.frames(fid).values()) for fid in ("face_coach", "face_bard")}
+    assert tracked["face_coach"] >= 34 and tracked["face_bard"] >= 34          # the tracked frames ride into every face
+    assert counts["face_coach"] == 1 + 1 + tracked["face_coach"]              # one found line + one local frame + the tracked frames
+    assert counts["face_bard"] == tracked["face_bard"]                        # no corpus yet → frames only
+    rows = face_lora._read_jsonl(tmp_path / "lora" / "face_coach" / "train.jsonl")
+    assert sum(1 for r in rows if r["kind"] == "found") == 1 and all(r["cite"] for r in rows)
     assert len(counts) == 18
 
 
