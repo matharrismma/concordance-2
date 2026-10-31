@@ -109,6 +109,35 @@ importance(unit, window) = magnitude(unit) × fires(unit, window)
 
 ---
 
+## Growth — build a character in the gap (the other half)
+
+> Matt, 2026-10-31: *"It is easier to build a new character at times than to cram that knowledge into a
+> current character. We focus on the 20% that gets us 80% and then just build another character in the
+> gap. We may be dumb compared to one model, but each has strengths and there is no real limit on our
+> number. We prune to ensure we don't overbuild. When a new character is developed, those aspects are cut
+> and we allow new aspects of that character to grow back."*
+
+Pruning alone would shrink the village; the economy is **prune + grow**, as in the brain (synaptic pruning
+with neurogenesis). The unit of pruning is the **aspect** (a scope word, a shelf, a saying, an adapter's
+slice); the unit of growth is the **character**.
+
+- **Trigger to build.** A cluster of requests no face fits (`faces.route` → None on the battery or in
+  traffic), or a face that has outgrown its 80/20 core: false fires rising, dead words piling up in one
+  theme, a response corpus (`data/faces/responses/<face>.jsonl`) that reads in two registers. Do not widen
+  the parent — build the new face in the gap (`faces._FACES`, scope + shelves + manner + its own corpus).
+- **Cut, then regrow.** When the new face stands and routes on the battery, the overlapping aspects are
+  **cut** from the parent — moved into the new face's record, versioned, never deleted (the river keeps
+  every version). The parent's freed slots may regrow new aspects in the next window — measured by the
+  next `measure`, never assumed.
+- **80/20 first.** A new face's first corpus is its 20%: the 100–200 common responses and the scope words
+  that route them. Past that, depth is a candidate for another character, not more words.
+- **No cap on the roster.** Resource is **total live aspects**, kept optimal by the loop above; the number
+  of characters is free. A character is cheap: data + a small adapter (`tools/face_lora.py`).
+- **Never cram.** When a request fails, ask "which character is this?" — and if none, "which character
+  should exist?" — before adding a word to an existing one.
+
+---
+
 ## Cadence
 
 | Interval | Practice | Instrument |

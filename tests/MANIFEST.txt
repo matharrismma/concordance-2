@@ -127,6 +127,7 @@ test_equation_audit_2026_10_01.py
 test_exercise_science.py
 test_expand.py
 test_expand_on_call.py
+test_face_lora.py
 test_faces.py
 test_factfind.py
 test_failure_report_2026_10_08.py
