@@ -71,7 +71,7 @@ it more useful every cycle, without ever regressing the moat. The score only goe
 | **Fortnightly** | connection growth (safe, 0-FP edges) + map harvest | `tools/grow.py`, `tools/mint_edges.py` |
 | **Monthly** | corpus expansion — the biggest coverage gap, academics first | `tools/card_*.py` |
 | **Monthly** | nesting integrity — no orphans; every spine roots in the Floor | `/floor`, `graph.overview()` |
-| **Quarterly** | theory/tradition re-calibration; prune what bore no fruit | the calibration decks |
+| **Quarterly** | theory/tradition re-calibration; prune what bore no fruit — the winning-ticket cycle ([SOP-14](PRUNING.md): measure → mask the dead → gate → accept or rewind) | the calibration decks · `tools/winning_ticket.py` |
 
 ---
 

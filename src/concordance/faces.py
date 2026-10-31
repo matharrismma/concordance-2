@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 from typing import Any, Callable, Dict, List, Optional
 
-from . import physiology
+from . import physiology, ticket
 
 # A face is DATA (see docs/EXPERT_FACES.md): a servant role over existing components.
 #   scope       — words that route a request to this face
@@ -360,10 +360,29 @@ def _scores(text: str) -> Dict[str, int]:
     for fid, f in _FACES.items():
         score = 0
         for s in f["scope"]:
+            if ticket.masked("scope", f"{fid}|{s}"):          # the winning ticket: a dead word, masked (ticket.py)
+                continue
             # multi-word phrases matched as substrings, single words as tokens
             score += (1 if s in low else 0) if " " in s else (1 if s in toks else 0)
         scores[fid] = score
     return scores
+
+
+def scope_fires(texts: List[str]) -> Dict[str, Dict[str, Any]]:
+    """ACTIVATION for the ticket (ticket.py): for every scope word of every face, how many of `texts` it trips, with
+    its MAGNITUDE — specificity: a phrase counts double, and a word shared by k faces counts 1/k (the generic word is
+    the likeliest false route). Returns unit id "fid|word" -> {"fires", "magnitude", "face"}. Pure."""
+    owners: Dict[str, int] = {}
+    for f in _FACES.values():
+        for s in f["scope"]:
+            owners[s] = owners.get(s, 0) + 1
+    prepared = [(set(_WORD.findall((t or "").lower())), " " + (t or "").lower() + " ") for t in texts]
+    out: Dict[str, Dict[str, Any]] = {}
+    for fid, f in _FACES.items():
+        for s in f["scope"]:
+            fires = sum(1 for toks, low in prepared if ((s in low) if " " in s else (s in toks)))
+            out[f"{fid}|{s}"] = {"fires": fires, "magnitude": (2.0 if " " in s else 1.0) / owners[s], "face": fid}
+    return out
 
 
 def route(text: str) -> Optional[str]:

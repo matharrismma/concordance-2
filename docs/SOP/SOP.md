@@ -169,6 +169,12 @@ and fails on either direction of drift:
 6. **Crisis is never enriched.** No gate, no scripture-as-fix, no auditor. Numbers in the
    message must not summon arithmetic at someone who needs help.
 
+## SOP-14 — Pruning: the winning ticket
+
+Pruning is a versioned **mask**, never a deletion; importance = magnitude × activation in a dated window;
+only the dead are proposed; the 0-FP gates must hold with the mask on; a regression rewinds. Full procedure,
+criterion, units and cadence: [PRUNING.md](PRUNING.md). Instrument: `tools/winning_ticket.py`.
+
 ## SOP-13 — Newest everywhere, provably
 
 The standing state is: local HEAD == origin/master == every deployed file == the drive's

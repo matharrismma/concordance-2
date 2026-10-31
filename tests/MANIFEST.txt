@@ -162,6 +162,7 @@ test_governance_moral.py
 test_graph.py
 test_grid.py
 test_grid_atlas.py
+test_ticket.py
 test_group_signed_contributions.py
 test_groups.py
 test_growth.py
