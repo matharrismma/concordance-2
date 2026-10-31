@@ -130,6 +130,7 @@ test_expand_on_call.py
 test_face_frames.py
 test_face_lora.py
 test_faces.py
+test_four_gates.py
 test_factfind.py
 test_failure_report_2026_10_08.py
 test_field_canon.py

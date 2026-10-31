@@ -2168,6 +2168,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                    else "no face fits this request — use the ordinary front door (POST /ask)")
             return _err(404, why, "NO_FACE")
         return _ok(_faces.compose(fid, text, config))
+    if method == "POST" and path == "/gates":
+        # THE FOUR GATES — a decision walked RED → FLOOR → BROTHERS → GOD, deterministically (four_gates.py): the
+        # constraints and the kernel's witness rule, the faces for the facts, the Shepherd for the Word. No model.
+        from .. import four_gates as _gates
+        b = body if isinstance(body, dict) else {}
+        action = str(b.get("action") or b.get("text") or "").strip()
+        if not action:
+            return _err(400, "action required")
+        return _ok(_gates.run(action, config=config, witness=b.get("witness"), author=b.get("author")))
 
     # ── BYOM — bring your own model. An OPTIONAL, gated EXTERNAL worker: the user's OpenAI-compatible
     # model is called ONLY on the airlock-stripped skeleton, its output is verified (never trusted raw),
@@ -3511,6 +3520,7 @@ ROUTES = [
     {"path": "/faces", "methods": ("GET",), "api": True},       # list the callable life-domain servants
     {"path": "/recombine", "methods": ("GET",), "api": True, "rl": "read"},  # speak from the keeping by recombining found clauses (scans the corpus like /search)
     {"path": "/face", "methods": ("POST",), "rl": True},        # consult one — composes verifiers+shelves+discernment
+    {"path": "/gates", "methods": ("POST",), "rl": True},       # the Four Gates: a decision walked RED→FLOOR→BROTHERS→GOD, no model
     {"path": "/byom", "methods": ("POST",), "rl": True},        # bring your own model — gated external worker (default OFF)
     {"path": "/thread", "methods": ("DELETE", "GET"), "api": True},
     {"path": "/threads", "methods": ("GET",), "api": True, "rl": True},

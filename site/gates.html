@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Four Gates — Narrow Highway</title>
+<meta name="description" content="Walk a decision through four gates — RED, FLOOR, BROTHERS, GOD — each checked against what is held and cited, never generated. The brothers are real people; the last gate is yours.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&display=swap">
+<style>
+  /* THE FOUR GATES — the Console's hand (site/console.html, docs/CONSOLE.md): parchment and brass, one still
+     frame, the trail of four gates read like an instrument. Fail-fast: the gate that halts is struck like a seal. */
+  :root{
+    --paper:#f1ece0; --panel:#e9e2d1; --ink:#1b1712; --ink-soft:#574e42; --dim:#8a8070;
+    --line:#d3c9b4; --hair:#e2dac7; --brass:#9a7623; --brass-lit:#b78f36; --copper:#9c5a36;
+    --seal:#8c2f23; --moss:#4e6b3a; --rule:#2a241b;
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    --display:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+    --plaque:ui-sans-serif,system-ui,'Segoe UI',sans-serif;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+    --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a; --dim:#746b5a;
+    --line:#2b2934; --hair:#232230; --brass:#cfa54c; --brass-lit:#e4bf6a; --copper:#c97d55;
+    --seal:#c45a49; --moss:#8fb37a; --rule:#ece5d4; color-scheme:dark; }}
+  :root[data-theme="dark"]{ --paper:#12121a; --panel:#1a1a23; --ink:#ece5d4; --ink-soft:#a79d8a; --dim:#746b5a;
+    --line:#2b2934; --hair:#232230; --brass:#cfa54c; --brass-lit:#e4bf6a; --copper:#c97d55; --seal:#c45a49;
+    --moss:#8fb37a; --rule:#ece5d4; color-scheme:dark; }
+  *{ box-sizing:border-box }
+  html,body{ margin:0; background:var(--paper); color:var(--ink) }
+  body{ font-family:var(--serif); line-height:1.62; -webkit-font-smoothing:antialiased }
+  .book{ max-width:41rem; margin:0 auto; min-height:100svh; display:flex; flex-direction:column;
+         padding:calc(1rem + env(safe-area-inset-top)) 1.35rem calc(1rem + env(safe-area-inset-bottom)) }
+  header.bar{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding-bottom:.7rem;
+              border-bottom:1px solid var(--brass); box-shadow:0 1px 0 var(--hair) }
+  .brand{ font-family:var(--plaque); font-size:.74rem; letter-spacing:.2em; text-transform:uppercase; color:var(--dim);
+          text-decoration:none; display:inline-flex; align-items:center; gap:.5em }
+  .brand b{ color:var(--brass); font-weight:600; letter-spacing:.16em }
+  .order{ font-family:var(--plaque); font-size:.68rem; letter-spacing:.18em; color:var(--dim); text-transform:uppercase }
+  main{ flex:1 0 auto; padding:2rem 0 1rem }
+  h1{ font-family:var(--display); font-size:2.5rem; line-height:1.06; margin:.1rem 0 .6rem; font-weight:600; text-wrap:balance }
+  .lede{ color:var(--ink-soft); font-family:var(--display); font-style:italic; font-size:1.3rem; line-height:1.42; margin:0 0 1.4rem; max-width:36rem }
+  label{ display:block; font-family:var(--plaque); font-size:.68rem; letter-spacing:.2em; text-transform:uppercase; color:var(--dim); margin:0 0 .5rem }
+  textarea{ width:100%; min-height:5.2rem; padding:.8rem .95rem; background:var(--panel); color:var(--ink); border:1px solid var(--line);
+            border-radius:3px; font:inherit; font-size:1.05rem; line-height:1.55; resize:vertical }
+  textarea:focus{ outline:none; border-color:var(--brass) }
+  .row{ display:flex; gap:.6rem; flex-wrap:wrap; margin:.7rem 0 1.6rem; align-items:center }
+  .row input{ flex:1 1 12rem; min-width:0; padding:.55rem .8rem; background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:3px; font:inherit; font-size:.95rem }
+  button{ font-family:var(--plaque); font-size:.7rem; letter-spacing:.16em; text-transform:uppercase; background:var(--brass); color:var(--paper);
+          border:1px solid var(--brass); border-radius:3px; padding:.6rem 1.1rem; cursor:pointer }
+  button[disabled]{ opacity:.45; cursor:default }
+  button.quiet{ background:none; color:var(--dim); border-color:var(--line) }
+  .hint{ font-family:var(--plaque); font-size:.74rem; color:var(--dim); margin:-.9rem 0 1.4rem }
+  /* the gates — four rows of one instrument; the glyph is the readout */
+  .gates{ border:1px solid var(--line); border-radius:4px; overflow:hidden; background:var(--panel) }
+  .gate{ display:grid; grid-template-columns:2.2rem 1fr auto; gap:.8rem; align-items:start; padding:.9rem 1rem; border-top:1px solid var(--hair) }
+  .gate:first-child{ border-top:0 }
+  .gate .glyph{ font-family:var(--plaque); font-size:1.25rem; line-height:1.2; color:var(--dim); text-align:center }
+  .gate .name{ font-family:var(--plaque); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-soft) }
+  .gate .sub{ font-family:var(--display); font-style:italic; font-size:1rem; color:var(--dim); margin-left:.5em }
+  .gate .why{ margin:.3rem 0 0; font-size:.98rem; color:var(--ink) }
+  .gate .why li{ margin:.15rem 0 }
+  .gate .cite{ font-family:var(--plaque); font-size:.74rem; color:var(--brass); margin:.3rem 0 0 }
+  .gate .doors a{ color:var(--brass); text-decoration:none; border-bottom:1px solid transparent; margin-right:.8em }
+  .gate .doors a:hover{ border-bottom-color:var(--brass) }
+  .gate .status{ font-family:var(--plaque); font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); padding-top:.2rem }
+  .gate[data-s="PASS"] .glyph, .gate[data-s="PASS"] .status{ color:var(--moss) }
+  .gate[data-s="HALT"] .glyph, .gate[data-s="HALT"] .status{ color:var(--seal) }
+  .gate[data-s="AWAITING"] .glyph, .gate[data-s="AWAITING"] .status{ color:var(--copper) }
+  .gate[data-s="RETURNED"] .glyph, .gate[data-s="RETURNED"] .status{ color:var(--brass) }
+  .gate[data-s="SKIPPED"]{ opacity:.5 }
+  .gate .face{ font-family:var(--plaque); font-size:.76rem; color:var(--ink-soft); margin:.35rem 0 0 }
+  .gate .face b{ color:var(--brass); font-weight:600 }
+  /* the verdict — a wax seal struck once */
+  .verdict{ margin:1.3rem 0 .4rem; display:inline-flex; align-items:center; gap:.5em; font-family:var(--plaque); font-size:.72rem; letter-spacing:.16em;
+            text-transform:uppercase; padding:.35rem .85rem; border:1px solid var(--brass); color:var(--brass); border-radius:2px; background:var(--panel) }
+  .verdict.halt{ border-color:var(--seal); color:var(--seal) }
+  .verdict.wait{ border-color:var(--copper); color:var(--copper) }
+  .means{ color:var(--ink-soft); font-size:1rem; margin:.3rem 0 1.4rem }
+  footer{ border-top:1px solid var(--hair); padding-top:.8rem; font-family:var(--plaque); font-size:.7rem; letter-spacing:.12em; color:var(--dim); text-transform:uppercase }
+  @media (prefers-reduced-motion:no-preference){ .gate{ transition:opacity .25s ease } }
+</style>
+</head>
+<body>
+<div class="book">
+  <header class="bar">
+    <a class="brand" href="/"><span class="fleur">✦</span> Narrow <b>Highway</b></a>
+    <span class="order">Red → Floor → Brothers → God</span>
+  </header>
+  <main>
+    <h1>The Four Gates</h1>
+    <p class="lede">Bring a decision. It is walked through four gates in order and halts at the first that fails — each checked against what is held and cited, never generated. The brothers are real people, and the last gate is yours.</p>
+    <form id="f" autocomplete="off">
+      <label for="action">The proposed action</label>
+      <textarea id="action" name="action" placeholder="Describe the decision, proposal, or action — plainly, in your own words." required></textarea>
+      <div class="row">
+        <input id="witness" name="witness" placeholder="Witness (a brother's node id or name) — optional">
+        <input id="author" name="author" placeholder="You (your node id or name) — optional">
+        <button id="go" type="submit">Walk the gates</button>
+        <button id="reset" type="button" class="quiet" hidden>Again</button>
+      </div>
+    </form>
+    <p class="hint">A cry for help is answered first and outranks the gates. Nothing here is sealed; the trail is yours to keep.</p>
+    <section class="gates" id="gates" aria-live="polite">
+      <div class="gate" data-g="RED" data-s="WAIT"><div class="glyph">○</div><div><span class="name">Red</span><span class="sub">the non-negotiables</span><div class="why"></div></div><div class="status">waiting</div></div>
+      <div class="gate" data-g="FLOOR" data-s="WAIT"><div class="glyph">○</div><div><span class="name">Floor</span><span class="sub">the protective minimums</span><div class="why"></div></div><div class="status">waiting</div></div>
+      <div class="gate" data-g="BROTHERS" data-s="WAIT"><div class="glyph">○</div><div><span class="name">Brothers</span><span class="sub">real witnesses</span><div class="why"></div></div><div class="status">waiting</div></div>
+      <div class="gate" data-g="GOD" data-s="WAIT"><div class="glyph">○</div><div><span class="name">God</span><span class="sub">authority, timing, calling</span><div class="why"></div></div><div class="status">waiting</div></div>
+    </section>
+    <div id="verdict" hidden></div>
+    <p id="means" class="means" hidden></p>
+  </main>
+  <footer>Four Gates · found, verified, cited · the brothers are real · the deciding is yours</footer>
+</div>
+<script>
+(function(){
+  var GLYPH={WAIT:'○',PASS:'✓',HALT:'✗',AWAITING:'…',RETURNED:'↩',SKIPPED:'—',RUN:'◎'};
+  var f=document.getElementById('f'), go=document.getElementById('go'), again=document.getElementById('reset');
+  var rows={}; document.querySelectorAll('.gate').forEach(function(r){ rows[r.dataset.g]=r; });
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function set(g,status,why){ var r=rows[g]; if(!r) return; r.dataset.s=status; r.querySelector('.glyph').textContent=GLYPH[status]||'○';
+    r.querySelector('.status').textContent=status.toLowerCase(); r.querySelector('.why').innerHTML=why||''; }
+  function clear(){ Object.keys(rows).forEach(function(g){ set(g,'WAIT',''); });
+    document.getElementById('verdict').hidden=true; document.getElementById('means').hidden=true; again.hidden=true; }
+  function render(out){
+    if(out.kind==='crisis'){ set('RED','HALT','<ul><li>'+esc(out.means)+'</li></ul>'); showVerdict('halt','A cry comes first', out.means); return; }
+    (out.gates||[]).forEach(function(g){
+      var h='';
+      if(g.reasons&&g.reasons.length){ h+='<ul>'+g.reasons.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>'; }
+      if(g.concerns&&g.concerns.length){ h+='<ul>'+g.concerns.map(function(x){return '<li>concern — '+esc(x)+'</li>';}).join('')+'</ul>'; }
+      if(g.rests_on&&g.rests_on.length){ h+='<div class="face">rests on: '+g.rests_on.map(function(c){return '<a href="/card.html?id='+encodeURIComponent(c.id)+'" style="color:var(--brass);text-decoration:none">'+esc(c.title||c.id)+'</a>';}).join(' · ')+'</div>'; }
+      (g.faces||[]).forEach(function(fc){ if(fc.boundary){ h+='<div class="face"><b>'+esc(fc.expert)+':</b> '+esc(fc.boundary)+(fc.refer?' '+esc(fc.refer):'')+'</div>'; } });
+      if(g.passages&&g.passages.length){ h+='<div class="face">the Word opened: '+g.passages.map(function(p){return '<a href="/card.html?id='+encodeURIComponent(p.id)+'" style="color:var(--brass);text-decoration:none">'+esc(p.title||p.id)+'</a>';}).join(' · ')+'</div>'; }
+      if(g.voice){ Object.keys(g.voice).forEach(function(k){ if(g.voice[k]) h+='<div class="face">'+esc(g.voice[k])+'</div>'; }); }
+      if(g.doors&&g.doors.length){ h+='<div class="face doors">bring it to your brothers: '+g.doors.map(function(d){return '<a href="'+esc(d)+'">'+esc(d)+'</a>';}).join('')+'</div>'; }
+      if(g.cites&&g.cites.length){ h+='<div class="cite">'+g.cites.map(esc).join(' · ')+'</div>'; }
+      set(g.gate,g.status,h);
+    });
+    var cls=out.verdict==='HALTED'?'halt':(out.verdict==='AWAITING WITNESS'?'wait':'');
+    var label=out.verdict==='HALTED'?('Halted at '+out.halted_at):out.verdict;
+    showVerdict(cls,label,out.means);
+  }
+  function showVerdict(cls,label,means){ var v=document.getElementById('verdict'); v.className='verdict '+cls; v.textContent=label; v.hidden=false;
+    var m=document.getElementById('means'); m.textContent=means||''; m.hidden=!means; again.hidden=false; }
+  f.addEventListener('submit',function(e){
+    e.preventDefault(); clear();
+    var action=document.getElementById('action').value.trim(); if(!action) return;
+    var body={action:action}; var w=document.getElementById('witness').value.trim(), a=document.getElementById('author').value.trim();
+    if(w) body.witness={id:w}; if(a) body.author={id:a};
+    go.disabled=true; set('RED','RUN','');
+    fetch('/gates',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){ return r.json(); })
+      .then(function(out){ if(out.error){ set('RED','HALT','<ul><li>'+esc(out.error)+'</li></ul>'); showVerdict('halt','Could not walk the gates',''); return; } render(out); })
+      .catch(function(err){ set('RED','HALT','<ul><li>the door could not be reached</li></ul>'); showVerdict('halt','Could not walk the gates',String(err)); })
+      .finally(function(){ go.disabled=false; });
+  });
+  again.addEventListener('click',function(){ clear(); document.getElementById('action').focus(); });
+})();
+</script>
+</body>
+</html>
