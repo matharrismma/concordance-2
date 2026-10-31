@@ -35,7 +35,7 @@ INTENTS: List[Dict[str, Any]] = [
     {"intent": "WALK", "purpose": "a situation in, one next step out",
      "entry": "ask.respond",
      "engages": ["ask.respond", "ask.is_crisis", "corpus.Corpus.search", "derivation.verify_derivation",
-                 "faces.route", "faces.compose"],
+                 "faces.route", "faces.compose", "parable.for_situation", "coach.recommend"],
      "engages_note": "crisis first, always; a checkable claim inside the situation may be verified; when a face fits, the "
                      "Steward brings the role in the same voice (ask._with_role) — composed, never sealed",
      "must_not": ["receipts.attach", "ledger.seal_to_ledger", "coach.check_answer"],
