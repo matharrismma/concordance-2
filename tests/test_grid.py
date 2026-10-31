@@ -30,6 +30,27 @@ def test_floor_consumes_axis_coords_for_biology():
     assert ac is not None and "discreteness" in ac.dimensions
 
 
+def test_everything_on_axes_every_target_is_a_real_axis():
+    """Matt, 2026-10-31: 'everything should be on axes'. Every name the keeping uses that these tables place
+    must land on a CANONICAL axis that exists — a table entry pointing at a phantom axis is the same class of
+    bug as an axis on an undeclared member."""
+    canon = set(grid.AXIS_DIMENSIONS) - set(grid.ALIASES)
+    for table in (grid.SHELF_AXES, grid.TIER_AXES, grid.KIND_AXES):
+        bad = {k: v for k, v in table.items() if grid.canonical(v) not in canon}
+        assert bad == {}, f"table entries off the grid: {bad}"
+    # a key that is already an axis or alias never belongs in SHELF_AXES (it would shadow `canonical`)
+    assert not (set(grid.SHELF_AXES) & (set(grid.AXIS_DIMENSIONS) | set(grid.ALIASES)))
+
+
+def test_axis_of_resolves_axes_aliases_and_the_wider_vocabulary_and_never_guesses():
+    assert grid.axis_of("physics") == "physics"
+    assert grid.axis_of("scripture") == "scripture_anchors"         # alias
+    assert grid.axis_of("hebrew_ot") == "scripture_anchors"         # keeping vocabulary
+    assert grid.axis_of("Trades ") == "construction"                # normalised
+    assert grid.axis_of("literature") is None                       # no axis yet — honest None
+    assert grid.axis_of("") is None and grid.axis_of(None) is None
+
+
 def test_axis_view_and_overview():
     v = grid.axis_view("mathematics")
     assert v and v["axis"] == "mathematics" and "reasoning" in v["dimensions"]

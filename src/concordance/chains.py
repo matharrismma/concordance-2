@@ -12,9 +12,10 @@ it defaults to `corpus.get_card`.
 """
 from __future__ import annotations
 
+import heapq
 import json
 from collections import deque
-from typing import Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 
 BUILDS_ON = "builds_on"   # a later work builds on an earlier one (directional)
 ENABLES = "enables"       # the reciprocal: an earlier work enables a later one (floor -> forward)
@@ -193,6 +194,203 @@ def intersect(a_start: str, b_start: str, *, rels: Optional[Set[str]] = None,
                     seen_b.add(n)
                     qb.append(n)
     return None
+
+
+# ── THE NARROW HIGHWAY: least-doubt paths (Matt, 2026-10-31: "Dijkstra's algorithm may be a tool for
+# improvement"). `intersect` above finds the nearest meeting point by HOP COUNT; but the map's edges are
+# typed, and its cards carry the kernel's authority ladder (quarantined < cited < verified), so a 2-hop
+# path through loose, unverified joints is NOT nearer in trust than a 3-hop path through proven lineage.
+# These walk by MEASURED cost — the relationship the engine declared and the authority the kernel assigned
+# — never a hand-tuned guess. The shortest path is the path of least doubt.
+_REL_COST: Dict[str, int] = {
+    # proven lineage / structure — a step the map has already stood on
+    BUILDS_ON: 1, ENABLES: 1, PART_OF: 1, HAS_PART: 1, "rests_on": 1, "supports": 1,
+    # a question hanging off a floor, or a FOUND joint where two chains meet
+    OPEN_END_OF: 2, HAS_OPEN_END: 2, CONNECTS_AT: 2,
+    # loose lateral kinship — connected, but not a proven step
+    "same_family": 3, "adjacent": 3, "kindred": 3, "concords_with": 3, "shares_scripture": 3,
+    "names_the_created_thing": 3,
+    # a bridge row that asserted only "connected" (corpus._BRIDGE_REL_FALLBACK)
+    "unspecified": 5,
+}
+_REL_COST_DEFAULT = 5                           # an unknown label is treated like an unasserted one
+_AUTH_PENALTY = {"verified": 0, "cited": 1}     # anything else is quarantined, by the kernel's own law
+_AUTH_PENALTY_DEFAULT = 2
+
+
+def _authority(card: Optional[dict]) -> str:
+    """The card's authority as the kernel ranks it — an unknown tier caps to 'quarantined' (kernel._cap)."""
+    c = card or {}
+    a = (c.get("source") or {}).get("authority_tier") or c.get("authority_tier") or ""
+    from . import kernel
+    return a if a in kernel.AUTHORITY else "quarantined"
+
+
+def edge_cost(edge: dict, to_card: Optional[dict]) -> int:
+    """The measured cost of taking one edge: its declared relationship + the authority of where it lands."""
+    rel = (edge or {}).get("relationship") or "unspecified"
+    return _REL_COST.get(rel, _REL_COST_DEFAULT) + _AUTH_PENALTY.get(_authority(to_card), _AUTH_PENALTY_DEFAULT)
+
+
+def _card_axis(card: Optional[dict], get_card: Optional[Callable] = None) -> Optional[str]:
+    """The grid AXIS a card sits on — everything on axes (Matt, 2026-10-31). The ladder, finest signal first,
+    each rung measured against the keeping (see grid.SHELF_AXES): (1) source.domain; (2) the confessional
+    authority tier; (3) the shelf; (4) the card kind; (5) a protocol's `domains` list / a receipt's sealed
+    record; (6) a connection or bridge card stands where its endpoints stand (one hop, via `get_card`, no
+    recursion). None only when the subject has no axis yet — such a card connects by declared roads alone."""
+    if not card:
+        return None
+    from . import grid
+    src = card.get("source") if isinstance(card.get("source"), dict) else {}
+    for name in (src.get("domain"), grid.TIER_AXES.get(str(src.get("authority_tier") or "").lower()),
+                 card.get("shelf"), grid.KIND_AXES.get(str(card.get("kind") or "").lower())):
+        ax = grid.axis_of(name) if isinstance(name, str) else None
+        if ax:
+            return ax
+    doms = list(card.get("domains")) if isinstance(card.get("domains"), list) else []
+    rec = (card.get("extra") or {}).get("record") if isinstance(card.get("extra"), dict) else None
+    if isinstance(rec, dict):                                     # a receipt: the floor's own coordinates at seal time
+        ac, spec = rec.get("axis_coords"), rec.get("spec")
+        doms.append(ac.get("axis") if isinstance(ac, dict) else None)
+        doms.append(spec.get("domain") if isinstance(spec, dict) else None)
+        doms += [(vr.get("data") or {}).get("domain") for vr in rec.get("verifier_results") or []
+                 if isinstance(vr, dict) and isinstance(vr.get("data"), dict)]
+    for d in doms:
+        ax = grid.axis_of(d) if isinstance(d, str) else None
+        if ax:
+            return ax
+    if get_card is not None:
+        for e in card.get("connections") or []:
+            to = e.get("to_card_id") if isinstance(e, dict) else None
+            ax = _card_axis(get_card(to), None) if to else None     # one hop; the endpoint's own rungs only
+            # a META axis (the engine's own ground) is never inherited: a card `part_of` a shelf-head spine is
+            # contained by it, not about it — 77,700 literature cards once leaked onto layer_zero_grounding this way
+            if ax and ax not in grid.META_AXES:
+                return ax
+    return None
+
+
+def tensor_cost(axis_a: Optional[str], axis_b: Optional[str]) -> Optional[int]:
+    """THE TERRAIN (Matt, 2026-10-31: "should it be tensors instead of chains?" — underneath them): the
+    scaffold's own distance between two axes, by the floor's metric (ledger.find_closest): 1 - Jaccard over
+    their dimension sets. Scaled so proof stays cheapest — a declared road costs 1; a lateral step within
+    one axis 2; a step to an adjacent axis 3..6 by how few members they share; axes sharing NO member have
+    no terrain between them (grid.adjacent's rule). None when either side has no coordinates."""
+    if not axis_a or not axis_b:
+        return None
+    from . import grid
+    da, db = grid.AXIS_DIMENSIONS.get(axis_a), grid.AXIS_DIMENSIONS.get(axis_b)
+    if not da or not db:
+        return None
+    if axis_a == axis_b:
+        return 2
+    shared = da & db
+    if not shared:
+        return None
+    jaccard_distance = 1.0 - len(shared) / len(da | db)
+    return 2 + int(round(4 * jaccard_distance))
+
+
+def _edges(card: Optional[dict], rels: Optional[Set[str]]) -> List[dict]:
+    out: List[dict] = []
+    for c in ((card or {}).get("connections") or []):
+        if isinstance(c, dict) and c.get("to_card_id") and (rels is None or c.get("relationship") in rels):
+            out.append(c)
+    return out
+
+
+def _dijkstra_all(start: str, rels: Optional[Set[str]], get_card: Callable, max_nodes: int,
+                  goal: Optional[str] = None,
+                  terrain_fn: Optional[Callable[[str], Any]] = None) -> Dict[str, Any]:
+    """Single-source least-doubt search over ROADS (declared edges — a proven step each) and, when a
+    `terrain_fn` is given, the TERRAIN (the scaffold's own proximity between the cards' axes, by the
+    floor's 1 - Jaccard metric). A road is always cheaper than terrain; terrain fills the gaps where no
+    road was ever drawn. `terrain_fn(card_id)` yields candidate neighbour ids (the surface supplies it —
+    e.g. cards on the same or adjacent axes); default None = roads only, exactly as before.
+    Returns {"dist", "prev", "settled"}; stops early at `goal`; bounded by `max_nodes` settled."""
+    dist: Dict[str, int] = {start: 0}
+    prev: Dict[str, str] = {}
+    heap: List = [(0, start)]
+    settled: Set[str] = set()
+
+    def relax(n: str, nd: int, via: str) -> None:
+        if nd < dist.get(n, float("inf")):
+            dist[n] = nd
+            prev[n] = via
+            heapq.heappush(heap, (nd, n))
+
+    while heap and len(settled) < max_nodes:
+        d, cid = heapq.heappop(heap)
+        if cid in settled:
+            continue
+        settled.add(cid)
+        if goal is not None and cid == goal:
+            break
+        here = get_card(cid)
+        for e in _edges(here, rels):                                            # ROADS
+            relax(e["to_card_id"], d + edge_cost(e, get_card(e["to_card_id"])), cid)
+        if terrain_fn is not None:                                              # TERRAIN
+            ax = _card_axis(here, get_card)
+            if ax:
+                for n in terrain_fn(cid):
+                    if n == cid:
+                        continue
+                    there = get_card(n)
+                    tc = tensor_cost(ax, _card_axis(there, get_card))
+                    if tc is None:
+                        continue
+                    relax(n, d + tc + _AUTH_PENALTY.get(_authority(there), _AUTH_PENALTY_DEFAULT), cid)
+    return {"dist": dist, "prev": prev, "settled": settled}
+
+
+def shortest(start: str, goal: str, *, rels: Optional[Set[str]] = None,
+             get_card: Callable = _default_get_card, max_nodes: int = 2048,
+             terrain_fn: Optional[Callable[[str], Any]] = None) -> Optional[Dict]:
+    """Dijkstra: the LEAST-DOUBT path from `start` to `goal` over roads in `rels` (None = any), plus the
+    terrain when `terrain_fn` is given. Returns {"cost", "path": [ids]} or None if unreachable within the
+    bound. Ids only, no bodies."""
+    if start == goal:
+        return {"cost": 0, "path": [start]}
+    run = _dijkstra_all(start, rels, get_card, max_nodes, goal=goal, terrain_fn=terrain_fn)
+    if goal not in run["settled"]:
+        return None
+    path = [goal]
+    while path[-1] != start:
+        path.append(run["prev"][path[-1]])
+    return {"cost": run["dist"][goal], "path": list(reversed(path))}
+
+
+def intersect_weighted(a_start: str, b_start: str, *, rels: Optional[Set[str]] = None,
+                       get_card: Callable = _default_get_card, max_nodes: int = 1024,
+                       terrain_fn: Optional[Callable[[str], Any]] = None) -> Optional[Dict]:
+    """Where two chains connect by LEAST DOUBT: the shared card minimising cost_a + cost_b (Dijkstra from
+    each start, over roads and — with `terrain_fn` — the terrain). `intersect` answers by fewest hops;
+    this answers by the most trustworthy meeting. Returns {"at", "cost_a", "cost_b", "cost"} or None.
+    Ties break on the smaller id (deterministic)."""
+    da = _dijkstra_all(a_start, rels, get_card, max_nodes, terrain_fn=terrain_fn)["dist"]
+    db = _dijkstra_all(b_start, rels, get_card, max_nodes, terrain_fn=terrain_fn)["dist"]
+    best: Optional[Dict] = None
+    for cid, ca in da.items():
+        if cid in db:
+            tot = ca + db[cid]
+            if best is None or tot < best["cost"] or (tot == best["cost"] and cid < best["at"]):
+                best = {"at": cid, "cost_a": ca, "cost_b": db[cid], "cost": tot}
+    return best
+
+
+def nearest_floor(start: str, floors: Optional[List[str]] = None, *, rels: Optional[Set[str]] = None,
+                  get_card: Callable = _default_get_card, max_nodes: int = 2048,
+                  terrain_fn: Optional[Callable[[str], Any]] = None) -> Optional[Dict]:
+    """The proven FLOOR this card stands nearest to, by least doubt — the trail from a claim to the ground
+    that holds it (roads, plus the terrain when `terrain_fn` is given). Returns {"floor", "cost"} or None
+    if no floor is reachable within the bound."""
+    targets = list(floors if floors is not None else FLOORS)
+    dist = _dijkstra_all(start, rels, get_card, max_nodes, terrain_fn=terrain_fn)["dist"]
+    hits = [(dist[f], f) for f in targets if f in dist]
+    if not hits:
+        return None
+    cost, floor = min(hits)
+    return {"floor": floor, "cost": cost}
 
 
 def floor_map(floor: str, *, get_card: Optional[Callable] = None, max_nodes: int = 512) -> Optional[Dict]:

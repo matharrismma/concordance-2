@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, FrozenSet, List, Tuple
+from typing import Dict, FrozenSet, List, Optional, Tuple
 
 
 # The seven scaffold members uncovered so far. Each axis lives at a position
@@ -729,6 +729,75 @@ def canonical(name: str) -> str:
     """Resolve an axis name to its canonical form. Returns the input
     unchanged if no alias exists."""
     return ALIASES.get(name, name)
+
+
+# ── EVERYTHING ON AXES (Matt, 2026-10-31: "everything should be on axes") ─────────────────────────
+# The keeping names its shelves and source domains in a vocabulary wider than the 117 axes (dictionary,
+# gutenberg, trades, hebrew_ot, ...). These tables put every such name ON the axis it sits on, so a card's
+# terrain coordinates (chains.tensor_cost) exist wherever the subject does. Measured against the live keeping
+# (942,340 cards / 129 shelves, 2026-10-31): source.domain agrees with the shelf on 146,729 of 146,806 on-grid
+# cards, so the per-card domain is the finer signal and leads; the shelf follows; the confessional authority
+# tiers and the card kinds name their ground where neither does. A name whose SUBJECT has no axis yet
+# (literature, psychology, sociology, survival) is deliberately absent — an honest gap, not a forced fit;
+# so is a CATCH-ALL that names no subject (reference, practical, sources, commons, access) — those are placed
+# per card at their seed, never by shelf. `axis_of` returns None and the card connects by declared roads alone.
+#
+# shelf / source.domain vocabulary → the axis it sits on (a name that IS an axis or alias never appears here)
+SHELF_AXES: Dict[str, str] = {
+    # the Word, its languages, its study
+    "hebrew": "scripture_anchors", "hebrew_ot": "scripture_anchors", "greek": "scripture_anchors",
+    "greek_nt": "scripture_anchors", "commentary": "scripture_anchors", "topical": "scripture_anchors",
+    "encyclopedia": "scripture_anchors",      # ISBE + Easton — Bible encyclopedias
+    "codex": "theology_doctrine", "patristics": "theology_doctrine", "sermons": "theology_doctrine",
+    "churches": "theology_doctrine", "foreshadows": "theology_doctrine", "religion": "theology_doctrine",
+    "fieldkit": "theology_doctrine",          # the discipleship deck (One Master, Hear + Do)
+    "atlas": "theology_doctrine", "hymns": "music_theory",
+    # language
+    "dictionary": "linguistics", "pronunciation": "linguistics", "etymology": "linguistics",
+    "lexicon": "linguistics", "languages": "linguistics",
+    # the sciences and their reference works
+    "taxonomy": "biology", "regulation": "biology", "activities": "exercise_science",
+    "rfcs": "networking", "communications": "networking", "connectivity": "networking",
+    "oeis": "mathematics", "sequences": "mathematics", "millennium": "mathematics", "forms": "mathematics",
+    "calculations": "mathematics", "theories": "mathematics", "bridges": "mathematics",
+    "science": "physics", "systems": "physics", "unit_conversion": "physics_dimensional",
+    "timekeeping": "geography", "countries": "geography", "navigation": "geography",
+    "first_aid": "medicine", "sanitation": "medicine", "apothecary": "medicine",
+    "recipes": "nutrition", "water": "hydrology",
+    "trades": "construction", "maker": "manufacturing",
+    "data": "computer_science", "tools": "cryptography",
+    # people and principle
+    "builders": "history_chronology", "history of ideas": "history_chronology",
+    "strategy": "governance",                 # the principles of those who led — statecraft, war, enterprise
+    "classics": "philosophy", "curriculum": "philosophy",   # the great books; Aesop's lessons (ethics)
+    "chess": "sports_analytics",
+    # the engine's own ground (META_AXES)
+    "the-keeping": "layer_zero_grounding", "spine": "layer_zero_grounding", "playbook": "layer_zero_grounding",
+    "almanac": "layer_zero_grounding", "domains": "layer_zero_grounding", "concepts": "layer_zero_grounding",
+}
+# source.authority_tier → the ground a confessional source stands on (scripture quotes the Word; creeds,
+# catechisms and the fathers confess doctrine) — used when neither domain nor shelf names an axis
+TIER_AXES: Dict[str, str] = {
+    "scripture": "scripture_anchors", "creed": "theology_doctrine", "catechism": "theology_doctrine",
+    "father": "theology_doctrine",
+}
+# card kind → axis, for the kinds that carry no shelf at all (Easton's entries; devotional reflections)
+KIND_AXES: Dict[str, str] = {
+    "easton": "scripture_anchors", "reflection": "theology_doctrine", "sermon": "theology_doctrine",
+}
+
+
+def axis_of(name: Optional[str]) -> Optional[str]:
+    """The canonical AXIS a shelf / domain name sits on, or None when its subject has no axis yet. An axis or
+    alias resolves through `canonical`; the wider keeping vocabulary through SHELF_AXES. Never guesses."""
+    n = (name or "").strip().lower()
+    if not n:
+        return None
+    c = canonical(n)
+    if c in AXIS_DIMENSIONS:
+        return c
+    c = canonical(SHELF_AXES.get(n, ""))
+    return c if c in AXIS_DIMENSIONS else None
 
 
 def dimension_axes(dimension: str) -> List[str]:
