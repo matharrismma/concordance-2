@@ -430,6 +430,28 @@ def test_roster_lists_all_pullable_experts():
     assert all(x["id"].startswith("face_") and x["name"] for x in r)
 
 
+def test_conductor_convenes_a_panel_for_a_manysided_request():
+    out = faces.convene("I lost my job, I can't afford rent, and I'm losing my faith", k=3,
+                        crisis_fn=lambda t: False, search_fn=lambda q, shelves=None, limit=6: [],
+                        discern_fn=lambda t: {"claim": None}, faculty_fn=lambda f, t: None)
+    ids = {p["id"] for p in out["panel"]}
+    assert out["ok"] and out["convened"] >= 2
+    assert "face_social_worker" in ids and "face_shepherd" in ids   # hardship + faith, together
+    scores = [p["score"] for p in out["panel"]]
+    assert scores == sorted(scores, reverse=True)                   # best-fit leads
+    assert out["lead"] == out["panel"][0]["expert"]
+
+
+def test_convene_seats_no_expert_where_none_fits():
+    out = faces.convene("the weather is nice")
+    assert out["ok"] and out["convened"] == 0 and out["panel"] == []
+
+
+def test_physician_catches_sick_and_doctor():
+    """Benchmark-earned: 'sick' / 'doctor' must reach the Physician (it scored 0 before)."""
+    assert faces.route("I'm sick and I can't afford to see a doctor") == "face_physician"
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

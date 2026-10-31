@@ -2160,9 +2160,13 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         text = str(b.get("text") or "").strip()
         if not text:
             return _err(400, "text required")
-        fid = (b.get("face") or "").strip() or _faces.route(text)
+        # pull a named expert (id, full name, or bare name — resolved by the Conductor), else direct it
+        face_in = (b.get("face") or "").strip()
+        fid = _faces._resolve_expert(face_in) if face_in else _faces.route(text)
         if not fid:
-            return _err(404, "no face fits this request — use the ordinary front door (POST /ask)", "NO_FACE")
+            why = (f"no expert named {face_in!r} — see GET /faces for the roster" if face_in
+                   else "no face fits this request — use the ordinary front door (POST /ask)")
+            return _err(404, why, "NO_FACE")
         return _ok(_faces.compose(fid, text, config))
 
     # ── BYOM — bring your own model. An OPTIONAL, gated EXTERNAL worker: the user's OpenAI-compatible

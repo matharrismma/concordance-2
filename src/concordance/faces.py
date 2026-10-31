@@ -312,9 +312,10 @@ _FACES: Dict[str, Dict[str, Any]] = {
     },
     "face_physician": {
         "name": "the Physician",
-        "scope": ["symptom", "symptoms", "illness", "disease", "injury", "medication", "medicine",
-                  "dose", "dosage", "pain", "fever", "rash", "infection", "treatment", "diagnosis",
-                  "what are the symptoms", "is it serious", "wound"],
+        "scope": ["symptom", "symptoms", "sick", "ill", "unwell", "illness", "disease", "injury",
+                  "hurt", "medication", "medicine", "doctor", "see a doctor", "dose", "dosage", "pain",
+                  "fever", "rash", "infection", "treatment", "diagnosis", "what are the symptoms",
+                  "is it serious", "wound"],
         "shelves": {"medicine", "first_aid", "apothecary", "nutrition"},
         "verifiers": [],
         "discernment": False,
@@ -533,6 +534,26 @@ def direct(text: str, expert: Optional[str] = None, config: Any = None, **kw) ->
         how = "directed"
     served = compose(fid, text, config, **kw)
     return {"ok": True, "routed": fid, "expert": served.get("name"), "how": how, "served": served}
+
+
+def convene(text: str, k: int = 3, config: Any = None, **kw) -> Dict[str, Any]:
+    """THE CONDUCTOR CONVENES A PANEL — for a many-sided request, seat the top-k experts whose scope
+    actually fits (by scope-overlap score), compose each, and return them combined (best-fit leads).
+    This is experts combined BY an expert: the Conductor selects and orders the panel; each member
+    still composes deterministically over the keeping, and no expert with zero overlap is ever seated
+    (nothing is forced). Returns {ok, convened, lead, panel:[{id, expert, score, served}], means}."""
+    scores = _scores(text)
+    seated = sorted(((s, fid) for fid, s in scores.items() if s > 0), key=lambda p: (-p[0], p[1]))
+    seated = seated[: max(1, int(k))]
+    if not seated:
+        return {"ok": True, "convened": 0, "lead": None, "panel": [],
+                "means": "no expert's scope fits — the front door answers this one"}
+    panel: List[Dict[str, Any]] = []
+    for s, fid in seated:
+        served = compose(fid, text, config, **kw)
+        panel.append({"id": fid, "expert": served.get("name"), "score": s, "served": served})
+    return {"ok": True, "convened": len(panel), "lead": panel[0]["expert"], "panel": panel,
+            "means": "experts combined by the Conductor; the best-fit leads, the rest inform"}
 
 
 def _faculty(face: Dict[str, Any], text: str) -> Any:
