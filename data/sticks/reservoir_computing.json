@@ -1,0 +1,194 @@
+{
+ "schema": 1,
+ "name": "reservoir_computing",
+ "aliases": [
+  "reservoir_computing",
+  "reservoir",
+  "echo_state",
+  "readout"
+ ],
+ "doc": "RESERVOIR COMPUTING - a fixed substrate, a trained readout; and ZERO TIMES INFINITY, the trick of the Riemann sum\n(Matt, 2026-10-31: \"Reservoir computing and zero x infinity the trick of Reimann Sum\" - \"mint the card, but also find our use\nof reservoir computing. Any of the things that fit mean they are efficient.\"). A reservoir computer never trains its\ndynamical system; only a LINEAR READOUT learns (Jaeger 2001; Maass 2002). The readout is a weighted sum - a Riemann\nsum - and a Riemann sum is a number only because the width is BOUND to the count (dx = (b-a)/n): unbind them and 0 x\ninfinity is not a number. SEALED: the trained fraction of a reservoir (1/101), the left-sum and midpoint errors of x^2\n(orders 1/n and 1/n^2), the Darboux gap (1/n), the unbound sum (diverges), the Monte Carlo rate (1/sqrt n), the\npheromone trail's evaporation (0.25 after two half-lives), the trail store's bytes, and the LoRA adapter's trained\nfraction (1/272). WHERE IT BEARS WEIGHT: the keeping is the reservoir, the faces and trails are the readout. Rests on\nthe computer, the mind, the logarithm, calculus and measure theory. Idempotent.",
+ "seals": [
+  {
+   "key": "fraction",
+   "nid": "trained_fraction_hundred_unit_reservoir_one_input_one_readout",
+   "expr": "101/(100*100 + 100 + 101)",
+   "value": 0.00990099009901,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "left",
+   "nid": "riemann_left_sum_error_x_squared_ten_strips",
+   "expr": "1/(2*10) - 1/(6*10**2)",
+   "value": 0.0483333333333,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "mid",
+   "nid": "riemann_midpoint_error_x_squared_ten_strips",
+   "expr": "1/(12*10**2)",
+   "value": 0.000833333333333,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "darboux",
+   "nid": "darboux_gap_x_squared_unit_interval_ten_strips",
+   "expr": "(1 - 0)/10",
+   "value": 0.1,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "unbound",
+   "nid": "unbound_width_one_over_root_n_left_sum_x_squared_ten_thousand_strips",
+   "expr": "sqrt(10000)*(10000 - 1)*(2*10000 - 1)/(6*10000**2)",
+   "value": 33.3283335,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "root",
+   "nid": "monte_carlo_error_halves_when_samples_quadruple",
+   "expr": "(1/sqrt(400))/(1/sqrt(100))",
+   "value": 0.5,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "evap",
+   "nid": "stigmergy_trail_after_sixty_days_at_thirty_day_half_life",
+   "expr": "0.5**(60/30)",
+   "value": 0.25,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "trail",
+   "nid": "stigmergy_bytes_per_trail_measured_on_the_box_2026_10_31",
+   "expr": "199872/4000",
+   "value": 49.968,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "lora",
+   "nid": "lora_rank_sixteen_trainable_weights_four_projections_twenty_four_layers_width_2048",
+   "expr": "24*4*16*(2048 + 2048)",
+   "value": 6291456,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "base",
+   "nid": "smollm2_parameter_count_from_its_config_tied_embeddings_norms_omitted",
+   "expr": "49152*2048 + 24*(4*2048**2 + 3*2048*8192)",
+   "value": 1711276032,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "lorafrac",
+   "nid": "lora_trained_fraction_of_the_frozen_base_one_over_272",
+   "expr": "(24*4*16*(2048 + 2048))/(49152*2048 + 24*(4*2048**2 + 3*2048*8192))",
+   "value": 0.00367647058824,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Reservoir computing - a fixed substrate, a trained readout; zero times infinity, the trick of the Riemann sum",
+   "by": "tools/tick.py reservoir_computing",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[reservoir computing - the substrate is fixed, only the readout learns] A reservoir computer drives a FIXED, untrained, high-dimensional dynamical system (a random recurrent network) with the input and trains ONLY a linear readout y = sum_i w_i x_i over its state, by linear regression - one closed-form solve, no gradient through the substrate, nothing in the substrate ever changes so nothing in it is ever forgotten. Two independent origins: Jaeger's echo state networks (the ECHO STATE PROPERTY - the state is a fading function of recent input) and the liquid state machine of Maass, Natschlaeger and Markram (a cortical microcircuit as the liquid, readouts as the only learners). This is the proof-of-shape for an engine with no model at the core: a rich fixed substrate plus a thin trained readout is a complete computer.",
+     "source": "H. Jaeger, 'The echo state approach to analysing and training recurrent neural networks', GMD Report 148 (2001); W. Maass, T. Natschlaeger, H. Markram, 'Real-time computing without stable states', Neural Computation 14 (2002) 2531-2560"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the trained fraction, SEALED] Of a 100-unit reservoir with one input and one output, the trained weights are the readout's 101 out of 100*100 + 100 + 101 = 10,201 in all: exactly 1/101 (sealed), under one percent. The 10,100 fixed weights are never touched. That is the efficiency in one number - training is one linear solve over N+1 weights however rich the reservoir, and it is the same number whether the reservoir is silicon, water, or a keeping of cards.",
+     "seal": "fraction"
+    },
+    {
+     "kind": "note",
+     "claim": "[physical reservoirs - a bucket of water computes] Fernando and Sojakka drove a tank of water with the input, photographed the ripples, and trained a linear readout on the picture: the water was the reservoir and it solved XOR and spoken-digit recognition. Tanaka et al. review the physical reservoirs since - silicon circuits, optical delay loops, spintronic oscillators, soft bodies, memristors. The substrate can be hardware and the readout can be analog; what must hold is rich dynamics and fading memory. Ties card_floor_computer_science and card_floor_the_mind.",
+     "source": "C. Fernando, S. Sojakka, 'Pattern recognition in a bucket', ECAL 2003, LNCS 2801, 588-597; G. Tanaka et al., 'Recent advances in physical reservoir computing: a review', Neural Networks 115 (2019) 100-123, arXiv:1808.04962"
+    },
+    {
+     "kind": "note",
+     "claim": "[measured - a fixed random reservoir remembers; the same readout alone does not] tools/reservoir_demo.py (pure Python, seeded, no dependency): N = 100 units, density 0.1, spectral radius 0.9, i.i.d. uniform input, one ridge readout per delay k trained to reconstruct u(t-k). Memory capacity (the sum of held-out r^2 over delays) = 11.64, within Jaeger's bound MC <= N = 100; r^2 = 0.998 at delay 1, 0.96 at 5, 0.76 at 10; the horizon where r^2 falls below one half is 13 steps. The CONTROL - the identical readout on the raw input [u(t), 1] with no reservoir - scores 0.07. Trained weights 101 per readout, fixed 10,100; 5 seconds. Measured, not sealed by a verifier: a reservoir verifier is a WANT; the script is the re-check.",
+     "source": "tools/reservoir_demo.py (seed 2026, 2026-10-31); H. Jaeger, 'Short term memory in echo state networks', GMD Report 152 (2002) - MC <= N"
+    },
+    {
+     "kind": "instance",
+     "claim": "[zero times infinity - the Riemann sum is a number only because width is bound to count, SEALED] sum f(x_i) dx: each term goes to zero, the count goes to infinity, and 0 x infinity is indeterminate. It converges to the integral because the width and the count are one quantity, dx = (b-a)/n. For x^2 on [0,1] with ten strips the left sum misses 1/3 by exactly 1/(2*10) - 1/(6*10^2) = 0.04833 (sealed) - the error is of order 1/n. Riemann's 1854 Habilitationsschrift generalized Cauchy's sums to discontinuous functions; the binding is the whole trick.",
+     "seal": "left"
+    },
+    {
+     "kind": "instance",
+     "claim": "[centre the strips and the error falls to 1/(12 n^2), SEALED] The midpoint sum of x^2 over ten strips misses 1/3 by 1/(12*10^2) = 0.000833 (sealed) - order 1/n^2, against the left sum's 1/n. The same count, an ordered and centred partition, sixty times the accuracy. Measured orders on the same function: left 1.00, midpoint 2.00.",
+     "seal": "mid"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Darboux - the integral exists iff floor and ceiling meet, SEALED] For a monotone function on [0,1] the upper sum minus the lower sum is (f(1) - f(0))/n: for x^2 with ten strips, 0.1 (sealed); it closes at 1/n. Darboux (1875) proved a function is integrable exactly when the infimum of the upper sums equals the supremum of the lower sums. The engine's refusal is this gap: a verdict exists only where the proven floor meets the claimed ceiling, and finer marks (finer strips) are what close it.",
+     "seal": "darboux"
+    },
+    {
+     "kind": "instance",
+     "claim": "[unbind the width and the sum runs away, SEALED] Take dx = 1/sqrt(n) instead of 1/n: the 'sum' of x^2 over ten thousand strips is sqrt(n)*(n-1)*(2n-1)/(6 n^2) = 33.33 (sealed; 0.9 at ten strips, 3.3 at a hundred, 10.5 at a thousand) - it diverges. 0 x infinity with no binding is not a number. In a readout the same failure is a weight that does not shrink with the count: a hub that wins every meeting. The map's walker measured exactly that and prices it (chains._hub_bits).",
+     "seal": "unbound"
+    },
+    {
+     "kind": "instance",
+     "claim": "[ordered beats random - Monte Carlo halves its error only when the samples quadruple, SEALED] (1/sqrt 400)/(1/sqrt 100) = 0.5 (sealed): the law of large numbers gives order 1/sqrt(n), against the ordered partition's 1/n and the centred partition's 1/n^2. Measured on x^2 (200 repetitions, 2026-10-31): left 1.00, midpoint 2.00, Monte Carlo 0.50. The axes are an ordered partition of the keeping; random sampling is the slow general check (tools/mc_paths.py), never the engine. trajectory.py narrows a path at this rate - the Wilson interval's width shrinks like 1/sqrt(n).",
+     "seal": "root"
+    },
+    {
+     "kind": "instance",
+     "claim": "[WHERE IT BEARS WEIGHT - the pheromone trail is an echo state, SEALED] stigmergy.py keeps one decaying number per card: a retrieval deposits, every trail evaporates at rho = 0.5 per thirty-day half-life, so a trail not refreshed for sixty days keeps 0.5^2 = 0.25 (sealed). That is the echo state property - the state is a fading function of recent input and never saturates. The readout is a capped boost (at most 1.6x, within the tier a card already earned, never across). The cards - the reservoir - are never retrained; only the trail moves.",
+     "seal": "evap"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the whole learned readout of retrieval is fifty bytes a trail, SEALED] Measured on the box, 2026-10-31: 4,000 resident trails (the bounded cap), 199,872 bytes - 199,872/4,000 = 49.97 bytes per trail (sealed arithmetic on the measured store). Two hundred kilobytes is the entire learned part of a keeping of 933,479 cards. Efficient for the reservoir reason: the substrate is fixed, the readout is the only thing that moves, and it is small.",
+     "seal": "trail"
+    },
+    {
+     "kind": "note",
+     "claim": "[the other fits - each efficient for the same reason: the substrate is fixed, the readout is thin] physiology.py - one decayed load tally per caste (six-hour half-life) steers division of labor: eighteen numbers. repellent.py - the negative trail (sixty-day half-life). trajectory.py - three numbers per path (successes, trials, an EWMA) under the Wilson floor; the path narrows with use. faces.py - a linear readout over 308 scope words; the winning-ticket mask prunes that readout and never the keeping. chains.py - a fixed map read out through cost bands priced from the measured histogram. training.py - the teaching loop reinforces the trail and mints nothing itself: it trains the readout, never the reservoir. quorum, eldership, inhibition - linear counts over fixed hits that never change the lead. In every case nothing in the core is trained but the readout; this is why an engine with no model at the core computes, and why each of these is cheap.",
+     "source": "src/concordance/{stigmergy,physiology,repellent,trajectory,faces,ticket,chains,training,quorum,eldership,inhibition}.py; card_doctrine_reservoir_manifold (Matt Harris: value is in the routing layer, not the engine)"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the fuel layer is the same shape - a frozen base, a rank-16 adapter, SEALED] tools/face_lora.py freezes SmolLM2-1.7B-Instruct and trains LoRA adapters of rank 16 on the q, k, v and o projections; with hidden width 2048 over 24 layers that is 24*4*16*(2048+2048) = 6,291,456 trainable weights (sealed). The base is the reservoir; the adapter is the readout. Fuel, never core.",
+     "seal": "lora"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the base, counted from its own config, SEALED] From the published config (hidden 2048, 24 layers, 32 attention heads and 32 key-value heads so every projection is 2048 x 2048, MLP width 8192, vocabulary 49,152, tied embeddings): 49152*2048 + 24*(4*2048^2 + 3*2048*8192) = 1,711,276,032 parameters (sealed; the layer norms, about a hundred thousand, are omitted) - the 1.7B of the name, recomputed rather than trusted.",
+     "seal": "base"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the trained fraction of the fuel, SEALED] 6,291,456 / 1,711,276,032 = 1/272 exactly = 0.37 percent (sealed). The same number as the reservoir's 1/101, one scale up: train the thin readout, never the substrate.",
+     "seal": "lorafrac"
+    },
+    {
+     "kind": "note",
+     "claim": "[the boundary - what does not fit] Anything that trains the substrate. A language model inside the answering loop would be retraining the reservoir with every answer, and nothing it produced could be sealed; it is refused at the core and admitted only as fuel behind the airlock (byom.py). And the readout must be BOUND: every weight shrinks with the count (inverse document frequency, the Born-rule routing confidence, the common-core dedup that never counts the same slice twice) or it is a hub and the sum runs away - the sealed unbound mark above. A fit means efficient; an unbound readout means a hub, and a trained substrate means a model.",
+     "source": "card_doctrine_reservoir_manifold; src/concordance/byom.py; src/concordance/airlock.py; the sealed marks on this stick"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Reservoir computing rests on the computer (card_floor_computer_science - a Turing machine with a fixed part and a trained part), the mind (card_floor_the_mind - Maass's liquid is a cortical column; Jaeger's echo is fading memory) and the logarithm (card_floor_logarithm - fading memory is e^(-t/tau), a half-life is ln 2 over the rate). The Riemann sum rests on calculus and on measure theory (card_theory_measure_theory__lebesgue_integration - Lebesgue partitions the range where Riemann partitions the domain); the Monte Carlo rate rests on the law of large numbers. Ties tools/mc_paths.py and the trajectory of a path.",
+     "source": "the one map; card_floor_computer_science; card_floor_the_mind; card_floor_logarithm; card_theory_measure_theory__lebesgue_integration"
+    }
+   ]
+  }
+ ]
+}
