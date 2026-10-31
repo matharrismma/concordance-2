@@ -748,7 +748,10 @@ SHELF_AXES: Dict[str, str] = {
     "hebrew": "scripture_anchors", "hebrew_ot": "scripture_anchors", "greek": "scripture_anchors",
     "greek_nt": "scripture_anchors", "commentary": "scripture_anchors", "topical": "scripture_anchors",
     "encyclopedia": "scripture_anchors",      # ISBE + Easton — Bible encyclopedias
-    "codex": "theology_doctrine", "patristics": "theology_doctrine", "sermons": "theology_doctrine",
+    # NOT codex: a MIXED shelf — its spine says "the core theological work" but the data holds the engine's chart
+    # and floor cards too (e, the logarithm, the Weil conjectures) as engine_derived with no domain; the
+    # scripture / catechism tiers place the theological half, the charts want a source.domain at their seed
+    "patristics": "theology_doctrine", "sermons": "theology_doctrine",
     "churches": "theology_doctrine", "foreshadows": "theology_doctrine", "religion": "theology_doctrine",
     "fieldkit": "theology_doctrine",          # the discipleship deck (One Master, Hear + Do)
     "atlas": "theology_doctrine", "hymns": "music_theory",

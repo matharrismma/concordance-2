@@ -92,8 +92,12 @@ def test_shortest_returns_cost_and_none_when_unreachable():
 
 def test_intersect_weighted_finds_the_least_doubt_meeting():
     w = chains.intersect_weighted("fermi", "maxwell", get_card=_get)
-    assert w and w["at"] == "electroweak" and w["cost"] == w["cost_a"] + w["cost_b"]
+    assert w and w["at"] == "electroweak" and w["cost"] == w["cost_a"] + w["cost_b"] + w["joint_bits"]
     assert chains.intersect("fermi", "maxwell", get_card=_get) == "electroweak"   # BFS still agrees here
+    # a joint is a THIRD card: when b lies on a's own lineage the meeting is still the card beyond, not b itself
+    # (live, 2026-10-31: e reached the trig parts directly and the "meeting" came back as the trig card at cost_b 0)
+    w = chains.intersect_weighted("fermi", "parity", get_card=_get)
+    assert w and w["at"] == "electroweak" and w["cost_b"] > 0
 
 
 def test_nearest_floor_by_least_doubt():
@@ -186,6 +190,57 @@ def test_everything_on_axes_the_ladder():
     assert ax(g["book"], g.get) is None                                      # but nothing inherits that ground
     # an honest gap: a subject with no axis yet is None, never forced onto a neighbour
     assert ax({"shelf": "gutenberg", "source": {"domain": "literature"}}) is None
+    # codex is a MIXED shelf: the tiers place its theology; its engine-derived charts (e, the logarithm) stay None
+    assert ax({"shelf": "codex", "source": {"authority_tier": "scripture"}}) == "scripture_anchors"
+    assert ax({"shelf": "codex", "source": {"authority_tier": "engine_derived"}}) is None
+
+
+def test_terrain_never_loses_a_road():
+    """2026-10-31, live: with terrain on, e -> Euler's identity came back UNREACHABLE under the node bound — the
+    terrain widened the frontier and the bound cut the road off. Information added must never lose a path."""
+    g = {"a": _tcard("a", "physics", [_edge("b")]), "b": _tcard("b", "physics", [_edge("goal")]),
+         "goal": _tcard("goal", "chemistry")}
+    for i in range(40):                                       # a crowd of cheap lateral neighbours on a's axis
+        g[f"n{i}"] = _tcard(f"n{i}", "physics", [_edge(f"n{(i + 1) % 40}")])
+    crowd = lambda cid: [f"n{i}" for i in range(40)]
+    roads = chains.shortest("a", "goal", get_card=g.get, max_nodes=6)
+    both = chains.shortest("a", "goal", get_card=g.get, max_nodes=6, terrain_fn=crowd)
+    assert roads and roads["cost"] == 2
+    assert both and both["cost"] <= roads["cost"]           # terrain can only lower doubt, never lose the road
+    # meetings too: `goal` is a sink, so roads alone have no THIRD card where a and goal meet; the terrain may
+    # supply one (a lateral neighbour both can reach) — it adds, it never removes, and it never names a start
+    assert chains.intersect_weighted("a", "goal", get_card=g.get, max_nodes=6) is None
+    w = chains.intersect_weighted("a", "goal", get_card=g.get, max_nodes=60, terrain_fn=crowd)
+    assert w is None or w["at"] not in ("a", "goal")
+
+
+def test_a_hub_costs_the_bits_it_takes_to_leave_it():
+    """Measured 2026-10-31: the keeping's cards carry a median of 1 road (p99 = 3); a card with more than 4 exits is
+    a hub, and leaving it — or meeting at it — costs log2(d/4) bits. Live case: the floor of discovery, which
+    every work paves, won every meeting by fewest hops."""
+    g = {"a": _card("a", [_edge("hub"), _edge("l1")]), "goal": _card("goal", [])}
+    g["hub"] = _card("hub", [_edge(f"x{i}") for i in range(99)] + [_edge("goal")])   # 100 exits -> ~5 bits
+    for i in range(99):
+        g[f"x{i}"] = _card(f"x{i}", [])
+    g["l1"], g["l2"], g["l3"] = _card("l1", [_edge("l2")]), _card("l2", [_edge("l3")]), _card("l3", [_edge("goal")])
+    assert chains._hub_bits(g["hub"]) == 5 and chains._hub_bits(g["l1"]) == 0 and chains._hub_bits(g["a"]) == 0
+    out = chains.shortest("a", "goal", get_card=g.get)
+    assert out["path"] == ["a", "l1", "l2", "l3", "goal"]        # 4 proven steps (4) beat 2 steps through the hub (2 + 5)
+    # a meeting at a hub is dearer than a meeting at a specific joint by the hub's bits
+    g["b"] = _card("b", [_edge("hub"), _edge("l3")])
+    w = chains.intersect_weighted("a", "b", get_card=g.get)
+    assert w["at"] == "l3" and w["joint_bits"] == 0
+
+
+def test_the_keepings_road_vocabulary_is_priced_from_the_evidence():
+    """Measured histogram (2026-10-31): the labels the keeping actually uses, banded by the claim each makes.
+    An inverse the loader grafts is priced as its forward."""
+    cost = lambda rel: chains._REL_COST.get(rel, chains._REL_COST_DEFAULT)
+    assert cost("comments_on") == cost("proof_text") == cost("charts") == 1            # the text itself / sealed
+    assert cost("cites") == cost("speaks_to") == cost("paves") == 2                   # declared and checkable
+    assert cost("bridges") == cost("same_form") == cost("see_also") == 3              # "RESONANCE, not proof"
+    assert cost("member_of") == 5 and cost("never_seen_label") == 5                   # containment / unasserted
+    assert cost("charted_by") == cost("charts") and cost("paved_by") == cost("paves") and cost("has_open_end") == cost("open_end_of")
 
 
 def test_chain_shape_for_a_reader():

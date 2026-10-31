@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import heapq
 import json
+import math
 from collections import deque
 from typing import Any, Callable, Dict, List, Optional, Set
 
@@ -202,16 +203,36 @@ def intersect(a_start: str, b_start: str, *, rels: Optional[Set[str]] = None,
 # path through loose, unverified joints is NOT nearer in trust than a 3-hop path through proven lineage.
 # These walk by MEASURED cost — the relationship the engine declared and the authority the kernel assigned
 # — never a hand-tuned guess. The shortest path is the path of least doubt.
+# Priced from the keeping's OWN road vocabulary (histogram over the corpus universe, 2026-10-31: 909k member_of,
+# 47k comments_on, 38k speaks_to, 23k see_also, 13k cites, 8k same_section, 7k shares_scripture, 3k part_of, …)
+# by the kind of claim each relationship makes — read off its own evidence text, not guessed:
+#   1  a step the map has already stood on — derivation, the parts of a proof, a worked & sealed demonstration,
+#      or the text itself (a commentary IS about its verse; an excerpt IS cut from its source)
+#   2  declared and checkable, short of proof — a citation, an index entry, an instance of a form, a counterexample
+#   3  kinship / resonance — the bridge cards say it of themselves: "held at RESONANCE, not proof of possessing the theory"
+#   5  containment and hubs (member_of a spine, shelf_anchor) — meeting at a hub is the fewest-hops answer, not the
+#      least-doubt one — and a row that asserted only "connected" (corpus._BRIDGE_REL_FALLBACK)
+# The loader grafts an inverse onto the other card (charts ↔ charted_by, paves ↔ paved_by, open_end_of ↔
+# has_open_end); an inverse is priced exactly as its forward.
 _REL_COST: Dict[str, int] = {
-    # proven lineage / structure — a step the map has already stood on
+    # 1 — stood on
     BUILDS_ON: 1, ENABLES: 1, PART_OF: 1, HAS_PART: 1, "rests_on": 1, "supports": 1,
-    # a question hanging off a floor, or a FOUND joint where two chains meet
+    "comments_on": 1, "proof_text": 1, "excerpt_of": 1, "demonstrates": 1, "demonstrated_by": 1,
+    "charts": 1, "charted_by": 1, "verified_by": 1, "inverse_of": 1,
+    # 2 — declared and checkable
     OPEN_END_OF: 2, HAS_OPEN_END: 2, CONNECTS_AT: 2,
-    # loose lateral kinship — connected, but not a proven step
+    "cites": 2, "cited_by": 2, "speaks_to": 2, "instance_of": 2, "instantiates": 2, "paves": 2, "paved_by": 2,
+    "precedes": 2, "follows": 2, "counterexample_of": 2, "limits": 2, "specializes": 2, "modulates": 2, "uses": 2,
+    "measured_by": 2, "bounded_by": 2, "falsified_by": 2, "mechanism_of": 2, "pre_registered_validation_of": 2,
+    # 3 — kinship / resonance
     "same_family": 3, "adjacent": 3, "kindred": 3, "concords_with": 3, "shares_scripture": 3,
-    "names_the_created_thing": 3,
-    # a bridge row that asserted only "connected" (corpus._BRIDGE_REL_FALLBACK)
-    "unspecified": 5,
+    "names_the_created_thing": 3, "see_also": 3, "same_section": 3, "parallels": 3, "bridges": 3, "same_form": 3,
+    "same_form_as": 3, "shares_form_with": 3, "resonates_with": 3, "figure_of": 3, "points_to": 3, "related": 3,
+    "related_to": 3, "relates_to": 3, "related_method": 3, "illuminates": 3, "complements": 3, "embodies": 3,
+    "leads_to": 3, "culminates_in": 3, "points_beyond_itself": 3, "feeds_back": 3, "nested_in": 3,
+    "grounded_in_body_by": 3, "physical_substrate_of": 3, "instance_of_one_floor": 3,
+    # 5 — containment, hubs, unasserted
+    "member_of": 5, "shelf_anchor": 5, "unspecified": 5,
 }
 _REL_COST_DEFAULT = 5                           # an unknown label is treated like an unasserted one
 _AUTH_PENALTY = {"verified": 0, "cited": 1}     # anything else is quarantined, by the kernel's own law
@@ -230,6 +251,20 @@ def edge_cost(edge: dict, to_card: Optional[dict]) -> int:
     """The measured cost of taking one edge: its declared relationship + the authority of where it lands."""
     rel = (edge or {}).get("relationship") or "unspecified"
     return _REL_COST.get(rel, _REL_COST_DEFAULT) + _AUTH_PENALTY.get(_authority(to_card), _AUTH_PENALTY_DEFAULT)
+
+
+# HUBS. Measured over the corpus universe (2026-10-31, 932,542 cards with roads): a card carries a MEDIAN of 1
+# declared road, p95 = 2, p99 = 3. A card with more exits than that is a hub (the floor of discovery that every
+# work paves; a spine that every member of a shelf hangs from), and meeting two chains at a hub — or walking
+# through one — proves little: it is the fewest-hops answer, not the least-doubt one. The doubt is the
+# information it takes to pick the right exit among d: log2(d / free) bits, free = the keeping's own p99 + 1.
+_HUB_FREE_EXITS = 4
+
+
+def _hub_bits(card: Optional[dict]) -> int:
+    """Bits of doubt a card's branching adds — 0 for a card with ≤ 4 roads (a path), log2(d/4) for a hub."""
+    d = sum(1 for e in ((card or {}).get("connections") or []) if isinstance(e, dict) and e.get("to_card_id"))
+    return int(round(math.log2(d / _HUB_FREE_EXITS))) if d > _HUB_FREE_EXITS else 0
 
 
 def _card_axis(card: Optional[dict], get_card: Optional[Callable] = None) -> Optional[str]:
@@ -301,12 +336,14 @@ def _edges(card: Optional[dict], rels: Optional[Set[str]]) -> List[dict]:
 
 def _dijkstra_all(start: str, rels: Optional[Set[str]], get_card: Callable, max_nodes: int,
                   goal: Optional[str] = None,
-                  terrain_fn: Optional[Callable[[str], Any]] = None) -> Dict[str, Any]:
+                  terrain_fn: Optional[Callable[[str], Any]] = None,
+                  max_cost: Optional[int] = None) -> Dict[str, Any]:
     """Single-source least-doubt search over ROADS (declared edges — a proven step each) and, when a
     `terrain_fn` is given, the TERRAIN (the scaffold's own proximity between the cards' axes, by the
     floor's 1 - Jaccard metric). A road is always cheaper than terrain; terrain fills the gaps where no
     road was ever drawn. `terrain_fn(card_id)` yields candidate neighbour ids (the surface supplies it —
     e.g. cards on the same or adjacent axes); default None = roads only, exactly as before.
+    `max_cost` prunes every relaxation beyond it (a ceiling a cheaper answer already set).
     Returns {"dist", "prev", "settled"}; stops early at `goal`; bounded by `max_nodes` settled."""
     dist: Dict[str, int] = {start: 0}
     prev: Dict[str, str] = {}
@@ -314,6 +351,8 @@ def _dijkstra_all(start: str, rels: Optional[Set[str]], get_card: Callable, max_
     settled: Set[str] = set()
 
     def relax(n: str, nd: int, via: str) -> None:
+        if max_cost is not None and nd > max_cost:
+            return
         if nd < dist.get(n, float("inf")):
             dist[n] = nd
             prev[n] = via
@@ -327,8 +366,9 @@ def _dijkstra_all(start: str, rels: Optional[Set[str]], get_card: Callable, max_
         if goal is not None and cid == goal:
             break
         here = get_card(cid)
+        hub = _hub_bits(here)                                                   # picking an exit from a hub costs bits
         for e in _edges(here, rels):                                            # ROADS
-            relax(e["to_card_id"], d + edge_cost(e, get_card(e["to_card_id"])), cid)
+            relax(e["to_card_id"], d + edge_cost(e, get_card(e["to_card_id"])) + hub, cid)
         if terrain_fn is not None:                                              # TERRAIN
             ax = _card_axis(here, get_card)
             if ax:
@@ -343,16 +383,40 @@ def _dijkstra_all(start: str, rels: Optional[Set[str]], get_card: Callable, max_
     return {"dist": dist, "prev": prev, "settled": settled}
 
 
+def _search(start: str, rels: Optional[Set[str]], get_card: Callable, max_nodes: int,
+            terrain_fn: Optional[Callable[[str], Any]], goal: Optional[str] = None,
+            ceiling: Optional[int] = None) -> Dict[str, Any]:
+    """Roads first, then terrain UNDER the roads' answer. The terrain widens the frontier, and under a node
+    bound that once made a road-reachable goal UNREACHABLE (e → Euler's identity, 2026-10-31) — information
+    added must never lose a path. So: the roads-only run sets a ceiling (its cost to `goal`, or the caller's);
+    the terrain run is pruned to that ceiling and the two distance maps merge by minimum. Terrain can only
+    lower doubt. Without `terrain_fn` this is exactly the single roads-only run."""
+    roads = _dijkstra_all(start, rels, get_card, max_nodes, goal=goal)
+    if terrain_fn is None:
+        return roads
+    cap = roads["dist"].get(goal) if goal is not None else None
+    if ceiling is not None:
+        cap = ceiling if cap is None else min(cap, ceiling)
+    terr = _dijkstra_all(start, rels, get_card, max_nodes, goal=goal, terrain_fn=terrain_fn, max_cost=cap)
+    dist, prev = dict(roads["dist"]), dict(roads["prev"])
+    for cid, d in terr["dist"].items():
+        if d < dist.get(cid, float("inf")):
+            dist[cid] = d
+            if cid in terr["prev"]:
+                prev[cid] = terr["prev"][cid]
+    return {"dist": dist, "prev": prev, "settled": roads["settled"] | terr["settled"]}
+
+
 def shortest(start: str, goal: str, *, rels: Optional[Set[str]] = None,
              get_card: Callable = _default_get_card, max_nodes: int = 2048,
              terrain_fn: Optional[Callable[[str], Any]] = None) -> Optional[Dict]:
     """Dijkstra: the LEAST-DOUBT path from `start` to `goal` over roads in `rels` (None = any), plus the
-    terrain when `terrain_fn` is given. Returns {"cost", "path": [ids]} or None if unreachable within the
-    bound. Ids only, no bodies."""
+    terrain when `terrain_fn` is given (never dearer than roads alone — see `_search`). Returns
+    {"cost", "path": [ids]} or None if unreachable within the bound. Ids only, no bodies."""
     if start == goal:
         return {"cost": 0, "path": [start]}
-    run = _dijkstra_all(start, rels, get_card, max_nodes, goal=goal, terrain_fn=terrain_fn)
-    if goal not in run["settled"]:
+    run = _search(start, rels, get_card, max_nodes, terrain_fn, goal=goal)
+    if goal not in run["dist"]:
         return None
     path = [goal]
     while path[-1] != start:
@@ -364,17 +428,19 @@ def intersect_weighted(a_start: str, b_start: str, *, rels: Optional[Set[str]] =
                        get_card: Callable = _default_get_card, max_nodes: int = 1024,
                        terrain_fn: Optional[Callable[[str], Any]] = None) -> Optional[Dict]:
     """Where two chains connect by LEAST DOUBT: the shared card minimising cost_a + cost_b (Dijkstra from
-    each start, over roads and — with `terrain_fn` — the terrain). `intersect` answers by fewest hops;
-    this answers by the most trustworthy meeting. Returns {"at", "cost_a", "cost_b", "cost"} or None.
-    Ties break on the smaller id (deterministic)."""
-    da = _dijkstra_all(a_start, rels, get_card, max_nodes, terrain_fn=terrain_fn)["dist"]
-    db = _dijkstra_all(b_start, rels, get_card, max_nodes, terrain_fn=terrain_fn)["dist"]
+    each start, over roads and — with `terrain_fn` — the terrain, never dearer than roads alone).
+    `intersect` answers by fewest hops; this answers by the most trustworthy meeting: cost_a + cost_b + the
+    bits the meeting card's own branching adds (a joint at a hub proves little — see `_hub_bits`). Returns
+    {"at", "cost_a", "cost_b", "joint_bits", "cost"} or None. Ties break on the smaller id (deterministic)."""
+    da = _search(a_start, rels, get_card, max_nodes, terrain_fn)["dist"]
+    db = _search(b_start, rels, get_card, max_nodes, terrain_fn)["dist"]
     best: Optional[Dict] = None
     for cid, ca in da.items():
-        if cid in db:
-            tot = ca + db[cid]
+        if cid in db and cid not in (a_start, b_start):      # a JOINT is a third card — reaching b from a is `shortest`
+            bits = _hub_bits(get_card(cid))
+            tot = ca + db[cid] + bits
             if best is None or tot < best["cost"] or (tot == best["cost"] and cid < best["at"]):
-                best = {"at": cid, "cost_a": ca, "cost_b": db[cid], "cost": tot}
+                best = {"at": cid, "cost_a": ca, "cost_b": db[cid], "joint_bits": bits, "cost": tot}
     return best
 
 
@@ -385,7 +451,7 @@ def nearest_floor(start: str, floors: Optional[List[str]] = None, *, rels: Optio
     that holds it (roads, plus the terrain when `terrain_fn` is given). Returns {"floor", "cost"} or None
     if no floor is reachable within the bound."""
     targets = list(floors if floors is not None else FLOORS)
-    dist = _dijkstra_all(start, rels, get_card, max_nodes, terrain_fn=terrain_fn)["dist"]
+    dist = _search(start, rels, get_card, max_nodes, terrain_fn)["dist"]
     hits = [(dist[f], f) for f in targets if f in dist]
     if not hits:
         return None
