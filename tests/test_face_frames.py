@@ -53,6 +53,31 @@ def test_frames_are_scaffold_not_content():
         assert all("{" not in v for v in DATA[fid]["gap"]), fid
 
 
+def test_review_findings_stay_fixed():
+    """The 2026-10-31 review of the draft: (1) a `found` frame must not claim what KIND of thing was found — the
+    live GOD gate filled "The Word says, in {source}" with a commentary; (2) a `name` frame quotes the ask, since
+    it is a whole request; (3) the Social Worker and the Shepherd always hand off to real people (their gap and
+    manner promise it); (4) no `holds` frame asserts a judgment past the verdict (margin met, stage closed)."""
+    genre = re.compile(r"the word says|the text reads|canonical work|the theory it rests on|for exactly this", re.I)
+    judgment = re.compile(r"within margin|stage can close|the gate is met|the land agrees", re.I)
+    for fid in faces._FACES:
+        for v in DATA[fid]["found"]:
+            assert not genre.search(v), f"{fid}.found claims a genre: {v!r}"
+        for v in DATA[fid]["name"]:
+            assert "“{ask}”" in v, f"{fid}.name must quote the ask: {v!r}"
+        for v in DATA[fid]["holds"]:
+            assert not judgment.search(v), f"{fid}.holds asserts past the verdict: {v!r}"
+    assert {"face_social_worker", "face_shepherd"} <= set(faces._REFERS)
+    out = faces.compose("face_social_worker", "I have no food and no power",
+                        crisis_fn=lambda t: False, search_fn=lambda q, limit=12, **kw: [], discern_fn=lambda t, **kw: None,
+                        verify_fn=lambda t, **kw: None)
+    assert out["voice"].get("gap") and out["voice"].get("refer") in DATA["face_social_worker"]["refer"]   # the promise is kept
+    # character, not boilerplate: the once-shared generic lines are gone
+    for shared in ("Next: {step}.", "One thing I need: {ask}?", "That is from {source}, {tier}.", "{source} ({tier})."):
+        owners = [fid for fid in faces._FACES for slot in DATA[fid] for v in DATA[fid][slot] if v == shared]
+        assert len(owners) <= 1, f"{shared!r} is spoken by {owners} — one line, many faces"
+
+
 def test_a_credentialed_face_names_and_negates_its_credential():
     for fid, word in CREDENTIAL.items():
         joined = " ".join(DATA[fid]["boundary"]).lower()

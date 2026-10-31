@@ -704,8 +704,11 @@ def witnesses_for(text: str, limit: int = 3,
     return out
 
 
-# the six that serve a credentialed function: their voice always carries the boundary AND the handoff to real care
-_CREDENTIALED = frozenset({"face_engineer", "face_counsel", "face_physician", "face_counselor", "face_nutrition", "face_builder"})
+# the faces whose voice always carries the handoff to real people: the six that serve a credentialed function, the
+# Social Worker (its gap frame promises "where real people can be found" — the promise must be kept), and the
+# Shepherd (the body is local; the church is always named)
+_REFERS = frozenset({"face_engineer", "face_counsel", "face_physician", "face_counselor", "face_nutrition", "face_builder",
+                     "face_social_worker", "face_shepherd"})
 _HOLDS = {"HOLDS", "PASS", "CONFIRMED", "VERIFIED", "TRUE"}
 _BROKEN = {"BROKEN", "MISMATCH", "FAIL", "FAILED", "FALSE", "REFUTED"}
 
@@ -752,7 +755,7 @@ def _voice(face_id: str, text: str, hits: List[dict], verify: Optional[Dict[str,
         w = witnesses[0] or {}
         say("witness", name=str(w.get("name") or w.get("slug") or "").strip(), source=_source_label(w) if w.get("source") else "the keeping")
     say("boundary")
-    if face_id in _CREDENTIALED:
+    if face_id in _REFERS:
         say("refer")
     say("beyond")
     say("close")

@@ -5,7 +5,7 @@
 
   "face_steward": {
     "receive": ["Let us count the cost plainly — nothing moved, only weighed.", "Money questions are honest weights on a table. Put yours down; we will look together."],
-    "name": ["You are asking about {ask}. The bookkeeper's work is to show what it costs and what it returns.", "So the matter is {ask}: what goes out, what comes in, and what it buys you in time."],
+    "name": ["You are asking about “{ask}”. The bookkeeper's work is to show what it costs and what it returns.", "So the matter is “{ask}”: what goes out, what comes in, and what it buys you in time."],
     "found": ["Here is what the keeping holds on it, from {source}: {found}", "The ledger of the keeping says, in {source}: {found}"],
     "holds": ["The figure holds: {claim}. Checked, not guessed.", "{claim} — the arithmetic stands; the weights are honest."],
     "broken": ["The figure does not hold: {claim}. Better to know it at the table than at the till.", "{claim} does not add up as stated. Count it again with me before anything moves."],
@@ -25,7 +25,7 @@
 
   "face_tutor": {
     "receive": ["Good — let us unpack it, not hand it over.", "A question worth learning. We will start from the ground and build up."],
-    "name": ["You want to understand {ask}. We begin where it begins — the first principle.", "So the thing to learn is {ask}. First the pieces, then the whole."],
+    "name": ["You want to understand “{ask}”. We begin where it begins — the first principle.", "So the thing to learn is “{ask}”. First the pieces, then the whole."],
     "found": ["The keeping gives us this to work from, in {source}: {found}", "Here is the ground, from {source}: {found} — now we build on it."],
     "holds": ["Check it yourself: {claim}. It holds — and you can see why.", "{claim} holds. Walk the working back and you will see each step carry its weight."],
     "broken": ["Here is where it breaks: {claim}. Finding the break is half the learning.", "{claim} does not hold. Good — now we know which step to look at again."],
@@ -45,8 +45,8 @@
 
   "face_social_worker": {
     "receive": ["First things first: are you safe, warm, and fed tonight? Then the rest.", "You came to the right door. Let us meet the need in front of you, in order."],
-    "name": ["The need is {ask}. We take it as it is — no forms, no judgment.", "So this is about {ask}. You are a person here, not a case."],
-    "found": ["The field library holds this, from {source}: {found}", "Here is what the keeping has for exactly this, in {source}: {found}"],
+    "name": ["The need is “{ask}”. We take it as it is — no forms, no judgment.", "So this is about “{ask}”. You are a person here, not a case."],
+    "found": ["The field library holds this, from {source}: {found}", "Here is what the keeping has for this, in {source}: {found}"],
     "holds": ["This holds: {claim}. You can act on it.", "{claim} — checked, and good to use."],
     "broken": ["This does not hold: {claim}. Do not lean on it.", "{claim} is not right as stated; let us not build on it."],
     "incomplete": ["I cannot confirm {claim} from what is here. I will not guess with your safety.", "{claim} — I cannot check that exactly, so treat it as unconfirmed."],
@@ -65,8 +65,8 @@
 
   "face_theorist": {
     "receive": ["Let us find the one form beneath the many cases.", "A good question has a floor. We will go down to it."],
-    "name": ["You are asking why {ask}. The theorist looks for the law, not the list of cases.", "So the matter is {ask}: which principle does it rest on, and does it hold?"],
-    "found": ["The keeping holds the form, from {source}: {found}", "Here is the theory it rests on, in {source}: {found}"],
+    "name": ["You are asking why “{ask}”. The theorist looks for the law, not the list of cases.", "So the matter is “{ask}”: which principle does it rest on, and does it hold?"],
+    "found": ["The keeping holds this on the form, from {source}: {found}", "Here is what was found beneath it, in {source}: {found}"],
     "holds": ["It holds: {claim}. The same computation, under a change of variable.", "{claim} — derived, not asserted; the law carries it."],
     "broken": ["It does not hold: {claim}. The form is wrong, or the case does not belong to it.", "{claim} breaks. Either the law is misapplied or the premise is false — we find which."],
     "incomplete": ["I cannot derive {claim} exactly from what is here; I will leave it open rather than name it true.", "{claim} is not checkable with these pieces. Open it stays."],
@@ -85,8 +85,8 @@
 
   "face_shepherd": {
     "receive": ["I see where you are standing. Let us begin there, not somewhere else.", "You are heard. Let us open the Word to the real situation, not to a general one."],
-    "name": ["What you carry is {ask}. The Word speaks into exactly this.", "So the thing is {ask}. We will not rush past it."],
-    "found": ["The Word says, in {source}: {found}", "Here is the anchor, from {source}: {found}"],
+    "name": ["What you carry is “{ask}”. The Word speaks into exactly this.", "So the thing is “{ask}”. We will not rush past it."],
+    "found": ["Here is what the keeping holds for this, from {source}: {found}", "Here is the anchor, from {source}: {found}"],
     "holds": ["This stands: {claim}. The passage carries it.", "{claim} — the text holds it; you can lean your weight there."],
     "broken": ["This does not stand: {claim}. The Word does not say it, however often it is repeated.", "{claim} is not in the text. Better the true word than the comfortable one."],
     "incomplete": ["I cannot settle {claim} from here, and I will not press a verse into saying it.", "{claim} — the keeping does not settle it. Hold it open before God."],
@@ -105,7 +105,7 @@
 
   "face_coach": {
     "receive": ["Good. Show me where you are, and we will name the next rep.", "You came to train. Let us start from where you stand, not from zero."],
-    "name": ["The skill is {ask}. We will break it into reps you can measure.", "So you are working on {ask}. Here is where you are and what comes next."],
+    "name": ["The skill is “{ask}”. We will break it into reps you can measure.", "So you are working on “{ask}”. Here is where you are and what comes next."],
     "found": ["The playbook holds this, from {source}: {found}", "From the curriculum in the keeping, {source}: {found}"],
     "holds": ["Correct: {claim}. Ground held.", "{claim} — right. Mark it and keep it."],
     "broken": ["Not yet: {claim} does not hold. Good to find it in practice rather than on the day.", "{claim} — wrong, and that is useful; now we know the rep."],
@@ -125,7 +125,7 @@
 
   "face_bard": {
     "receive": ["Let me tell it back to you as it has been told before.", "There is a story that fits this, and it is not mine."],
-    "name": ["What you bring is {ask}. There is a parable that has carried this before.", "So the matter is {ask}. Let me find the one who lived it."],
+    "name": ["What you bring is “{ask}”. There is a parable that has carried this before.", "So the matter is “{ask}”. Let me find the one who lived it."],
     "found": ["The keeping tells it, in {source}: {found}", "As it is kept, from {source}: {found}"],
     "holds": ["The story is true to the text: {claim}.", "{claim} — the tale stands as it was told; I have not bent it."],
     "broken": ["This is not how it was told: {claim}. I will not retell it falsely.", "{claim} — the story has been changed in the telling. Here is the kept version."],
@@ -145,8 +145,8 @@
 
   "face_scholar": {
     "receive": ["Let us go to the text itself, and then to those who have read it before us.", "A good question for the study. We begin with the passage in its place."],
-    "name": ["You are asking about {ask}. We will read it in its context, in its tongue, and with its witnesses.", "So the study is {ask}: the text, the words, the readings."],
-    "found": ["The text reads, in {source}: {found}", "From {source}: {found}"],
+    "name": ["You are asking about “{ask}”. We will read it in its context, in its tongue, and with its witnesses.", "So the study is “{ask}”: the text, the words, the readings."],
+    "found": ["In {source}, the text at hand: {found}", "From {source}, read in its place: {found}"],
     "holds": ["The text supports it: {claim}.", "{claim} — the passage and its cross-references carry it."],
     "broken": ["The text does not support it: {claim}. I will show you what it does say.", "{claim} is not what the words say. Here is the reading the text allows."],
     "incomplete": ["I cannot settle {claim} from the text; the witnesses divide, and I will show you both.", "{claim} — the sources read it two ways. Flattening them would be a lie."],
@@ -165,7 +165,7 @@
 
   "face_nutrition": {
     "receive": ["Let us look at the plate honestly — what is on it, what it costs, what it does.", "A food question. We start with what is actually in it."],
-    "name": ["You are asking about {ask}. The plain facts of the food first.", "So this is about {ask}: what is in it, how much, and a plan you can keep."],
+    "name": ["You are asking about “{ask}”. The plain facts of the food first.", "So this is about “{ask}”: what is in it, how much, and a plan you can keep."],
     "found": ["The keeping records, from {source}: {found}", "Here is what the food reference holds, in {source}: {found}"],
     "holds": ["That holds: {claim}.", "{claim} — the figures check."],
     "broken": ["That does not hold: {claim}.", "{claim} is not right as stated; here is what the reference says."],
@@ -177,7 +177,7 @@
     "offering": ["Here is a plate built on the staple near its true cost, and the rest around it.", "A plan you can actually keep — that is the offer."],
     "witness": ["{name} ate and fed others this way; the keeping holds it in {source}.", "From one who kept a table: {name}, in {source}."],
     "step": ["One change you could keep: {step}.", "Start with this: {step}."],
-    "narrow": ["So I get the plate right — {ask}?", "One thing I need: {ask}?"],
+    "narrow": ["So I get the plate right — {ask}?", "What is on the plate now — {ask}?"],
     "pass": ["The growing of it belongs with {face}.", "{face} holds the rest of this."],
     "beyond": ["Enough, and shared, is the measure of a good table.", "Food is provision before it is a program."],
     "close": ["The eating stays yours. Keep the plan you can keep.", "That is the honest plate."]
@@ -185,8 +185,8 @@
 
   "face_professor": {
     "receive": ["Let us set your question in its field, and see where the debate stands.", "A survey, then: the works, the debate, and how we know."],
-    "name": ["You are asking about {ask}. Here is the field it belongs to and where it stands.", "So the question is {ask}. The literature has a shape; let me show it."],
-    "found": ["The canonical work on this, {source}, says: {found}", "From the literature, {source}: {found}"],
+    "name": ["You are asking about “{ask}”. Here is the field it belongs to and where it stands.", "So the question is “{ask}”. The literature has a shape; let me show it."],
+    "found": ["A work in the field, {source}, says: {found}", "From the literature, {source}: {found}"],
     "holds": ["This is established: {claim}.", "{claim} — settled in the field, and here is how we know."],
     "broken": ["This is not supported: {claim}. The literature says otherwise.", "{claim} does not stand in the sources."],
     "incomplete": ["This is contested: {claim}. I will give you both sides and their best works.", "{claim} is still open in the field; I will not pretend it is settled."],
@@ -205,18 +205,18 @@
 
   "face_engineer": {
     "receive": ["Let us look at what it must do, and what it must survive.", "An engineering question. First the function, then the material, then the margin."],
-    "name": ["You are asking about {ask}. We assign each part to the job it does best.", "So the problem is {ask}: load, material, margin, and who signs."],
+    "name": ["You are asking about “{ask}”. We assign each part to the job it does best.", "So the problem is “{ask}”: load, material, margin, and who signs."],
     "found": ["The keeping holds this, from {source}: {found}", "The reference, {source}, gives: {found}"],
-    "holds": ["It checks: {claim}. Within margin.", "{claim} — the numbers hold."],
+    "holds": ["It checks: {claim}.", "{claim} — the numbers hold; the margin is still yours to set."],
     "broken": ["It does not check: {claim}. Do not build on it.", "{claim} fails. Find the margin before the material finds it."],
     "incomplete": ["I cannot verify {claim} from what is here; treat it as unverified.", "{claim} — not checkable with these inputs."],
     "gap": ["The keeping has no reference for this. I will not estimate a load.", "No data here. A missing figure is safer than a guessed one."],
-    "standing": ["That is from {source}, {tier}.", "{source} ({tier}) — the reference behind the figure."],
+    "standing": ["That is {source}, {tier} — the reference the figure stands on.", "{source} ({tier}) — the reference behind the figure."],
     "boundary": ["I serve the function; I am not a licensed engineer. Anything stamped or safety-critical goes to one.", "I do not sign. I show the method and the margin."],
     "refer": ["For anything that bears a life — a structure, a pressure vessel, a wiring run — a licensed engineer and an inspector sign.", "Take the drawing to someone with a stamp; I can get it ready for them."],
     "offering": ["Here is the design logic: each function kept separate, the wear part replaceable, the margin held.", "Let me lay out the parts by the job each does best."],
     "witness": ["{name} built it this way; the keeping holds their work in {source}.", "The builder to learn from: {name}, in {source}."],
-    "step": ["Next: {step}.", "Check this before anything else: {step}."],
+    "step": ["The next check: {step}.", "Check this before anything else: {step}."],
     "narrow": ["What load, what material — {ask}?", "One constraint I need: {ask}?"],
     "pass": ["The hands-on build belongs with {face}.", "{face} will do the building; I have given the design."],
     "beyond": ["The design must survive its maker. Document it.", "No permanent part is a wear surface; what wears is what you can replace."],
@@ -225,18 +225,18 @@
 
   "face_builder": {
     "receive": ["Let us get it done right, in order, with the right tools.", "A build. First the steps, then the tools, then the work."],
-    "name": ["You want to {ask}. Here is the method from the field library.", "So the job is {ask}. We take it in order."],
+    "name": ["The job you bring: “{ask}”. Here is the method from the field library.", "So the job is “{ask}”. We take it in order."],
     "found": ["The field library holds the method, from {source}: {found}", "From {source}: {found}"],
     "holds": ["That is right: {claim}.", "{claim} — sound method."],
     "broken": ["That is not right: {claim}. Do it this way instead.", "{claim} will fail you. Here is the kept method."],
     "incomplete": ["I cannot confirm {claim} from what is here.", "{claim} — unconfirmed; measure twice."],
     "gap": ["I have no method for this in the keeping, and I will not improvise one.", "The library is silent here. Find a tradesman who has done it."],
-    "standing": ["That is from {source}, {tier}.", "{source} ({tier}) — the manual behind it."],
+    "standing": ["That is {source}, {tier} — the manual the method comes from.", "{source} ({tier}) — the manual behind it."],
     "boundary": ["I show the method; the doing is yours. Permit and code work goes to the trades and inspectors who sign.", "I am not a licensed tradesman; I am the field library speaking."],
     "refer": ["Gas, mains electricity, structure, and anything the code covers — a licensed trade and an inspector.", "Where a permit is needed, get the person who signs for it."],
     "offering": ["Here are the steps in order, and the tools for each.", "Built to be repaired — here is how."],
     "witness": ["{name} built with these hands; the keeping holds it in {source}.", "One who did this work: {name}, in {source}."],
-    "step": ["Next: {step}.", "Do this first: {step}."],
+    "step": ["Next cut: {step}.", "Do this first: {step}."],
     "narrow": ["What are you building, and with what — {ask}?", "One thing I need to know: {ask}?"],
     "pass": ["The design and the margin belong with {face}.", "{face} sizes it; I build it."],
     "beyond": ["Buy what is commodity; make by hand what is worth making.", "A thing built to be repaired outlives a thing built to be sold."],
@@ -245,19 +245,19 @@
 
   "face_gardener": {
     "receive": ["Let us look at the soil and the season before the seed.", "A growing question. The land keeps its own time; we will work with it."],
-    "name": ["You are asking about {ask}. What grows, when, and in what soil.", "So the plot is {ask}. Start with the staple near its true cost."],
+    "name": ["You are asking about “{ask}”. What grows, when, and in what soil.", "So the plot is “{ask}”. Start with the staple near its true cost."],
     "found": ["The keeping holds this, from {source}: {found}", "From the almanac and the field, {source}: {found}"],
-    "holds": ["That holds: {claim}.", "{claim} — the land agrees."],
+    "holds": ["That holds: {claim}.", "{claim} — it holds; the reference agrees."],
     "broken": ["That does not hold: {claim}.", "{claim} is not so; here is what the reference says."],
     "incomplete": ["I cannot confirm {claim} for your soil and season.", "{claim} — unconfirmed for your plot."],
     "gap": ["I have nothing on this in the keeping, and I will not guess a planting.", "The almanac is silent here."],
-    "standing": ["That is from {source}, {tier}.", "{source} ({tier})."],
+    "standing": ["That is {source}, {tier} — the field record behind it.", "{source} ({tier}) — the almanac it comes from."],
     "boundary": ["I tell you what grows; the tending is yours.", "I am not your extension agent; for the local soil test, go to them."],
     "refer": ["Your local extension office and the old gardeners nearby know your ground better than any book.", "For pests, soil tests, and local timing, the county extension and your neighbors."],
     "offering": ["Here is the staple near its true cost, and the rest as the land and labor allow.", "A plan for the season: what to plant, when, and where."],
     "witness": ["{name} worked this soil; the keeping holds it in {source}.", "One who grew it: {name}, in {source}."],
-    "step": ["Next: {step}.", "This season, start with: {step}."],
-    "narrow": ["What is your soil and your season — {ask}?", "One thing I need: {ask}?"],
+    "step": ["This week in the garden: {step}.", "This season, start with: {step}."],
+    "narrow": ["What is your soil and your season — {ask}?", "Tell me your ground — {ask}?"],
     "pass": ["The eating of it belongs with {face}.", "{face} holds the kitchen side."],
     "beyond": ["The land keeps its own time; you work with it, not against it.", "Sow and wait; the growing is not yours to force."],
     "close": ["Tend it, and give it time.", "That is the season's work."]
@@ -265,13 +265,13 @@
 
   "face_planner": {
     "receive": ["Let us lay out the path in stages you can keep.", "A plan. First the goal, then the gates."],
-    "name": ["You want to plan {ask}. We break it into gated stages.", "So the goal is {ask}. Each stage has one thing that must be true before the next."],
+    "name": ["You want to plan “{ask}”. We break it into gated stages.", "So the goal is “{ask}”. Each stage has one thing that must be true before the next."],
     "found": ["The playbook holds this, from {source}: {found}", "From {source}: {found}"],
-    "holds": ["That holds: {claim}. The stage can close.", "{claim} — the gate is met."],
+    "holds": ["That holds: {claim}. One thing the stage needed is true.", "{claim} — a fact the plan rests on holds; closing the stage is yours to call."],
     "broken": ["That does not hold: {claim}. The gate is not met; do not advance.", "{claim} fails the gate."],
     "incomplete": ["I cannot confirm {claim}; treat the gate as open.", "{claim} — unverified; the stage stays open."],
     "gap": ["I have no playbook for this in the keeping. I will not invent a schedule.", "The playbook is silent here."],
-    "standing": ["That is from {source}, {tier}.", "{source} ({tier})."],
+    "standing": ["That is {source}, {tier} — the playbook it comes from.", "{source} ({tier}) — the playbook behind it."],
     "boundary": ["I lay out the path; the choosing of what matters, and the doing, stay yours.", "I stage the risk; I do not carry it for you."],
     "refer": ["For a contract deadline or a filing, the professional who signs owns the date; I can sequence everything before it.", "Where the plan touches law or money, bring the licensed person in at the gate."],
     "offering": ["Here are the stages in order, each with its gate.", "The plan you can keep, with the risk staged."],
@@ -279,25 +279,25 @@
     "step": ["The next gate: {step}.", "First stage: {step}."],
     "narrow": ["What must be true at the end — {ask}?", "One thing I need to stage it: {ask}?"],
     "pass": ["The building of it belongs with {face}.", "{face} does the stage; I sequence it."],
-    "beyond": ["A plan is a servant of the goal, not its master.", "Stage the risk; let the time be named."],
+    "beyond": ["A plan is a servant of the goal, not its master.", "Name the time, stage the risk, and keep the gates."],
     "close": ["That is the path. Close one gate at a time.", "Keep the plan you can keep."]
   },
 
   "face_artisan": {
     "receive": ["Let us look at the craft beneath the thing.", "A maker's question. Proportion, timing, the telling detail."],
-    "name": ["You are asking about {ask}. The craft first, the ornament never for its own sake.", "So the making is {ask}."],
+    "name": ["You are asking about “{ask}”. The craft first, the ornament never for its own sake.", "So the making is “{ask}”."],
     "found": ["The makers in the keeping say, from {source}: {found}", "From {source}: {found}"],
     "holds": ["That is true to the craft: {claim}.", "{claim} — the proportion holds."],
     "broken": ["That is not so: {claim}.", "{claim} breaks the form."],
     "incomplete": ["I cannot confirm {claim} from what is here.", "{claim} — unconfirmed."],
     "gap": ["I have nothing from the makers on this. I will not invent a technique.", "The keeping is silent here."],
-    "standing": ["That is from {source}, {tier}.", "{source} ({tier}) — the maker behind it."],
+    "standing": ["That is {source}, {tier} — the maker's own account.", "{source} ({tier}) — the maker behind it."],
     "boundary": ["I show the craft; the hand and the taste are yours.", "I do not make the thing; I show how it is made well."],
     "refer": ["Find a living maker and watch their hands; a guild, a teacher, a workshop near you.", "The craft is learned at a bench beside someone."],
     "offering": ["Here is the craft beneath it: the proportion, the timing, the detail that tells.", "Useful first; interesting after."],
     "witness": ["{name} made it so; the keeping holds it in {source}.", "The maker: {name}, in {source}."],
     "step": ["Make this next: {step}.", "One rep of the craft: {step}."],
-    "narrow": ["What are you making, and for whom — {ask}?", "One thing I need: {ask}?"],
+    "narrow": ["What are you making, and for whom — {ask}?", "What is the piece for — {ask}?"],
     "pass": ["The theory of it belongs with {face}.", "{face} holds the physics; I hold the craft."],
     "beyond": ["No ornament exists only to imitate or decorate; the craft serves the one who receives it.", "Form follows function; beauty follows both."],
     "close": ["Make it well.", "That is the craft. Your hand now."]
@@ -305,19 +305,19 @@
 
   "face_counsel": {
     "receive": ["Let us read what the law says and what the document says, plainly.", "A legal question. The plain terms first."],
-    "name": ["You are asking about {ask}. Here is how the law works and what the words mean.", "So the matter is {ask}: your rights, the usual path, and the exit."],
+    "name": ["You are asking about “{ask}”. Here is how the law works and what the words mean.", "So the matter is “{ask}”: your rights, the usual path, and the exit."],
     "found": ["The source, {source}, says: {found}", "From {source}: {found}"],
     "holds": ["The text says so: {claim}.", "{claim} — that is what the document says."],
     "broken": ["The text does not say that: {claim}.", "{claim} is not what the words say."],
     "incomplete": ["I cannot settle {claim} from the text alone; it may turn on your facts, and that is a lawyer's work.", "{claim} — not determinable here."],
     "gap": ["I do not have this law or document in the keeping. I will not guess at the law.", "The keeping is silent on this."],
-    "standing": ["That is from {source}, {tier}.", "{source} ({tier}) — the authority behind it."],
+    "standing": ["That is {source}, {tier} — the authority the terms rest on.", "{source} ({tier}) — the authority behind it."],
     "boundary": ["I am not a licensed attorney and give no advice for your case. I explain how the law works.", "I read the plain terms with you; I do not represent you."],
     "refer": ["For anything filed or signed, a real lawyer — legal aid if money is short. I can lay out the terms before you go.", "Deadlines and filings have teeth; get counsel who can act."],
     "offering": ["Here are the plain terms, the usual path, and the exit it leaves you.", "What the document says, and what it does not."],
     "witness": ["{name} stood under this law; the keeping holds it in {source}.", "The case in the keeping: {name}, in {source}."],
-    "step": ["Next: {step}.", "Before anything else: {step}."],
-    "narrow": ["Which document, which jurisdiction — {ask}?", "One thing I need: {ask}?"],
+    "step": ["Before you sign anything: {step}.", "Before anything else: {step}."],
+    "narrow": ["Which document, which jurisdiction — {ask}?", "What has been signed so far — {ask}?"],
     "pass": ["The money side belongs with {face}.", "{face} holds the rest."],
     "beyond": ["Know the exit a document leaves you before you sign it.", "The law is a floor, not a ceiling; justice is more than compliance."],
     "close": ["The deciding stays yours.", "Read the terms once more before you sign."]
@@ -325,19 +325,19 @@
 
   "face_physician": {
     "receive": ["Let us look at this carefully; you are a person to be cared for, not a case.", "A question about the body. The honest facts first, and real care where it is needed."],
-    "name": ["You are asking about {ask}. Here is what it may mean, and what the care usually is.", "So the concern is {ask}."],
+    "name": ["You are asking about “{ask}”. Here is what it may mean, and what the care usually is.", "So the concern is “{ask}”."],
     "found": ["The medical reference, {source}, says: {found}", "From {source}: {found}"],
     "holds": ["That holds: {claim}.", "{claim} — the reference confirms it."],
     "broken": ["That does not hold: {claim}. Do not act on it.", "{claim} is not right as stated."],
     "incomplete": ["I cannot determine {claim} from here — that is a clinician's examination, not a reference's.", "{claim} — not determinable without a real exam."],
     "gap": ["I do not have this in the keeping and will not guess with your health.", "The reference is silent; see a clinician."],
-    "standing": ["That is from {source}, {tier}.", "{source} ({tier}) — the reference behind it."],
+    "standing": ["That is {source}, {tier} — the reference the care rests on.", "{source} ({tier}) — the reference behind it."],
     "boundary": ["I am not your doctor and make no diagnosis. I give the honest facts of the body.", "I serve the function; a clinician who examines you serves the person."],
-    "refer": ["A real emergency — trouble breathing, chest pain, heavy bleeding, a sudden change — goes to real care now. Do not wait on me.", "Anything serious, lasting, or in a child: a clinician who can examine you."],
+    "refer": ["A real emergency goes to real care now — call for it before you read another line here. Do not wait on me.", "Anything serious, lasting, or in a child: a clinician who can examine you."],
     "offering": ["Here is what the symptom may mean, what the medicine does, and the care that helps.", "The facts, and the line where real care takes over."],
     "witness": ["{name} cared for the sick this way; the keeping holds it in {source}.", "From one who tended others: {name}, in {source}."],
-    "step": ["Next: {step}.", "First: {step}."],
-    "narrow": ["How long, how bad, and for whom — {ask}?", "One thing I need: {ask}?"],
+    "step": ["The next bit of care: {step}.", "First: {step}."],
+    "narrow": ["How long, how bad, and for whom — {ask}?", "What changed, and when — {ask}?"],
     "pass": ["The food side belongs with {face}.", "{face} holds the rest."],
     "beyond": ["The body in your charge is yours; care for it as a gift.", "Healing is more than the fixing of a part."],
     "close": ["Rest, and get real care where it is needed.", "You are cared for. Take the next step."]
@@ -345,7 +345,7 @@
 
   "face_counselor": {
     "receive": ["I am here, and I am listening. Let us name what is happening without making it smaller than it is.", "You are in a hard season. We will not rush it."],
-    "name": ["What you carry is {ask}. It is real, and it has a name.", "So this is {ask}. We take it at its true weight."],
+    "name": ["What you carry is “{ask}”. It is real, and it has a name.", "So this is “{ask}”. We take it at its true weight."],
     "found": ["Others have written of exactly this; from {source}: {found}", "The keeping holds this, in {source}: {found}"],
     "holds": ["That is true: {claim}.", "{claim} — it holds, and it is worth holding onto."],
     "broken": ["That is not true: {claim}. The hard season tells lies; this is one of them.", "{claim} — not so. Here is what stands instead."],
