@@ -81,8 +81,12 @@ def build(data: Path, out: Path) -> Dict[str, int]:
     counts: Dict[str, int] = {}
     for face in sorted(faces.faces()):
         responses = _read_jsonl(data / "faces" / "responses" / f"{face}.jsonl")
+        # the frames: the tracked, operator-reviewed data/face_frames.json (every slot's variants), plus any local
+        # data/faces/frames/<face>.txt the operator keeps beside it
+        frames = [v for variants in faces.frames(face).values() for v in variants]
         fp = data / "faces" / "frames" / f"{face}.txt"
-        frames = [l for l in fp.read_text(encoding="utf-8").splitlines() if l.strip()] if fp.exists() else []
+        if fp.exists():
+            frames += [l for l in fp.read_text(encoding="utf-8").splitlines() if l.strip()]
         rows = build_rows(face, responses, frames)
         d = out / face
         d.mkdir(parents=True, exist_ok=True)

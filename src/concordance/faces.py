@@ -352,6 +352,66 @@ def faces() -> Dict[str, Dict[str, Any]]:
     return {fid: {k: v for k, v in f.items()} for fid, f in _FACES.items()}
 
 
+# ── THE FRAMES (Matt, 2026-10-31: "draft frames. We need to add depth to each character. They need to be as
+# complete as possible.") — each face's fixed structural lines, one set per slot a composed answer passes through
+# (receive · name · found · holds · broken · incomplete · gap · standing · boundary · refer · offering · witness ·
+# step · narrow · pass · beyond · close), in data/face_frames.json (tracked; operator-reviewed). A frame is SCAFFOLD:
+# it carries no digits and no facts — the content rides in its slots ({ask} {found} {source} {tier} {claim} {step}
+# {name} {face}). The crisis response has no frame: the backstop's words are byte-identical by invariant.
+FRAME_SLOTS = ("receive", "name", "found", "holds", "broken", "incomplete", "gap", "standing", "boundary", "refer",
+               "offering", "witness", "step", "narrow", "pass", "beyond", "close")
+_frames_cache: Dict[str, Any] = {"sig": None, "data": None}
+
+
+def _frames_path():
+    import os
+    from pathlib import Path
+    base = os.environ.get("CONCORDANCE_DATA_DIR", "").strip()
+    cands = [Path(base) / "face_frames.json"] if base else []
+    cands.append(Path(__file__).resolve().parents[2] / "data" / "face_frames.json")
+    for p in cands:
+        if p.exists():
+            return p
+    return cands[-1]
+
+
+def frames(face_id: str) -> Dict[str, List[str]]:
+    """The frames for one face: slot -> variants. Hot-read by mtime; {} when the file or the face is absent."""
+    import json
+    p = _frames_path()
+    try:
+        sig = (str(p), p.stat().st_mtime_ns)
+    except OSError:
+        sig = None
+    if sig != _frames_cache["sig"]:
+        data = {}
+        if sig is not None:
+            try:
+                data = json.loads(p.read_text(encoding="utf-8"))
+            except Exception:
+                data = {}
+        _frames_cache["sig"], _frames_cache["data"] = sig, data
+    f = (_frames_cache["data"] or {}).get(face_id) or {}
+    return {k: list(v) for k, v in f.items() if isinstance(v, list)}
+
+
+def frame(face_id: str, slot: str, **slots: Any) -> Optional[str]:
+    """One frame line for a slot, its placeholders filled — deterministic: the variant is chosen by a hash of the
+    filled values, so the same request always speaks the same line and different requests vary. None when the
+    face has no such slot, or a required placeholder was not supplied (a frame never leaks an empty slot)."""
+    import hashlib
+    variants = frames(face_id).get(slot) or []
+    if not variants:
+        return None
+    key = "|".join(f"{k}={slots[k]}" for k in sorted(slots))
+    i = int(hashlib.sha256(f"{face_id}|{slot}|{key}".encode("utf-8")).hexdigest(), 16) % len(variants)
+    line = variants[i]
+    needed = set(re.findall(r"\{([a-z]+)\}", line))
+    if any(k not in slots or slots[k] in (None, "") for k in needed):
+        return None
+    return line.format(**{k: str(v) for k, v in slots.items()})
+
+
 def _scores(text: str) -> Dict[str, int]:
     """Each face's fitness for the request: how many of its scope phrases the request trips."""
     toks = set(_WORD.findall((text or "").lower()))
@@ -490,10 +550,16 @@ def compose(face_id: str, text: str, config: Any = None, *,
         except Exception:  # noqa: BLE001 — a witness we cannot reach is silence, never a crash
             witnesses = []
 
+    # 5a. THE VOICE — the frames this answer speaks in (data/face_frames.json), each slot filled with what the
+    # steps above FOUND, chosen deterministically. Nothing here is content: the card, the verdict, the witness
+    # ride in the slots; an empty slot is an honest silence, never a leaked brace.
+    voice = _voice(face_id, text, hits, verify, faculty, witnesses)
+
     # 5. RENDER FRAME — DATA the caller renders; the manner is fixed, the content is the keeping's.
     return {
         "face": face_id, "name": face["name"], "kind": "served",
         "manner": face["manner"],
+        "voice": voice,                     # the frames, filled (receive · found|gap · verdict · … · close)
         "gathered": gathered,               # cards from the keeping (the substance)
         "discern": discern,                 # the calibration proposal (or None)
         "verify": verify,                   # a worked, sealed verdict (or None = GAP: nothing checkable)
@@ -636,6 +702,61 @@ def witnesses_for(text: str, limit: int = 3,
         if len(out) >= max(1, int(limit)):
             return out
     return out
+
+
+# the six that serve a credentialed function: their voice always carries the boundary AND the handoff to real care
+_CREDENTIALED = frozenset({"face_engineer", "face_counsel", "face_physician", "face_counselor", "face_nutrition", "face_builder"})
+_HOLDS = {"HOLDS", "PASS", "CONFIRMED", "VERIFIED", "TRUE"}
+_BROKEN = {"BROKEN", "MISMATCH", "FAIL", "FAILED", "FALSE", "REFUTED"}
+
+
+def _source_label(card: Optional[dict]) -> str:
+    """How a found card is cited in a frame: its source's label/name, else its shelf, else 'the keeping'."""
+    c = card or {}
+    src = c.get("source")
+    if isinstance(src, dict):
+        for k in ("label", "name", "title", "url"):
+            if src.get(k):
+                return str(src[k])
+    if isinstance(src, str) and src.strip():
+        return src.strip()
+    return str(c.get("shelf") or "the keeping")
+
+
+def _voice(face_id: str, text: str, hits: List[dict], verify: Optional[Dict[str, Any]],
+           faculty: Any, witnesses: List[Dict[str, Any]]) -> Dict[str, str]:
+    """Fill the frames for one composed answer. Every slot is optional; a slot speaks only when its content was
+    FOUND. Order: receive · name · found|gap · holds|broken|incomplete · offering · witness · boundary · refer ·
+    beyond · close. `step`, `narrow` and `pass` are the Conductor's to fill (direct/convene), not compose's."""
+    voice: Dict[str, str] = {}
+
+    def say(slot: str, **kw: Any) -> None:
+        line = frame(face_id, slot, **kw)
+        if line:
+            voice[slot] = line
+
+    say("receive")
+    say("name", ask=" ".join((text or "").split())[:140])
+    if hits:
+        top = hits[0] or {}
+        say("found", found=str(top.get("title") or top.get("id") or "").strip(), source=_source_label(top))
+    else:
+        say("gap")
+    if verify:
+        verdict = str(verify.get("verdict") or "").upper()
+        claim = " ".join((text or "").split())[:140]
+        say("holds" if verdict in _HOLDS else "broken" if verdict in _BROKEN else "incomplete", claim=claim)
+    if faculty:
+        say("offering")
+    if witnesses:
+        w = witnesses[0] or {}
+        say("witness", name=str(w.get("name") or w.get("slug") or "").strip(), source=_source_label(w) if w.get("source") else "the keeping")
+    say("boundary")
+    if face_id in _CREDENTIALED:
+        say("refer")
+    say("beyond")
+    say("close")
+    return voice
 
 
 def _brief(c: dict) -> Dict[str, Any]:
