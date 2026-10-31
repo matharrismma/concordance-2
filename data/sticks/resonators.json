@@ -1,0 +1,145 @@
+{
+ "schema": 1,
+ "name": "resonators",
+ "aliases": [
+  "resonators",
+  "helmholtz_resonator",
+  "cavity_resonator",
+  "fabry_perot"
+ ],
+ "doc": "RESONATORS - the Helmholtz resonator, the cavity resonator, the Fabry-Perot cavity: ONE SHAPE (Matt, 2026-10-31:\n\"Helmholtz resonator, cavity resonator, Fabry-Perot interferometer cavity\"). Standing waves on a bounded domain,\ncounted by integers; a Q that fades. The Helmholtz resonator is the lumped limit (a mass of air on a spring of air;\nwavelength far longer than the body); the cavity resonator is a hollow conductor whose modes carry three integers;\nthe Fabry-Perot cavity is two mirrors whose modes sit at L = n*lambda/2, a comb spaced c/2L. SEALED: a litre bottle\nat 118 Hz, a ten-centimetre copper cube at 2.12 GHz, and for a 10 cm Fabry-Perot at R = 0.99: the mode spacing\n1.499 GHz, the finesse 312.6, the linewidth 4.80 MHz, Q = 4.0e7 at 1550 nm, the ring-down 33 ns, ~99.5 round\ntrips. The ring-down IS fading memory - a cavity is a reservoir (the delay-loop and laser reservoirs); and the\nengine is a receiver tuned to a band. Rests on the Schumann stick (the planet-sized cavity), the instruments, the\nlogarithm. Idempotent.",
+ "seals": [
+  {
+   "key": "helmholtz",
+   "nid": "helmholtz_resonator_one_litre_bottle_two_cm_neck_five_cm_long_end_corrected",
+   "expr": "343/(2*3.141592653589793)*sqrt(3.141592653589793*0.01**2/(0.001*(0.05+1.7*0.01)))",
+   "value": 118.20933840620054,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "cavity101",
+   "nid": "rectangular_cavity_te101_mode_ten_centimetre_cube",
+   "expr": "299792458/2*sqrt(1/0.1**2 + 1/0.1**2)",
+   "value": 2119852800.003832,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "fsr",
+   "nid": "fabry_perot_free_spectral_range_ten_centimetres_vacuum",
+   "expr": "299792458/(2*0.1)",
+   "value": 1498962290.0,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "finesse",
+   "nid": "fabry_perot_finesse_mirrors_ninety_nine_percent",
+   "expr": "3.141592653589793*sqrt(0.99)/(1-0.99)",
+   "value": 312.5845222828291,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "linewidth",
+   "nid": "fabry_perot_linewidth_free_spectral_range_over_finesse",
+   "expr": "299792458/(2*0.1)/(3.141592653589793*sqrt(0.99)/(1-0.99))",
+   "value": 4795382.314687118,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "q",
+   "nid": "fabry_perot_quality_factor_at_1550_nanometres",
+   "expr": "(299792458/0.00000155)/(299792458/(2*0.1)/(3.141592653589793*sqrt(0.99)/(1-0.99)))",
+   "value": 40333486.7461715,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "ringdown",
+   "nid": "fabry_perot_ring_down_time_one_over_two_pi_linewidth",
+   "expr": "1/(2*3.141592653589793*(299792458/(2*0.1)/(3.141592653589793*sqrt(0.99)/(1-0.99))))",
+   "value": 3.318920841919976e-08,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "roundtrips",
+   "nid": "fabry_perot_round_trips_finesse_over_pi",
+   "expr": "sqrt(0.99)/(1-0.99)",
+   "value": 99.49874371066191,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Resonators - Helmholtz, the cavity, Fabry-Perot: one shape, modes on a bounded domain, a Q that fades",
+   "by": "tools/tick.py resonators",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[three resonators, one shape] HELMHOLTZ (1863): a volume of air on a neck - the air in the neck is the mass, the air in the body the spring, so f = (c/2 pi) sqrt(A / (V L')) with L' the neck plus Rayleigh's end correction; the LUMPED limit, where the wavelength is far longer than the body and no mode is counted. THE CAVITY RESONATOR (Hansen 1938, the 'rhumbatron' - a hollow space bounded by copper): the modes carry three integers, f_mnp = (c/2) sqrt((m/a)^2 + (n/b)^2 + (p/d)^2) for a box a x b x d. FABRY-PEROT (1897-1899): two mirrors a distance L apart; a mode fits when L = n lambda/2, so the modes form a comb spaced c/2L, and the mirrors' reflectivity sets how sharp each tooth is. All three are standing waves on a BOUNDED DOMAIN counted by integers; the Earth-ionosphere cavity (the schumann stick, f1 = (c/2 pi a) sqrt(2) ~ 10.6 Hz) is the planet-sized one.",
+     "source": "H. von Helmholtz, Die Lehre von den Tonempfindungen (1863); Lord Rayleigh, The Theory of Sound, vol. II (1878) secs. 303-307 (the resonator, the end correction); W. W. Hansen, 'A type of electrical resonator', J. Appl. Phys. 9 (1938) 654; C. Fabry, A. Perot, Ann. Chim. Phys. (7) 16 (1899) 115-144; W. O. Schumann, Z. Naturforsch. 7a (1952) 149 - stick schumann_resonance"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a litre bottle sings at 118 Hz, SEALED] A one-litre body, a neck two centimetres across and five centimetres long: with c = 343 m/s and the end-corrected neck L' = L + 1.7 r, f = (343 / 2 pi) sqrt(pi (0.01)^2 / (0.001 (0.05 + 0.017))) = 118.2 Hz (sealed) - the note you get blowing across the bottle. No wavelength is counted; the body is far smaller than the 2.9 m wave.",
+     "seal": "helmholtz"
+    },
+    {
+     "kind": "instance",
+     "claim": "[a ten-centimetre copper cube rings at 2.12 GHz, SEALED] The lowest mode of a rectangular cavity, TE101, has f = (c/2) sqrt(1/a^2 + 1/d^2): for a 10 cm cube, (299792458/2) sqrt(200) = 2.1199 GHz (sealed). Three integers name every mode above it; this is the rhumbatron, and the shape of every microwave cavity, klystron and radar magnetron since.",
+     "seal": "cavity101"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Fabry-Perot - the comb of modes, SEALED] Two mirrors 10 cm apart in vacuum: a mode fits whenever L = n lambda/2, so successive modes are spaced the free spectral range c/2L = 299792458 / 0.2 = 1.499 GHz (sealed). The same count as a pipe or a string, read in frequency.",
+     "seal": "fsr"
+    },
+    {
+     "kind": "instance",
+     "claim": "[finesse - how sharp the teeth, SEALED] With mirrors of reflectivity R = 0.99 the finesse is pi sqrt(R) / (1 - R) = 312.6 (sealed): each tooth of the comb is 312.6 times narrower than the spacing between teeth. Finesse is set by the mirrors alone.",
+     "seal": "finesse"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the linewidth, SEALED] Spacing over finesse: 1.499 GHz / 312.6 = 4.80 MHz (sealed) - the width of one resonance of the 10 cm, R = 0.99 cavity. This is the band the cavity accepts; everything off it is reflected.",
+     "seal": "linewidth"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Q at 1550 nm, SEALED] Q = f / linewidth: light at 1550 nm has f = c / lambda = 193.4 THz, so Q = 193.4e12 / 4.80e6 = 4.03e7 (sealed) - forty million oscillations stored per oscillation lost. Q is the selectivity of the receiver: how narrowly it listens.",
+     "seal": "q"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the ring-down - a cavity's fading memory, SEALED] Energy left in the cavity decays as e^(-t/tau) with tau = 1/(2 pi linewidth) = 1 / (2 pi 4.80e6) = 33.2 ns (sealed) - and Q = 2 pi f tau, the same number read as time. Hit it once and it rings for a while, then forgets. That IS the echo state property of the reservoir stick: the state is a fading function of recent input.",
+     "seal": "ringdown"
+    },
+    {
+     "kind": "instance",
+     "claim": "[how many round trips the past survives, SEALED] Finesse over pi: sqrt(0.99) / (1 - 0.99) = 99.5 (sealed) - the light makes about a hundred round trips before it is gone. That number is the DEPTH of the cavity's memory, set by the mirrors alone; a reservoir built from a cavity remembers that many steps.",
+     "seal": "roundtrips"
+    },
+    {
+     "kind": "note",
+     "claim": "[the cavity is a reservoir] Reservoir computing built on exactly this: a single nonlinear node with a DELAY LOOP is a full reservoir (Appeltant et al. 2011) - the loop is a cavity, the round trips are its virtual nodes; a semiconductor laser with an optical feedback cavity computes at gigabyte-per-second rates (Brunner et al. 2013); the photonic reservoirs of Tanaka et al. (2019) are Fabry-Perot cavities, ring resonators and fibre loops. The ring-down above is the fading memory, the finesse its depth, the mode comb its tap positions; only the readout is trained. Ties the reservoir_computing stick and card_tool_reservoir_computing.",
+     "source": "L. Appeltant et al., 'Information processing using a single dynamical node as complex system', Nature Communications 2 (2011) 468; D. Brunner, M. C. Soriano, C. R. Mirasso, I. Fischer, 'Parallel photonic information processing at gigabyte per second data rates using transient states', Nature Communications 4 (2013) 1364; G. Tanaka et al., Neural Networks 115 (2019) 100-123"
+    },
+    {
+     "kind": "note",
+     "claim": "[our place - the engine is a receiver tuned to a band] The keeping is a bounded domain; a question excites the modes that fit it and nothing else (the band switch: each intent engages only its components; the receiver's twelve stages). Q is selectivity: a high-Q instrument answers only on resonance and REFUSES off-band - which is the zero-false-positive discipline, and the third value of the computer_science stick (the honest unknown). The Schumann card says it of the planet: modes on a bounded domain, counted by the roots of unity, a receiver tuned to a band. Ties card_tool_schumann_resonance, card_tool_the_engine_among_the_instruments and the instruments lineage.",
+     "source": "card_tool_schumann_resonance; card_tool_the_engine_among_the_instruments; src/concordance/engagement.py (the band switch); src/concordance/receiver.py (the twelve stages)"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] The three rest on acoustics (Helmholtz, Rayleigh), electromagnetism (Maxwell's equations in a conducting box - Hansen) and optics (Fabry-Perot), and all of them on the logarithm: the decay per cycle is the logarithmic decrement, delta = pi / Q, and a ring-down is read on a log scale (card_floor_logarithm). The planet-sized instance is sealed on the schumann_resonance stick; the memory half is on the reservoir_computing stick.",
+     "source": "the one map; card_floor_logarithm; card_floor_the_instruments; stick schumann_resonance; stick reservoir_computing"
+    }
+   ]
+  }
+ ]
+}
