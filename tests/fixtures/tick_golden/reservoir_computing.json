@@ -182,6 +182,11 @@
      "by": "tools/tick.py reservoir_computing",
      "claim": "[on the one map] Reservoir computing rests on the computer (card_floor_computer_science - a Turing machine with a fixed part and a trained part), the mind (card_floor_the_mind - Maass's liquid is a cortical column; Jaeger's echo is fading memory) and the logarithm (card_floor_logarithm - fading memory is e^(-t/tau), a half-life is ln 2 over the rate). The Riemann sum rests on calculus and on measure theory (card_theory_measure_theory__lebesgue_integration - Lebesgue partitions the range where Riemann partitions the domain); the Monte Carlo rate rests on the law of large numbers. Ties tools/mc_paths.py and the trajectory of a path.",
      "kind": "note"
+    },
+    {
+     "by": "tools/tick.py reservoir_computing",
+     "claim": "[Boole, the same year - logic and probability in one algebra, and the law x*x = x] Riemann's 1854 Habilitationsschrift bound the width to the count; the same year George Boole published An Investigation of the Laws of Thought (London: Walton and Maberly, 1854; public domain, Project Gutenberg #15114 - card_src_book_15114), whose two halves are this stick's two halves: a calculus of logic and, on the same algebra, a calculus of probabilities (the Monte Carlo rate above lives in the second). Its one law of its own, x*x = x - the law of duality, the fundamental law of thought - is IDEMPOTENCE: the discipline of every seed and stick here (run it twice, the same bytes) and of the readout (a trail deposited twice is one trail; dedup at the stored form). Ties card_src_book_15114 and the computer_science stick.",
+     "kind": "note"
     }
    ]
   }

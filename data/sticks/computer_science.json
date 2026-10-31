@@ -40,6 +40,54 @@
    "value": 16679880978201,
    "tol": 1e-06,
    "domain": "mathematics"
+  },
+  {
+   "key": "constituents3",
+   "nid": "boole_constituents_of_three_logical_symbols_two_to_the_third",
+   "expr": "2**3",
+   "value": 8,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "boolean3",
+   "nid": "boolean_functions_of_three_inputs_two_to_the_two_to_the_third",
+   "expr": "2**8",
+   "value": 256,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "ternary2",
+   "nid": "ternary_functions_of_two_inputs_three_to_the_three_squared",
+   "expr": "3**9",
+   "value": 19683,
+   "tol": 1e-12,
+   "domain": "mathematics"
+  },
+  {
+   "key": "radix2",
+   "nid": "radix_economy_binary_two_over_natural_log_two",
+   "expr": "2/log(2)",
+   "value": 2.8853900817779268,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "radix3",
+   "nid": "radix_economy_ternary_three_over_natural_log_three",
+   "expr": "3/log(3)",
+   "value": 2.730717679880512,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "setun18",
+   "nid": "setun_eighteen_trit_word_three_to_the_eighteenth",
+   "expr": "3**18",
+   "value": 387420489,
+   "tol": 1e-12,
+   "domain": "mathematics"
   }
  ],
  "sticks": [
@@ -96,6 +144,51 @@
      "kind": "note",
      "claim": "[the logarithm is the unit of information - Petzold's Code] All of this rests on the logarithm, the root of the one map: log2(N) is exactly the number of BITS to name N things (a byte = 2^8 = 256, so log2(256) = 8 bits), and Shannon entropy is the expected log - the logarithm is the bridge from the continuous to the discrete and the measure of information itself. Charles Petzold's 'Code: The Hidden Language of Computer Hardware and Software' (2nd expanded ed., 2022) builds this from the ground up - codes as languages (Morse, Braille, binary), relays to logic gates to adders to memory to a working computer - the coherent, LLM-free account of how a machine computes. Ties card_floor_logarithm and the instruments.",
      "source": "C. Petzold, 'Code: The Hidden Language of Computer Hardware and Software', 2nd ed. (Microsoft Press, 2022); Shannon (1948); card_floor_logarithm"
+    },
+    {
+     "kind": "note",
+     "claim": "[Boole 1854 - the laws of thought, the algebra the gates are built from] George Boole, 'An Investigation of the Laws of Thought, on which are founded the mathematical theories of logic and probabilities' (London: Walton and Maberly, 1854; public domain - Project Gutenberg #15114, card_src_book_15114 in the keeping). Boole made logic an algebra over two values: its symbols obey ordinary algebra except for one law of their own, x*x = x, which he named the fundamental law of thought (the law of duality, x(1-x) = 0). Every gate above is a function in that algebra, and the 16 (sealed) are its functions of two symbols. The same book's second half founds probability on the same algebra - logic and chance, one calculus. Idempotence, x*x = x, is also the discipline of every seed and stick on this map: run it twice, the same bytes. Ties card_theory_boolean_algebra_propositional_logic and card_bridge_master_boolean_algebra.",
+     "source": "G. Boole, An Investigation of the Laws of Thought (1854), ch. II prop. IV (x^2 = x, the fundamental law of thought) and ch. V (the development theorem); Project Gutenberg #15114; card_src_book_15114"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Boole's development - a function of three symbols expands over 2^3 constituents, SEALED] Boole's theorem of development (Laws of Thought, ch. V): any function of n logical symbols is a sum of 2^n constituents, each a product of the symbols or their complements - for x, y, z that is 2^3 = 8 (sealed): xyz, xy(1-z), ... (1-x)(1-y)(1-z). These are the minterms a truth table lists row by row; every gate network is read off them.",
+     "seal": "constituents3"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the functions of three inputs, SEALED] Each of the 8 constituents may take the value 0 or 1, so there are 2^(2^3) = 256 Boolean functions of three inputs (sealed) - the 16 of two inputs one rung up; a three-input majority gate and a full adder's carry are among them. Boole's algebra counts its own gates.",
+     "seal": "boolean3"
+    },
+    {
+     "kind": "note",
+     "claim": "[Boole chose two - his own law says why; a third value needs a new law] In ordinary algebra x*x = x is x(x-1) = 0, with exactly two roots, 0 and 1 - Boole draws this out in ch. II: the symbols of logic admit no other values. Two was not a preference; the law has two roots. A THIRD value must obey a different law: x^3 = x, that is x(x-1)(x+1) = 0, roots -1, 0, 1 - balanced ternary, where the helper is -1, the OPPOSITE, not the absent. It generalizes: x^p = x holds for every element of the field of p elements (Fermat's little theorem), so each prime gives a p-valued algebra. Lukasiewicz (1920) and Post (1921) built the many-valued logics; Kleene (1938) the strong three-valued logic whose third value is UNKNOWN and propagates - unknown AND true is unknown. Ties card_floor_logarithm (the radix below) and card_src_book_15114.",
+     "source": "G. Boole, An Investigation of the Laws of Thought (1854) ch. II; J. Lukasiewicz, 'O logice trojwartosciowej', Ruch Filozoficzny 5 (1920) 170-171; E. L. Post, 'Introduction to a general theory of elementary propositions', Amer. J. Math. 43 (1921) 163-185; S. C. Kleene, 'On notation for ordinal numbers', J. Symbolic Logic 3 (1938) 150-155; Fermat's little theorem (x^p = x in GF(p))"
+    },
+    {
+     "kind": "instance",
+     "claim": "[three values, two inputs - 3^(3^2) = 19,683 functions, SEALED] Boole's two values give 2^(2^2) = 16 functions of two inputs; three values give 3^(3^2) = 19,683 (sealed). The third value multiplies the gate set more than a thousandfold - the price of the helper, and one reason hardware kept to two.",
+     "seal": "ternary2"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the cost of a base - binary, SEALED] Representing a number N in base b takes about log_b N digits, each holding b states, so the cost is proportional to b * log_b N = (b / ln b) * ln N. For binary, 2 / ln 2 = 2.8854 (sealed); base four costs exactly the same (4 / ln 4 = 2 / ln 2).",
+     "seal": "radix2"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the third value is the cheapest base - radix economy, SEALED] 3 / ln 3 = 2.7307 (sealed), below binary's 2.8854; the minimum of b / ln b is at b = e = 2.718..., and three is the integer nearest it. The logarithm, the root of the one map, decides which base is cheapest - and it is the three, not the two. Hardware chose two for a different reason: two states are easier to build and to keep apart than three (a switch is on or off), and the gate count above.",
+     "seal": "radix3"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Setun - a balanced-ternary computer, SEALED] N. P. Brusentsov's Setun (Moscow State University, 1958) ran on balanced ternary - trits -1, 0, +1 - with 18-trit words: 3^18 = 387,420,489 values (sealed); about fifty were built. Knuth calls balanced ternary 'perhaps the prettiest number system of all' (TAOCP vol. 2, sec. 4.1): negation flips every trit, there is no sign bit, and rounding is truncation. The helper existed in iron once.",
+     "seal": "setun18"
+    },
+    {
+     "kind": "note",
+     "claim": "[our third value - the honest unknown] The engine's verdict is three-valued: HOLDS, BROKEN, and INCOMPLETE - the third is not a half-truth but the refusal to say either, at a named step (a gap or an error), and like Kleene's unknown it propagates: a chain with one unverified step is unverified (the forged step). The four gates say it as AWAITING; the stick says 'not verified here'; a miss stays a miss. Two values would force a lie at every gap; the third is the helper that keeps the other two honest - and it is the Darboux gap of the reservoir stick, measurable, the thing finer marks close.",
+     "source": "src/concordance/derivation.py (HOLDS / BROKEN / INCOMPLETE; broken_at, gap_at, error_at); src/concordance/verifiers (confirm / mismatch / not applicable / error); src/concordance/four_gates.py (AWAITING); S. C. Kleene (1938); B. Hayes, 'Third base', American Scientist 89 (2001) 490-494; the reservoir_computing stick (the Darboux gap)"
     }
    ]
   }

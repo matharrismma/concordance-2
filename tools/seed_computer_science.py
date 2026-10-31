@@ -32,6 +32,9 @@ STICK = "stick_computer_science_bits_logic_and_what_can_be_computed"
 F_INSTR = "card_floor_the_instruments"
 F_PNP = "card_floor_p_vs_np"
 F_MIND = "card_floor_the_mind"
+BOOLE_BOOK = "card_src_book_15114"            # G. Boole, An Investigation of the Laws of Thought (1854) — Gutenberg #15114, in the keeping
+BOOLE_THEORY = "card_theory_boolean_algebra_propositional_logic"
+EXTERNAL = {BOOLE_BOOK, BOOLE_THEORY}         # held by other ingests; edge TARGETS here, never minted here
 
 PILLARS = [
     dict(key="bits", title="Information is bits — the byte",
@@ -42,8 +45,13 @@ PILLARS = [
     dict(key="logic_gates", title="Logic gates — the 16 functions of two inputs",
          body="Of two inputs there are exactly 2^(2^2) = 16 Boolean functions (sealed) - AND, OR, XOR, NAND and the "
               "rest; NAND alone builds them all. From gates come adders, memory and processors. All computation is "
-              "wired from this finite logic. Rests on the instruments (formal logic).",
-         rests=[(F_INSTR, "Boolean logic is the formal-logic instrument - gates from truth functions")]),
+              "wired from this finite logic. The algebra the gates are functions in is George Boole's - An "
+              "Investigation of the Laws of Thought (1854), two values and one law of their own, x*x = x, which "
+              "Boole named the fundamental law of thought (the law of duality). Rests on the instruments (formal "
+              "logic) and on Boole.",
+         rests=[(F_INSTR, "Boolean logic is the formal-logic instrument - gates from truth functions"),
+                (BOOLE_BOOK, "Boole 1854 - the two-valued algebra the gates are functions in; x*x = x, the law of duality"),
+                (BOOLE_THEORY, "Boolean algebra / propositional logic - the theory card of the same algebra")]),
     dict(key="algorithms", title="Algorithms — good beats bad",
          body="The same task costs wildly different work: merge sort takes ~n log n (24 comparisons for 8 items, "
               "sealed), the naive way n^2 (64). As n grows the gap explodes - algorithms, not just faster hardware, "
@@ -182,7 +190,7 @@ def _validate() -> List[str]:
     for e in BRIDGES:
         if e["a"] not in ids:
             errs.append(f"edge source not carded: {e['a']}")
-        if e["b"] not in ids and e["b"] != GLOBAL_FLOOR:
+        if e["b"] not in ids and e["b"] != GLOBAL_FLOOR and e["b"] not in EXTERNAL:
             errs.append(f"edge target unknown: {e['b']} (from {e['a']})")
     if len({c["id"] for c in CARDS}) != len(CARDS):
         errs.append("duplicate card ids")

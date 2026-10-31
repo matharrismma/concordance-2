@@ -2,11 +2,60 @@
  "entry": "computer_science",
  "rc": 0,
  "seals": {
+  "366f997ce727d8371d55f5f9b891a440682219717581c0368e6e860658e3b41a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "ternary_functions_of_two_inputs_three_to_the_three_squared"
+   ]
+  },
+  "49b59a91a944362db10691b6fd9c88c718c6a422abc5abb864adba3b656a7b7b": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "setun_eighteen_trit_word_three_to_the_eighteenth"
+   ]
+  },
+  "5ffb1326aff65c2d9e27e39cef47957417a5fcdebbda25d73bceecfb45d12be0": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "boolean_functions_of_three_inputs_two_to_the_two_to_the_third"
+   ]
+  },
+  "63d19feb464e411585b1a656257a2deda624e5b4401475c7a896c7d5a9cab7e4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "boole_constituents_of_three_logical_symbols_two_to_the_third"
+   ]
+  },
+  "6ec1dd3cd2d2e9b445f2b16c01b3eb08e611c4bb7616ed10c6a45e77946af30f": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "radix_economy_ternary_three_over_natural_log_three"
+   ]
+  },
+  "c806a2568ea52793e854cda24096f9af9c64cdf4f654905c1c54f2c51a67bc36": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "five_state_two_symbol_turing_machines_naive_transition_count"
+   ]
+  },
   "db2ca6b78206dae59d1c8638fd9eeb135528f291ed0d7b8ce9d405792ae034b9": {
    "axis": "mathematics",
    "overall": "PASS",
    "verifiers": [
     "boolean_functions_of_two_inputs_two_to_the_fourth"
+   ]
+  },
+  "df6cf982ac2259dd3b09c7481bece70736d88c27d531903f876ff912c7e8134e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "radix_economy_binary_two_over_natural_log_two"
    ]
   },
   "f921ec1a2e47fa50038fa3ddf767ceecdf02c7b1e04b1856d56e1fb3b2a3ee67": {
@@ -62,6 +111,78 @@
     {
      "by": "tools/tick.py computer_science",
      "claim": "[on the one map] Computer science rests on the instruments (the bit is Shannon information; logic is the formal-logic instrument), P vs NP (computability and complexity), and the mind (which computes - neural networks borrow the brain's shape). The engine is itself one such machine, a deterministic computation over the keeping. Ties card_floor_computer_science.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[the Busy Beaver search space, SEALED] BB(n) is the most steps an n-state 2-symbol Turing machine can run before halting - uncomputable in general (knowing it would decide the halting problem). The space for n=5 is enormous: each of the 2n=10 transition cells is HALT or one of 4n=20 moves, so (4*5+1)^(2*5) = 21^10 = 16,679,880,978,201 candidate machines (sealed). That BB(5) was pinned at all is a feat of exhaustive, machine-checked deciding.",
+     "kind": "instance",
+     "seal": "c806a2568ea52793e854cda24096f9af9c64cdf4f654905c1c54f2c51a67bc36"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[BB(5) PROVEN, BB(6) OPEN - cited, not sealed here] In 2024 the bbchallenge Collaboration proved BB(5) = 47,176,870 in the Coq proof assistant (Coq-BB5), ending a 60-year problem: every decider in the pipeline (Loops, n-gram Closed Position Set, Finite Automata Reduction, Weighted FAR, Closed Tape Language) is itself proved correct in Coq, and each machine's (non-)halting carries a machine-checkable certificate. We CITE this - we did not recompute the Coq proof. BB(6) stays OPEN (astronomically large). This is the open frontier of computability; it ties the halting problem (undecidable, Turing 1936) and card_floor_p_vs_np.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[ETH-refutation CLAIM - pending verification, NOT sealed, does NOT touch P vs NP] In October 2026 OpenAI and Anthropic each posted a claimed refutation of the Exponential Time Hypothesis (Impagliazzo-Paturi 1999: 3-SAT needs 2^(Omega(n))), describing a deterministic 3-SAT algorithm in 2^(e*n) time for every fixed e>0, with Lean/Coq formalizations. STATUS: UNVERIFIED - not peer-reviewed, under independent review (Impagliazzo, Paturi, R. Williams); the Lean-formalized statement is reported WEAKER than the paper's claim. ETH is STRONGER than P != NP, so even if it holds this does NOT give P = NP - the P vs NP floor stays open. Held as a CLAIM, cited never sealed, until an independent kernel-check passes: the machine-check is the proof, not the announcement.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[the logarithm is the unit of information - Petzold's Code] All of this rests on the logarithm, the root of the one map: log2(N) is exactly the number of BITS to name N things (a byte = 2^8 = 256, so log2(256) = 8 bits), and Shannon entropy is the expected log - the logarithm is the bridge from the continuous to the discrete and the measure of information itself. Charles Petzold's 'Code: The Hidden Language of Computer Hardware and Software' (2nd expanded ed., 2022) builds this from the ground up - codes as languages (Morse, Braille, binary), relays to logic gates to adders to memory to a working computer - the coherent, LLM-free account of how a machine computes. Ties card_floor_logarithm and the instruments.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[Boole 1854 - the laws of thought, the algebra the gates are built from] George Boole, 'An Investigation of the Laws of Thought, on which are founded the mathematical theories of logic and probabilities' (London: Walton and Maberly, 1854; public domain - Project Gutenberg #15114, card_src_book_15114 in the keeping). Boole made logic an algebra over two values: its symbols obey ordinary algebra except for one law of their own, x*x = x, which he named the fundamental law of thought (the law of duality, x(1-x) = 0). Every gate above is a function in that algebra, and the 16 (sealed) are its functions of two symbols. The same book's second half founds probability on the same algebra - logic and chance, one calculus. Idempotence, x*x = x, is also the discipline of every seed and stick on this map: run it twice, the same bytes. Ties card_theory_boolean_algebra_propositional_logic and card_bridge_master_boolean_algebra.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[Boole's development - a function of three symbols expands over 2^3 constituents, SEALED] Boole's theorem of development (Laws of Thought, ch. V): any function of n logical symbols is a sum of 2^n constituents, each a product of the symbols or their complements - for x, y, z that is 2^3 = 8 (sealed): xyz, xy(1-z), ... (1-x)(1-y)(1-z). These are the minterms a truth table lists row by row; every gate network is read off them.",
+     "kind": "instance",
+     "seal": "63d19feb464e411585b1a656257a2deda624e5b4401475c7a896c7d5a9cab7e4"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[the functions of three inputs, SEALED] Each of the 8 constituents may take the value 0 or 1, so there are 2^(2^3) = 256 Boolean functions of three inputs (sealed) - the 16 of two inputs one rung up; a three-input majority gate and a full adder's carry are among them. Boole's algebra counts its own gates.",
+     "kind": "instance",
+     "seal": "5ffb1326aff65c2d9e27e39cef47957417a5fcdebbda25d73bceecfb45d12be0"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[Boole chose two - his own law says why; a third value needs a new law] In ordinary algebra x*x = x is x(x-1) = 0, with exactly two roots, 0 and 1 - Boole draws this out in ch. II: the symbols of logic admit no other values. Two was not a preference; the law has two roots. A THIRD value must obey a different law: x^3 = x, that is x(x-1)(x+1) = 0, roots -1, 0, 1 - balanced ternary, where the helper is -1, the OPPOSITE, not the absent. It generalizes: x^p = x holds for every element of the field of p elements (Fermat's little theorem), so each prime gives a p-valued algebra. Lukasiewicz (1920) and Post (1921) built the many-valued logics; Kleene (1938) the strong three-valued logic whose third value is UNKNOWN and propagates - unknown AND true is unknown. Ties card_floor_logarithm (the radix below) and card_src_book_15114.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[three values, two inputs - 3^(3^2) = 19,683 functions, SEALED] Boole's two values give 2^(2^2) = 16 functions of two inputs; three values give 3^(3^2) = 19,683 (sealed). The third value multiplies the gate set more than a thousandfold - the price of the helper, and one reason hardware kept to two.",
+     "kind": "instance",
+     "seal": "366f997ce727d8371d55f5f9b891a440682219717581c0368e6e860658e3b41a"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[the cost of a base - binary, SEALED] Representing a number N in base b takes about log_b N digits, each holding b states, so the cost is proportional to b * log_b N = (b / ln b) * ln N. For binary, 2 / ln 2 = 2.8854 (sealed); base four costs exactly the same (4 / ln 4 = 2 / ln 2).",
+     "kind": "instance",
+     "seal": "df6cf982ac2259dd3b09c7481bece70736d88c27d531903f876ff912c7e8134e"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[the third value is the cheapest base - radix economy, SEALED] 3 / ln 3 = 2.7307 (sealed), below binary's 2.8854; the minimum of b / ln b is at b = e = 2.718..., and three is the integer nearest it. The logarithm, the root of the one map, decides which base is cheapest - and it is the three, not the two. Hardware chose two for a different reason: two states are easier to build and to keep apart than three (a switch is on or off), and the gate count above.",
+     "kind": "instance",
+     "seal": "6ec1dd3cd2d2e9b445f2b16c01b3eb08e611c4bb7616ed10c6a45e77946af30f"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[Setun - a balanced-ternary computer, SEALED] N. P. Brusentsov's Setun (Moscow State University, 1958) ran on balanced ternary - trits -1, 0, +1 - with 18-trit words: 3^18 = 387,420,489 values (sealed); about fifty were built. Knuth calls balanced ternary 'perhaps the prettiest number system of all' (TAOCP vol. 2, sec. 4.1): negation flips every trit, there is no sign bit, and rounding is truncation. The helper existed in iron once.",
+     "kind": "instance",
+     "seal": "49b59a91a944362db10691b6fd9c88c718c6a422abc5abb864adba3b656a7b7b"
+    },
+    {
+     "by": "tools/tick.py computer_science",
+     "claim": "[our third value - the honest unknown] The engine's verdict is three-valued: HOLDS, BROKEN, and INCOMPLETE - the third is not a half-truth but the refusal to say either, at a named step (a gap or an error), and like Kleene's unknown it propagates: a chain with one unverified step is unverified (the forged step). The four gates say it as AWAITING; the stick says 'not verified here'; a miss stays a miss. Two values would force a lie at every gap; the third is the helper that keeps the other two honest - and it is the Darboux gap of the reservoir stick, measurable, the thing finer marks close.",
      "kind": "note"
     }
    ]
