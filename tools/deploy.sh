@@ -75,10 +75,17 @@ while IFS= read -r f; do
     [ -n \"\$f\" ] && rm -f '$DEST'/\"\$f\"
 done < '$SNAP/added.txt'
 if systemctl is-enabled --quiet nh-engine 2>/dev/null; then sudo systemctl restart nh-engine; else sudo systemctl restart nh-org; sudo systemctl restart nh-com-2; fi
+# The MCP host runs the SAME code and was restarted onto the refused files above — restore it too, or the
+# agents' door keeps serving the deploy the gate refused (measured 2026-11-01: nh-mcp held the refused
+# ask.py in memory for six minutes after the site engine had been reverted).
+if systemctl is-enabled --quiet nh-mcp 2>/dev/null; then sudo systemctl restart nh-mcp; fi
 " || echo "   !! the revert itself failed — go in by hand: $SNAP holds prev.tar + added.txt"
     echo "-- reverted. re-checking both doors --"
     poll 8001 "witness (reverted)" || echo "   !! STILL DOWN after revert — manual intervention needed"
     poll 8002 "secular (reverted)" || echo "   !! STILL DOWN after revert — manual intervention needed"
+    if ssh -i "$KEY" -o ConnectTimeout=10 "$HOST" "systemctl is-enabled --quiet nh-mcp 2>/dev/null"; then
+        poll 8003 "mcp (reverted)" || echo "   !! nh-mcp did not answer after the revert — /mcp may be degraded; check it by hand"
+    fi
     echo "-- the deploy was undone. Nothing was lost: $SNAP holds what was replaced. --"
 }
 
