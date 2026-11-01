@@ -130,7 +130,7 @@ def ratchet(floor: Dict[str, Any], passed: List[str], failed: List[str], known_m
 
 
 # ── the wire ─────────────────────────────────────────────────────────────────────────────────
-def fetch(probe: Dict[str, Any]) -> Tuple[int, Any]:
+def fetch(probe: Dict[str, Any], *, _retried: bool = False) -> Tuple[int, Any]:
     base = BASES.get(probe.get("face") or "secular", BASES["secular"])
     url = base + probe["path"]
     if probe.get("query"):
@@ -148,6 +148,21 @@ def fetch(probe: Dict[str, Any]) -> Tuple[int, Any]:
             status = r.status
     except urllib.error.HTTPError as e:
         raw, status = e.read(), e.code
+        if status == 429 and not _retried:
+            # THE LIMITER IS NOT A VERDICT (2026-11-01). Every probe arrives from the box's own loopback —
+            # ONE rate-limit key — and the probe set puts ~125 write-bucket requests (/stick, /verify,
+            # /ask) through a 120/min cap, so the last two /stick probes were refused 429, counted as
+            # REGRESSIONS, and a good deploy was reverted. A 429 says "come back later" and nothing about
+            # the probe: honour Retry-After once (bounded), then judge the answer the door actually gives.
+            try:
+                wait = int((e.headers.get("retry-after") if e.headers else None) or 5)
+            except ValueError:
+                wait = 5
+            wait = max(1, min(wait, 65))
+            print(f"   429 on {probe.get('id') or probe.get('path')}: the limiter's bucket is full — "
+                  f"waiting {wait}s (Retry-After), then asking once more", flush=True)
+            time.sleep(wait)
+            return fetch(probe, _retried=True)
     except Exception as e:  # noqa: BLE001 — a dead door is a failed probe, not a crash
         return 0, {"error": f"{type(e).__name__}: {e}"}
     try:

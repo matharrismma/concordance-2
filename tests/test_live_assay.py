@@ -75,6 +75,63 @@ def test_the_probe_file_is_sound():
     assert "ask.cry.help.first" not in known
 
 
+def _http_error(code, retry_after=None):
+    import io
+    import urllib.error
+    from email.message import Message
+    hdrs = Message()
+    if retry_after is not None:
+        hdrs["Retry-After"] = str(retry_after)
+    return urllib.error.HTTPError("http://x/stick", code, "refused", hdrs, io.BytesIO(b'{"error": "rate limit exceeded"}'))
+
+
+class _Resp:
+    status = 200
+
+    def __init__(self, body: bytes):
+        self._b = body
+
+    def read(self):
+        return self._b
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+def test_a_429_is_not_a_verdict_the_wire_waits_retry_after_once(monkeypatch):
+    """The gate refused a good deploy (2026-11-01) on two /stick probes the limiter answered 429 — every
+    probe shares the box's one loopback key and the probe set crossed the write bucket. A 429 says "come
+    back later": honour Retry-After once, then judge the answer the door actually gives."""
+    calls, slept = [], []
+
+    def fake_urlopen(req, timeout=None):
+        calls.append(req.full_url)
+        if len(calls) == 1:
+            raise _http_error(429, retry_after=7)
+        return _Resp(b'{"fit": {"record": 5}}')
+    monkeypatch.setattr(la.urllib.request, "urlopen", fake_urlopen)
+    monkeypatch.setattr(la.time, "sleep", lambda s: slept.append(s))
+    status, body = la.fetch({"id": "stick.x", "path": "/stick", "query": {"id": "stick_x"}})
+    assert (status, body) == (200, {"fit": {"record": 5}})
+    assert len(calls) == 2 and slept == [7]                      # one wait, the Retry-After the door named
+
+
+def test_a_second_429_still_counts_and_the_wait_is_bounded(monkeypatch):
+    slept = []
+    monkeypatch.setattr(la.urllib.request, "urlopen", lambda req, timeout=None: (_ for _ in ()).throw(_http_error(429, retry_after=600)))
+    monkeypatch.setattr(la.time, "sleep", lambda s: slept.append(s))
+    status, body = la.fetch({"id": "stick.y", "path": "/stick"})
+    assert status == 429 and body == {"error": "rate limit exceeded"}
+    assert slept == [65]                                          # bounded, and only once
+    # any other refusal is returned as it came, with no wait
+    slept.clear()
+    monkeypatch.setattr(la.urllib.request, "urlopen", lambda req, timeout=None: (_ for _ in ()).throw(_http_error(404)))
+    assert la.fetch({"id": "z", "path": "/nowhere"})[0] == 404 and slept == []
+
+
 def test_seal_clean_reads_the_receipt(monkeypatch):
     calls = []
     def fake_fetch(probe):
