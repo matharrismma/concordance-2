@@ -1,0 +1,247 @@
+{
+ "schema": 1,
+ "name": "sorting_algorithms",
+ "aliases": [
+  "sorting_algorithms",
+  "sorting",
+  "sort",
+  "sorts",
+  "merge_sort",
+  "quicksort",
+  "heapsort",
+  "insertion_sort",
+  "shellsort",
+  "timsort",
+  "radix_sort",
+  "sorting_networks",
+  "batcher",
+  "bogosort"
+ ],
+ "doc": "SORTING ALGORITHMS - the roll and the bound none can beat (Matt, 2026-10-31: \"I'm interested in all of the\nsorting algorithms. There are over 80 I know of. Those could integrate.\"). Sorting is putting a keeping in order so\nit can be searched; every comparison answers one two-valued question, so a decision tree with n! leaves is at least\nlog2 n! deep - the bound no comparison sort beats (Knuth, TAOCP vol. 3, 5.3.1). The fractal_maps stick already seals\nthe bound at 1024 (8,769), merge sort's n log2 n there (10,240), quicksort's average 2 n ln n and worst n(n-1)/2,\nand the radix advantage; this stick rests on those and seals what they left: the small exact end (8 items: 8! =\n40,320 orders, a floor of 16 comparisons, and Ford-Johnson reaches it), the worst-case formulas (merge sort's\nn lg n - 2^lg n + 1 = 8,977 at 1000; insertion's n(n-1)/2 = 499,500; heapsort's 2 n lg n = 19,932), Batcher's\nnetworks (19 comparators, depth 6, for eight wires - the proven optimum; the bitonic sorter's 24), Knuth's\nshellsort gaps ((3^7-1)/2 = 1093), the stooge exponent log 3 / log 1.5 = 2.71, timsort's minrun (63 for 1000),\nthe pancake bound 18n/11, and bogosort's expected (n-1) n! swaps. Eighty-six named algorithms in seven families,\neach with its origin cited; tools/sorting_demo.py MEASURES the same counts by running the algorithms (Knuth's\nzero-one principle proves the eight-wire networks on 256 inputs). OUR USE: the engine sorts 362 times in 124\nmodules (2026-10-31) - timsort with the powersort merge policy under every list.sort; the search cache is named\nRADIX against the COMPARISON rung; shards are merged; the chain walker is a heap; stability is relied on by name;\nthe ledger sorts every file per append (an open want). Rests on the computer-science floor, its algorithms pillar,\nthe logarithm, the reservoir readout (a weighted sum, then a sort) and Boole's third value (the three-way\ncomparison). Idempotent.",
+ "seals": [
+  {
+   "key": "perms8",
+   "nid": "orders_of_eight_items_eight_factorial",
+   "expr": "factorial(8)",
+   "value": 40320.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "lower8",
+   "nid": "comparison_sort_lower_bound_ceiling_log2_of_eight_factorial",
+   "expr": "ceiling(log(factorial(8))/log(2))",
+   "value": 16.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "mergeworst1000",
+   "nid": "merge_sort_worst_case_comparisons_n_lg_n_minus_two_to_lg_n_plus_one_at_1000",
+   "expr": "1000*10 - 1024 + 1",
+   "value": 8977.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "insertworst1000",
+   "nid": "insertion_sort_worst_case_comparisons_n_n_minus_one_over_two_at_1000",
+   "expr": "1000*999/2",
+   "value": 499500.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "heapworst1000",
+   "nid": "heapsort_worst_case_comparisons_two_n_lg_n_at_1000",
+   "expr": "2*1000*log(1000)/log(2)",
+   "value": 19931.568569324176,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "batcher8",
+   "nid": "batcher_odd_even_merge_sort_comparators_for_eight_wires",
+   "expr": "(9 - 3 + 4)*2 - 1",
+   "value": 19.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "bitonic8",
+   "nid": "bitonic_sorter_comparators_for_eight_wires",
+   "expr": "8*3*(3 + 1)/4",
+   "value": 24.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "shell7",
+   "nid": "knuth_shellsort_gap_sequence_seventh_term_three_to_seven_minus_one_over_two",
+   "expr": "(3**7 - 1)/2",
+   "value": 1093.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "stooge",
+   "nid": "stooge_sort_exponent_log_three_over_log_three_halves",
+   "expr": "log(3)/log(1.5)",
+   "value": 2.709511291351455,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "minrun1000",
+   "nid": "timsort_minrun_for_one_thousand_items",
+   "expr": "floor(1000/16) + 1",
+   "value": 63.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "pancake1000",
+   "nid": "pancake_sort_upper_bound_eighteen_n_over_eleven_flips_at_1000",
+   "expr": "18*1000/11",
+   "value": 1636.3636363636363,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "bogo8",
+   "nid": "bogosort_expected_swaps_n_minus_one_times_n_factorial_for_eight",
+   "expr": "7*factorial(8)",
+   "value": 282240.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Sorting algorithms - the roll and the bound none can beat",
+   "by": "tools/tick.py sorting_algorithms",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[sorting, and the one bound] To sort is to find the one permutation of n items that puts them in order; a comparison asks one two-valued question (Boole's 0 or 1), so any comparison sort is a decision tree whose leaves are the n! possible orders, and a binary tree with n! leaves is at least log2 n! deep. That is the bound no comparison sort beats, and by Stirling it is n log2 n - 1.44 n. The fractal_maps stick seals it at 1024 items (8,769 comparisons) beside merge sort's n log2 n (10,240), quicksort's average 2 n ln n (14,196) and worst n(n-1)/2 (523,776), and the radix advantage (log2 n / 4 = 4.94 times fewer operations on a four-digit-group key); this stick rests on those seals and does not repeat them. What it adds: the small exact end, the worst-case formulas, the networks, the gap sequences, the engineered sorts the engine actually runs, the pessimal end, and the roll.",
+     "source": "D. E. Knuth, The Art of Computer Programming, vol. 3: Sorting and Searching (1973; 2nd ed. 1998), ch. 5, sec. 5.3.1 (minimum-comparison sorting); stick fractal_maps (its seals at n = 1024); G. Boole, An Investigation of the Laws of Thought (1854) - card_src_book_15114"
+    },
+    {
+     "kind": "instance",
+     "claim": "[eight items have 40,320 orders, SEALED] 8! = 40,320 (sealed): the leaves of the decision tree for eight items. Every one of them is a different input a sorting algorithm must handle, and tools/sorting_demo.py runs merge sort over all 40,320 of them to find its worst case.",
+     "seal": "perms8"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the floor for eight items is 16 comparisons, and it is reached, SEALED] ceil(log2 40,320) = ceil(15.30) = 16 (sealed). Ford and Johnson's merge insertion (1959) sorts eight items in exactly 16 comparisons in the worst case, so S(8) = 16: at this size the bound is tight. Knuth's table of S(n) shows the bound reached up to n = 11 and again at 20 and 21; whether merge insertion is optimal for every n is open. A bound that is reached tells you the cost belongs to the problem, not the method.",
+     "seal": "lower8"
+    },
+    {
+     "kind": "instance",
+     "claim": "[merge sort's exact worst case, SEALED] Top-down merge sort makes at most n ceil(lg n) - 2^ceil(lg n) + 1 comparisons: for n = 1000, ceil(lg 1000) = 10 and 2^10 = 1024, so 10,000 - 1024 + 1 = 8,977 (sealed) - within 5 percent of the ceil(log2 1000!) = 8,530 floor. For eight items the same formula gives 24 - 8 + 1 = 17, and tools/sorting_demo.py finds exactly 17 as the maximum over all 40,320 orders (measured). Merge sort's cost is nearly all problem and very little method.",
+     "seal": "mergeworst1000"
+    },
+    {
+     "kind": "instance",
+     "claim": "[insertion sort's worst case is quadratic, SEALED] Straight insertion on n items already in reverse order compares n(n-1)/2 times: 499,500 for n = 1000 (sealed; tools/sorting_demo.py counts exactly 499,500 on the reversed thousand, measured). Fifty-six times merge sort's 8,977. The same count is bubble sort's and selection sort's comparison count, which is why the quadratic family is taught first and used last - except on tiny or nearly sorted inputs, where insertion sort's adaptivity wins (timsort runs it inside every run below minrun).",
+     "seal": "insertworst1000"
+    },
+    {
+     "kind": "instance",
+     "claim": "[heapsort: n log n in place, SEALED] Williams' heapsort (1964) with Floyd's linear-time heap construction makes at most about 2 n lg n comparisons: 19,932 for n = 1000 (sealed), a little over twice merge sort's, with no extra array at all - the heap lives inside the input. Dijkstra's smoothsort (1981) keeps the heap but makes it adaptive: linear on sorted input, n log n in the worst case.",
+     "seal": "heapworst1000"
+    },
+    {
+     "kind": "instance",
+     "claim": "[Batcher's network for eight wires: 19 comparators, depth 6, and that is optimal, SEALED] Batcher's odd-even merge sort on n = 2^k wires uses (k^2 - k + 4) 2^(k-2) - 1 comparators: for k = 3, (9 - 3 + 4) x 2 - 1 = 19 (sealed) in k(k+1)/2 = 6 layers. Knuth proves 19 comparators and depth 6 are the minimum for eight inputs. tools/sorting_demo.py BUILDS the network, counts 19 comparators and 6 layers, and checks it sorts all 2^8 = 256 zero-one inputs - which by Knuth's zero-one principle proves it sorts every input (measured). A sorting network is sorting as WIRING: no branches, the same comparators in the same order for every input - the shape of a circuit, not a program, which is why it runs on GPUs and in hardware.",
+     "seal": "batcher8"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the bitonic sorter for eight wires: 24 comparators, SEALED] Batcher's other network uses n lg n (lg n + 1) / 4 comparators: 8 x 3 x 4 / 4 = 24 (sealed) in the same 6 layers - five more than odd-even merge, but perfectly regular: every layer is the same pattern shifted, which is why the bitonic sorter is the GPU's sort. tools/sorting_demo.py builds it, counts 24, and proves it on the 256 zero-one inputs (measured). For sixteen wires Batcher needs 63; the best known network, Green's (1969, in Knuth 5.3.4), needs 60 - and whether fewer than 60 suffice is OPEN: minimum sizes are proven only up to twelve wires (Codish, Cruz-Filipe, Frank and Schneider-Kamp 2014 for nine and ten; Harder 2020 for eleven and twelve).",
+     "seal": "bitonic8"
+    },
+    {
+     "kind": "instance",
+     "claim": "[shellsort's gaps: Knuth's sequence reaches 1093, SEALED] Shell's 1959 method is insertion sort run first at a large gap, then smaller, until the gap is 1 - early passes move items far, the last pass finds the input nearly sorted. The gap sequence decides the cost. Knuth's (3^k - 1)/2 gives 1, 4, 13, 40, 121, 364, 1093 ((3^7 - 1)/2 = 1093, sealed) and about n^1.5; Pratt's 2^p 3^q gaps give n log^2 n; Sedgewick's n^(4/3); Ciura's empirical gaps 1, 4, 10, 23, 57, 132, 301, 701 are the fastest known in practice. The true complexity of shellsort under the best sequence is open.",
+     "seal": "shell7"
+    },
+    {
+     "kind": "instance",
+     "claim": "[stooge sort's exponent is 2.71, SEALED] Sort the first two thirds, then the last two thirds, then the first two thirds again: T(n) = 3 T(2n/3), so the cost is n^(log 3 / log 1.5) = n^2.7095 (sealed) - WORSE than the quadratic family. It is kept as the honest lesson that recursion is not speed; what matters is how much work each level does and how many levels there are (the logarithm's base in the exponent). Slowsort (Broder and Stolfi 1984) is the same lesson made deliberate: multiply and surrender.",
+     "seal": "stooge"
+    },
+    {
+     "kind": "instance",
+     "claim": "[timsort's minrun for a thousand items is 63, SEALED] Timsort (Tim Peters 2002, CPython's list.sort and sorted) first finds the natural runs already in the data, extends any run shorter than MINRUN with binary insertion sort, then merges runs. MINRUN is the top six bits of n, plus one if any lower bit is set: 1000 = 1111101000 in binary, top six bits 111110 = 62, lower bits 1000 nonzero, so 62 + 1 = 63 (sealed; tools/sorting_demo.py runs the listsort.txt rule and gets 63, measured). Then n / 63 = 15.9, a hair under 16 = 2^4, so the merges come out balanced. Since CPython 3.11 the merge ORDER follows Munro and Wild's powersort policy (nearly optimal for existing runs); the engine's every list.sort is this algorithm.",
+     "seal": "minrun1000"
+    },
+    {
+     "kind": "instance",
+     "claim": "[pancake sort: at most 18n/11 flips, SEALED] Sorting by prefix reversal - the only move is to flip the top k pancakes - needs at most (5n + 5)/3 flips (Gates and Papadimitriou 1979, the paper's first author being Bill Gates) and, by Chitturi et al. 2009, at most 18n/11: 1,636.4 flips for a thousand (sealed), against a lower bound of 15n/14. The exact pancake number is known only for n up to about 19. A sort where the MOVE is constrained, not the comparison - the shape of genome rearrangement by reversal, which is where the problem went.",
+     "seal": "pancake1000"
+    },
+    {
+     "kind": "instance",
+     "claim": "[bogosort: 282,240 swaps expected for eight items, SEALED] Shuffle; check; repeat. Gruber, Holzer and Ruepp analysed it: the expected number of swaps is (n - 1) n!, so 7 x 40,320 = 282,240 for eight items (sealed), and the expected comparisons about (e - 1) n!. The worst case is unbounded. The pessimal end of the roll is kept for the same reason the stooge is: a method that is CORRECT and useless is still a method, and the roll is honest only if it has both ends.",
+     "seal": "bogo8"
+    },
+    {
+     "kind": "note",
+     "claim": "[the roll, family 1 - EXCHANGE, 14] Swap what is out of order. Bubble sort (described by Friend 1956 as 'sorting by exchange'; the name appears in Iverson 1962); cocktail shaker sort (bubble in both directions; Knuth 5.2.2); odd-even transposition sort (Habermann 1972, the parallel neighbour sort); comb sort (Dobosiewicz 1980; Lacey and Box 1991 - bubble sort with shrinking gaps); gnome sort (Sarbazi-Azad 2000, 'stupid sort'; the gnome name is Grune's); exchange sort (compare every pair with the first; folklore); QUICKSORT (Hoare 1961, Algorithm 64; the analysis 1962); three-way quicksort with the fat partition (Dijkstra's Dutch national flag, 1976; Bentley and McIlroy 1993 engineered it into qsort); dual-pivot quicksort (Yaroslavskiy 2009; Java's Arrays.sort since Java 7); introsort (Musser 1997; quicksort that falls back to heapsort when recursion goes deep - C++ std::sort); pdqsort (O. Peters 2014, pattern-defeating quicksort; Rust's sort_unstable); radix exchange sort (Hildebrandt and Isbitz 1959; Knuth Algorithm R - quicksort partitioning on the bits of the key); stooge sort (Cormen, Leiserson, Rivest and Stein, problem 7-3); slowsort (Broder and Stolfi 1984).",
+     "source": "E. H. Friend, 'Sorting on electronic computer systems', J. ACM 3 (1956) 134-168; K. E. Iverson, A Programming Language (1962); A. N. Habermann, 'Parallel neighbor-sort', CMU report (1972); W. Dobosiewicz, Inf. Proc. Lett. 11 (1980) 5-6; S. Lacey, R. Box, Byte 16:4 (1991) 315; H. Sarbazi-Azad, Newsletter of the IEEE CS Iran Section (2000); C. A. R. Hoare, 'Algorithm 64: Quicksort', Comm. ACM 4 (1961) 321, and 'Quicksort', Computer J. 5 (1962) 10-16; E. W. Dijkstra, A Discipline of Programming (1976) ch. 14; J. L. Bentley, M. D. McIlroy, 'Engineering a sort function', Software: Practice and Experience 23 (1993) 1249-1265; V. Yaroslavskiy, 'Dual-pivot quicksort' (2009); D. R. Musser, Software: P&E 27 (1997) 983-993; O. R. L. Peters, pdqsort (2014); P. Hildebrandt, H. Isbitz, J. ACM 6 (1959) 156-163; Knuth TAOCP vol. 3 sec. 5.2.2; A. Z. Broder, J. Stolfi, SIGACT News 16:3 (1984) 49-53"
+    },
+    {
+     "kind": "note",
+     "claim": "[the roll, family 2 - SELECTION, 10] Pick the smallest, put it first, repeat. Selection sort (Knuth 5.2.3); double selection (smallest and largest per pass; folklore); HEAPSORT (Williams 1964, Algorithm 232); Floyd's treesort 3 with the bottom-up linear heap build (Floyd 1964, Algorithm 245); smoothsort (Dijkstra 1981, EWD796 - Leonardo heaps, adaptive); weak-heap sort (Dutton 1993); Cartesian tree sort (Levcopoulos and Petersson 1989, adaptive to presortedness); tournament sort, i.e. replacement selection (Friend 1956; Knuth 5.4.1 - the run-maker of external sorting); cycle sort (Haddon 1990 - the fewest writes possible, each item moved at most once); bingo sort (selection by value, folklore).",
+     "source": "J. W. J. Williams, 'Algorithm 232: Heapsort', Comm. ACM 7 (1964) 347-348; R. W. Floyd, 'Algorithm 245: Treesort 3', Comm. ACM 7 (1964) 701; E. W. Dijkstra, 'Smoothsort, an alternative for sorting in situ', Science of Computer Programming 1 (1982) 223-233 (EWD796, 1981); R. D. Dutton, 'Weak-heap sort', BIT 33 (1993) 372-381; C. Levcopoulos, O. Petersson, 'Heapsort - adapted for presorted files', WADS 1989, LNCS 382; B. K. Haddon, 'Cycle-sort: a linear sorting method', Computer J. 33 (1990) 365-367; Knuth TAOCP vol. 3 secs. 5.2.3, 5.4.1"
+    },
+    {
+     "kind": "note",
+     "claim": "[the roll, family 3 - INSERTION, 11] Take the next item, put it where it belongs among those already sorted. Straight insertion (Knuth Algorithm S); binary insertion (find the place by bisection - the earliest mention Knuth 5.2.1 finds is Mauchly's 1946 Moore School lecture); two-way insertion (Knuth 5.2.1); SHELLSORT (Shell 1959; gap sequences by Pratt 1972, Sedgewick 1986, Ciura 2001); library sort, gapped insertion (Bender, Farach-Colton and Mosteiro 2004/2006 - leave spaces, as a librarian does, so insertion is O(n log n) with high probability); patience sorting (Mallows 1963; Aldous and Diaconis 1999 - deal onto piles as in the card game; the number of piles is the longest increasing subsequence); tree sort (insert into a binary search tree, walk it in order; Knuth 6.2.2); splaysort (Moffat, Eddy and Petersson 1996); Ford-Johnson merge insertion (1959 - fewest comparisons known); list insertion (Knuth 5.2.1); address-calculation sort (Isaac and Singleton 1956 - insert at the address the key's value suggests).",
+     "source": "D. L. Shell, 'A high-speed sorting procedure', Comm. ACM 2:7 (1959) 30-32; V. R. Pratt, Shellsort and Sorting Networks (Stanford PhD 1972; Garland 1979); R. Sedgewick, 'A new upper bound for Shellsort', J. Algorithms 7 (1986) 159-173; M. Ciura, 'Best increments for the average case of Shellsort', FCT 2001, LNCS 2138, 106-117; M. A. Bender, M. Farach-Colton, M. A. Mosteiro, 'Insertion sort is O(n log n)', Theory of Computing Systems 39 (2006) 391-397; C. L. Mallows, SIAM Review 5 (1963) 375-376; D. Aldous, P. Diaconis, Bull. AMS 36 (1999) 413-432; A. Moffat, G. Eddy, O. Petersson, 'Splaysort: fast, versatile, practical', Software: P&E 26 (1996) 781-797; L. R. Ford Jr., S. M. Johnson, 'A tournament problem', Amer. Math. Monthly 66 (1959) 387-389; E. J. Isaac, R. C. Singleton, 'Sorting by address calculation', J. ACM 3 (1956) 169-174; Knuth TAOCP vol. 3 sec. 5.2.1, 6.2.2"
+    },
+    {
+     "kind": "note",
+     "claim": "[the roll, family 4 - MERGE, 17] Sort the halves, merge them. MERGE SORT (von Neumann 1945, the first program written for the EDVAC; Goldstine and von Neumann 1947-48); straight two-way merge, bottom-up (Knuth Algorithm S); natural merge (Knuth Algorithm N - uses the runs already there); list merge (Knuth Algorithm L); in-place merge sort (Kronrod 1969 - merging with O(1) extra space); TIMSORT (T. Peters 2002 - natural runs, binary insertion below minrun, galloping merges; Python, Java's objects, Android, V8); powersort (Munro and Wild 2018 - the nearly optimal merge policy CPython adopted in 3.11); block sort, i.e. WikiSort (Kim and Kutzner 2008 - stable, in place, ratio-based merging); GrailSort (Astrelin 2013, after Huang and Langston); quadsort, fluxsort and crumsort (van den Hoven 2014-2021 - branchless merging); glidesort (O. Peters 2023 - stable, adaptive, merge and quicksort hybrid); strand sort (pull out an increasing strand, merge it; folklore); and the EXTERNAL merges for data that does not fit in memory: polyphase merge (Gilstad 1960), cascade merge (Betz and Carter 1959), oscillating sort (Sobel 1962) - Knuth 5.4.",
+     "source": "H. H. Goldstine, J. von Neumann, 'Planning and coding of problems for an electronic computing instrument', Part II, vol. 2 (IAS 1947-48; Knuth 5.2.4 dates the merge-sort program to 1945); M. A. Kronrod, 'Optimal ordering algorithm without operational field', Soviet Math. Dokl. 10 (1969) 744-746; T. Peters, Objects/listsort.txt (CPython, 2002); J. I. Munro, S. Wild, 'Nearly-optimal mergesorts', ESA 2018, LIPIcs 112; CPython 3.11 changelog (bpo-34561); P.-S. Kim, A. Kutzner, 'Ratio based stable in-place merging', TAMC 2008, LNCS 4978, 246-257; A. Astrelin, GrailSort (2013); B.-C. Huang, M. A. Langston, 'Practical in-place merging', Comm. ACM 31 (1988) 348-352; I. van den Hoven, quadsort/fluxsort/crumsort (2014-2021); O. R. L. Peters, glidesort (2023); R. L. Gilstad, 'Polyphase merge sorting', AFIPS EJCC 18 (1960) 143-148; B. K. Betz, W. C. Carter, 'New merge sorting techniques', ACM National Meeting (1959); S. Sobel, 'Oscillating sort', J. ACM 9 (1962) 372-374; Knuth TAOCP vol. 3 secs. 5.2.4, 5.4"
+    },
+    {
+     "kind": "note",
+     "claim": "[the roll, family 5 - DISTRIBUTION, 14] Do not compare; read the key's digits and place. These beat the log2 n! bound because they are not comparison sorts: the key is a number of bounded width. Counting sort (Seward 1954, the thesis that also analysed radix sort); comparison counting (Knuth Algorithm C); pigeonhole sort; bucket sort, i.e. bin sort (Isaac and Singleton 1956; Knuth 5.2.5); LSD RADIX SORT (Hollerith's punched-card machines - the 1890 census tabulators sorted into bins, the mechanical sorter followed by 1901 - sorted column by column, least significant first: the oldest algorithm on the roll); MSD radix sort; American flag sort (McIlroy, Bostic and McIlroy 1993 - MSD radix in place, named for the Dutch national flag); multikey quicksort, three-way string quicksort (Bentley and Sedgewick 1997); burstsort (Sinha and Zobel 2004 - a trie whose buckets burst when full); proxmap sort (Standish 1995); flashsort (Neubert 1998); spreadsort (Ross 2002; Boost.Sort - radix that falls back to comparison); the postman's sort (Ramey 1992); histogram sort and interpolation sort (counting and bucket variants, folklore).",
+     "source": "H. H. Seward, 'Information sorting in the application of electronic digital computers to business operations', MIT Digital Computer Lab report R-232 (1954); Knuth TAOCP vol. 3 sec. 5.2.5 (and 5.2 on Hollerith, 1887-1890); E. J. Isaac, R. C. Singleton, J. ACM 3 (1956) 169-174; P. M. McIlroy, K. Bostic, M. D. McIlroy, 'Engineering radix sort', Computing Systems 6:1 (1993) 5-27; J. L. Bentley, R. Sedgewick, 'Fast algorithms for sorting and searching strings', SODA 1997, 360-369; R. Sinha, J. Zobel, 'Cache-conscious sorting of large sets of strings with dynamic tries', ACM J. Exp. Algorithmics 9 (2004); T. A. Standish, Data Structures, Algorithms and Software Principles in C (1995); K.-D. Neubert, 'The Flashsort1 algorithm', Dr. Dobb's Journal (Feb. 1998); S. J. Ross, 'The Spreadsort high-performance general-case sorting algorithm', PDPTA 2002; R. Ramey, 'The postman's sort', C Users Journal 10:8 (1992)"
+    },
+    {
+     "kind": "note",
+     "claim": "[the roll, family 6 - NETWORKS AND PARALLEL, 10] Sorting as wiring, or as many machines at once. Batcher's odd-even merge sort and the bitonic sorter (both Batcher 1968 - sealed above for eight wires); the pairwise sorting network (Parberry 1992); Green's sixteen-input network of 60 comparators (1969; in Knuth 5.3.4 - the best known, minimality open); shear sort (Scherson, Sen and Shamir 1986 - rows and columns of a mesh); samplesort (Frazer and McKellar 1970 - pick splitters by sampling, then bucket); parallel sorting by regular sampling, PSRS (Shi and Schaeffer 1992); merge path (Odeh, Green, Mwassi, Shmueli and Birk 2012 - split one merge across many processors); GPU radix sort (Satish, Harris and Garland 2009); cubesort (Cypher and Sanz 1992).",
+     "source": "K. E. Batcher, 'Sorting networks and their applications', AFIPS Spring Joint Computer Conf. 32 (1968) 307-314; I. Parberry, 'The pairwise sorting network', Parallel Processing Letters 2 (1992) 205-211; M. W. Green, 'Some improvements in non-adaptive sorting algorithms', Proc. 6th Allerton Conf. (1969) 387-391; Knuth TAOCP vol. 3 sec. 5.3.4; M. Codish, L. Cruz-Filipe, M. Frank, P. Schneider-Kamp, 'Sorting nine inputs requires twenty-five comparisons', J. Computer and System Sciences 82 (2016) 551-563; J. Harder, 'An answer to the Bose-Nelson sorting problem for 11 and 12 channels' (2020); I. D. Scherson, S. Sen, A. Shamir, 'Shear sort: a true two-dimensional sorting technique for VLSI networks', ICPP 1986; W. D. Frazer, A. C. McKellar, 'Samplesort', J. ACM 17 (1970) 496-507; H. Shi, J. Schaeffer, 'Parallel sorting by regular sampling', J. Parallel Distrib. Comput. 14 (1992) 361-372; S. Odeh et al., 'Merge path - parallel merging made simple', IPDPSW 2012; N. Satish, M. Harris, M. Garland, 'Designing efficient sorting algorithms for manycore GPUs', IPDPS 2009; R. Cypher, J. L. C. Sanz, 'Cubesort', J. Algorithms 13 (1992) 211-234"
+    },
+    {
+     "kind": "note",
+     "claim": "[the roll, family 7 - ANALOG, PESSIMAL, AND ORDER WITHOUT KEYS, 10] Bead sort, gravity sort (Arulanandham, Calude and Dinneen 2002 - beads on rods fall; the rows are sorted); spaghetti sort (Dewdney 1984 - cut rods to length, stand them up, lower a hand); pancake sort and burnt pancake sort (Gates and Papadimitriou 1979 - sealed above); Franceschini's sort (2007 - stable, in place, O(n log n) comparisons AND O(n) moves, closing a long-open question); bogosort and bozosort (Gruber, Holzer and Ruepp 2007 - sealed above; bozosort swaps one random pair instead of shuffling); sleep sort (folklore, 2011 - each item sleeps its own value and then prints itself: a sort by the clock, not a comparison); and the two TOPOLOGICAL sorts, which order by dependency rather than by key: Kahn's (1962 - peel off nodes with no incoming edges) and the depth-first one (Tarjan 1976; Cormen et al. 22.4) - the order a chain of bound steps must be read in.",
+     "source": "J. J. Arulanandham, C. S. Calude, M. J. Dinneen, 'Bead-sort: a natural sorting algorithm', Bull. EATCS 76 (2002) 153-162; A. K. Dewdney, 'On the spaghetti computer and other analog gadgets for problem solving', Scientific American 250:6 (June 1984) 19-26; W. H. Gates, C. H. Papadimitriou, 'Bounds for sorting by prefix reversal', Discrete Mathematics 27 (1979) 47-57; B. Chitturi et al., 'An (18/11)n upper bound for sorting by prefix reversals', Theoretical Computer Science 410 (2009) 3372-3390; G. Franceschini, 'Sorting stably, in place, with O(n log n) comparisons and O(n) moves', Theory of Computing Systems 40 (2007) 327-353; H. Gruber, M. Holzer, O. Ruepp, 'Sorting the slow way', FUN 2007, LNCS 4475, 183-197; A. B. Kahn, 'Topological sorting of large networks', Comm. ACM 5 (1962) 558-562; R. E. Tarjan, 'Edge-disjoint spanning trees and depth-first search', Acta Informatica 6 (1976) 171-185"
+    },
+    {
+     "kind": "note",
+     "claim": "[the count] Eighty-six named sorting algorithms on this stick, in seven families: exchange 14, selection 10, insertion 11, merge 17, distribution 14, networks and parallel 10, analog-pessimal-order 10. Each name carries its origin; 'folklore' marks the ones with no first paper. The roll is open: a name with a cited origin that is not here is a want, not an error. Matt counted 'over 80'; the keeping now holds 86 and the arithmetic that prices them.",
+     "source": "this stick, 2026-10-31; D. E. Knuth, TAOCP vol. 3 (1973; 1998) remains the standard roll; V. Estivill-Castro, D. Wood, 'A survey of adaptive sorting algorithms', ACM Computing Surveys 24 (1992) 441-476"
+    },
+    {
+     "kind": "note",
+     "claim": "[our use - the engine sorts 362 times in 124 modules] Counted 2026-10-31 in src/concordance (sorted( and .sort( call sites). Under every one of them is TIMSORT with the powersort merge policy (CPython 3.11+). What the engine relies on, by name: STABILITY - ask.py:1130 'Stable sort preserves the corpus's search relevance to break a title-overlap tie'; recombine.py:77 'frame order -> relevance -> shortest -> stable'; coach.py:137 a 'STABLE, deterministic teaching order'; distill.py:165 'the ordering is total and stable' - a stable sort never reorders what it did not measure, which is provenance preserved. THE RANKED READOUT - corpus.py:1035 sorts (-score, id): a total order with a deterministic tie-break, the same answer every time. THE HEAP - chains.py:359 walks the priced map with heapq (Dijkstra's queue IS Williams' heap, heapsort's structure); Counter.most_common(k) in airlock.py:83 is heapq.nlargest, a partial sort in k log n. THE MERGE - corpus_db.py:496 'merge shards by bm25': each shard arrives sorted and the merge step of merge sort joins them. RADIX AGAINST COMPARISON, in the engine's own words - corpus.py:1790 'Ranked search with a RADIX CACHE: the whole-keeping scoring is the expensive COMPARISON rung'; domain_resolver.py:388 'route by the shape of the key (radix), not by scanning the corpus'; candidates.py:258 zero-pads ids 'so ids sort as they were generated' (a fixed-width key is what LSD radix needs); corpus.py:607 orders by call prefix - the library call number is an MSD radix key, the floor tree a trie. THE OPEN WANT - ledger.py:81 _ledger_chain_files sorts EVERY ledger file by sealed_at on every append, n log n per seal and growing: the receipts plan's .head tip pointer is natural merge sort's insight (a run already in order costs nothing to keep in order).",
+     "source": "src/concordance/ask.py, recombine.py, coach.py, distill.py, corpus.py, chains.py, airlock.py, corpus_db.py, domain_resolver.py, candidates.py, ledger.py (lines as of 2026-10-31, branch millennium-routing-floor); CPython Objects/listsort.txt; CPython 3.11 changelog (bpo-34561); the receipts plan (sequenced bounded components - the ledger .head tip)"
+    },
+    {
+     "kind": "note",
+     "claim": "[what carries over to the reservoir and to Boole] The readout of the reservoir_computing stick is a weighted sum - and then a SORT: top-k by score is a partial sort, so the only trained part of the engine ends in Williams' heap or Peters' merge. The Riemann partition must be ORDERED to converge at 1/n; the axes are sorted keys, and a sorted keeping is searched by bisection in log2 n probes (sealed on fractal_maps: 19.75 for 882,022 cards) - sorting is what makes the ordered partition usable. Boole: a comparison is x < y, two values, and the decision-tree bound counts them; the THREE-WAY comparison (<, =, >) is the computer_science stick's third value, -1, 0, 1, balanced ternary - and Dijkstra's Dutch national flag partition (less, equal, greater) is quicksort built on it, which is why equal keys cost nothing there. Stability is the engine's covenant in a sort: equal keys keep the order they were FOUND in.",
+     "source": "stick reservoir_computing (the readout); stick fractal_maps (binary search on the keeping); stick computer_science (the third value, x^3 = x); E. W. Dijkstra, A Discipline of Programming (1976) ch. 14; Knuth TAOCP vol. 3 sec. 5.3.1"
+    },
+    {
+     "kind": "note",
+     "claim": "[on the one map] Rests on the computer-science floor (card_floor_computer_science) and its algorithms pillar (card_cs_algorithms - merge sort's 24 at eight items, sealed there), on the logarithm (card_floor_logarithm - log2 n! prices the bound; the base in the stooge exponent), on the reservoir (card_tool_reservoir_computing - the readout ends in a sort), on Boole's gates (card_cs_logic_gates - a comparison is one Boolean decision) and on the dictionary's own word (card_src_word_sorting_algorithm). Card: card_cs_sorting_algorithms (tools/seed_sorting_algorithms.py). Measured: tools/sorting_demo.py. WANTS: a sorting VERIFIER that recomputes comparison and comparator counts from the formulas so a claim like 'Batcher's network for sixteen wires uses 63 comparators' verifies at zero false positives; and the ledger .head tip, so the one sort the engine repeats needlessly stops.",
+     "source": "the one map; card_floor_computer_science; card_cs_algorithms; card_floor_logarithm; card_tool_reservoir_computing; card_cs_logic_gates; card_src_word_sorting_algorithm; tools/sorting_demo.py"
+    }
+   ]
+  }
+ ]
+}

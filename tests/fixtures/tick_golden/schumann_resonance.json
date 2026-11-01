@@ -1,0 +1,39 @@
+{
+ "entry": "schumann_resonance",
+ "rc": 0,
+ "seals": {
+  "bf6cec86265197f929fbebddf8cd7fff3a740c5b2aef0ecfcaee472c18f412d3": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "schumann_fundamental_ideal_lossless_cavity"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_the_schumann_resonance_the_earth_ionosphere_cavity_s_fundame": {
+   "field": "",
+   "question": "The Schumann resonance - the Earth-ionosphere cavity's fundamental tone",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "tools/tick.py schumann",
+     "claim": "[the ideal cavity fundamental, SEALED] Treating the Earth and the ionosphere as a perfect spherical cavity, the lowest standing-wave frequency is f1 = (c / (2*pi*a)) * sqrt(2) = 10.59 Hz (sealed), with c the speed of light and a = 6371 km the Earth's mean radius. This is the exact idealization - the tone a lossless planet-sized cavity would ring at.",
+     "kind": "instance",
+     "seal": "bf6cec86265197f929fbebddf8cd7fff3a740c5b2aef0ecfcaee472c18f412d3"
+    },
+    {
+     "by": "tools/tick.py schumann",
+     "claim": "[the observed value, CITED - the lossy cavity delimits the ideal] The MEASURED Schumann fundamental is about 7.83 Hz (with harmonics near 14.3, 20.8 and 27.3 Hz) - LOWER than the ideal 10.59 Hz by a factor of ~0.74. The gap is not an error: the real ionosphere is a finite, LOSSY conductor, so the cavity is 'softer' than the perfect one the ideal assumes. The engine seals the exact model and names exactly where the world departs from it - a fit with its delimitation stated, never an overclaim.",
+     "kind": "note"
+    },
+    {
+     "by": "tools/tick.py schumann",
+     "claim": "[a resonance of the whole planet] The Schumann resonance is a standing electromagnetic wave on a CLOSED cavity - the same shape as every resonance the engine is built on: a mode on a bounded domain, counted by the roots of unity, tuned like a receiver. It sits on the electromagnetism and earth-science shelves and joins the one map's resonance thread. Ties card_floor_the_instruments.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}
