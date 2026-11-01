@@ -52,7 +52,10 @@ touched a grader (`git diff --name-only BASE`); if it did, the step fails withou
   elsewhere) cannot pass a test, and **reset before every stage** so nothing one stage writes
   reaches the next. The stages: **the pin check** (the step's test files laid over, the fix left
   out — at least one of the step's own test ids must fail; a skip, an unknown id or "no tests ran"
-  is not red) · the step's tests · **the full suite** (`-vv`, with the vacuity plugin) · **the moat**
+  is not red. When the whole fix is in `tests/` — an expectation or fixture that a later deliberate
+  commit made stale — there is nothing to revert, the pin is N/A, the gate names the baselined reds
+  the step retires, and the checker must justify each changed expectation against the commit the
+  claim names) · the step's tests · **the full suite** (`-vv`, with the vacuity plugin) · **the moat**
   (`tools/benchmark.py`, 0 false positives). **Results are streamed, never read from a file the
   run leaves behind**: a reporter plugin, written outside the tree under a random name, sends every
   test's result over a localhost socket as pytest makes it, from the innermost of the wrappers

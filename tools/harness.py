@@ -74,6 +74,7 @@ SELF_REL = "tools/harness.py"
 RUNS_REL = "docs/harness/runs"
 BASELINE_REL = "docs/harness/baseline.txt"
 MANIFEST_REL = "tests/MANIFEST.txt"
+BOOKKEEPING = (BASELINE_REL, MANIFEST_REL)   # a step may have to edit these; neither is ever the fix
 MAX_ROUNDS = 3                      # failed verdicts before a step is BLOCKED and a human decides
 RESERVED = ("plan", "live")         # verdict targets that are not steps
 LINGER_SECONDS = 30                 # after the session reports its finish, how long a process may linger
@@ -978,15 +979,22 @@ def check_step_tests(root: str, tests: Sequence[str]) -> dict:
     return _ok(f"{counts(run.results)} — {run.tail}")
 
 
-def check_pins(wt: str, paths: Sequence[str], tests: Sequence[str]) -> dict:
+def check_pins(wt: str, paths: Sequence[str], tests: Sequence[str], retired: Sequence[str] = ()) -> dict:
     """The step's tests must go RED with the fix taken away — or they do not pin the fix.
 
     `wt` is a worktree at the step's base with only the step's TEST files laid over. A red here
     must be one of the step's own test ids (or a collection error of their file): a skip, an
     unknown id, or a "no tests ran" is not red.
+
+    The FIX is what lies outside tests/, less the bookkeeping every step may have to touch (its
+    baseline line, its manifest line). A step whose fix is the test or its fixture — an expectation
+    a later deliberate commit made stale — has nothing to revert: the pin is N/A, and the checker
+    must justify the changed expectation against the commit the claim names.
     """
-    if not [p for p in paths if not p.startswith("tests/")]:
-        return _ok("test-only step: nothing to revert (the checker must justify any changed expectation)")
+    if not [p for p in paths if not p.startswith("tests/") and p not in BOOKKEEPING]:
+        gone = f"; it retires baselined red(s): {', '.join(retired)}" if retired else ""
+        return _ok(f"no fix outside tests/ to revert{gone} — the checker must justify every changed "
+                   f"expectation against the commit the claim names")
     present = [t for t in tests if os.path.exists(os.path.join(wt, t.split("::")[0]))]
     if not present:
         return _fail(["none of the step's tests exist at the base, even with the step's test files laid over"])
@@ -1345,7 +1353,9 @@ def cmd_gate(root: str, run: str, sid: str, role: str, by: str) -> Tuple[bool, d
         # Every stage starts from a freshly reset worktree: nothing one stage writes reaches the next.
         with the_floor(root), candidate(root, base) as wt:
             fresh(root, wt, [p for p in paths if p.startswith("tests/")])
-            checks["pins"] = check_pins(wt, paths, st["tests"])
+            retired = sorted(set(parse_baseline(_show(root, base, BASELINE_REL))[0])
+                             - set(parse_baseline(_read_text(os.path.join(root, BASELINE_REL)))[0]))
+            checks["pins"] = check_pins(wt, paths, st["tests"], retired)
             fresh(root, wt, paths)
             checks["tests"] = check_step_tests(wt, st["tests"])
             if checks["tests"]["ok"]:

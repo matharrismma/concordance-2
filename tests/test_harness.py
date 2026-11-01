@@ -363,6 +363,19 @@ def test_a_test_that_passes_without_the_fix_does_not_pin_it(repo):
     assert not ok and not ev["checks"]["pins"]["ok"]
 
 
+def test_a_stale_expectation_fixed_in_the_test_is_not_refused_for_its_bookkeeping(repo):
+    # The red is the test's own stale expectation; fixing it also deletes its baseline line. The
+    # baseline line is bookkeeping, not the fix, so the step is test-only: the pin is N/A.
+    _write(repo, h.BASELINE_REL, "tests/test_app.py::test_value | " + h.fingerprint("x") + "\n")
+    _commit_all(repo, "baselined")
+    run = _stepped(repo, scope=("tests/*", h.BASELINE_REL))
+    _write(repo, "tests/test_app.py", "import app\n\n\ndef test_value():\n    assert app.VALUE == 1\n")
+    _write(repo, h.BASELINE_REL, "")
+    ok, ev = _gate(repo, run, "checker", "checker-1")
+    assert ok, ev["checks"]                                   # not refused: the whole gate passes
+    assert "retires baselined red(s): tests/test_app.py::test_value" in ev["checks"]["pins"]["detail"]
+
+
 def test_a_test_that_merely_skips_without_the_fix_does_not_pin_it(repo):
     run = _stepped(repo, tests=("tests/test_new.py",), scope=("src/*", "tests/*"))
     _write(repo, "src/newmod.py", "ANSWER = 42\n")
@@ -491,9 +504,11 @@ def test_the_committed_baseline_is_well_formed():
     assert all(n.startswith("tests/") and "::" in n for n in vac)
 
 
-def test_the_command_line_refuses_out_loud(capsys):
+def test_the_command_line_refuses_out_loud(capfd):
+    # capfd, not capsys: when this copy differs from HEAD's, main() re-runs HEAD's copy as a child
+    # process, which writes to the descriptor, not to this process's sys.stderr.
     assert h.main(["done", "no-such-run-here"]) == 2
-    assert "REFUSED" in capsys.readouterr().err
+    assert "REFUSED" in capfd.readouterr().err
     assert h.main(["status", "Not A Valid Id"]) == 2
 
 
