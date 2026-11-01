@@ -1,0 +1,32 @@
+# THE BASELINE — what the suite is known to do wrong today, each line with its reason.
+#
+#   <nodeid> | <fingerprint>   a known red; the fingerprint hashes HOW it fails (the failure message),
+#                              so an "every page" test already red for one page cannot hide a second
+#   vacuous <nodeid>           a known pass that asserted against a corpus it never populated
+#                              (tools/vacuity_plugin.py)
+#
+# The checker's gate fails on any red or vacuous pass not listed here, on a listed red failing
+# differently, and on a listed entry that no longer holds ("stale"). A step may only DELETE lines:
+# the step that fixes one removes its line in the same step. Re-measured only in a bootstrap, with
+# `python tools/harness.py measure` (the commit-to-be in a fresh worktree, -vv, vacuity plugin on).
+#
+# Measured 2026-11-01 on the harness bootstrap (ec094fe + the harness), through the result
+# stream: 5 failed, 230 skipped, 1 xfailed; every other test passed.
+tests/test_chains_seeded.py::test_computer_science_floor_rests_on_the_instruments_and_p_vs_np | 3fa2a78b2244  # the CS floor's chain counts 6 where the test expects 4
+tests/test_reachability.py::test_every_page_is_linked_or_declared_unlisted | 67e05c696d74  # site/gates.html is linked from nowhere
+tests/test_site.py::test_every_page_offers_a_way_home | 4946dcc81de5  # site/gates.html has no way home
+tests/test_site.py::test_the_palette_reaches_every_public_page | d8b8fa037766  # site/gates.html is not reached by the palette
+tests/test_sticks_catalog.py::test_a_data_entry_mints_byte_identical_to_the_function_it_replaced[linear_algebra] | 4d69740eae92  # the linear_algebra data entry mints different seals
+vacuous tests/test_airlock.py::test_ingest_mints_cards_that_map_back_to_the_users_file  # pre-existing; each needs a human reading of its assertion
+vacuous tests/test_airlock.py::test_ingest_persists_nothing_to_disk
+vacuous tests/test_api.py::test_free_text_verify_airlocks_context
+vacuous tests/test_api.py::test_seal_404_on_bogus_hash
+vacuous tests/test_api.py::test_search_returns_results
+vacuous tests/test_compendium.py::test_build_publishes_holds_drops_broken_signs_emits_and_serves
+vacuous tests/test_engagement.py::test_walk_engages_no_seal_no_ledger_no_coach
+vacuous tests/test_house_ending.py::test_a_first_person_ache_is_met_as_comfort_with_the_number_in_hand
+vacuous tests/test_house_ending.py::test_an_internal_points_back_to_its_door_and_an_error_carries_no_ending
+vacuous tests/test_house_ending.py::test_find_and_keep_doors_end_the_same_way
+vacuous tests/test_mcp_contracts.py::test_a_business_error_leaves_typed_with_iserror_true
+vacuous tests/test_mcp_no_private_keys.py::test_the_action_still_succeeds_unsigned
+vacuous tests/test_professions.py::test_the_root_is_polycarp_the_disciple_of_a_disciple
