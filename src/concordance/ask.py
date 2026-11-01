@@ -1016,7 +1016,12 @@ _STOP = {"how", "what", "when", "where", "who", "whom", "whose", "why", "which",
          # the verb. Left in, the verb became the subject and led with a pronunciation stub for "wrote"
          # (measured live 2026-08-31). The subject of "who <verb> X" is X.
          "wrote", "write", "writes", "written", "said", "painted", "invented", "discovered",
-         "composed", "founded", "authored", "coined", "directed", "produced", "sculpted", "built"}
+         "composed", "founded", "authored", "coined", "directed", "produced", "sculpted", "built",
+         # and the agent NOUNS of the same question — "who was the COMPOSER of the Messiah" is about the
+         # oratorio, not the word; left in, "composer messiah" pulled a book that merely says Messiah
+         # (measured live 2026-11-01). The subject of "who is the <maker> of X" is X.
+         "author", "writer", "composer", "painter", "inventor", "discoverer", "founder", "sculptor",
+         "director", "producer", "builder", "architect", "designer"}
 
 
 def subject(text: str) -> str:
@@ -1719,41 +1724,89 @@ def _authorship_verb(text: str):
     return _ATTRIBUTION_VERB_OF.get(w, w)
 
 
-def _carries_the_attribution(card: Dict[str, Any], subj: str, verb: str) -> bool:
-    """Is this card the attribution of the subject? It must be ABOUT the work (its title names the subject,
-    _title_names_subject — never a mention in passing), it is never a map edge, and then one of: it sits on
-    a works shelf (the work itself, cited to its author); its prose says "by <Name>"; or its own words carry
-    the asked verb's family ("composed"/"composer", "written"/"author", "painter", "inventor" …)."""
+def _subject_stems(subj: str) -> set:
+    return {_stem(w) for w in (_content_tokens(subj) - _GENERIC_Q_WORDS)}
+
+
+def _title_core(title: str) -> str:
+    """A title without its author tail ("Hamlet — William Shakespeare" -> "Hamlet") or a parenthetical
+    qualifier ("Messiah (Handel)" -> "Messiah") — what the card is ABOUT, before who made it."""
+    t = str(title or "")
+    if " — " in t:
+        t = t.split(" — ", 1)[0]
+    return re.sub(r"\([^)]*\)", " ", t)
+
+
+def _title_is_subject(subj: str, card: Dict[str, Any]) -> bool:
+    """Is the card titled the subject itself — the title (its core) adds no word beyond the subject?
+    WordNet's "messiah" is; "Hamlet — William Shakespeare" is; "The Messiah in Moses and the Prophets —
+    Eleazar Lord" is NOT (it is a different work that bears the word; its own "by Eleazar Lord" attributes
+    THAT book, not the oratorio — live 2026-11-01)."""
+    want = _subject_stems(subj)
+    have = {_stem(w) for w in _content_tokens(_title_core(card.get("title") or ""))}
+    return bool(want) and bool(have) and have <= want
+
+
+def _title_covers_subject(subj: str, card: Dict[str, Any]) -> bool:
+    """Does the card's TITLE carry EVERY subject word (stem-aware)? With a subject of two or more words,
+    this is the test for "this card IS the work": "The Pilgrim's Progress in Words of One Syllable" covers
+    "pilgrims progress". A ONE-word subject can never claim a work by title alone — every book that bears
+    the word would qualify ("The Messiah in Moses and the Prophets" for "messiah"; "The Revelation of …"
+    for "revelation")."""
+    want = _subject_stems(subj)
+    if len(want) < 2:
+        return False
+    return want <= {_stem(w) for w in _content_tokens(card.get("title") or "")}
+
+
+def _attribution_evidence(card: Dict[str, Any], subj: str, verb: str) -> int:
+    """How strongly this card is the subject's attribution — 0: not at all; 1: it IS the work (a works-shelf
+    card whose title covers the whole two-or-more-word subject; its source names the author); 2: it SAYS so
+    — a card titled the subject itself whose prose says "by <Name>" or carries the asked verb's family
+    ("composed"/"composer", "written"/"author", "painter", "inventor" …). Prose outranks the shelf:
+    WordNet's "an oratorio composed by Handel" is the answer; a book that merely bears the word is not.
+    A map edge is never any."""
     cid = str(card.get("id") or "")
     if cid.startswith("card_c_") or card.get("shelf") == "connections":
-        return False
-    if not _title_names_subject(subj, card):
-        return False
-    if card.get("shelf") in _WORK_SHELVES:
-        return True
-    body = str(card.get("body") or "")
-    if _BY_NAME.search(body):
-        return True
-    fam = _ATTRIBUTION_FAMILY.get(verb, ())
-    raw = set(_WORD3.findall(" ".join([str(card.get("title") or ""), body,
-                                       str((card.get("source") or {}).get("label") or "")]).lower()))
-    return any(t.startswith(f) for t in raw for f in fam)
+        return 0
+    if _title_is_subject(subj, card):
+        body = str(card.get("body") or "")
+        fam = _ATTRIBUTION_FAMILY.get(verb, ())
+        raw = set(_WORD3.findall(" ".join([str(card.get("title") or ""), body,
+                                           str((card.get("source") or {}).get("label") or "")]).lower()))
+        if _BY_NAME.search(body) or any(t.startswith(f) for t in raw for f in fam):
+            return 2
+    if card.get("shelf") in _WORK_SHELVES and _title_covers_subject(subj, card):
+        return 1
+    return 0
+
+
+def _carries_the_attribution(card: Dict[str, Any], subj: str, verb: str) -> bool:
+    return _attribution_evidence(card, subj, verb) > 0
 
 
 def _attribution_leads(hits: List[Dict[str, Any]], text: str, subj: str) -> List[Dict[str, Any]]:
-    """For an authorship question, the first hit that carries the attribution leads (stable: only it moves).
-    When no hit in the pool does, ONE search on the works shelves fetches the work itself — "who wrote
-    Pilgrims Progress" had six connector cards and not one section of the book. Nothing is dropped; when
-    nothing carries the attribution the hits stand exactly as they were (a miss stays a miss)."""
+    """For an authorship question, the hit with the strongest attribution evidence leads — prose that names
+    the maker over the work's own shelf, and among equals the first in pool order (stable: only it moves).
+    When no hit in the pool carries any, ONE search on the works shelves fetches the work itself — "who
+    wrote Pilgrims Progress" had six connector cards and not one edition of the book. Nothing is dropped;
+    when nothing carries the attribution the hits stand exactly as they were (a miss stays a miss)."""
     verb = _authorship_verb(text)
     if not verb or not hits:
         return hits
-    best = next((c for c in hits if _carries_the_attribution(c, subj, verb)), None)
+
+    def _best(pool: List[Dict[str, Any]]):
+        top, top_ev = None, 0
+        for c in pool:
+            ev = _attribution_evidence(c, subj, verb)
+            if ev > top_ev:
+                top, top_ev = c, ev
+                if ev == 2:
+                    break
+        return top
+    best = _best(hits)
     if best is None:
-        for c in (corpus.search(subj, limit=8, shelves=set(_WORK_SHELVES)) or []):
-            if _carries_the_attribution(c, subj, verb):
-                best = c
-                break
+        best = _best(corpus.search(subj, limit=8, shelves=set(_WORK_SHELVES)) or [])
         if best is None:
             return hits
         return [best] + [c for c in hits if c.get("id") != best.get("id")]

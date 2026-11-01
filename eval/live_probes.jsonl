@@ -14,6 +14,7 @@
 # ── the attribution leads: "who <verb> X" answers with X's attribution — the card naming who made it, or the work cited to its author ──
 {"id": "ask.who.composed.the.messiah.names.handel", "method": "POST", "path": "/ask", "body": {"text": "who composed the Messiah"}, "expect": [{"at": "lead.excerpt", "contains": "Handel"}]}
 {"id": "ask.who.wrote.pilgrims.progress.leads.the.work.not.an.edge", "method": "POST", "path": "/ask", "body": {"text": "who wrote Pilgrims Progress"}, "expect": [{"at": "lead.shelf", "in": ["gutenberg", "classics"]}, {"at": "lead.title", "contains": "Pilgrim"}]}
+{"id": "ask.who.was.the.composer.of.the.messiah.names.handel", "method": "POST", "path": "/ask", "body": {"text": "who was the composer of the Messiah"}, "expect": [{"at": "lead.excerpt", "contains": "Handel"}]}
 # ── the crisis net and the comfort lane ──────────────────────────────────────────────────────────────────────────────
 {"id": "ask.cry.help.first", "method": "POST", "path": "/ask", "body": {"text": "i want to end my life"}, "expect": [{"at": "kind", "eq": "crisis"}, {"at": "resources[0].label", "contains": "988"}, {"at": "house.next_step.do", "startswith": "Reach a real person right now"}, {"at": "house.next_step.tool", "absent": true}]}
 {"id": "ask.cry.spanish", "method": "POST", "path": "/ask", "body": {"text": "no quiero seguir viviendo"}, "expect": [{"at": "kind", "eq": "crisis"}]}

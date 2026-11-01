@@ -314,3 +314,40 @@ def test_the_noun_form_is_the_same_question():
     assert ask._authorship_verb("who is the author of Hebrews") == "wrote"
     assert ask._authorship_verb("who is the messiah") is None
     assert ask._authorship_verb("who said it is finished") is None
+    # and the agent noun is scaffolding, like the verb: the subject is the work (live 2026-11-01, "composer
+    # messiah" pulled "The Messiah in Moses and the Prophets", a book that merely bears the word)
+    assert ask.subject("who was the composer of the Messiah") == "messiah"
+    assert ask.subject("who is the author of Hebrews") == "hebrews"
+    assert ask.subject("who wrote Pilgrims Progress") == "pilgrims progress"
+
+
+_ELEAZAR = {"id": "card_src_book_34680", "shelf": "gutenberg",
+            "title": "The Messiah in Moses and the Prophets — Eleazar Lord",
+            "body": "The Messiah in Moses and the Prophets, by Eleazar Lord. Subjects: Messiah -- Prophecies"}
+
+
+def test_a_work_must_cover_the_whole_subject_and_prose_outranks_the_shelf(monkeypatch):
+    monkeypatch.setattr(ask.corpus, "search", lambda *a, **k: [])
+    # prose that names the composer (2) leads over a works-shelf book bearing the word (its own "by Eleazar
+    # Lord" is attribution of a DIFFERENT work — but it stands behind the card that answers)
+    out = ask._attribution_leads([_ELEAZAR, _MESSIAH_WORD], "who was the composer of the Messiah", "messiah")
+    assert [c["id"] for c in out] == ["card_src_word_messiah", "card_src_book_34680"]
+    # the whole-subject test: an edition of the book IS the work; a book that merely bears one word is not
+    assert ask._title_covers_subject("pilgrims progress", _BUNYAN) is True
+    bunyan_ed = {"id": "card_src_book_7088", "shelf": "gutenberg",
+                 "title": "The Pilgrim's Progress in Words of One Syllable — John Bunyan", "body": "Subjects: allegory"}
+    assert ask._attribution_evidence(bunyan_ed, "pilgrims progress", "wrote") == 1
+    assert ask._title_covers_subject("messiah composer", _ELEAZAR) is False
+    assert ask._attribution_evidence(_ELEAZAR, "messiah composer", "composed") == 0
+    assert ask._attribution_evidence(_MESSIAH_WORD, "messiah", "composed") == 2
+    # a Gutenberg header's "by Eleazar Lord" attributes THAT book, not the oratorio: the card is not titled
+    # the subject, and a one-word subject can never claim a work by title alone -> no evidence at all
+    assert ask._attribution_evidence(_ELEAZAR, "messiah", "composed") == 0
+    assert ask._attribution_leads([_ELEAZAR, _MESSIAH_ETYM], "who composed the Messiah", "messiah") == [_ELEAZAR, _MESSIAH_ETYM]
+    # the title's core: an author tail or a parenthetical never makes a card "about" more than the subject
+    hamlet = {"id": "card_src_book_1524", "shelf": "gutenberg", "title": "Hamlet — William Shakespeare",
+              "body": "Hamlet, by William Shakespeare. Subjects: Tragedies"}
+    assert ask._title_is_subject("hamlet", hamlet) is True
+    assert ask._attribution_evidence(hamlet, "hamlet", "wrote") == 2
+    assert ask._title_is_subject("messiah", {"title": "Messiah (Handel)"}) is True
+    assert ask._title_is_subject("messiah", _ELEAZAR) is False
