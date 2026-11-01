@@ -167,8 +167,9 @@ def real_corpus_object():
             # CONCORDANCE_FREEZE_SHELVES (the box, 2026-10-02) a corpus built without `frozen_idx`
             # holds no frozen index, and search() merges shard hits only for a corpus that froze
             # shelves — so this helper would have silently lost every frozen-shelf answer.
-            cards = corpus.load_cards(_df_out=df, _frozen_out=fz)
-            _REAL_CORPUS = corpus.Corpus(cards, df_extra=df, frozen_idx=fz)
+            fe: dict = {}                      # ... and the bridges' frozen side (2026-10-31), the same way
+            cards = corpus.load_cards(_df_out=df, _frozen_out=fz, _bridges_out=fe)
+            _REAL_CORPUS = corpus.Corpus(cards, df_extra=df, frozen_idx=fz, frozen_edges=fe)
             if not _REAL_CARDS:
                 _REAL_CARDS = cards            # one read serves both helpers
         finally:

@@ -43,7 +43,7 @@ from array import array
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-VERSION = 1
+VERSION = 2                         # 2: the bridges' frozen side (frozen_edges) rides the tail record
 MAGIC = b"NHCORPUS\x00\x01"
 PREFIX = "corpus-"
 SUFFIX = ".marshal"
@@ -253,7 +253,9 @@ def save(path: Path, key: str, state: Dict[str, Any]) -> bool:
             _write_raw(f, array(_IDX, map(pos.__getitem__, frozen)))
             _write_obj(f, list(frozen.values()))
             _write_obj(f, {"call_tree": state["call_tree"], "df_extra": state["df_extra"],
-                           "frozen_shelf_counts": state["frozen_shelf_counts"]})
+                           "frozen_shelf_counts": state["frozen_shelf_counts"],
+                           # the bridges' frozen side (Corpus._frozen_edges, id -> [edges]): small, rides whole
+                           "frozen_edges": _compact(state["frozen_edges"])})
             _write_obj(f, {"end": True, "key": key})       # the trailer: proves the write ran to completion
         del pos, ids
         os.replace(tmp, path)
@@ -312,7 +314,8 @@ def load(path: Path, key: str) -> Optional[Dict[str, Any]]:
         return {"cards": cards, "min_idf": float(h["min_idf"]), "n": int(h["n"]), "froze": bool(h["froze"]),
                 "by_token": by_token, "df_extra": tail["df_extra"], "frozen": frozen,
                 "frozen_shelf_counts": tail["frozen_shelf_counts"], "call_tree": tail["call_tree"],
-                "cids_by_call": cids_by_call, "public_sorted": public_sorted}
+                "cids_by_call": cids_by_call, "public_sorted": public_sorted,
+                "frozen_edges": tail["frozen_edges"]}
     except Exception:  # noqa: BLE001 — corrupt, truncated, foreign: a miss, never an error
         return None
 

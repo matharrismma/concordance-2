@@ -421,9 +421,15 @@ class Corpus:
 
     def __init__(self, cards: Dict[str, dict], min_idf: float = MIN_DISTINCTIVE_IDF,
                  df_extra: Optional[Dict[str, int]] = None,
-                 frozen_idx: Optional[Dict[str, tuple]] = None):
+                 frozen_idx: Optional[Dict[str, tuple]] = None,
+                 frozen_edges: Optional[Dict[str, List[dict]]] = None):
         self.cards = cards
         self.min_idf = min_idf
+        # THE FROZEN SIDE OF THE BRIDGES (2026-10-31): a bridge row whose endpoint is a frozen card has no
+        # resident dict to carry its edge (lazy stubs), so the edge waits here — id -> [edges] — and is merged
+        # into the rehydrated card on read (full): the live graph over the shard's stored copy, exactly as a
+        # resident card carries its grafted edges. Filled by load_cards(_bridges_out=...); persisted with the rest.
+        self._frozen_edges: Dict[str, List[dict]] = dict(frozen_edges) if frozen_edges else {}
         # LAZY STUBS (increment 2): frozen cards are NOT held resident. `_frozen` maps each PUBLIC
         # frozen id -> (call, title) — a compact entry for browse and the call-tree; the full card
         # (body, connections, facets, provenance) rehydrates from the shard on read. This makes
@@ -503,7 +509,8 @@ class Corpus:
     _STATE_FIELDS = (("cards", "cards"), ("min_idf", "min_idf"), ("n", "_n"), ("froze", "_froze"),
                      ("by_token", "_by_token"), ("df_extra", "_df_extra"), ("frozen", "_frozen"),
                      ("frozen_shelf_counts", "_frozen_shelf_counts"), ("call_tree", "_call_tree"),
-                     ("cids_by_call", "_cids_by_call"), ("public_sorted", "_public_sorted"))
+                     ("cids_by_call", "_cids_by_call"), ("public_sorted", "_public_sorted"),
+                     ("frozen_edges", "_frozen_edges"))
 
     def _state(self) -> Dict[str, Any]:
         """Everything a cold process needs to be THIS corpus — the structures corpus_cache persists."""
@@ -567,8 +574,18 @@ class Corpus:
         if cid in self._frozen:
             # rehydrate thaws the frozen card's shard, reads the full card, and falls back to this
             # minimal stub if the shard cannot answer (never a silent hole).
-            return rehydrate({"id": cid, "shelf": self._shelf_of(cid), "frozen": True,
+            full = rehydrate({"id": cid, "shelf": self._shelf_of(cid), "frozen": True,
                               "title": self._title_of(cid)})
+            # the bridges' frozen side (see __init__): grafted onto the fresh copy on the way out, one edge per
+            # (target, relationship) beside whatever the shard stored — never into the shard, never twice.
+            extra = self._frozen_edges.get(cid)
+            if extra and isinstance(full, dict):
+                links = full.get("connections")
+                if not isinstance(links, list):
+                    links = full["connections"] = []
+                for e in extra:
+                    _graft_edge(links, e.get("to_card_id"), e.get("relationship"), e.get("evidence") or "")
+            return full
         return None
 
     def _call_node(self, prefix: str) -> Optional[dict]:
@@ -1234,7 +1251,8 @@ def load_cards(path: Optional[Path] = None,
                _contrib_out: Optional[Dict[str, List[int]]] = None,
                _offsets_in: Optional[Dict[str, List[int]]] = None,
                _offsets_out: Optional[Dict[str, List[int]]] = None,
-               _nofile_out: Optional[Dict[str, Any]] = None) -> Dict[str, dict]:
+               _nofile_out: Optional[Dict[str, Any]] = None,
+               _bridges_out: Optional[Dict[str, List[dict]]] = None) -> Dict[str, dict]:
     """Load cards from a JSONL file into an id -> card dict. Empty if absent.
 
     `_df_out` (internal — default_corpus passes it): a dict that receives the document
@@ -1247,7 +1265,14 @@ def load_cards(path: Optional[Path] = None,
     card (body, connections, facets, provenance) is served from the shard on demand (get_card /
     rehydrate). This is what makes resident RAM scale with the CORE shelf, not the whole keeping
     (measured 2026-09-26: the stub dicts were ~96% of resident memory). Withheld frozen cards are
-    dropped entirely (never browsable/served), but still stream their DF so IDF is unchanged."""
+    dropped entirely (never browsable/served), but still stream their DF so IDF is unchanged.
+
+    `_bridges_out` (internal — default_corpus passes it): a dict that receives, per FROZEN card id, the
+    bridge edges whose endpoint is that card (id -> [edges]). A bridge overlay is resolved against the FULL
+    keeping — the resident cards AND the frozen index — so a row to a frozen-shelf card (the Gutenberg
+    catalogue) applies: the resident side carries its edge inline, the frozen side rides here and
+    Corpus.full merges it on read. Without it a frozen endpoint is not reachable in this load, and such a
+    row counts as unresolved (warned, tallied in LOAD_PHASES) rather than half-applied."""
     p = path or _cards_path()
     out: Dict[str, dict] = {}
     if not p.exists():
@@ -1256,7 +1281,12 @@ def load_cards(path: Optional[Path] = None,
     from time import perf_counter as _pc
     _ph: Dict[str, Any] = {"frozen_df_ms": 0.0, "frozen_cards": 0, "resident_cards": 0,
                            "frozen_cards_cached": 0, "files_skipped": 0, "files_seeked": 0,
-                           "dup_edges_dropped": 0}
+                           "dup_edges_dropped": 0,
+                           # the bridge overlays, tallied (never silent): rows read; applied on both cards;
+                           # left UNRESOLVED because an endpoint is in neither the resident keeping nor the
+                           # frozen index; and edges that went to the frozen side table (_bridges_out)
+                           "bridge_rows": 0, "bridge_rows_applied": 0, "bridge_rows_unresolved": 0,
+                           "bridge_edges_frozen_side": 0, "bridge_unresolved_by_overlay": {}}
     from sys import intern as _intern   # one object per distinct call number / surface across 840k frozen entries
     # THE FROZEN CACHE (2026-10-08, frozen_cache.py): `_contrib_out` receives, per SOURCE FILE NAME, how many
     # [frozen, resident] cards it held (so default_corpus can key the cache on exactly the files that matter,
@@ -1384,8 +1414,25 @@ def load_cards(path: Optional[Path] = None,
                     c = _signpost_card(rec)
                     if c is not None and c["id"] not in out:
                         _keep(c)
+        # THE BRIDGES RESOLVE AGAINST THE FULL KEEPING (2026-10-31). Every source file above has been read by
+        # now, so file order was never the gap — but a FROZEN-shelf card never enters `out` (lazy stubs: only its
+        # (call, title) index entry), so a row to one (seed_computer_science: card_cs_logic_gates -> a Gutenberg
+        # catalogue card, seen live 2026-10-31) was dropped here by a silent `continue` while its sibling row to a
+        # resident theory card applied. An endpoint now counts as present when it is resident OR in the frozen
+        # index; the frozen side's edge goes to `_bridges_out` and Corpus.full merges it on read. Rows that still
+        # do not resolve are counted per overlay, warned with examples, and reported in LOAD_PHASES.
         for overlay in BRIDGE_OVERLAYS:
-            _apply_bridges(out, p.parent / overlay)
+            st = _apply_bridges(out, p.parent / overlay, frozen=_frozen_out, frozen_edges=_bridges_out)
+            _ph["bridge_rows"] += st["rows"]
+            _ph["bridge_rows_applied"] += st["applied"]
+            _ph["bridge_rows_unresolved"] += st["unresolved"]
+            _ph["bridge_edges_frozen_side"] += st["frozen_side"]
+            if st["unresolved"]:
+                _ph["bridge_unresolved_by_overlay"][overlay] = st["unresolved"]
+        if _ph["bridge_rows_unresolved"]:
+            _log.warning("bridges: %d of %d row(s) still unresolved at the end of the load, by overlay %s — "
+                         "no edge attached for them on either card (0-FP); each overlay's warning names examples",
+                         _ph["bridge_rows_unresolved"], _ph["bridge_rows"], _ph["bridge_unresolved_by_overlay"])
     _ph["extras_ms"] = round((_pc() - _t_extras) * 1000.0, 1)
     _ph["frozen_df_ms"] = round(_ph["frozen_df_ms"], 1)
     LOAD_PHASES.update(_ph)
@@ -1519,14 +1566,42 @@ def _dedupe_connections(card: dict) -> int:
     return dropped
 
 
-def _apply_bridges(cards: Dict[str, dict], overlay: Path) -> None:
+def _graft_edge(links: List[Any], dst: str, r: str, ev: str) -> bool:
+    """Append {to_card_id, relationship, evidence} to one connection list unless that exact (target,
+    relationship) is already there; True if appended. One edge per (source, target) PER RELATIONSHIP: an
+    exact duplicate is dropped; a second relationship on a pair already bridged with a different one is KEPT
+    (it used to be silently dropped — 16 directions locally, 2 on the tracked seeds: `member_of` lost to
+    `part_of`)."""
+    if any(isinstance(x, dict) and x.get("to_card_id") == dst and x.get("relationship") == r for x in links):
+        return False
+    links.append({"to_card_id": dst, "relationship": r, "evidence": ev})
+    return True
+
+
+_BRIDGE_UNRESOLVED_EXAMPLES = 5       # pairs named in an overlay's warning; the COUNT is always exact
+
+
+def _apply_bridges(cards: Dict[str, dict], overlay: Path,
+                   frozen: Optional[Dict[str, tuple]] = None,
+                   frozen_edges: Optional[Dict[str, List[dict]]] = None) -> Dict[str, Any]:
     """Graft the two trees: apply the git-tracked reference→Scripture bridges reciprocally onto
     both cards' connection lists at load time. The 25k cards.jsonl is never mutated on disk — the
     edges live in their own small overlay so they survive any regeneration of the reference cards.
-    0-FP: each bridge is an exact-subject match (an element or crop the Bible also names)."""
+    0-FP: each bridge is an exact-subject match (an element or crop the Bible also names).
+
+    THE ENDPOINT TEST IS THE FULL KEEPING (2026-10-31): an endpoint is present when it is resident in
+    `cards` OR named in `frozen` (the compact index of the frozen shelves — lazy stubs that never enter
+    `cards`). A frozen endpoint has no dict to carry its edge, so that edge goes to `frozen_edges`
+    (id -> [edges]) and Corpus.full merges it on read; `frozen` counts only when `frozen_edges` is given,
+    so a row is never half-applied. A row with an endpoint in neither place attaches NOTHING on either
+    card (0-FP) and is counted and warned — never a silent skip. Returns the tally:
+    {overlay, rows, applied, unresolved, frozen_side, missing_rel, unresolved_examples}."""
+    stats: Dict[str, Any] = {"overlay": overlay.name, "rows": 0, "applied": 0, "unresolved": 0,
+                             "frozen_side": 0, "missing_rel": 0, "unresolved_examples": []}
     if not overlay.exists():
-        return
-    missing = 0
+        return stats
+    fz = frozen if (frozen and frozen_edges is not None) else None
+    examples: List[str] = stats["unresolved_examples"]
     for line in overlay.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if not line:
@@ -1538,26 +1613,36 @@ def _apply_bridges(cards: Dict[str, dict], overlay: Path) -> None:
         a, b = e.get("a"), e.get("b")
         rel = e.get("relationship")
         if not rel:
-            missing += 1
+            stats["missing_rel"] += 1
             rel = _BRIDGE_REL_FALLBACK
         ev = e.get("evidence") or ""
+        stats["rows"] += 1
         ca, cb = cards.get(a), cards.get(b)
-        if not ca or not cb:
+        a_ok = ca is not None or (fz is not None and a in fz)
+        b_ok = cb is not None or (fz is not None and b in fz)
+        if not (a_ok and b_ok):
+            stats["unresolved"] += 1
+            if len(examples) < _BRIDGE_UNRESOLVED_EXAMPLES:
+                gone = ", ".join(str(x) for x, ok in ((a, a_ok), (b, b_ok)) if not ok)
+                examples.append(f"{a} -> {b} ({rel}): missing {gone}")
             continue
         # the reverse label is DECLARED (issue #25): the inverse for a directional edge so the floor walks as
         # a tree and an order stays an order; the same label for a declared symmetric one; a logged gap otherwise.
         rev = _reverse_rel(rel)
-        for src, dst, r in ((ca, b, rel), (cb, a, rev)):
-            links = src.setdefault("connections", [])
-            # one edge per (source, target) PER RELATIONSHIP: an exact duplicate is dropped; a second
-            # relationship on a pair already bridged with a different one is KEPT (it used to be silently
-            # dropped — 16 directions locally, 2 on the tracked seeds: `member_of` lost to `part_of`).
-            if not any(isinstance(x, dict) and x.get("to_card_id") == dst and x.get("relationship") == r
-                       for x in links):
-                links.append({"to_card_id": dst, "relationship": r, "evidence": ev})
-    if missing:
-        _log.warning("%s: %d bridge row(s) carry no relationship; applied as %r", overlay.name, missing,
-                     _BRIDGE_REL_FALLBACK)
+        for card, src_id, dst, r in ((ca, a, b, rel), (cb, b, a, rev)):
+            if card is not None:
+                _graft_edge(card.setdefault("connections", []), dst, r, ev)
+            elif _graft_edge(frozen_edges.setdefault(src_id, []), dst, r, ev):   # type: ignore[union-attr]
+                stats["frozen_side"] += 1
+        stats["applied"] += 1
+    if stats["missing_rel"]:
+        _log.warning("%s: %d bridge row(s) carry no relationship; applied as %r", overlay.name,
+                     stats["missing_rel"], _BRIDGE_REL_FALLBACK)
+    if stats["unresolved"]:
+        _log.warning("%s: %d of %d bridge row(s) UNRESOLVED — an endpoint is in neither the resident keeping "
+                     "nor the frozen index, so no edge was attached on either card (0-FP); e.g. %s",
+                     overlay.name, stats["unresolved"], stats["rows"], "; ".join(examples))
+    return stats
 
 
 def add_to_default(card: dict) -> None:
@@ -1615,6 +1700,7 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                                 "load_cards_ms": 0.0, "index_build_ms": 0.0,
                                 "total_ms": round((_pc() - _t0) * 1000.0, 1),
                                 "resident_cards": len(_DEFAULT.cards), "frozen_index": len(_DEFAULT._frozen),
+                                "frozen_edges": len(_DEFAULT._frozen_edges),   # frozen ids carrying bridge edges
                                 "df_tokens": len(_DEFAULT._df_extra),
                                 "frozen_cache": "bypassed",            # the corpus cache holds its tables too
                                 "corpus_cache": "hit", "corpus_cache_load_ms": round(cc_load_ms, 1),
@@ -1665,9 +1751,11 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                 nofile: Dict[str, Any] = {"df": {}, "ids": []}
                 _r1 = _rss()
                 contrib: Dict[str, List[int]] = {}
+                fe: Dict[str, List[dict]] = {}       # the bridges' frozen side (load_cards -> Corpus.full)
                 cards = load_cards(path, _df_out=df, _frozen_out=fz, _skip_frozen_in=skip,
                                    _contrib_out=contrib, _offsets_in=offsets_in, _offsets_out=offsets_out,
-                                   _nofile_out=(nofile if offsets_out is not None else None))
+                                   _nofile_out=(nofile if offsets_out is not None else None),
+                                   _bridges_out=fe)
                 _t1 = _pc()
                 _r2 = _rss()
                 if state == "hit":
@@ -1698,7 +1786,7 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                             cached_names = big
                             cached_skip = sorted(n for n, o in offs.items() if not o)
                     cache_save_ms = (_pc() - _ts) * 1000.0
-                _DEFAULT = Corpus(cards, df_extra=df, frozen_idx=fz)
+                _DEFAULT = Corpus(cards, df_extra=df, frozen_idx=fz, frozen_edges=fe)
                 _t2 = _pc()
                 _r3 = _rss()
                 if cc_key is not None and cc_path is not None:
