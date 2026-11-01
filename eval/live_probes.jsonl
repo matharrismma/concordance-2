@@ -9,6 +9,8 @@
 {"id": "ask.mormonism.walks.as.tested", "method": "POST", "path": "/ask", "body": {"text": "is mormonism christian"}, "expect": [{"at": "lead.id", "eq": "card_foreshadow_mormonism_lds_under_the_test"}, {"at": "path.type", "eq": "tested"}, {"at": "path.anchor.ref", "eq": "1 John 4:2-3"}]}
 {"id": "ask.islam.walks.as.tested", "method": "POST", "path": "/ask", "body": {"text": "what does the bible say about islam"}, "expect": [{"at": "lead.id", "eq": "card_foreshadow_islam_under_the_test"}, {"at": "path.type", "eq": "tested"}]}
 {"id": "ask.egyptians.lead.the.egyptian.chart", "method": "POST", "path": "/ask", "body": {"text": "what did the egyptians believe about judgment after death"}, "expect": [{"at": "lead.id", "eq": "card_foreshadow_egyptian"}], "known_miss": true}
+# ── the resonance floor is a filter: the lead must cover the asking, and a right answer one seat back still leads ──
+{"id": "ask.riemann.hypothesis.leads.with.its.own.card", "method": "POST", "path": "/ask", "body": {"text": "the Riemann hypothesis"}, "expect": [{"at": "lead.id", "in": ["card_question_riemann", "card_floor_riemann"]}, {"at": "results", "min_len": 2}]}
 # ── the crisis net and the comfort lane ──────────────────────────────────────────────────────────────────────────────
 {"id": "ask.cry.help.first", "method": "POST", "path": "/ask", "body": {"text": "i want to end my life"}, "expect": [{"at": "kind", "eq": "crisis"}, {"at": "resources[0].label", "contains": "988"}, {"at": "house.next_step.do", "startswith": "Reach a real person right now"}, {"at": "house.next_step.tool", "absent": true}]}
 {"id": "ask.cry.spanish", "method": "POST", "path": "/ask", "body": {"text": "no quiero seguir viviendo"}, "expect": [{"at": "kind", "eq": "crisis"}]}

@@ -95,3 +95,55 @@ def test_floor_counts_a_charts_terms_toward_its_coverage():
              "bands": ["daoism", "the way"], "extra": {"discerns_terms": ["tao te ching", "lao tzu"]}}
     keeping = _FakeCorpus({"ching": ["t1"], "virtue": ["v1", "v2", "v3"], "teaching": ["x1", "x2"]})
     assert ask._covers_the_asking(chart, "ching virtue teaching", keeping) is True
+
+
+# THE FLOOR IS A FILTER (2026-11-01). "the Riemann hypothesis": the connection lift put a differential-
+# geometry hub first and the exact-title card second; the floor judged only hits[0] and nulled the whole
+# answer. Now every hit is judged, the covering hits stand first (nothing dropped), and the null comes
+# only when none covers.
+_ZETA = _FakeCorpus({"riemann": ["r1", "r2", "r3"], "hypothesis": ["r1", "r2"], "curvature": ["g1"]})
+_DIFF_GEO = {"id": "card_theory_differential_geometry",
+             "title": "Differential geometry (curvature measured from inside)",
+             "body": "Gauss, Riemann: curvature read from the surface itself"}
+_QUESTION = {"id": "card_question_riemann", "title": "The Riemann hypothesis",
+             "body": "every non-trivial zero of the zeta function has real part one half"}
+_WEIL = {"id": "card_joint_weil_conjectures",
+         "title": "The Weil conjectures: the Riemann hypothesis over finite fields", "body": "Deligne 1974"}
+
+
+def test_filter_leads_with_the_first_hit_that_covers():
+    out = ask._floor_filter([_DIFF_GEO, _QUESTION, _WEIL], "the Riemann hypothesis", _ZETA)
+    assert [c["id"] for c in out] == ["card_question_riemann", "card_joint_weil_conjectures",
+                                      "card_theory_differential_geometry"]
+
+
+def test_filter_leaves_a_covering_lead_exactly_as_ranked():
+    hits = [_QUESTION, _WEIL, _DIFF_GEO]
+    assert ask._floor_filter(hits, "the Riemann hypothesis", _ZETA) == hits
+
+
+def test_filter_nulls_only_when_no_hit_covers():
+    human = {"id": "h", "title": "Human capital theory (Becker, Mincer)", "body": "schooling as investment"}
+    markets = {"id": "m", "title": "Capital markets", "body": "the pricing of risk"}
+    assert ask._floor_filter([human, markets], "what is the capital of France", _KEEPING) == []
+
+
+def test_filter_keeps_a_thin_asking_whole():
+    hits = [{"id": "a", "title": "x", "body": "y"}, {"id": "b", "title": "z", "body": "w"}]
+    assert ask._floor_filter(hits, "paris", _KEEPING) == hits
+
+
+def test_filter_never_demotes_a_chart_a_result_tripped():
+    # the question names none of the chart's terms and the chart covers none of the asking's rare words —
+    # but a RESULT is a primary source on the practice it discerns, so _pair_discernment lifted it: it
+    # leads on purpose, never second-guessed, and the source stands behind it
+    chart = {"id": "card_foreshadow_gateway", "shelf": "foreshadows",
+             "title": "The Gateway process, under the test",
+             "body": "Hemi-Sync and the Monroe Institute, read against Deuteronomy 18",
+             "extra": {"discerns_terms": ["astral projection", "out-of-body"]}}
+    source = {"id": "card_src_leadbeater", "title": "C. W. Leadbeater - The Astral Plane (astral projection)",
+              "body": "how to leave the body at night and travel"}
+    keeping = _FakeCorpus({"leave": ["s1", "s2"], "body": ["s1", "s2", "s3"], "night": ["s1"]})
+    assert ask._covers_the_asking(chart, "how do i leave my body at night", keeping) is False
+    out = ask._floor_filter([chart, source], "how do i leave my body at night", keeping)
+    assert [c["id"] for c in out] == ["card_foreshadow_gateway", "card_src_leadbeater"]

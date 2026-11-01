@@ -1581,6 +1581,52 @@ def _covers_the_asking(card: Dict[str, Any], text: str, corpus_obj: Any = None) 
     return rarest in covered and len(covered) >= 2
 
 
+def _a_result_trips_the_chart(chart: Dict[str, Any], hits: List[Dict[str, Any]]) -> bool:
+    """Did _pair_discernment lift this chart because a RESULT is a primary source on what it discerns?
+    The same read it makes: a non-chart hit's title+bands+subject carries one of the chart's terms as a
+    WHOLE term (alignment.term_in, the one matcher). The question-names-it case is _covers_the_asking's
+    own exemption; this is the other way a chart comes to lead on purpose."""
+    if chart.get("shelf") not in _SHADOW_SHELVES:
+        return False
+    ex = chart.get("extra") if isinstance(chart.get("extra"), dict) else {}
+    terms = [str(t).lower() for t in (ex.get("discerns_terms") or []) if str(t).strip()]
+    if not terms:
+        return False
+    from . import alignment as _align
+    for h in hits:
+        if h is chart or h.get("id") == chart.get("id") or h.get("shelf") in _SHADOW_SHELVES:
+            continue
+        hay = (str(h.get("title") or "") + " " + " ".join(str(b) for b in (h.get("bands") or []))
+               + " " + str(h.get("subject") or "")).lower()
+        if any(_align.term_in(t, hay) for t in terms):
+            return True
+    return False
+
+
+def _floor_filter(hits: List[Dict[str, Any]], text: str, corpus_obj: Any = None) -> List[Dict[str, Any]]:
+    """THE FLOOR IS A FILTER (2026-11-01). The floor judged only hits[0], so whatever the shaping put
+    first decided everything: on "the Riemann hypothesis" the connection lift had put a differential-
+    geometry hub first and the exact-title card SECOND (measured live 2026-11-01), and the floor nulled
+    the whole answer — an honest null where the right answer stood one seat back. Now every hit is judged
+    by the one rule (_covers_the_asking): the hits that cover the asking stand first, in their shaped
+    order, the word-matches behind them, and nothing is dropped (`results` stays whole, as the page
+    counts on). The lead is the FIRST hit that covers; the honest null comes only when NONE does.
+    A chart _pair_discernment lifted on purpose — a result is a primary source on what it discerns —
+    stays the lead, never second-guessed (the question-names-it case is the floor's own exemption)."""
+    if not hits:
+        return hits
+    # corpus_obj stays lazy: _covers_the_asking resolves the live corpus only past its thin-asking
+    # returns, exactly as the one-hit floor did — a thin asking never touches the keeping
+    flags = [_covers_the_asking(c, text, corpus_obj) for c in hits]
+    if not flags[0] and _a_result_trips_the_chart(hits[0], hits):
+        flags[0] = True                                      # lifted on purpose: it leads
+    if all(flags):
+        return hits
+    if not any(flags):
+        return []
+    return [c for c, f in zip(hits, flags) if f] + [c for c, f in zip(hits, flags) if not f]
+
+
 def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
                   gate_just_opened: bool = False) -> Dict[str, Any]:
     """Compose a conduit response: found + verified + cited + curated material only. No LLM.
@@ -2336,10 +2382,14 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
     # actually cover the asking's rarest, most identifying token — else it is a token-match, not an
     # answer, and we say so. Only the GENERIC lead is gated (base.message is None): a verified/lookup
     # answer or a tortoise-pull line returned earlier or set base.message, and is never second-guessed.
-    if base.get("message") is None and not _covers_the_asking(hits[0], text):
-        return _witnessed({**base, "kind": "found", "results": [],
-                           "message": _NO_CONFIDENT_LEAD, "resources": _LOOK_ELSEWHERE},
-                          text, witness, gate_just_opened)
+    # THE FLOOR IS A FILTER (2026-11-01): every hit is judged, the covering hits stand first, the lead is
+    # the first that covers, and the honest null comes only when none does (_floor_filter).
+    if base.get("message") is None:
+        hits = _floor_filter(hits, text)
+        if not hits:
+            return _witnessed({**base, "kind": "found", "results": [],
+                               "message": _NO_CONFIDENT_LEAD, "resources": _LOOK_ELSEWHERE},
+                              text, witness, gate_just_opened)
 
     out = {**base, "kind": "found", "message": base.get("message") or _FOUND_LEAD,
            "lead": _lead_card(hits[0]), "results": [corpus._brief(c) for c in hits]}
