@@ -611,6 +611,49 @@ def _prefer_connected(hits: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return hits
 
 
+def _titled_by_the_asking(card: Dict[str, Any], text: str) -> bool:
+    """Is this card's TITLE the asking as typed? The ranker's own exact-title target (Corpus.search's
+    q_exact: lowercased, whitespace-collapsed, the nine-fold boost), with its one guard: never a
+    pronunciation card, whose title is its headword — an index collision, not an answer."""
+    if card.get("shelf") == "pronunciation":
+        return False
+    qn = " ".join(str(text or "").lower().split())
+    return bool(qn) and " ".join(str(card.get("title") or "").lower().split()) == qn
+
+
+def _prefer_the_titled_card(hits: List[Dict[str, Any]], text: str) -> List[Dict[str, Any]]:
+    """WHOLE TITLE (step 4½): the card whose title IS the asking as typed leads — the ranker's strongest
+    lexical signal, kept through the shaping. The hub lift (step 4) had put a differential-geometry hub
+    over "The Riemann hypothesis" (measured live 2026-11-01): the hub's edges ran to other word-matches
+    in the pool, while the question card's seventeen edges run to its chain, outside it — a map signal
+    that is true, outranking a title that is truer. Stable: only the titled card moves, only to the
+    front; everything else keeps its order. Discernment (step 5) still leads over it, on purpose."""
+    for i, c in enumerate(hits):
+        if _titled_by_the_asking(c, text):
+            return hits if i == 0 else [c] + hits[:i] + hits[i + 1:]
+    return hits
+
+
+def _fetch_the_card_the_asking_names(hits: List[Dict[str, Any]], text: str, subj: str,
+                                     practical: bool) -> List[Dict[str, Any]]:
+    """THE ASKING NAMES A CARD BY ITS TITLE (2026-11-01). The ranker holds a nine-fold boost for the card
+    whose title is the query AS TYPED — but the found path searches the crafted subject, which drops the
+    article the title carries: "the Riemann hypothesis" -> "riemann hypothesis", and the card titled
+    exactly that fell out of the six (measured live 2026-11-01: ninth or below, so the Weil finite-field
+    joint led). When a short, non-question asking differs from its subject and no hit already bears its
+    title, ask the ranker ONCE for the asking as typed and keep ONLY the card it names — nothing else from
+    that search (it scores on the same tokens; the exact boost is all it adds). Not for a how-to: the
+    practical lane prefers instruction over a lookup that happens to share a title."""
+    if not hits or practical or subj == (text or "") or _is_question(text):
+        return hits
+    if len((text or "").split()) > 12 or any(_titled_by_the_asking(c, text) for c in hits):
+        return hits
+    named = next((c for c in (corpus.search(text, limit=3) or []) if _titled_by_the_asking(c, text)), None)
+    if named is None:
+        return hits
+    return [named] + [c for c in hits if c.get("id") != named.get("id")]
+
+
 def _discernment_watch(cp) -> List[tuple]:
     """The charts that DISCERN a subject with PRIMARY SOURCES in the keeping — each declares the
     distinctive terms it watches (`card.extra.discerns_terms`, e.g. the Gateway/New-Age chart watching
@@ -697,11 +740,14 @@ def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) ->
          neighbourhood (a substantive link to another on-topic hit) leads over an island stub that
          merely holds the word. Composes with the lexical rank, never replaces it; inert where the
          graph is thin (so a practical query is left exactly as the words ranked it).
+      4½. WHOLE TITLE — the card whose title IS the asking as typed leads over a hub (the ranker's own
+         exact-title signal, kept through the shaping; not for a how-to).
       5. DISCERNMENT — when a result is a PRIMARY SOURCE on a subject a discernment chart covers (an
          occult text the PD ingest carries), the chart is lifted to the LEAD so the source is never met
          without the discernment beside it. Curated + inert (fires only on a chart's distinctive terms).
-    Behavior-preserving through step 3; step 4 only lifts a connected hub over an island lead; step 5
-    only fires when a discernment chart's own watch-terms are tripped (front door must discern)."""
+    Behavior-preserving through step 3; step 4 only lifts a connected hub over an island lead; step 4½
+    only moves a card titled by the asking; step 5 only fires when a discernment chart's own watch-terms
+    are tripped (front door must discern)."""
     if practical:
         clean = [c for c in hits if not _is_practical_junk(c)]
         if not clean:
@@ -716,6 +762,8 @@ def _shape_found_hits(hits: List[Dict[str, Any]], text: str, practical: bool) ->
             hits = [c for c in hits if not str(c.get("id") or "").startswith("card_src_pron_")] + pron
     hits = _prefer_full_coverage(hits, text)
     hits = _prefer_connected(hits)
+    if not practical:
+        hits = _prefer_the_titled_card(hits, text)    # step 4½: the card the asking names by its title
     return _pair_discernment(hits, text)
 
 
@@ -2206,6 +2254,7 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
             hits = corpus.search(subj, limit=6)
     if not hits and subj != (text or ""):         # last resort — the raw words as typed
         hits = corpus.search(text, limit=6)
+    hits = _fetch_the_card_the_asking_names(hits, text, subj, practical)   # the title the asking IS
     if _vol:
         base = {**base, "volume": {"id": _vol["id"], "name": _vol["name"]}}
     weak = (not hits) or not _shares_a_word(subj, hits[0])

@@ -1,4 +1,6 @@
-"""The resonance floor (ask._covers_the_asking) — the fix for the "human capital theory" bug.
+"""The resonance floor (ask._covers_the_asking, ask._floor_filter) — the fix for the "human capital
+theory" bug — and its companion, the card the asking names by its title (ask._prefer_the_titled_card,
+ask._fetch_the_card_the_asking_names). Pure logic, fakes only: these run on a clean clone.
 
 A found answer must cover the asking's rarest (most identifying) token, not just a common one.
 These test the pure logic with a tiny fake corpus (its `_by_token` sets the token frequencies), so
@@ -147,3 +149,79 @@ def test_filter_never_demotes_a_chart_a_result_tripped():
     assert ask._covers_the_asking(chart, "how do i leave my body at night", keeping) is False
     out = ask._floor_filter([chart, source], "how do i leave my body at night", keeping)
     assert [c["id"] for c in out] == ["card_foreshadow_gateway", "card_src_leadbeater"]
+
+
+# THE ASKING NAMES A CARD BY ITS TITLE (2026-11-01) — the filter's companion. Measured live after the
+# filter deployed: "the Riemann hypothesis" led with the Weil finite-field joint. The ranker's nine-fold
+# exact-title boost fires on the query AS TYPED, but the found path searched the crafted subject ("riemann
+# hypothesis"), the titled card fell out of the six, and the hub lift then put a differential-geometry hub
+# over the rest. Retrieval fetches the titled card once; shaping step 4½ keeps it in front.
+_RH_HUB = {"id": "card_theory_differential_geometry",
+           "title": "Differential geometry (curvature measured from inside)",
+           "connections": [{"to_card_id": "card_theory_non_euclidean", "relationship": "cites"}]}
+_RH_Q = {"id": "card_question_riemann", "title": "The Riemann hypothesis", "connections": []}
+_RH_WEIL = {"id": "card_joint_weil_conjectures",
+            "title": "The Weil conjectures (Deligne 1974): the Riemann hypothesis over finite fields"}
+_RH_NE = {"id": "card_theory_non_euclidean", "title": "Non-Euclidean geometry",
+          "connections": [{"to_card_id": "card_theory_differential_geometry", "relationship": "cites"}]}
+
+
+def test_the_titled_card_leads_over_a_hub():
+    out = ask._prefer_the_titled_card([_RH_HUB, _RH_WEIL, _RH_Q, _RH_NE], "the Riemann hypothesis")
+    assert [c["id"] for c in out] == ["card_question_riemann", "card_theory_differential_geometry",
+                                      "card_joint_weil_conjectures", "card_theory_non_euclidean"]
+    # case and spacing are the ranker's own normalization; a title that merely CONTAINS the asking is not it
+    assert ask._prefer_the_titled_card([_RH_WEIL, _RH_Q], "  THE riemann   Hypothesis ")[0]["id"] == "card_question_riemann"
+    assert ask._prefer_the_titled_card([_RH_HUB, _RH_WEIL], "the Riemann hypothesis") == [_RH_HUB, _RH_WEIL]
+
+
+def test_the_titled_card_is_never_a_pronunciation_headword():
+    pron = {"id": "card_src_pron_messiah", "shelf": "pronunciation", "title": "messiah"}
+    hymn = {"id": "card_hymn_messiah", "title": "Messiah (Handel)"}
+    assert ask._prefer_the_titled_card([hymn, pron], "messiah") == [hymn, pron]
+
+
+def test_shaping_keeps_the_titled_card_ahead_of_the_hub_lift(monkeypatch):
+    """Through the whole shaping (steps 3-4½): the hub lift moves the connected hub to the front, and
+    the titled card is then restored over it. Discernment (step 5) reads the live corpus's watch; an
+    empty keeping has no charts, so it leaves the order as step 4½ made it."""
+    class _NoCharts:
+        cards = {}
+    monkeypatch.setattr(ask.corpus, "default_corpus", lambda: _NoCharts())
+    out = ask._shape_found_hits([_RH_Q, _RH_WEIL, _RH_HUB, _RH_NE], "the Riemann hypothesis", practical=False)
+    assert out[0]["id"] == "card_question_riemann"
+    assert {c["id"] for c in out} == {"card_question_riemann", "card_joint_weil_conjectures",
+                                      "card_theory_differential_geometry", "card_theory_non_euclidean"}
+
+
+def test_retrieval_fetches_the_card_the_asking_names(monkeypatch):
+    """The subject search ("riemann hypothesis") lacked the titled card; one search on the asking as
+    typed brings it, and only it — the rest of that search is discarded."""
+    calls = []
+
+    def _fake_search(q, limit=25, **kw):
+        calls.append(q)
+        return [_RH_Q, {"id": "card_other", "title": "something else"}]
+    monkeypatch.setattr(ask.corpus, "search", _fake_search)
+    out = ask._fetch_the_card_the_asking_names([_RH_WEIL, _RH_HUB], "the Riemann hypothesis",
+                                               "riemann hypothesis", practical=False)
+    assert [c["id"] for c in out] == ["card_question_riemann", "card_joint_weil_conjectures",
+                                      "card_theory_differential_geometry"]
+    assert calls == ["the Riemann hypothesis"]
+
+
+def test_retrieval_never_searches_twice_without_cause(monkeypatch):
+    """No second search for a question (no title is a question), a how-to, an asking that IS its
+    subject, a long asking, a pool that already holds the titled card, or an empty pool."""
+    def _never(q, limit=25, **kw):
+        raise AssertionError("searched the asking as typed without cause: %r" % q)
+    monkeypatch.setattr(ask.corpus, "search", _never)
+    pool = [_RH_WEIL, _RH_HUB]
+    f = ask._fetch_the_card_the_asking_names
+    assert f(pool, "what is the Riemann hypothesis", "riemann hypothesis", False) == pool
+    assert f(pool, "the Riemann hypothesis", "riemann hypothesis", True) == pool
+    assert f(pool, "riemann hypothesis", "riemann hypothesis", False) == pool
+    long = "the " + " ".join(["word"] * 13)
+    assert f(pool, long, long.replace("the ", ""), False) == pool
+    assert f([_RH_Q, _RH_WEIL], "the Riemann hypothesis", "riemann hypothesis", False) == [_RH_Q, _RH_WEIL]
+    assert f([], "the Riemann hypothesis", "riemann hypothesis", False) == []
