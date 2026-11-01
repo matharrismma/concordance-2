@@ -11,6 +11,9 @@
 {"id": "ask.egyptians.lead.the.egyptian.chart", "method": "POST", "path": "/ask", "body": {"text": "what did the egyptians believe about judgment after death"}, "expect": [{"at": "lead.id", "eq": "card_foreshadow_egyptian"}], "known_miss": true}
 # ── the resonance floor is a filter: the lead must cover the asking, and a right answer one seat back still leads ──
 {"id": "ask.riemann.hypothesis.leads.with.its.own.card", "method": "POST", "path": "/ask", "body": {"text": "the Riemann hypothesis"}, "expect": [{"at": "lead.id", "in": ["card_question_riemann", "card_floor_riemann"]}, {"at": "results", "min_len": 2}]}
+# ── the attribution leads: "who <verb> X" answers with X's attribution — the card naming who made it, or the work cited to its author ──
+{"id": "ask.who.composed.the.messiah.names.handel", "method": "POST", "path": "/ask", "body": {"text": "who composed the Messiah"}, "expect": [{"at": "lead.excerpt", "contains": "Handel"}]}
+{"id": "ask.who.wrote.pilgrims.progress.leads.the.work.cited.to.bunyan", "method": "POST", "path": "/ask", "body": {"text": "who wrote Pilgrims Progress"}, "expect": [{"at": "lead.shelf", "eq": "classics"}, {"at": "lead.source.label", "contains": "Bunyan"}]}
 # ── the crisis net and the comfort lane ──────────────────────────────────────────────────────────────────────────────
 {"id": "ask.cry.help.first", "method": "POST", "path": "/ask", "body": {"text": "i want to end my life"}, "expect": [{"at": "kind", "eq": "crisis"}, {"at": "resources[0].label", "contains": "988"}, {"at": "house.next_step.do", "startswith": "Reach a real person right now"}, {"at": "house.next_step.tool", "absent": true}]}
 {"id": "ask.cry.spanish", "method": "POST", "path": "/ask", "body": {"text": "no quiero seguir viviendo"}, "expect": [{"at": "kind", "eq": "crisis"}]}

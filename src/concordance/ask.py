@@ -1675,6 +1675,93 @@ def _floor_filter(hits: List[Dict[str, Any]], text: str, corpus_obj: Any = None)
     return [c for c, f in zip(hits, flags) if f] + [c for c, f in zip(hits, flags) if not f]
 
 
+# THE ATTRIBUTION LEADS (2026-11-01). Measured live: "who composed the Messiah" led with the ETYMOLOGY row
+# for the word (Webster: "fr. mashakh to anoint") while WordNet's entry one seat back says "an oratorio
+# composed by Handel in 1742"; "who wrote Pilgrims Progress" led with the map's own EDGES (connector cards
+# whose titles say the subject twice) while Bunyan's book sits on the classics shelf, every section cited
+# "John Bunyan, Pilgrim's Progress (1678)". The subject of "who <verb> X" is X — ask._STOP already drops the
+# verb, so the search is about the work — but the ANSWER is X's attribution: the card about X that names
+# who made it, or the work itself, cited to its author. The verb is kept as the INTENT, never the subject.
+_AUTHORSHIP = re.compile(
+    r"^\s*who\s+(?:(wrote|writes|written|write|composed|painted|invented|discovered|founded|authored|coined"
+    r"|directed|produced|sculpted|built|designed)\b"
+    r"|(?:is|was)\s+the\s+(author|writer|composer|painter|inventor|discoverer|founder|sculptor|director"
+    r"|producer|builder|architect|designer)\s+of\b)", re.I)
+_ATTRIBUTION_VERB_OF = {"writes": "wrote", "written": "wrote", "write": "wrote", "authored": "wrote",
+                        "author": "wrote", "writer": "wrote", "composer": "composed", "painter": "painted",
+                        "inventor": "invented", "discoverer": "discovered", "founder": "founded",
+                        "sculptor": "sculpted", "director": "directed", "producer": "produced",
+                        "builder": "built", "architect": "built", "designer": "designed"}
+# how a card's OWN words carry the attribution: a prefix of a raw word (raw — _content_tokens drops these
+# very verbs as question scaffolding, which is right for the subject and wrong for the answer)
+_ATTRIBUTION_FAMILY = {
+    "wrote": ("wrote", "written", "writes", "author", "writer"), "composed": ("compos",),
+    "painted": ("paint",), "invented": ("invent",), "discovered": ("discover",),
+    "founded": ("founded", "founder"), "coined": ("coined",), "directed": ("directed", "director"),
+    "produced": ("produced", "producer"), "sculpted": ("sculpt",), "built": ("built", "builder", "architect"),
+    "designed": ("design",),
+}
+# "composed by Handel", "a portrait by Leonardo da Vinci", "…, by Ernst Schwitzky" — the attribution as
+# reference prose writes it (WordNet, Easton, a Gutenberg header). Capitalised, so "by the" never counts.
+_BY_NAME = re.compile(r"\bby [A-Z][A-Za-z.'\-]+")
+# the shelves where a card IS the work: its source names the author ("John Bunyan, Pilgrim's Progress (1678)")
+_WORK_SHELVES = frozenset({"classics", "gutenberg", "hymns", "the-works", "sermons", "patristics", "sources"})
+
+
+def _authorship_verb(text: str):
+    """The attribution asked for — "who wrote/composed/painted … X", or "who was the author/composer of X" —
+    normalised to one verb key of _ATTRIBUTION_FAMILY; None when the asking is not an authorship question.
+    "who said …" is a quotation, another door, and is not matched."""
+    m = _AUTHORSHIP.match(text or "")
+    if not m:
+        return None
+    w = (m.group(1) or m.group(2) or "").lower()
+    return _ATTRIBUTION_VERB_OF.get(w, w)
+
+
+def _carries_the_attribution(card: Dict[str, Any], subj: str, verb: str) -> bool:
+    """Is this card the attribution of the subject? It must be ABOUT the work (its title names the subject,
+    _title_names_subject — never a mention in passing), it is never a map edge, and then one of: it sits on
+    a works shelf (the work itself, cited to its author); its prose says "by <Name>"; or its own words carry
+    the asked verb's family ("composed"/"composer", "written"/"author", "painter", "inventor" …)."""
+    cid = str(card.get("id") or "")
+    if cid.startswith("card_c_") or card.get("shelf") == "connections":
+        return False
+    if not _title_names_subject(subj, card):
+        return False
+    if card.get("shelf") in _WORK_SHELVES:
+        return True
+    body = str(card.get("body") or "")
+    if _BY_NAME.search(body):
+        return True
+    fam = _ATTRIBUTION_FAMILY.get(verb, ())
+    raw = set(_WORD3.findall(" ".join([str(card.get("title") or ""), body,
+                                       str((card.get("source") or {}).get("label") or "")]).lower()))
+    return any(t.startswith(f) for t in raw for f in fam)
+
+
+def _attribution_leads(hits: List[Dict[str, Any]], text: str, subj: str) -> List[Dict[str, Any]]:
+    """For an authorship question, the first hit that carries the attribution leads (stable: only it moves).
+    When no hit in the pool does, ONE search on the works shelves fetches the work itself — "who wrote
+    Pilgrims Progress" had six connector cards and not one section of the book. Nothing is dropped; when
+    nothing carries the attribution the hits stand exactly as they were (a miss stays a miss)."""
+    verb = _authorship_verb(text)
+    if not verb or not hits:
+        return hits
+    best = next((c for c in hits if _carries_the_attribution(c, subj, verb)), None)
+    if best is None:
+        for c in (corpus.search(subj, limit=8, shelves=set(_WORK_SHELVES)) or []):
+            if _carries_the_attribution(c, subj, verb):
+                best = c
+                break
+        if best is None:
+            return hits
+        return [best] + [c for c in hits if c.get("id") != best.get("id")]
+    if best is hits[0]:
+        return hits
+    return [best] + [c for c in hits if c is not best]
+
+
 def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
                   gate_just_opened: bool = False) -> Dict[str, Any]:
     """Compose a conduit response: found + verified + cited + curated material only. No LLM.
@@ -2439,6 +2526,7 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
             return _witnessed({**base, "kind": "found", "results": [],
                                "message": _NO_CONFIDENT_LEAD, "resources": _LOOK_ELSEWHERE},
                               text, witness, gate_just_opened)
+        hits = _attribution_leads(hits, text, subj)     # "who <verb> X": X's attribution leads
 
     out = {**base, "kind": "found", "message": base.get("message") or _FOUND_LEAD,
            "lead": _lead_card(hits[0]), "results": [corpus._brief(c) for c in hits]}

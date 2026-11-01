@@ -225,3 +225,92 @@ def test_retrieval_never_searches_twice_without_cause(monkeypatch):
     assert f(pool, long, long.replace("the ", ""), False) == pool
     assert f([_RH_Q, _RH_WEIL], "the Riemann hypothesis", "riemann hypothesis", False) == [_RH_Q, _RH_WEIL]
     assert f([], "the Riemann hypothesis", "riemann hypothesis", False) == []
+
+
+# THE ATTRIBUTION LEADS (2026-11-01). Measured live: "who composed the Messiah" led with the etymology row
+# for the word, while WordNet's entry one seat back says "an oratorio composed by Handel in 1742"; "who wrote
+# Pilgrims Progress" led with six connector cards (the map's edges) while Bunyan's book sits on the classics
+# shelf, each section cited "John Bunyan, Pilgrim's Progress (1678)". The subject of "who <verb> X" is X; the
+# ANSWER is X's attribution — the card about X that names who made it, or the work itself cited to its author.
+_MESSIAH_ETYM = {"id": "card_src_etym_messiah", "shelf": "etymology", "title": "messiah",
+                 "body": "messiah: etymology (Webster 1913) — n.: [Heb. mashiakh anointed, fr. mashakh to anoint. Cf. Messias.]"}
+_MESSIAH_WORD = {"id": "card_src_word_messiah", "shelf": "dictionary", "title": "messiah",
+                 "body": "messiah: (noun) any expected deliverer — syn: christ · (noun) the awaited king of the Jews "
+                         "· (noun) an oratorio composed by Handel in 1742"}
+_EASTON_MESSIAH = {"id": "card_enc_easton_messiah", "shelf": "encyclopedia", "title": "Messiah",
+                   "body": "(Heb. mashiah), in all the thirty-nine instances of its occurring in the Old Testament, "
+                           "is rendered by the LXX. 'Christos.'"}
+_BUNYAN = {"id": "card_n_7f68f4020306", "shelf": "classics",
+           "title": "Pilgrim's Progress §297: I saw also in my dream, that when the Shepherds perceived that they were wayfaring men,...",
+           "body": "I saw also in my dream, that when the Shepherds perceived that they were wayfaring men, they also put questions to them",
+           "source": {"label": "John Bunyan, Pilgrim's Progress (1678)", "ref": "§297"}}
+
+
+def _edge(n):
+    return {"id": "card_c_%d" % n, "shelf": "connections", "body": "the pilgrims went on",
+            "title": "Pilgrim's Progress §%d: CHR. → Pilgrim's Progress §%d: CHR." % (n, n + 1)}
+
+
+def _no_search(*a, **k):
+    raise AssertionError("searched without cause: %r %r" % (a, k))
+
+
+def test_attribution_leads_with_the_card_that_names_the_composer(monkeypatch):
+    monkeypatch.setattr(ask.corpus, "search", _no_search)          # the pool already holds it: no search
+    out = ask._attribution_leads([_MESSIAH_ETYM, _MESSIAH_WORD, _EASTON_MESSIAH], "who composed the Messiah", "messiah")
+    assert [c["id"] for c in out] == ["card_src_word_messiah", "card_src_etym_messiah", "card_enc_easton_messiah"]
+    # already leading: untouched
+    hits = [_MESSIAH_WORD, _MESSIAH_ETYM]
+    assert ask._attribution_leads(hits, "who composed the Messiah", "messiah") == hits
+
+
+def test_attribution_never_leads_with_a_map_edge_and_fetches_the_work(monkeypatch):
+    calls = []
+
+    def _fake(q, limit=25, shelves=None, **kw):
+        calls.append((q, bool(shelves) and "classics" in shelves))
+        return [_BUNYAN]
+    monkeypatch.setattr(ask.corpus, "search", _fake)
+    edges = [_edge(212), _edge(23), _edge(148)]
+    out = ask._attribution_leads(edges, "who wrote Pilgrims Progress", "pilgrims progress")
+    assert out[0]["id"] == "card_n_7f68f4020306"
+    assert out[0]["source"]["label"].startswith("John Bunyan")        # the work, cited to its author
+    assert [c["id"] for c in out[1:]] == [c["id"] for c in edges]      # nothing dropped
+    assert calls == [("pilgrims progress", True)]                      # ONE search, the works shelves
+
+
+def test_attribution_is_inert_off_an_authorship_question(monkeypatch):
+    monkeypatch.setattr(ask.corpus, "search", _no_search)
+    hits = [_MESSIAH_ETYM, _MESSIAH_WORD]
+    assert ask._attribution_leads(hits, "what is the messiah", "messiah") == hits
+    assert ask._attribution_leads(hits, "who said blessed are the meek", "blessed meek") == hits   # a quotation: another door
+    assert ask._attribution_leads([], "who composed the Messiah", "messiah") == []
+
+
+def test_attribution_leaves_the_hits_when_nothing_carries_it(monkeypatch):
+    monkeypatch.setattr(ask.corpus, "search", lambda *a, **k: [])
+    # a novel ABOUT the theft of the painting: a works-shelf card, "by <Name>" in its header — but its title
+    # never names the subject, so it is not the painter; the hits stand as they were (a miss stays a miss)
+    novel = {"id": "card_src_book_43733", "shelf": "gutenberg",
+             "title": "Das Geheimnis der Gioconda: Das Tagebuch des Diebes — Ernst Schwitzky",
+             "body": "Das Geheimnis der Gioconda, by Ernst Bernhard Joseph Theodor Schwitzky (in de). Subjects: Art thefts -- Fiction"}
+    assert ask._attribution_leads([novel, _EASTON_MESSIAH], "who painted the Mona Lisa", "mona lisa") == [novel, _EASTON_MESSIAH]
+
+
+def test_by_name_prose_counts_as_the_attribution(monkeypatch):
+    monkeypatch.setattr(ask.corpus, "search", _no_search)
+    portrait = {"id": "card_src_word_mona_lisa", "shelf": "dictionary", "title": "mona lisa",
+                "body": "mona lisa: (noun) a portrait by Leonardo da Vinci"}     # no "paint" word: "by <Name>" carries it
+    out = ask._attribution_leads([_EASTON_MESSIAH, portrait], "who painted the Mona Lisa", "mona lisa")
+    assert out[0]["id"] == "card_src_word_mona_lisa"
+    assert ask._carries_the_attribution(_MESSIAH_WORD, "messiah", "composed") is True
+    assert ask._carries_the_attribution(_MESSIAH_ETYM, "messiah", "composed") is False
+    assert ask._carries_the_attribution(_edge(1), "pilgrims progress", "wrote") is False   # an edge, never
+
+
+def test_the_noun_form_is_the_same_question():
+    assert ask._authorship_verb("who was the composer of the Messiah") == "composed"
+    assert ask._authorship_verb("Who wrote Pilgrim's Progress?") == "wrote"
+    assert ask._authorship_verb("who is the author of Hebrews") == "wrote"
+    assert ask._authorship_verb("who is the messiah") is None
+    assert ask._authorship_verb("who said it is finished") is None
