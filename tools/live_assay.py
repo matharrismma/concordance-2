@@ -19,7 +19,10 @@ does not yet; it never counts as a regression, and the day it passes it joins th
 THE RATCHET: <ASSAY_DIR>/floor.json holds every probe id that has EVER passed. A probe in the floor that
 fails tonight is a REGRESSION — the run exits 1, logs the ids, and posts to CONCORDANCE_ALERT_WEBHOOK if
 set. A probe that passes for the first time joins the floor. Recall may only rise. Each run also writes
-<ASSAY_DIR>/<date>.json with every probe's result, so a drift can be read, not guessed.
+<ASSAY_DIR>/<date>.json with every probe's result, so a drift can be read, not guessed. A REGRESSED run
+leaves floor.json untouched: the floor is every probe that passed on an accepted run (a refused deploy is
+reverted, and a floor that took its newly passing probes would turn the next green run into a false
+regression — 2026-11-01). A 429 from the limiter is not a verdict: the wire honours Retry-After once.
 Stdlib only."""
 from __future__ import annotations
 
@@ -244,7 +247,13 @@ def main(argv: Optional[List[str]] = None) -> int:
                "regressed": r["regressed"], "newly_passing": r["newly_passing"], "floor": len(r["ids"]),
                "seconds": round(time.time() - started, 1), "results": results}
     (ASSAY_DIR / f"{today}.json").write_text(json.dumps(summary, indent=1, ensure_ascii=False), encoding="utf-8")
-    floor_path.write_text(json.dumps({"ids": r["ids"], "since": r["since"], "updated": today}, indent=1), encoding="utf-8")
+    if not r["regressed"]:
+        # THE FLOOR IS EVERY PROBE THAT PASSED ON AN ACCEPTED RUN (2026-11-01). A regressed run refuses a
+        # deploy, which is reverted — and the floor had already taken that run's newly passing probes,
+        # pinning a behaviour the live box no longer had, so the next green run would have read it as a
+        # regression. A regressed run writes its day file (the drift is readable) and leaves floor.json as
+        # it was; the newly passing probes join the floor the first time they pass on a run that stands.
+        floor_path.write_text(json.dumps({"ids": r["ids"], "since": r["since"], "updated": today}, indent=1), encoding="utf-8")
     line = (f"{summary['at']} ASSAY {'REGRESSED' if r['regressed'] else 'OK'}: {len(passed)}/{len(probes)} passed, "
             f"floor {len(r['ids'])}, newly passing {r['newly_passing']}, regressed {r['regressed']}, "
             f"known misses now passing {summary['known_misses_now_passing']}, {summary['seconds']}s")

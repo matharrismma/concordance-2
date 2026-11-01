@@ -132,6 +132,31 @@ def test_a_second_429_still_counts_and_the_wait_is_bounded(monkeypatch):
     assert la.fetch({"id": "z", "path": "/nowhere"})[0] == 404 and slept == []
 
 
+def test_a_regressed_run_leaves_the_floor_untouched(monkeypatch, tmp_path):
+    """The gate refused a deploy (2026-11-01) and reverted the box, but the ratchet had already written the
+    floor with that run's newly passing probe — pinning a behaviour the live box no longer had, so the next
+    green run would have read it as a regression. The floor is every probe that passed on an ACCEPTED run:
+    a regressed run writes its day file and leaves floor.json as it was."""
+    monkeypatch.setattr(la, "ASSAY_DIR", tmp_path)
+    monkeypatch.setattr(la, "alert", lambda *a, **k: None)
+    answers = {"a": (200, {"kind": "found"}), "b": (200, {"kind": "found"}), "c": (200, {"kind": "found"})}
+    probes = [{"id": i, "path": "/ask", "expect": [{"at": "kind", "eq": "found"}]} for i in ("a", "b")]
+    monkeypatch.setattr(la, "load_probes", lambda *a, **k: list(probes))
+    monkeypatch.setattr(la, "fetch", lambda p, **k: answers[p["id"]])
+    assert la.main([]) == 0
+    assert json.loads((tmp_path / "floor.json").read_text(encoding="utf-8"))["ids"] == ["a", "b"]
+    # tonight: a regressed, c passes for the first time -> exit 1, the day file written, the floor as it was
+    answers["a"] = (200, {"kind": "crisis"})
+    probes.append({"id": "c", "path": "/ask", "expect": [{"at": "kind", "eq": "found"}]})
+    assert la.main([]) == 1
+    assert json.loads((tmp_path / "floor.json").read_text(encoding="utf-8"))["ids"] == ["a", "b"]
+    assert (tmp_path / f"{la.date.today().isoformat()}.json").exists()
+    # the morning after the fix: a passes again, c joins
+    answers["a"] = (200, {"kind": "found"})
+    assert la.main([]) == 0
+    assert json.loads((tmp_path / "floor.json").read_text(encoding="utf-8"))["ids"] == ["a", "b", "c"]
+
+
 def test_seal_clean_reads_the_receipt(monkeypatch):
     calls = []
     def fake_fetch(probe):

@@ -206,6 +206,20 @@ GOLDEN_READ_LIMITED = {
 }
 
 
+def test_a_get_on_a_write_limited_route_meets_the_read_bucket():
+    """A read is a read whatever path it shares with a write (2026-11-01: sixty GET /stick probes were
+    counted against the 120/min write cap and a good deploy was reverted as a regression). The route
+    registry still names ONE bucket per path (the goldens above stand); the METHOD decides for a path
+    that serves both: GET -> read, POST -> write. A "read" route is read for any method; an unlimited
+    route meets none."""
+    assert api.rate_bucket("GET", "/stick") == "read"
+    assert api.rate_bucket("POST", "/stick") == "write"
+    assert api.rate_bucket("GET", "/study") == "read" and api.rate_bucket("POST", "/study") == "write"
+    assert api.rate_bucket("POST", "/verify") == "write" and api.rate_bucket("POST", "/ask") == "write"
+    assert api.rate_bucket("GET", "/search") == "read" and api.rate_bucket("GET", "/chains") == "read"
+    assert api.rate_bucket("GET", "/health") is None and api.rate_bucket("GET", "/now") is None
+
+
 def test_the_read_bucket_is_separate_and_larger():
     """Every 429 this server has ever served was on /search, and 75 of them refused ClaudeBot
     mid-crawl — 3,368 searches from the audience we built the surface for. The cap is not removed

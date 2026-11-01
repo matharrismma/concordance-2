@@ -3773,6 +3773,21 @@ RATELIMITED = tuple(r["path"] for r in ROUTES if r.get("rl") is True)
 READ_LIMITED = tuple(r["path"] for r in ROUTES if r.get("rl") == "read")
 
 
+def rate_bucket(method: str, path: str) -> Optional[str]:
+    """Which limiter a request meets: "read" (the generous bucket), "write" (the cap), or None.
+
+    A route flagged "read" always meets the read bucket. A route flagged True meets the WRITE bucket for a
+    POST and the READ bucket for a GET — a read is a read whatever path it shares with a write: GET /stick
+    reads a stick file, POST /stick creates one; GET /study reads, POST /study writes. Measured 2026-11-01:
+    the gate's sixty GET /stick probes were counted against the 120/min write cap alongside its /verify and
+    /ask POSTs, the last two were refused 429, and a good deploy was reverted as a regression."""
+    if path in READ_LIMITED:
+        return "read"
+    if path in RATELIMITED:
+        return "read" if method == "GET" else "write"
+    return None
+
+
 def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
                  site_dir: str = None, warm: bool = True):
     """The configured server, built but NOT started — so a test can bind port 0 and drive the real
@@ -4034,10 +4049,10 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 cid = u.path[len("/card/"):].split("/")[0].strip()
                 status, html = render_card_html(cid, corpus.get_card(cid) if cid else None)
                 return self._html(status, html)
-            # rate limit the compute / IO paths, keyed by the real client
-            if u.path in RATELIMITED or u.path in READ_LIMITED:
-                read = u.path in READ_LIMITED
-                lim = read_limiter if read else limiter
+            # rate limit the compute / IO paths, keyed by the real client; a GET meets the read bucket
+            bucket = rate_bucket(method, u.path)
+            if bucket:
+                lim = read_limiter if bucket == "read" else limiter
                 key = self._rl_key()
                 if not lim.allow(key):
                     return self._json(429, {"error": "rate limit exceeded", "code": "RATE_LIMITED"},
