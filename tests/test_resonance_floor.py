@@ -64,3 +64,34 @@ def test_floor_passes_a_lead_that_covers_the_name_via_bands():
              "body": "Riemann's periods, Lefschetz's (1,1) theorem, Hodge's harmonic integrals",
              "bands": ["hodge", "Hodge conjecture", "algebraic cycles"]}
     assert ask._covers_the_asking(floor, "the Hodge conjecture", _HODGE) is True
+
+
+# The gate refused the first deploy of the floor (2026-11-01): four discernment charts the question
+# plainly named ("what did the stoics believe", "is mormonism christian", ...) were nulled, because a
+# chart's subject lives in its discerns_terms ("the stoics"), not its prose ("Stoicism"). A chart leads
+# on purpose (_pair_discernment) — the floor must never second-guess the one the asking names.
+_STOA = _FakeCorpus({"stoics": ["s1"], "believe": ["b1", "b2", "b3"], "capital": ["c1", "c2"],
+                     "france": ["c6"]})
+_STOICISM = {"id": "card_foreshadow_stoicism", "shelf": "foreshadows", "title": "Stoicism",
+             "body": "Zeno's porch: live according to nature; the Logos; Paul on the Areopagus (Acts 17).",
+             "bands": ["foreshadow", "religion", "stoic", "natural law"],
+             "extra": {"discerns_terms": ["stoicism", "stoic philosophy", "the stoics"]}}
+
+
+def test_floor_never_nulls_the_chart_the_asking_names():
+    # "stoics" is in no prose/band token, only in the chart's own terms ("the stoics") -> still leads
+    assert ask._covers_the_asking(_STOICISM, "what did the stoics believe", _STOA) is True
+
+
+def test_floor_still_judges_a_chart_the_asking_did_not_name():
+    # the same chart on an unrelated asking is judged by coverage like any card -> suppressed
+    assert ask._covers_the_asking(_STOICISM, "what is the capital of France", _STOA) is False
+
+
+def test_floor_counts_a_charts_terms_toward_its_coverage():
+    # no whole term is tripped ("ching" is not "tao te ching"), but the TERM's tokens cover the asking's
+    # rarest word and the body covers a second -> covered, like _shares_a_word reads a chart
+    chart = {"shelf": "foreshadows", "title": "Chinese traditions", "body": "the Way, virtue, the sage",
+             "bands": ["daoism", "the way"], "extra": {"discerns_terms": ["tao te ching", "lao tzu"]}}
+    keeping = _FakeCorpus({"ching": ["t1"], "virtue": ["v1", "v2", "v3"], "teaching": ["x1", "x2"]})
+    assert ask._covers_the_asking(chart, "ching virtue teaching", keeping) is True

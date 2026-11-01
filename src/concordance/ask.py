@@ -1545,10 +1545,27 @@ def _covers_the_asking(card: Dict[str, Any], text: str, corpus_obj: Any = None) 
     threshold. Coverage is read from title+body+excerpt+BANDS, because the distinctive name of a node
     ("Hodge conjecture") lives in its bands, not its prose. Returns True (don't suppress) when the asking
     is too thin to discriminate: fewer than two content tokens the keeping actually holds. Suppression
-    yields an honest null, never a wrong lead."""
+    yields an honest null, never a wrong lead.
+
+    A DISCERNMENT CHART IS NEVER A TOKEN MATCH. A foreshadow/signpost leads ON PURPOSE (_pair_discernment:
+    "front door must discern", the posture like crisis-first) when the asking names what it discerns —
+    and its subject lives in `discerns_terms` ("the stoics", "taoism", "islam"), not in its prose, which
+    says "Stoicism" and "Daoism". The floor read only prose+bands, so the gate refused the first deploy
+    (2026-11-01): four charts the question plainly named were nulled to the honest null. Same two rules
+    the keeping already uses — the ONE whole-term matcher (alignment.term_in) decides "the asking names
+    it", and the chart's terms count toward its coverage (as _shares_a_word reads them)."""
     want = {w for w in _content_tokens(text) if len(w) >= 4}
     if len(want) < 2:
         return True
+    chart_terms: List[str] = []
+    if card.get("shelf") in _SHADOW_SHELVES:
+        ex = card.get("extra") if isinstance(card.get("extra"), dict) else {}
+        chart_terms = [str(t).lower() for t in (ex.get("discerns_terms") or []) if str(t).strip()]
+        if chart_terms:
+            from . import alignment as _align
+            q = " " + str(text or "").lower() + " "
+            if any(_align.term_in(t, q) for t in chart_terms):
+                return True                              # the asking named the charted subject: it leads
     if corpus_obj is None:
         corpus_obj = corpus.default_corpus()
     by_token = getattr(corpus_obj, "_by_token", {}) or {}
@@ -1557,7 +1574,8 @@ def _covers_the_asking(card: Dict[str, Any], text: str, corpus_obj: Any = None) 
     if len(present) < 2:                                     # too little the keeping holds to discriminate
         return True
     hay = _content_tokens(" ".join([card.get("title") or "", card.get("body") or "",
-                                    card.get("excerpt") or "", " ".join(card.get("bands") or [])]))
+                                    card.get("excerpt") or "", " ".join(card.get("bands") or []),
+                                    " ".join(chart_terms)]))
     rarest = min(present, key=lambda w: (df[w], w))
     covered = {w for w in present if w in hay}
     return rarest in covered and len(covered) >= 2
