@@ -523,7 +523,10 @@ def test_computer_science_floor_rests_on_the_instruments_and_p_vs_np():
     overlay.write_text("\n".join(json.dumps(e) for e in S25.BRIDGES) + "\n", encoding="utf-8")
     corpus._apply_bridges(cards, overlay)
     m = chains.floor_map(S25.FLOOR, get_card=cards.get)
-    assert m and len(m["parts"]) == 4
+    # the four pillars, and the two concept cards 472634b made part_of the floor (Busy Beaver, ETH)
+    assert m and len(m["parts"]) == 6
+    assert {p["id"] for p in m["parts"]} == {"card_cs_bits", "card_cs_logic_gates", "card_cs_algorithms",
+                                             "card_cs_computability", "card_cs_busy_beaver", "card_cs_eth"}
     serves = {s["at"] for s in m["serves"]}
     assert {"card_floor_the_instruments", "card_floor_p_vs_np", "card_floor_the_mind"} <= serves
 

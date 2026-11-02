@@ -12,7 +12,6 @@
 #
 # Measured 2026-11-01 on the harness bootstrap (ec094fe + the harness), through the result
 # stream: 5 failed, 230 skipped, 1 xfailed; every other test passed.
-tests/test_chains_seeded.py::test_computer_science_floor_rests_on_the_instruments_and_p_vs_np | 3fa2a78b2244  # the CS floor's chain counts 6 where the test expects 4
 tests/test_reachability.py::test_every_page_is_linked_or_declared_unlisted | 67e05c696d74  # site/gates.html is linked from nowhere
 tests/test_site.py::test_every_page_offers_a_way_home | 4946dcc81de5  # site/gates.html has no way home
 tests/test_site.py::test_the_palette_reaches_every_public_page | d8b8fa037766  # site/gates.html is not reached by the palette
