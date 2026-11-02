@@ -78,7 +78,8 @@ the same harness, pointed at that repository (`HARNESS_ROOT=<repo> python tools/
 plan first measures that repository's baseline (witness measured green on 2026-11-01: 43 passed,
 0 failed, and 6 skipped that need the live core) and names its ship path.
 
-1. **Every receipt opens again where it is cited.** In the `.org` app, a seal V3 does not hold is
+1. **Every receipt opens again where it is cited.** — **COMPLETE 2026-11-02**: witness run
+   `2026-11-02-receipts-open` (ledger recorded at d36649a, live at 819688b; live verdict by checker-19). In the `.org` app, a seal V3 does not hold is
    asked of the keeping's engine, and the `/find` pass-through is made exact. The witness app gets
    a gated ship path of its own — scripted, verified, rolling back on failure — and the runbook names
    it beside `tools/deploy.sh`. Done when each answers 200 at the address it cites: a concordance-2
