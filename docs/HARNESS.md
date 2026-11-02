@@ -28,7 +28,7 @@ open (goal + done criteria) ─► a checker passes the plan
               FAIL ─► findings to the same builder ─► fix ─► builder gate ─► checker again (3 rounds, then BLOCKED)
               PASS ─► close (mechanical) ─► commit (mechanical) ─► push
   └─► next step … until the done criteria hold
-ship: tools/deploy.sh (its own gate grades and auto-reverts) ─► note ship ─► a checker verifies live
+ship: the repository's gated ship path (its own gate grades and rolls back) ─► note ship ─► a checker verifies live
   ─► done (mechanical) ─► record the ledger
 ```
 
@@ -127,7 +127,24 @@ and its commit says so.
 - The full suite runs in a **clean clone** (no keeping; corpus-dependent files skip by design),
   never on the box beside the live engine. The laptop pages under load: builders run only their
   step's tests; one heavy job at a time.
-- Only the lead touches the box, and only through `tools/deploy.sh`. Subagents never ssh.
+- Only the lead touches the box, and only through a gated ship path, never by hand:
+  - **this repository** — `sh tools/deploy.sh <files>`: snapshot, transfer, restart, the four on-box
+    gates, automatic revert on any regression, then the drift check;
+  - **the `.org` app (witness)** — witness's `tools/ship.sh`, streamed from the lead's machine with
+    Git Bash (`ssh <box> 'bash -s' < tools/ship.sh`; PowerShell 5.1 has no `<`, and piping from it
+    turns the script's line endings to CRLF), so it never runs from the checkout it rewrites. It
+    takes an exclusive lock (one ship at a time; a leftover lock refuses until a human clears it),
+    records the checkout's HEAD, refuses a dirty or diverged checkout without touching the work tree,
+    fast-forwards to `origin/main`, restarts the app, and checks `/health`'s commit and doors that
+    reach both engines. Its `/verify` check carries `?seal=0` and never seals; its `/console` check
+    writes one conversation record on the keeping each ship and re-mints the existing unit seal
+    without adding a ledger entry. On any failure after the fast-forward it resets to the recorded
+    commit, restarts and exits 1; exit 3 means the rollback itself failed and a human must look. A
+    ship that loses its session finishes on its own: read public `/health` before running another;
+  - **V3** — named here when [THE_PATH](THE_PATH.md) run 3 lands its scripted call of
+    `deploy/install.sh`.
+
+  Subagents never ssh.
 
 ## Where things live
 
