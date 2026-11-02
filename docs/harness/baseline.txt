@@ -12,9 +12,6 @@
 #
 # Measured 2026-11-01 on the harness bootstrap (ec094fe + the harness), through the result
 # stream: 5 failed, 230 skipped, 1 xfailed; every other test passed.
-tests/test_reachability.py::test_every_page_is_linked_or_declared_unlisted | 67e05c696d74  # site/gates.html is linked from nowhere
-tests/test_site.py::test_every_page_offers_a_way_home | 4946dcc81de5  # site/gates.html has no way home
-tests/test_site.py::test_the_palette_reaches_every_public_page | d8b8fa037766  # site/gates.html is not reached by the palette
 vacuous tests/test_airlock.py::test_ingest_mints_cards_that_map_back_to_the_users_file  # pre-existing; each needs a human reading of its assertion
 vacuous tests/test_airlock.py::test_ingest_persists_nothing_to_disk
 vacuous tests/test_api.py::test_free_text_verify_airlocks_context

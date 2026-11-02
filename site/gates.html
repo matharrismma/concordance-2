@@ -79,12 +79,16 @@
   .means{ color:var(--ink-soft); font-size:1rem; margin:.3rem 0 1.4rem }
   footer{ border-top:1px solid var(--hair); padding-top:.8rem; font-family:var(--plaque); font-size:.7rem; letter-spacing:.12em; color:var(--dim); text-transform:uppercase }
   @media (prefers-reduced-motion:no-preference){ .gate{ transition:opacity .25s ease } }
+  /* the shared shell (nh-home.js, nh-tools.js) pins the one home control top-left and the palette button
+     bottom-right; where the book reaches those corners, the header and the footer step clear of them */
+  @media (max-width:52rem){ .book{ padding-top:calc(3.25rem + env(safe-area-inset-top));
+                                   padding-bottom:calc(5rem + env(safe-area-inset-bottom)) } }
 </style>
 </head>
 <body>
 <div class="book">
   <header class="bar">
-    <a class="brand" href="/"><span class="fleur">✦</span> Narrow <b>Highway</b></a>
+    <span class="brand"><span class="fleur">✦</span> Narrow <b>Highway</b></span>
     <span class="order">Red → Floor → Brothers → God</span>
   </header>
   <main>
@@ -157,5 +161,7 @@
   again.addEventListener('click',function(){ clear(); document.getElementById('action').focus(); });
 })();
 </script>
+<script src="/nh-home.js"></script>
+<script src="/nh-tools.js"></script>
 </body>
 </html>
