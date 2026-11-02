@@ -100,8 +100,11 @@ declared, not authenticated. Code under test runs inside the pytest process, so 
 down the reporter by name can still lie, and the vacuity report is a file the run writes; both take
 code a checker reading the diff will see. A working copy of `tools/harness.py` edited to skip its own
 re-exec cannot be stopped by any file, which is why the checker asks git for the changed paths before
-it trusts the gate. A post-commit hook runs before the commit is verified. The worktree is a
-CRLF checkout on Windows while the box gets LF, which matters only to tests that compare raw bytes.
+it trusts the gate. A post-commit hook runs before the commit is verified. On Windows the worktrees
+are CRLF checkouts, and `tools/deploy.sh` sends the working copy, so files deployed from Windows
+arrive on the box as CRLF while the rest stay LF (found by checker-9, 2026-11-01). Nothing breaks —
+browsers and Python accept both, and `tools/verify_deploy.py` normalises line endings — but a test
+that compares raw bytes would see it; deploying committed blobs instead is a want.
 Because the manifest only grows, renaming or deleting a test file is a bootstrap. A change to the
 machinery itself is a **bootstrap**: the lead writes it, a fresh checker reviews it outside any run,
 and its commit says so.
