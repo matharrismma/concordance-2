@@ -76,6 +76,32 @@ every rule that is not verbatim, and lists ORIGIN and OWNER pointers as unresolv
 entry the scan hits is named by its line only. Exit 0 when nothing is unresolved, unquoted or hit;
 1 when something is; 2 when the records or the configuration cannot be read.
 
+BRIEF. `python tools/context.py brief --role builder|checker|lead [--wants-cap N] ROOT RUN [STEP]`
+assembles a role's working context from records. ROOT is the checkout holding the run's ledger: this
+concordance-2 checkout, or a public repository's checkout the roots file names. RULES.md, BACKLOG.md
+and the harness (its Ledger class, cmd_brief and done_problems) are read through git from one
+concordance-2 commit, never the working copy: for a step of a run in concordance-2, the step's base,
+so no step can change the brief its own checker receives; otherwise concordance-2's HEAD. The
+ledgers are read from their checkouts, since a run's ledger is append-only and uncommitted while the
+run is open. The brief prints the commit it used, then:
+
+    CORE       every rule in scope (all, or the run's repo), by id, its text verbatim on one line
+    IN FLIGHT  every step not committed or abandoned in the public repositories' ledgers: repo,
+               run, step, owner and state, never a path; a private repository is never read
+    RUN        goal and criteria; for a builder the step's claim, scope, tests and previous
+               findings; for a checker the harness's own cmd_brief instead (none of the builder's
+               notes); for the lead every step's state; for every role what done_problems says
+    WANTS      the open and filed-as-run wants of this run, its repo and all repos; past
+               --wants-cap characters each prints as its pointer only (the cap never touches CORE)
+    DUE        none yet: the schedule is a later step of this run
+
+Every line quoted from a record ends with its pointer in brackets, resolved: one that does not
+resolve prints UNRESOLVED, never dropped. A line quoted from a ledger that names a path or an
+address (the path, IP, e-mail and ssh-key rules) prints as its pointer instead of its text. Then the
+whole output is scanned: a private name or a secret pattern anywhere, or a path or an address in the
+brief's own text, refuses the brief (exit 2), naming the line and the kind, never the word. brief
+also refuses when tools/context.py differs from HEAD; check never does.
+
 Refusals name lines and fields, never a record's words. Stdlib only, like the harness it serves.
 """
 from __future__ import annotations
@@ -612,11 +638,11 @@ def fetch(p: Pointer, roots: Mapping[str, str]) -> Tuple[Optional[str], Optional
         if not isinstance(ev, dict) or "ev" not in ev:
             return None, "that line is not a ledger event"
         return "\n".join(_strings(ev)), None
-    if _git(root, "cat-file", "-e", p.sha + "^{commit}") is None:
-        shallow = (_git(root, "rev-parse", "--is-shallow-repository") or b"").strip() == b"true"
-        return None, "the commit is not in this checkout" + (" (a shallow clone)" if shallow else "")
     blob = _git(root, "cat-file", "blob", f"{p.sha}:{p.path}")
-    if blob is None:
+    if blob is None:                      # only now ask why: one git call when the pointer resolves
+        if _git(root, "cat-file", "-e", p.sha + "^{commit}") is None:
+            shallow = (_git(root, "rev-parse", "--is-shallow-repository") or b"").strip() == b"true"
+            return None, "the commit is not in this checkout" + (" (a shallow clone)" if shallow else "")
         return None, "the file does not exist at that commit"
     text = blob.decode("utf-8", "replace")
     if p.anchor not in text:
@@ -706,15 +732,325 @@ def check(root: str, environ: Optional[Mapping[str, str]] = None) -> Tuple[int, 
     return 0, out
 
 
+# ------------------------------------------------------------------------------------------ brief
+
+ROLES = ("builder", "checker", "lead")
+WANTS_CAP = 3000                         # characters of WANTS text before the rest print as pointers
+LIVE_STATUSES = ("open", "filed-as-run")
+DETAIL_KINDS = ("path", "ip", "email", "ssh-key")    # a quoted ledger line these hit prints as its pointer
+OUTPUT_KINDS = ("private-name", "secret")            # any hit in the whole output refuses the brief
+_WITHHELD = "(withheld: it names a path or an address; read it at its pointer)"
+
+
+class BriefRefused(Exception):
+    """brief will not print. The reason names lines and kinds, never a matched word or a path."""
+
+
+def _same(a: str, b: str) -> bool:
+    return os.path.normcase(os.path.realpath(a)) == os.path.normcase(os.path.realpath(b))
+
+
+def _blob(repo: str, sha: str, rel: str) -> Optional[str]:
+    raw = _git(repo, "cat-file", "blob", f"{sha}:{rel}")
+    return None if raw is None else raw.decode("utf-8")
+
+
+def _self_unchanged() -> Optional[str]:
+    """Why tools/context.py may not brief (it differs from HEAD, or is not committed), or None."""
+    blob = _git(_REPO, "cat-file", "blob", "HEAD:tools/context.py")
+    if blob is None:
+        return "tools/context.py is not committed at this checkout's HEAD"
+    with open(os.path.abspath(__file__), "rb") as fh:
+        here = fh.read()
+    if here.replace(b"\r\n", b"\n") != blob.replace(b"\r\n", b"\n"):
+        return "tools/context.py differs from HEAD; a brief runs only from committed code"
+    return None
+
+
+def _harness_at(sha: str):
+    """The harness module as committed at `sha` (git cat-file, never the working copy)."""
+    import types
+    src = _blob(_REPO, sha, harness.SELF_REL)
+    if src is None:
+        raise BriefRefused("concordance-2 has no tools/harness.py at the records commit")
+    mod = types.ModuleType("harness_at_" + sha[:12])
+    mod.__file__ = os.path.join(_REPO, *harness.SELF_REL.split("/"))
+    exec(compile(src, f"{harness.SELF_REL}@{sha[:12]}", "exec"), mod.__dict__)
+    return mod
+
+
+def _numbered(root: str, run: str) -> Optional[List[Tuple[int, dict]]]:
+    lines = _ledger_lines(root, run)
+    if lines is None:
+        return None
+    try:
+        return [(n, json.loads(ln)) for n, ln in enumerate(lines, 1) if ln.strip()]
+    except ValueError:
+        raise BriefRefused(f"a line of run {run}'s ledger is not JSON") from None
+
+
+def _parsed(parse, text: str, rel: str):
+    try:
+        return parse(text)
+    except RecordsError as e:
+        raise BriefRefused(f"{rel} at the records commit does not parse: " + "; ".join(e.problems)) from None
+
+
+def _runs(root: str) -> List[str]:
+    d = os.path.join(root, *harness.RUNS_REL.split("/"))
+    if not os.path.isdir(d):
+        return []
+    return sorted(f[:-6] for f in os.listdir(d) if f.endswith(".jsonl") and harness._ID.match(f[:-6]))
+
+
+class _Out:
+    """The brief's lines: own text, or text quoted from a record with the pointer it came from."""
+
+    def __init__(self, cfg: Config, roots: Mapping[str, str]):
+        self.cfg, self.roots, self.lines = cfg, roots, []
+        self.seen: Dict[Pointer, str] = {}
+
+    def own(self, text: str) -> None:
+        self.lines.append(text)
+
+    def ptr(self, p: Pointer) -> str:
+        if p not in self.seen:
+            if not p.resolvable:
+                self.seen[p] = f"{p.render()} (unresolvable by kind)"
+            else:
+                why = resolve(p, self.roots)
+                self.seen[p] = f"UNRESOLVED: {p.render()} - {why}" if why else p.render()
+        return self.seen[p]
+
+    def quote(self, label: str, body: str, p: Pointer, from_ledger: bool = True) -> None:
+        body = " ".join(body.splitlines())            # one record line is one brief line, its pointer on it
+        if from_ledger and scan(body, self.cfg, DETAIL_KINDS):
+            body = _WITHHELD
+        self.lines.append(f"{label}{body} [{self.ptr(p)}]")
+
+
+def _checker_fields(o: _Out, out: List[str], plan: dict, st: dict, findings: List[Tuple[int, str]],
+                    at_plan: Pointer, at_step: Pointer, at, computed: Pointer) -> None:
+    """cmd_brief's lines, attributed field by field in the order it prints them. A field quoted from
+    the ledger spans as many lines as its value has and must end with exactly that value, so a
+    line break inside a claim or a finding can never shift a pointer; a computed field is one line
+    under its known prefix. Anything else refuses: a misattributed line is worse than none."""
+    pos = 0
+
+    def take(prefix: Tuple[str, ...], p: Pointer, value: Optional[str] = None) -> None:
+        nonlocal pos
+        n = 1 if value is None else value.count("\n") + 1
+        group = out[pos:pos + n]
+        text = "\n".join(group)
+        if len(group) < n or not group[0].startswith(prefix) or (value is not None and not text.endswith(value)):
+            raise BriefRefused("cmd_brief at the records commit prints a field this brief cannot attribute")
+        pos += n
+        if p is computed:
+            o.quote("", text, p, from_ledger=False)
+        elif value is None:
+            o.quote("", text, p)
+        else:
+            o.quote(text[:len(text) - len(value)], value, p)
+
+    take(("RUN ",), at_plan, plan["goal"])
+    take(("STEP ",), at_step)
+    take(("claim: ",), at_step, st["claim"])
+    take(("scope: ",), at_step, ", ".join(st["scope"]))
+    take(("tests: ",), at_step, ", ".join(st["tests"]))
+    take(("base: ",), at_step)
+    take(("changed now (",), computed)
+    take(("adopted at open: ",), at_step, ", ".join(st.get("adopted") or []) or "none")
+    take(("GRADERS TOUCHED", "graders touched: "), computed)
+    take(("content hash now: ",), computed)
+    take(("failed rounds so far: ",), computed)
+    for i, f in findings:
+        take(("previous finding: ",), at(i), f)
+    if pos != len(out):
+        raise BriefRefused("cmd_brief at the records commit prints a field this brief cannot attribute")
+
+
+def _role_run(o: _Out, H, role: str, repo: str, root: str, run: str, step: Optional[str],
+              evs: List[Tuple[int, dict]], sha: str) -> None:
+    L = H.Ledger(root, run)
+    try:
+        pi, plan = L.plan()
+    except H.HarnessError:
+        raise BriefRefused("the run has no plan") from None
+    line_of = [n for n, _ in evs]
+    at = lambda i: Pointer("LEDGER", repo=repo, run=run, line=line_of[i])   # noqa: E731
+    code = lambda anchor: Pointer("FILE", repo=SELF_REPO, path=harness.SELF_REL, sha=sha, anchor=anchor)  # noqa: E731
+    steps = {e["step"]: i for i, (_, e) in enumerate(evs) if e.get("ev") == "step"}
+    if step is not None and step not in steps:
+        raise BriefRefused("the run has no such step")
+    verdicts = [i for i, (_, e) in enumerate(evs)
+                if e.get("ev") == "verdict" and e.get("step") == step and not e.get("pass")]
+    o.own(f"== RUN {run} in {repo}")
+    if role == "checker" and step is not None:
+        _checker_fields(o, H.cmd_brief(root, run, step).split("\n"), plan, evs[steps[step]][1],
+                        [(i, f) for i in verdicts for f in evs[i][1].get("findings") or []],
+                        at(pi), at(steps[step]), at, code("def cmd_brief"))
+    else:
+        o.quote("goal: ", plan["goal"], at(pi))
+    for d in plan.get("done") or []:
+        o.quote("done when: ", d, at(pi))
+    if role == "builder" and step is not None:
+        st = evs[steps[step]][1]
+        o.quote("", f"step {step}: owner {st['owner']}, state {L.state(step)}", at(steps[step]), False)
+        o.quote("claim: ", st["claim"], at(steps[step]))
+        o.quote("scope: ", ", ".join(st["scope"]), at(steps[step]))
+        o.quote("tests: ", ", ".join(st["tests"]), at(steps[step]))
+        for i in verdicts:
+            for f in evs[i][1].get("findings") or []:
+                o.quote("previous finding: ", f, at(i))
+    if role == "lead":
+        for sid, i in steps.items():
+            o.quote("", f"step {sid}: owner {evs[i][1]['owner']}, state {L.state(sid)}", at(i), False)
+    problems = H.done_problems(root, L)
+    if not problems:
+        o.quote("", "run state: complete", code("def done_problems"), False)
+    for p in problems:
+        o.quote("open: ", p, code("def done_problems"), False)
+
+
+def brief(role: str, root: str, run: str, step: Optional[str] = None,
+          environ: Optional[Mapping[str, str]] = None, cap: int = WANTS_CAP) -> List[str]:
+    """The brief's lines (see the module docstring), or BriefRefused."""
+    if role not in ROLES:
+        raise BriefRefused("the role is builder, checker or lead")
+    why = _self_unchanged()
+    if why:
+        raise BriefRefused(why)
+    try:
+        cfg = load_config(environ)
+        listed = load_roots(cfg.dir)
+    except RecordsError as e:
+        raise BriefRefused("the configuration cannot be read: " + "; ".join(e.problems)) from None
+    except (OSError, UnicodeError, re.error) as e:
+        raise BriefRefused(f"the configuration cannot be read ({type(e).__name__})") from None
+    if _same(root, _REPO):
+        repo = SELF_REPO
+    else:
+        named = [n for n, p in listed.items() if _same(p, root)]
+        if not named:
+            raise BriefRefused("ROOT is neither this concordance-2 checkout nor a checkout the roots file names")
+        if named[0] not in PUBLIC_REPOS:
+            raise BriefRefused("a brief is only for a run in a repository with a public remote")
+        repo = named[0]
+    if not harness._ID.match(run):
+        raise BriefRefused("the run id is not a harness run id")
+    evs = _numbered(root, run)
+    if evs is None:
+        raise BriefRefused("ROOT holds no ledger for this run")
+    head = (_git(_REPO, "rev-parse", "HEAD") or b"").decode().strip()
+    if step is not None and repo == SELF_REPO:
+        bases = [e.get("base") for _, e in evs if e.get("ev") == "step" and e.get("step") == step]
+        if not bases or not bases[-1]:
+            raise BriefRefused("the run has no such step")
+        sha, whence = bases[-1], "the step's base, which no step can change"
+    else:
+        sha, whence = head, "concordance-2's HEAD"
+    if _git(_REPO, "cat-file", "-e", sha + "^{commit}") is None:
+        raise BriefRefused("the records commit is not in this concordance-2 checkout")
+    H = _harness_at(sha)
+    try:
+        return _assemble(H, role, repo, root, run, step, evs, sha, whence, cfg, listed, cap)
+    except H.HarnessError as e:
+        raise BriefRefused(f"the harness at the records commit refused: {e}") from None
+
+
+def _assemble(H, role: str, repo: str, root: str, run: str, step: Optional[str], evs: List[Tuple[int, dict]],
+              sha: str, whence: str, cfg: Config, listed: Mapping[str, str], cap: int) -> List[str]:
+    roots = dict(listed)                  # pointers resolve where the brief reads: the run's repo at ROOT,
+    roots.setdefault(SELF_REPO, _REPO)    # the others through the roots file, concordance-2 by default here
+    roots[repo] = root
+    o = _Out(cfg, roots)
+    o.own(f"BRIEF for the {role} of run {run} in {repo}" + (f", step {step}" if step else ""))
+    o.own(f"records: concordance-2 {sha} ({whence}); RULES.md, BACKLOG.md and tools/harness.py are read "
+          f"from this commit, the ledgers from their checkouts")
+
+    rules_text = _blob(_REPO, sha, RULES_REL)
+    rules = [] if rules_text is None else [r for r in _parsed(parse_rules, rules_text, RULES_REL)
+                                           if r.scope in ("all", repo)]
+    o.own(f"== CORE: {len(rules)} rule(s) in scope for {repo}, verbatim, by id"
+          + ("" if rules_text is not None else " (no docs/harness/RULES.md at the records commit)"))
+    for r in sorted(rules, key=lambda r: r.id):
+        o.quote(f"RULE {r.id} ({r.scope}): ", r.text.replace("\n", " ") + " | check: " + r.check,
+                r.source, from_ledger=False)
+
+    o.own("== IN FLIGHT: open steps in the ledgers of the public repositories")
+    flying = 0
+    for name in PUBLIC_REPOS:
+        where = roots.get(name)
+        if where is None:
+            o.own(f"not located: {name} (no checkout in the roots file)")
+            continue
+        for r_id in _runs(where):
+            got = _numbered(where, r_id) or []
+            L = H.Ledger(where, r_id)
+            for n, e in got:
+                if e.get("ev") != "step":
+                    continue
+                state = L.state(e["step"])
+                if state in ("committed", "abandoned"):
+                    continue
+                flying += 1
+                o.quote("", f"{name} {r_id} {e['step']}: owner {e.get('owner')}, state {state}",
+                        Pointer("LEDGER", repo=name, run=r_id, line=n), from_ledger=False)
+    if not flying:
+        o.own("none")
+
+    _role_run(o, H, role, repo, root, run, step, evs, sha)
+
+    backlog_text = _blob(_REPO, sha, BACKLOG_REL)
+    wants = [] if backlog_text is None else _parsed(parse_backlog, backlog_text, BACKLOG_REL)
+    mine = lambda w: w.source.kind == "LEDGER" and w.source.repo == repo and w.source.run == run  # noqa: E731
+    live = [w for w in wants if w.status in LIVE_STATUSES and (w.scope in ("all", repo) or mine(w))]
+    live.sort(key=lambda w: (0 if mine(w) else 1 if w.scope == repo else 2, w.id))
+    o.own(f"== WANTS: {len(live)} open or filed as a run, for this run, {repo} and all repositories "
+          f"({len(wants) - len(live)} others not shown); past {cap} characters, pointers only")
+    spent = 0
+    for w in live:
+        text = w.text.replace("\n", " ")
+        spent += len(text)
+        if spent <= cap:
+            o.quote(f"WANT {w.id} ({w.status}, {w.scope}): ", text, w.source, from_ledger=False)
+        else:
+            o.quote(f"WANT {w.id} ({w.status}, {w.scope})", "", w.source, from_ledger=False)
+
+    o.own("== DUE: none listed; the schedule is built in a later step of this run")
+
+    text = "\n".join(o.lines)
+    hits = scan(text, cfg, OUTPUT_KINDS) + scan(text, cfg, DETAIL_KINDS)
+    if hits:
+        raise BriefRefused("; ".join(f"line {n} carries {kind}" for n, kind in sorted(set(hits))))
+    return o.lines
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     import argparse
     ap = argparse.ArgumentParser(prog="context.py", description="The harness's records of record.")
     sub = ap.add_subparsers(dest="cmd", required=True)
     c = sub.add_parser("check", help="scan RULES.md and BACKLOG.md and resolve every pointer")
     c.add_argument("root", nargs="?", default=_REPO, help="the concordance-2 checkout (default: this one)")
+    b = sub.add_parser("brief", help="assemble a role's working context from the records")
+    b.add_argument("--role", required=True, choices=ROLES)
+    b.add_argument("--wants-cap", type=int, default=WANTS_CAP)
+    b.add_argument("root", help="the checkout holding the run's ledger")
+    b.add_argument("run")
+    b.add_argument("step", nargs="?")
     a = ap.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if a.cmd == "brief":
+        try:
+            lines = brief(a.role, os.path.abspath(a.root), a.run, a.step, cap=a.wants_cap)
+        except BriefRefused as e:
+            print(f"REFUSED: {e}", file=sys.stderr)
+            return 2
+        sys.stdout.flush()                # LF bytes on every platform, so a brief is the same file everywhere
+        sys.stdout.buffer.write(("\n".join(lines) + "\n").encode("utf-8"))
+        sys.stdout.buffer.flush()
+        return 0
     code, lines = check(os.path.abspath(a.root))
     for ln in lines:
         print(ln)
