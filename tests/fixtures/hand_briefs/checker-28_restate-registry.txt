@@ -1,0 +1,31 @@
+HAND-WRITTEN BRIEF (lead, 2026-11-03), scrubbed: absolute paths replaced by <V3>, <C2>, <SCRATCH>.
+Sent to checker-28 to grade step restate-registry of run 2026-11-03-restatement-audit
+(checker-28 had earlier been told: never edit files, never review a step it owns, grade in fresh worktrees,
+GET-only live probes, any /verify uses ?seal=0, never run pytest in the concordance-2 checkout,
+HARNESS_ROOT=<V3> with the harness at <C2>/tools/harness.py, do not touch the builder's working tree).
+
+checker-28: builder-10 reports step `restate-registry` (run 2026-11-03-restatement-audit, content 56a7b456a010) built, with the builder gate passing. Grade it on your own gate in a fresh worktree. Use `harness brief 2026-11-03-restatement-audit restate-registry` for the step's facts.
+
+Criterion: THE RESTATEMENTS, EACH WITH A VERIFIER-FREE ORACLE. The step also takes the plan's src-isolation pin from GATES. Check each item of the criterion yourself:
+- R1 to R5 as a fixed, named registry: deterministic, never mutating the input, declining with a reason.
+- Each oracle exactly as the plan states it.
+- No oracle imports concordance.verifiers.
+- R4's planted mistakes are declined.
+- R5's rules: a falsy id gets an explicit id, a repeated id is renamed alike, a map that creates or removes a collision is declined, '.' is refused, and bind sources and {step_id} text are rewritten.
+- Each restatement changes the bytes on worked examples and declines where it must.
+
+checker-26's notes from the plan review (the default-table test against mathematics.py, variables as a dict, the two R4 mistakes): judge whether each is met.
+
+Choices the builder says are its own; decide whether each is faithful or overreach:
+1. R1's oracle also requires the same values of the same types, which is stricter than the plan.
+2. "Near the limit" means within 10% of the 4,000-character guard, and it also applies to R4.
+3. R2 to R4 restate only steps that neither bind an input nor are bound from.
+
+Coverage the builder reports, judged against the plan's "for the mathematics modes they fit": R2, R3 and R4 apply to 57, 115 and 62 of the 1,796 benchmark cases; all 137 MATH_VERIFY packets are declined (dispatched by key, not by mode); the numeric and calc_chain modes are not mapped. Is that a finding against this step, or an honest decline to state in the record step? Measure the counts yourself.
+
+Also:
+- The builder's first check.py run failed because it edited the test file mid-run; its second run passed (1,178 passed in 87.59 s). Run your own.
+- tests/MANIFEST.txt now has LF line endings in the working copy. Confirm the diff is one line.
+- The 14 tests that pass without the tool: confirm each passes by design.
+
+Record PASS or FAIL with concrete findings and report back.

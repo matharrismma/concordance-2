@@ -1,0 +1,38 @@
+HAND-WRITTEN BRIEF (lead, 2026-11-03), scrubbed: absolute paths replaced by <V3>, <C2>, <SCRATCH>.
+Sent to builder-10 for step 1 of run 2026-11-03-restatement-audit.
+
+You are builder-10. You own step 1 of harness run `2026-11-03-restatement-audit` in Concordance-V3 (measurement 4 of the TRM report: a restatement-invariance audit of the verifiers and the closure).
+
+Where things are:
+- Repo: <V3>, branch `restatement-audit`, already checked out at 8429386 (origin/main). Work only in this checkout.
+- Harness: <C2>/tools/harness.py, run from the concordance-2 directory with `HARNESS_ROOT=<V3>`. Never run pytest inside the concordance-2 checkout.
+- Read the approved plan first: `python tools/harness.py status 2026-11-03-restatement-audit`. Its "done when" criteria are the contract.
+
+Your step, `restate-registry`, covers the plan's criterion "THE RESTATEMENTS, EACH WITH A VERIFIER-FREE ORACLE" and nothing more:
+- `tools/restate.py`: R1 to R5 as a fixed, named registry. Each is deterministic, never mutates its input, and declines with a reason wherever preservation cannot be shown.
+- Each oracle exactly as the plan states it.
+- Tests the criterion asks for: each restatement changes the bytes on worked examples and declines where it must; R4's two planted mistakes (a renamed x with the default variable left in place; a rename to E) are declined by its oracle; a pin that the oracles never import `concordance.verifiers`.
+- Scope: tools/restate.py, tests/test_restate.py (or the name you choose), tests/MANIFEST.txt.
+- Not in this step: the audit tool, the KNOWN table, the planted verifier defects and the MEASURED.md section. Those are later steps.
+- You may also add the plan's src-isolation pin now if it fits: no module under src/ imports or loads tools/restate.py, judged from import statements and string constants, never a bare word match (law.py cites the Restatement (Second) of Contracts). If you do, say so.
+
+checker-26's plan-review notes:
+- R4's default table is a second copy of the verifier's defaults (variable defaults to "x" in five modes), and R4 cannot import concordance.verifiers. Add a test that checks the table against the spec.get("variable", "x") lines in src/concordance/verifiers/mathematics.py (about :313, :336, :359, :384, :424; find them yourself), so a change to a default is caught. Read the file as text; do not import it.
+- Inequality claims carry `variables` as a dict: all 14 benchmark inequality claims have "variables": {}. R4 must understand that form or decline the mode.
+- Prototype scripts by checker-26 in <SCRATCH>/scripts: restate_probe3.py (benchmark-wide), restate_probe5.py (frame_seq), restate_probe6.py and restate_probe7.py (R4 mistakes). They are prototypes: read them for facts and verify what you take.
+
+Rules:
+- Change nothing under src/concordance/, data/ or deploy/, and do not touch tools/benchmark.py.
+- Machinery files are off limits to a step: tools/check.py, tests/conftest.py, pyproject.toml, tools/benchmark.py. If you need one changed, stop and report.
+- No test may write the checkout's stores (the conftest guard enforces it).
+- You need no live probes; if you make one, every /verify uses ?seal=0.
+- Stage nothing, commit nothing, push nothing.
+- Laptop load: the in-suite benchmark sometimes times out under load, which is a false negative only. If tools/check.py fails on a timeout alone, re-run once and report both results.
+
+Process:
+1. Reproduce the red (the new tests fail before tools/restate.py exists).
+2. Open the step in the ledger with its claim, scope and tests.
+3. Build.
+4. Run `python tools/check.py` (it must print === GATE PASS ===).
+5. Run the builder gate until it passes.
+6. Report: the claim, the scope, the tests, the red, the check.py result with suite time, the builder gate line, and where a checker should look hardest.

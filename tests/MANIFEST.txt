@@ -298,6 +298,7 @@ test_receipt_is_also_a_card.py
 test_receiver.py
 test_recite.py
 test_recombine.py
+test_records_of_record.py
 test_recurring_form.py
 test_redact.py
 test_reference_cards.py
