@@ -85,6 +85,7 @@ test_construction.py
 test_contact.py
 test_context.py
 test_context_integration.py
+test_context_records.py
 test_core.py
 test_corpus.py
 test_corpus_db.py
