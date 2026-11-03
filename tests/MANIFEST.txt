@@ -87,6 +87,7 @@ test_context.py
 test_context_brief.py
 test_context_integration.py
 test_context_records.py
+test_context_schedule.py
 test_core.py
 test_corpus.py
 test_corpus_db.py

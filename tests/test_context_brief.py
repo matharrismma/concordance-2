@@ -270,8 +270,9 @@ def test_the_checker_gets_cmd_brief_and_no_builders_narrative(std):
 
 def _pointered(out):
     """Every line of CORE, IN FLIGHT, RUN and WANTS ends with a pointer that the grammar parses."""
-    quoted = [ln for name in ("CORE", "IN FLIGHT", "RUN", "WANTS")
-              for ln in _section(out, name)[1:] if not ln.startswith(("not located:", "none"))]
+    quoted = [ln for name in ("CORE", "IN FLIGHT", "RUN", "WANTS", "DUE")
+              for ln in _section(out, name)[1:] if not ln.startswith(("not located:", "none"))
+              and not ln.endswith(": no run completed")]
     for ln in quoted:
         assert ln.endswith("]")
         p = ln[ln.rindex(" [") + 2:-1].removeprefix("UNRESOLVED: ")
@@ -289,7 +290,10 @@ def test_every_quoted_line_names_its_pointer_and_an_unresolved_one_is_printed_ne
                     f'docs/DOC.md {std["sha1"]} "no such words" - the anchor does not occur in the file at that commit]']
     assert "RULE the-gate-stays-shut (all): The gate stays shut after dark. | check: it holds [FILE" in out
     assert "(unresolvable by kind)]" in out
-    assert _section(out, "DUE") == ["== DUE: none listed; the schedule is built in a later step of this run"]
+    assert _section(out, "DUE") == [
+        "== DUE: 0 of 4 rule(s) in scope are due; intervals 1, 2, 3, 5, 8, ... runs; staggered starts adopted "
+        "(most due in one of the first 100 runs, for 5 rules: 5 unstaggered, 2 staggered)",
+        "clock all: no run completed", "clock concordance-2: no run completed"]
 
 
 @pytest.mark.parametrize("second", ["and trims the wick", "served from /home/someone/lamp"],
@@ -309,6 +313,47 @@ def test_a_line_break_in_a_claim_or_a_finding_keeps_one_line_and_its_ledger_poin
         finding = cx._WITHHELD if withheld else "the wick is short " + second
         assert f"claim: {claim} [LEDGER concordance-2 {RUN} 4]" in lines
         assert f"previous finding: {finding} [LEDGER concordance-2 {RUN} 6]" in lines
+
+
+def test_due_lists_the_rules_due_the_confirmations_not_counted_and_the_ones_ignored(tmp_path):
+    s = _setup(str(tmp_path))
+    t1, done = "2026-01-03T00:00:00+00:00", "2026-01-02-done"
+    ev = lambda **e: json.dumps({"ts": t1, **e}, sort_keys=True)          # noqa: E731
+    confirm = lambda by, text: ev(ev="note", by=by, kind="confirm", text=text)  # noqa: E731
+    _write(s["c2"], f"docs/harness/runs/{done}.jsonl", "\n".join([
+        ev(ev="open", by="lead", head=s["sha2"]),
+        ev(ev="plan", by="lead", goal="Finish a run.", done=["it is finished"]),
+        ev(ev="verdict", by="checker-1", step="plan", findings=[], **{"pass": True}),
+        ev(ev="step", by="builder-1", owner="builder-1", step="d1", claim="d1 finishes", scope=["x"], tests=["t"],
+           base=s["sha2"], adopted=[]),
+        ev(ev="verdict", by="checker-3", step="d1", findings=[], **{"pass": True}),
+        ev(ev="commit", by="lead", step="d1", sha=s["sha2"], paths=[]),
+        ev(ev="note", by="lead", kind="ship", text="nothing ships", **{"pass": True}),
+        ev(ev="verdict", by="checker-3", step="live", findings=[], head=s["sha2"], **{"pass": True}),
+        confirm("checker-3", "RULE keep-the-lamp-lit failed: the lamp was out"),
+        confirm("checker-3", "RULE the-gate-stays-shut held: it was shut"),
+        confirm("builder-1", "RULE c2-only-rule held: a builder's word"),
+        confirm("checker-9", "RULE c2-only-rule held: a checker with no verdict here"),
+        confirm("checker-3", "RULE no-such-rule held: there is no such rule"),
+        confirm("checker-3", "RULE v3-only-rule held: a V3 rule, confirmed in a concordance-2 run"),
+        confirm("checker-3", "the lamp was fine, in free words")]) + "\n")
+    rc, out, err = _brief(s, "builder", s["c2"], RUN, "s1")
+    assert rc == 0, err.split(":")[0]
+    _pointered(out)
+    at = f"[LEDGER concordance-2 {done} "
+    assert _section(out, "DUE") == [
+        "== DUE: 2 of 4 rule(s) in scope are due; intervals 1, 2, 3, 5, 8, ... runs; staggered starts adopted "
+        "(most due in one of the first 100 runs, for 5 rules: 5 unstaggered, 2 staggered)",
+        f"clock all: 1 run(s) completed, the latest concordance-2 {done} {at}8]",
+        f"clock concordance-2: 1 run(s) completed, the latest concordance-2 {done} {at}8]",
+        f"DUE c2-only-rule (concordance-2): run 2, never confirmed, first due in run 2 [LEDGER concordance-2 {RUN} 2]",
+        f"DUE keep-the-lamp-lit (all): run 2, interval 1, last counted: failed in run 1 {at}9]",
+        f"not counted: the-gate-stays-shut held in run 1, when it was not due {at}10]",
+        f"ignored: a confirmation, because it is not by a checker {at}11]",
+        f"ignored: a confirmation, because its checker has no verdict in this ledger {at}12]",
+        f"ignored: a confirmation, because no such rule at the records commit {at}13]",
+        f"ignored: a confirmation, because outside the rule's scope {at}14]",
+        f"ignored: a confirmation, because it does not read 'RULE <id> held|failed: <evidence>' {at}15]"]
 
 
 def _snapshot(base):

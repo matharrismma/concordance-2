@@ -93,7 +93,8 @@ run is open. The brief prints the commit it used, then:
                notes); for the lead every step's state; for every role what done_problems says
     WANTS      the open and filed-as-run wants of this run, its repo and all repos; past
                --wants-cap characters each prints as its pointer only (the cap never touches CORE)
-    DUE        none yet: the schedule is a later step of this run
+    DUE        the clock, every rule in scope due under the schedule below, the confirmations
+               listed but not counted, and the ones ignored with the reason
 
 Every line quoted from a record ends with its pointer in brackets, resolved: one that does not
 resolve prints UNRESOLVED, never dropped. A line quoted from a ledger that names a path or an
@@ -101,6 +102,23 @@ address (the path, IP, e-mail and ssh-key rules) prints as its pointer instead o
 whole output is scanned: a private name or a secret pattern anywhere, or a path or an address in the
 brief's own text, refuses the brief (exit 2), naming the line and the kind, never the word. brief
 also refuses when tools/context.py differs from HEAD; check never does.
+
+THE SCHEDULE. A confirmation is a ledger note of kind confirm reading 'RULE <id> held|failed:
+<evidence>', by a checker-N with a verdict in the same ledger; any other is ignored and listed, as
+is one naming no rule of the records commit or a ledger outside the rule's scope. THE CLOCK: a run
+completes at its last passing live verdict once the harness's done_problems is empty; completed
+runs are ordered by that time, ties by repo name, then run id. A rule's entry, its run 0, is the
+time of the first commit whose RULES.md holds it; its runs are the runs in its scope (all public
+repositories, or its one repo) completed after that. A confirmation at time t sits in run 1 + those
+completed before t, so a run that stalls never pins it; a brief is assembled after every record it
+reads, so it sits in run 1 + all of them. THE GEAR: a rule at interval index i (from 1) whose last
+counted confirmation is in run c is due in run n when n - c >= F(i+1): 1, 2, 3, 5, 8, ...; held
+while due sets c = n and i = i + 1, failed sets c = n and i = 1 at any time, and anything else is
+listed, not counted. A rule's start (c = start - 1 at entry) is staggered: the j-th rule by entry,
+then id, first falls due in run 1 + floor(frac(j*phi) * F(k)), k the least with F(k) >= the number
+of rules, but only while that lowers the most rules due in one of the first 100 runs (every rule
+held and confirmed whenever due) below what unstaggered starts give; otherwise every start is 1.
+For 30 rules: 30 unstaggered, 6 staggered, so the stagger is adopted.
 
 Refusals name lines and fields, never a record's words. Stdlib only, like the harness it serves.
 """
@@ -732,6 +750,172 @@ def check(root: str, environ: Optional[Mapping[str, str]] = None) -> Tuple[int, 
     return 0, out
 
 
+# --------------------------------------------------------------------------------------- the schedule
+
+PHI = (1 + 5 ** 0.5) / 2
+_CONFIRM = re.compile(r"RULE (?P<rule>[a-z0-9]+(?:-[a-z0-9]+)*) (?P<verdict>held|failed): (?P<evidence>\S.*)", re.S)
+
+
+def fib(k: int) -> int:
+    """F(1) = F(2) = 1, F(k) = F(k-1) + F(k-2)."""
+    a, b = 1, 1
+    for _ in range(k - 1):
+        a, b = b, a + b
+    return a
+
+
+def interval(i: int) -> int:
+    """The runs a rule at interval index i waits after its last counted confirmation: F(i+1)."""
+    return fib(i + 1)
+
+
+def stagger_starts(n_rules: int) -> List[int]:
+    """The j-th rule's first due run (j = 1..n), spread by frac(j*phi) over the first F(k) runs, k the
+    least with F(k) >= n_rules."""
+    k = 1
+    while fib(k) < n_rules:
+        k += 1
+    return [1 + int(((j * PHI) % 1.0) * fib(k)) for j in range(1, n_rules + 1)]
+
+
+def max_due(starts: Sequence[int], runs: int = 100) -> int:
+    """The largest number of rules due in any one of the first `runs` runs, every rule always held
+    and confirmed whenever due, each first due at its start."""
+    c, i, most = [s - 1 for s in starts], [1] * len(starts), 0
+    for n in range(1, runs + 1):
+        due = [r for r in range(len(starts)) if n - c[r] >= interval(i[r])]
+        most = max(most, len(due))
+        for r in due:
+            c[r], i[r] = n, i[r] + 1
+    return most
+
+
+def stagger_measure(n_rules: int, runs: int = 100) -> Tuple[int, int]:
+    """(unstaggered, staggered): the largest number due in one run of the first `runs`, each way."""
+    return max_due([1] * n_rules, runs), max_due(stagger_starts(n_rules), runs)
+
+
+def _when(ts: str) -> datetime.datetime:
+    t = datetime.datetime.fromisoformat(ts.replace("Z", "+00:00"))
+    return t if t.tzinfo else t.replace(tzinfo=datetime.timezone.utc)
+
+
+@dataclass(frozen=True)
+class Completed:
+    """A run that done_problems calls complete, at its last passing live verdict (`line`)."""
+    ts: datetime.datetime
+    repo: str
+    run: str
+    line: int
+
+
+@dataclass(frozen=True)
+class Confirmation:
+    """A checker's 'RULE <id> held|failed: <evidence>' note, by a checker with a verdict in its ledger."""
+    ts: datetime.datetime
+    repo: str
+    run: str
+    line: int
+    by: str
+    rule: str
+    verdict: str
+
+
+@dataclass(frozen=True)
+class Gear:
+    """One rule's place in the schedule: due in run n when n - c >= interval(i)."""
+    n: int
+    c: int
+    i: int
+    due: bool
+    counted: Tuple[Tuple[Confirmation, int], ...]
+    listed: Tuple[Tuple[Confirmation, int], ...]
+
+
+def clock(done: Iterable[Completed]) -> List[Completed]:
+    """The completed runs in order: by completion time, ties by repo name, then run id."""
+    return sorted(done, key=lambda d: (d.ts, d.repo, d.run))
+
+
+def run_number(entry: datetime.datetime, done: Iterable[Completed], t: Optional[datetime.datetime] = None) -> int:
+    """1 + the runs completed after the rule's entry (its run 0) and before t (None: after every record)."""
+    return 1 + sum(1 for d in done if d.ts > entry and (t is None or d.ts < t))
+
+
+def gear(entry: datetime.datetime, done: Sequence[Completed], confirmations: Iterable[Confirmation],
+         start: int = 1, t: Optional[datetime.datetime] = None) -> Gear:
+    """The rule's gear: each confirmation placed in run 1 + the runs completed before its own time
+    (so a stalled run never pins it); failed sets c and resets i to 1 at any time, held while due sets
+    c and steps i, anything else is listed, not counted. `start` is the rule's first due run."""
+    c, i = start - 1, 1
+    counted: List[Tuple[Confirmation, int]] = []
+    listed: List[Tuple[Confirmation, int]] = []
+    for cf in sorted(confirmations, key=lambda x: (x.ts, x.repo, x.run, x.line)):
+        k = run_number(entry, done, cf.ts)
+        if cf.verdict == "failed":
+            c, i = k, 1
+            counted.append((cf, k))
+        elif k - c >= interval(i):
+            c, i = k, i + 1
+            counted.append((cf, k))
+        else:
+            listed.append((cf, k))
+    n = run_number(entry, done, t)
+    return Gear(n, c, i, n - c >= interval(i), tuple(counted), tuple(listed))
+
+
+def read_runs(H, located: Sequence[Tuple[str, str]]
+              ) -> Tuple[List[Completed], List[Confirmation], List[Tuple[str, str, int, str]]]:
+    """Every completed run and every confirmation in the ledgers of `located` (repo, checkout), and
+    the confirmations ignored (repo, run, line, why). H is the harness at the records commit."""
+    done: List[Completed] = []
+    found: List[Confirmation] = []
+    ignored: List[Tuple[str, str, int, str]] = []
+    for repo, root in located:
+        for run in _runs(root):
+            evs = _numbered(root, run) or []
+            try:
+                complete = not H.done_problems(root, H.Ledger(root, run))
+            except H.HarnessError:
+                complete = False
+            lives = [(n, e) for n, e in evs if e.get("ev") == "verdict" and e.get("step") == "live" and e.get("pass")]
+            if complete and lives:
+                done.append(Completed(_when(lives[-1][1]["ts"]), repo, run, lives[-1][0]))
+            judges = {e.get("by") for _, e in evs if e.get("ev") == "verdict"}
+            for n, e in evs:
+                if e.get("ev") != "note" or e.get("kind") != "confirm":
+                    continue
+                m = _CONFIRM.fullmatch(e.get("text") or "")
+                by = e.get("by") or ""
+                if m is None:
+                    ignored.append((repo, run, n, "it does not read 'RULE <id> held|failed: <evidence>'"))
+                elif not harness._CHECKER.fullmatch(by):
+                    ignored.append((repo, run, n, "it is not by a checker"))
+                elif by not in judges:
+                    ignored.append((repo, run, n, "its checker has no verdict in this ledger"))
+                else:
+                    found.append(Confirmation(_when(e["ts"]), repo, run, n, by, m.group("rule"), m.group("verdict")))
+    return done, found, ignored
+
+
+def rule_entries(sha: str) -> Dict[str, datetime.datetime]:
+    """Each rule's entry: the commit time of the first commit, up to `sha`, whose RULES.md holds it."""
+    log = (_git(_REPO, "log", "--reverse", "--format=%H %cI", sha, "--", RULES_REL) or b"").decode().split("\n")
+    entries: Dict[str, datetime.datetime] = {}
+    for ln in log:
+        if not ln.strip():
+            continue
+        commit, when = ln.split(" ", 1)
+        text = _blob(_REPO, commit, RULES_REL)
+        try:
+            ids = [r.id for r in parse_rules(text)] if text is not None else []
+        except RecordsError:
+            continue
+        for rid in ids:
+            entries.setdefault(rid, _when(when))
+    return entries
+
+
 # ------------------------------------------------------------------------------------------ brief
 
 ROLES = ("builder", "checker", "lead")
@@ -912,6 +1096,53 @@ def _role_run(o: _Out, H, role: str, repo: str, root: str, run: str, step: Optio
         o.quote("open: ", p, code("def done_problems"), False)
 
 
+def _due(o: _Out, H, repo: str, roots: Mapping[str, str], sha: str, every_rule: Sequence[Rule],
+         rules: Sequence[Rule]) -> None:
+    """The DUE section: the clock, every rule in scope that is due, the confirmations not counted,
+    and the ones ignored. The brief is assembled after every record it reads, so its run is
+    1 + every run in scope completed after the rule's entry."""
+    done, found, ignored = read_runs(H, [(n, roots[n]) for n in PUBLIC_REPOS if n in roots])
+    entries = rule_entries(sha)
+    at_sha = _when((_git(_REPO, "show", "-s", "--format=%cI", sha) or b"").decode().strip())
+    order = sorted(every_rule, key=lambda r: (entries.get(r.id, at_sha), r.id))
+    plain, spread = stagger_measure(len(order)) if order else (0, 0)
+    adopted = spread < plain
+    starts = dict(zip([r.id for r in order], stagger_starts(len(order)) if adopted else [1] * len(order)))
+    known = {r.id: r for r in every_rule}
+    gears = []
+    for r in sorted(rules, key=lambda r: r.id):
+        scoped = [d for d in done if r.scope == "all" or d.repo == r.scope]
+        mine = [cf for cf in found if cf.rule == r.id and (r.scope == "all" or cf.repo == r.scope)]
+        gears.append((r, gear(entries.get(r.id, at_sha), scoped, mine, starts[r.id])))
+    ledger = lambda x: Pointer("LEDGER", repo=x.repo, run=x.run, line=x.line)   # noqa: E731
+    o.own(f"== DUE: {sum(g.due for _, g in gears)} of {len(gears)} rule(s) in scope are due; intervals 1, 2, 3, 5, "
+          f"8, ... runs; staggered starts {'adopted' if adopted else 'not adopted'} (most due in one of the first "
+          f"100 runs, for {len(order)} rules: {plain} unstaggered, {spread} staggered)")
+    for scope in ("all", repo):
+        ran = clock(d for d in done if scope == "all" or d.repo == scope)
+        if ran:
+            o.quote("", f"clock {scope}: {len(ran)} run(s) completed, the latest {ran[-1].repo} {ran[-1].run}",
+                    ledger(ran[-1]), from_ledger=False)
+        else:
+            o.own(f"clock {scope}: no run completed")
+    for r, g in gears:
+        if g.due and g.counted:
+            cf, k = g.counted[-1]
+            o.quote("", f"DUE {r.id} ({r.scope}): run {g.n}, interval {interval(g.i)}, last counted: {cf.verdict} "
+                        f"in run {k}", ledger(cf), from_ledger=False)
+        elif g.due:
+            o.quote("", f"DUE {r.id} ({r.scope}): run {g.n}, never confirmed, first due in run {starts[r.id]}",
+                    r.source, from_ledger=False)
+    for r, g in gears:
+        for cf, k in g.listed:
+            o.quote("", f"not counted: {r.id} {cf.verdict} in run {k}, when it was not due", ledger(cf), False)
+    out = [(cf.repo, cf.run, cf.line, "no such rule at the records commit") for cf in found if cf.rule not in known]
+    out += [(cf.repo, cf.run, cf.line, "outside the rule's scope") for cf in found
+            if cf.rule in known and known[cf.rule].scope not in ("all", cf.repo)]
+    for rp, rn, ln, why in sorted(ignored + out):
+        o.quote("", f"ignored: a confirmation, because {why}", Pointer("LEDGER", repo=rp, run=rn, line=ln), False)
+
+
 def brief(role: str, root: str, run: str, step: Optional[str] = None,
           environ: Optional[Mapping[str, str]] = None, cap: int = WANTS_CAP) -> List[str]:
     """The brief's lines (see the module docstring), or BriefRefused."""
@@ -969,8 +1200,8 @@ def _assemble(H, role: str, repo: str, root: str, run: str, step: Optional[str],
           f"from this commit, the ledgers from their checkouts")
 
     rules_text = _blob(_REPO, sha, RULES_REL)
-    rules = [] if rules_text is None else [r for r in _parsed(parse_rules, rules_text, RULES_REL)
-                                           if r.scope in ("all", repo)]
+    every_rule = [] if rules_text is None else _parsed(parse_rules, rules_text, RULES_REL)
+    rules = [r for r in every_rule if r.scope in ("all", repo)]
     o.own(f"== CORE: {len(rules)} rule(s) in scope for {repo}, verbatim, by id"
           + ("" if rules_text is not None else " (no docs/harness/RULES.md at the records commit)"))
     for r in sorted(rules, key=lambda r: r.id):
@@ -1017,7 +1248,7 @@ def _assemble(H, role: str, repo: str, root: str, run: str, step: Optional[str],
         else:
             o.quote(f"WANT {w.id} ({w.status}, {w.scope})", "", w.source, from_ledger=False)
 
-    o.own("== DUE: none listed; the schedule is built in a later step of this run")
+    _due(o, H, repo, roots, sha, every_rule, rules)
 
     text = "\n".join(o.lines)
     hits = scan(text, cfg, OUTPUT_KINDS) + scan(text, cfg, DETAIL_KINDS)
