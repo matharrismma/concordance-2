@@ -313,6 +313,7 @@ REL = f"docs/harness/runs/{RUN}.jsonl"
 BRANCH = "trunk"                          # neither main nor master, so nothing can assume either
 WORD = "zebra-lantern-token"              # the invented secret: the fixture's only secret pattern
 AUTOCRLF = {"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "core.autocrlf", "GIT_CONFIG_VALUE_0": "true"}
+MACHINE_SETTINGS = ("HARNESS_ROOT", "PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX")   # none may decide a test
 
 
 def _src(rel):
@@ -406,7 +407,7 @@ def env(tmp_path):
     scratch.mkdir()
     patterns = home / "patterns.txt"
     patterns.write_text(WORD + "\n", encoding="utf-8")
-    plain = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k != "HARNESS_ROOT"}
+    plain = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k not in MACHINE_SETTINGS}
     return {**plain, **FIXED, "HOME": str(home), "USERPROFILE": str(home), "XDG_CONFIG_HOME": str(home),
             "GIT_CONFIG_NOSYSTEM": "1", "HARNESS_CONFIG_DIR": str(home),
             "HARNESS_SECRET_PATTERNS": str(patterns),
@@ -758,6 +759,28 @@ def test_record_refuses_a_harness_that_is_not_committed_beside_it(tmp_path, env)
     code, out = _record(w)
     assert code == 2 and out.startswith("REFUSED: tools/harness.py is not committed")
     assert w.worktrees() == 1
+
+
+@pytest.mark.parametrize("command", ["record", "check", "brief", "ci"])
+def test_a_run_of_the_tool_leaves_no_bytecode_where_this_environment_would_write_it(world, command):
+    """Linux CI found this write; the laptop's environment set PYTHONDONTWRITEBYTECODE and hid it from every
+    local gate. So the end of this test is a control: a plain import, in the same environment, does write."""
+    args = {"record": ["record", str(world.root), RUN], "check": ["check", str(world.root)],
+            "brief": ["brief", "--role", "lead", str(world.root), RUN], "ci": ["ci", "--", "no-owner", SHA]}[command]
+    tools = pathlib.Path(world.cli).parent
+    ran = subprocess.run([sys.executable, world.cli, *args], env=world.env, capture_output=True, encoding="utf-8")
+    assert "Traceback" not in ran.stderr
+    assert not (tools / "__pycache__").exists()
+    subprocess.run([sys.executable, "-c", "import harness"], cwd=str(tools), env=world.env, check=True,
+                   capture_output=True)
+    assert (tools / "__pycache__").is_dir()
+
+
+def test_a_module_that_imports_the_tool_keeps_its_own_bytecode_setting(world):
+    r = subprocess.run([sys.executable, "-c", "import sys, context; print(sys.dont_write_bytecode)"],
+                       cwd=str(pathlib.Path(world.cli).parent), env=world.env, check=True, capture_output=True,
+                       encoding="utf-8")
+    assert r.stdout.strip() == "False"
 
 
 def test_record_serves_a_repository_that_tracks_no_harness(tmp_path, env):

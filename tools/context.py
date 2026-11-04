@@ -171,6 +171,9 @@ The harness that runs is the one beside this file, or the worktree's HEAD's when
 harness's own rule; so a repository that tracks no harness is served too. Without -F the commit
 message is one plain line naming the run.
 
+Run as a script, this file writes no bytecode, whatever the environment says, so no command leaves a
+file in the checkout it runs from. A module that imports it keeps its own setting.
+
 Refusals name lines and fields, never a record's words. Stdlib only, like the harness it serves.
 """
 from __future__ import annotations
@@ -187,6 +190,8 @@ import tempfile
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, Iterator, List, Mapping, Optional, Sequence, Tuple
 
+if __name__ == "__main__":
+    sys.dont_write_bytecode = True        # else the import below caches itself beside this file, in the checkout
 import harness
 
 RULES_REL = "docs/harness/RULES.md"
