@@ -108,17 +108,24 @@ THE SCHEDULE. A confirmation is a ledger note of kind confirm reading 'RULE <id>
 is one naming no rule of the records commit or a ledger outside the rule's scope. THE CLOCK: a run
 completes at its last passing live verdict once the harness's done_problems is empty; completed
 runs are ordered by that time, ties by repo name, then run id. A rule's entry, its run 0, is the
-time of the first commit whose RULES.md holds it; its runs are the runs in its scope (all public
+time of the first commit, along first-parent history, whose RULES.md holds it; its runs are the
+runs in its scope (all public
 repositories, or its one repo) completed after that. A confirmation at time t sits in run 1 + those
 completed before t, so a run that stalls never pins it; a brief is assembled after every record it
 reads, so it sits in run 1 + all of them. THE GEAR: a rule at interval index i (from 1) whose last
 counted confirmation is in run c is due in run n when n - c >= F(i+1): 1, 2, 3, 5, 8, ...; held
 while due sets c = n and i = i + 1, failed sets c = n and i = 1 at any time, and anything else is
-listed, not counted. A rule's start (c = start - 1 at entry) is staggered: the j-th rule by entry,
-then id, first falls due in run 1 + floor(frac(j*phi) * F(k)), k the least with F(k) >= the number
-of rules, but only while that lowers the most rules due in one of the first 100 runs (every rule
-held and confirmed whenever due) below what unstaggered starts give; otherwise every start is 1.
-For 30 rules: 30 unstaggered, 6 staggered, so the stagger is adopted.
+listed, not counted. A rule never confirmed must be checked soon, so its first due run (c = start - 1
+at entry) is staggered over at most the first 13 runs after its entry (F(7)): the j-th rule ever
+entered first falls due in run 1 + floor(frac(j*phi) * 13). j is frozen at entry, the rule's place
+among all rules ever entered in RULES.md's first-parent history, by the commit that first added
+it, then id; with the spread fixed at 13, adding or removing a rule never moves another's start.
+For today's 30 rules, every rule held and confirmed whenever due, at most 9 are due in any one of
+the first 100 runs, and the longest wait for a first check is 13 runs. Old versions of RULES.md are
+read by their '## <id>' headings alone, never by the parser, so a change to the file's format can
+never change what an old version entered. All of this needs RULES.md's whole history: in a shallow
+clone, when git cannot give it, or when a version is not text, DUE is one line saying the schedule
+is not computed, and no start or due rule is printed; the other sections print as usual.
 
 Refusals name lines and fields, never a record's words. Stdlib only, like the harness it serves.
 """
@@ -609,6 +616,12 @@ def _git(root: str, *args: str) -> Optional[bytes]:
     return r.stdout if r.returncode == 0 else None
 
 
+def _shallow(root: str) -> Optional[bool]:
+    """Is this clone shallow? None when git cannot say: it failed, or is too old to know the flag and
+    echoes it back."""
+    return {b"true": True, b"false": False}.get((_git(root, "rev-parse", "--is-shallow-repository") or b"").strip())
+
+
 def _ledger_lines(root: str, run: str) -> Optional[List[str]]:
     try:
         with open(os.path.join(root, "docs", "harness", "runs", run + ".jsonl"), "rb") as fh:
@@ -659,8 +672,7 @@ def fetch(p: Pointer, roots: Mapping[str, str]) -> Tuple[Optional[str], Optional
     blob = _git(root, "cat-file", "blob", f"{p.sha}:{p.path}")
     if blob is None:                      # only now ask why: one git call when the pointer resolves
         if _git(root, "cat-file", "-e", p.sha + "^{commit}") is None:
-            shallow = (_git(root, "rev-parse", "--is-shallow-repository") or b"").strip() == b"true"
-            return None, "the commit is not in this checkout" + (" (a shallow clone)" if shallow else "")
+            return None, "the commit is not in this checkout" + (" (a shallow clone)" if _shallow(root) else "")
         return None, "the file does not exist at that commit"
     text = blob.decode("utf-8", "replace")
     if p.anchor not in text:
@@ -753,7 +765,9 @@ def check(root: str, environ: Optional[Mapping[str, str]] = None) -> Tuple[int, 
 # --------------------------------------------------------------------------------------- the schedule
 
 PHI = (1 + 5 ** 0.5) / 2
-_CONFIRM = re.compile(r"RULE (?P<rule>[a-z0-9]+(?:-[a-z0-9]+)*) (?P<verdict>held|failed): (?P<evidence>\S.*)", re.S)
+# Old ledgers are read with this forever, so it knows no id form: the rule names any token, and the
+# rule list at the records commit decides whether it exists.
+_CONFIRM = re.compile(r"RULE (?P<rule>\S+) (?P<verdict>held|failed): (?P<evidence>\S.*)", re.S)
 
 
 def fib(k: int) -> int:
@@ -769,13 +783,18 @@ def interval(i: int) -> int:
     return fib(i + 1)
 
 
+SPREAD = fib(7)                          # 13: a rule never confirmed is first due within 13 runs of entry
+
+
+def first_due(j: int) -> int:
+    """The first due run of the j-th rule ever entered (j from 1): 1 + floor(frac(j*phi) * 13). It
+    depends on j alone, so no rule added or removed later moves it."""
+    return 1 + int(((j * PHI) % 1.0) * SPREAD)
+
+
 def stagger_starts(n_rules: int) -> List[int]:
-    """The j-th rule's first due run (j = 1..n), spread by frac(j*phi) over the first F(k) runs, k the
-    least with F(k) >= n_rules."""
-    k = 1
-    while fib(k) < n_rules:
-        k += 1
-    return [1 + int(((j * PHI) % 1.0) * fib(k)) for j in range(1, n_rules + 1)]
+    """The first due runs of the rules ranked 1..n_rules."""
+    return [first_due(j) for j in range(1, n_rules + 1)]
 
 
 def max_due(starts: Sequence[int], runs: int = 100) -> int:
@@ -791,8 +810,10 @@ def max_due(starts: Sequence[int], runs: int = 100) -> int:
 
 
 def stagger_measure(n_rules: int, runs: int = 100) -> Tuple[int, int]:
-    """(unstaggered, staggered): the largest number due in one run of the first `runs`, each way."""
-    return max_due([1] * n_rules, runs), max_due(stagger_starts(n_rules), runs)
+    """(the largest number of rules due in one of the first `runs` runs, the longest wait in runs from
+    entry to a rule's first check), every rule entered at once, always held and confirmed whenever due."""
+    starts = stagger_starts(n_rules)
+    return max_due(starts, runs), max(starts, default=0)
 
 
 def _when(ts: str) -> datetime.datetime:
@@ -898,22 +919,93 @@ def read_runs(H, located: Sequence[Tuple[str, str]]
     return done, found, ignored
 
 
-def rule_entries(sha: str) -> Dict[str, datetime.datetime]:
-    """Each rule's entry: the commit time of the first commit, up to `sha`, whose RULES.md holds it."""
-    log = (_git(_REPO, "log", "--reverse", "--format=%H %cI", sha, "--", RULES_REL) or b"").decode().split("\n")
-    entries: Dict[str, datetime.datetime] = {}
-    for ln in log:
+class NoHistory(Exception):
+    """RULES.md's whole history cannot be read, so no rule's entry or first due run can be known."""
+
+
+_SHALLOW = "this clone is shallow, so RULES.md's history cannot be read and no rule's entry or first due run can be known"
+_GIT_FAILED = "git could not give RULES.md's whole history, so no rule's entry or first due run can be known"
+_NOT_TEXT = "a version in RULES.md's history is not text, so no rule's entry or first due run can be known"
+_NOT_HELD = ("RULES.md's history does not hold every rule of the records commit, so no rule's entry or first "
+             "due run can be known")
+_HEADING = re.compile(r"## +(\S+)[ \t]*")
+
+
+def heading_ids(text: str) -> List[str]:
+    """The ids one version of RULES.md enters, in order: every line that is exactly '## ' and one token.
+
+    The history walk reads old versions with this and nothing else, and it must stay that way: no
+    parse_rules, no fields, no _ENTRY_ID, not even _lines. Reading old bytes through today's format
+    would let a change to that format change what an old version entered, and every rank after it.
+    It matches whole lines, so a heading quoted in a '> ' text line is no heading. A one-token
+    heading that is no rule takes a place, but the same place forever, so it moves nothing later."""
+    return [m.group(1) for m in map(_HEADING.fullmatch, re.split(r"\r\n|\r|\n", text.removeprefix("\ufeff"))) if m]
+
+
+def _rules_history(sha: str) -> List[Tuple[datetime.datetime, List[str]]]:
+    """RULES.md's versions up to `sha` along first-parent history, oldest first: (commit time, ids).
+
+    NoHistory unless that history is whole. A shallow clone shows its boundary commit as a root that
+    adds every current rule, which looks complete and is not: a rule removed before the boundary
+    vanishes, and every rule after it re-ranks. So nothing here reads one, and a schedule is never
+    computed from it. The other ways in are git failing and bytes that are not text: a part of the
+    history is no better. A version the parser refuses is neither, and counts like any other."""
+    shallow = _shallow(_REPO)
+    if shallow:
+        raise NoHistory(_SHALLOW)
+    log = _git(_REPO, "log", "--first-parent", "--reverse", "--format=%H %cI", sha, "--", RULES_REL)
+    if shallow is None or log is None:
+        raise NoHistory(_GIT_FAILED)
+    out: List[Tuple[datetime.datetime, List[str]]] = []
+    for ln in log.decode().split("\n"):
         if not ln.strip():
             continue
         commit, when = ln.split(" ", 1)
-        text = _blob(_REPO, commit, RULES_REL)
         try:
-            ids = [r.id for r in parse_rules(text)] if text is not None else []
-        except RecordsError:
-            continue
+            text = _blob(_REPO, commit, RULES_REL)
+        except UnicodeError:
+            raise NoHistory(_NOT_TEXT) from None
+        if text is None:
+            if _git(_REPO, "ls-tree", commit, "--", RULES_REL) != b"":
+                raise NoHistory(_GIT_FAILED)          # the file is there, and its bytes cannot be read
+            out.append((_when(when), []))             # this commit deleted RULES.md
+        elif "\0" in text:
+            raise NoHistory(_NOT_TEXT)                # UTF-16 with no mark decodes as UTF-8, and no heading matches
+        else:
+            out.append((_when(when), heading_ids(text)))
+    return out
+
+
+def _schedule_basis(sha: str, every_rule: Sequence[Rule]) -> Tuple[Dict[str, datetime.datetime], Dict[str, int]]:
+    """(entries, ranks) of the rules at the records commit, or NoHistory. A whole history holds every
+    rule of that commit, so a rule it lacks means git gave a part of it, or the heading reader and
+    the parser no longer agree on what a heading is. Either way a rank would be a guess."""
+    entries, ranks = rule_entries(sha), rule_ranks(sha)
+    if any(r.id not in ranks for r in every_rule):
+        raise NoHistory(_NOT_HELD)
+    return entries, ranks
+
+
+def rule_entries(sha: str) -> Dict[str, datetime.datetime]:
+    """Each rule's entry: the commit time of the first commit, along first-parent history up to
+    `sha`, whose RULES.md holds it. NoHistory when that history cannot be read whole."""
+    entries: Dict[str, datetime.datetime] = {}
+    for when, ids in _rules_history(sha):
         for rid in ids:
-            entries.setdefault(rid, _when(when))
+            entries.setdefault(rid, when)
     return entries
+
+
+def rule_ranks(sha: str) -> Dict[str, int]:
+    """Each rule's j, frozen at its entry: its place (from 1) among every rule ever entered in
+    RULES.md's first-parent history up to `sha`, by the commit that first added it, then id. A rule
+    removed keeps its place, so removing one re-ranks nothing, and a rule added ranks after all before.
+    NoHistory when that history cannot be read whole."""
+    ranks: Dict[str, int] = {}
+    for _, ids in _rules_history(sha):
+        for rid in sorted(set(ids) - set(ranks)):
+            ranks[rid] = len(ranks) + 1
+    return ranks
 
 
 # ------------------------------------------------------------------------------------------ brief
@@ -1100,24 +1192,24 @@ def _due(o: _Out, H, repo: str, roots: Mapping[str, str], sha: str, every_rule: 
          rules: Sequence[Rule]) -> None:
     """The DUE section: the clock, every rule in scope that is due, the confirmations not counted,
     and the ones ignored. The brief is assembled after every record it reads, so its run is
-    1 + every run in scope completed after the rule's entry."""
+    1 + every run in scope completed after the rule's entry. Without RULES.md's whole history the
+    section is one line saying so: a start or a due rule from a part of it would be a guess."""
+    try:
+        entries, ranks = _schedule_basis(sha, every_rule)
+    except NoHistory as e:
+        o.own(f"== DUE: not computed: {e}")
+        return
     done, found, ignored = read_runs(H, [(n, roots[n]) for n in PUBLIC_REPOS if n in roots])
-    entries = rule_entries(sha)
-    at_sha = _when((_git(_REPO, "show", "-s", "--format=%cI", sha) or b"").decode().strip())
-    order = sorted(every_rule, key=lambda r: (entries.get(r.id, at_sha), r.id))
-    plain, spread = stagger_measure(len(order)) if order else (0, 0)
-    adopted = spread < plain
-    starts = dict(zip([r.id for r in order], stagger_starts(len(order)) if adopted else [1] * len(order)))
+    starts = {r.id: first_due(ranks[r.id]) for r in every_rule}
     known = {r.id: r for r in every_rule}
     gears = []
     for r in sorted(rules, key=lambda r: r.id):
         scoped = [d for d in done if r.scope == "all" or d.repo == r.scope]
         mine = [cf for cf in found if cf.rule == r.id and (r.scope == "all" or cf.repo == r.scope)]
-        gears.append((r, gear(entries.get(r.id, at_sha), scoped, mine, starts[r.id])))
+        gears.append((r, gear(entries[r.id], scoped, mine, starts[r.id])))
     ledger = lambda x: Pointer("LEDGER", repo=x.repo, run=x.run, line=x.line)   # noqa: E731
     o.own(f"== DUE: {sum(g.due for _, g in gears)} of {len(gears)} rule(s) in scope are due; intervals 1, 2, 3, 5, "
-          f"8, ... runs; staggered starts {'adopted' if adopted else 'not adopted'} (most due in one of the first "
-          f"100 runs, for {len(order)} rules: {plain} unstaggered, {spread} staggered)")
+          f"8, ... runs; a rule never confirmed is first due within {SPREAD} runs of its entry")
     for scope in ("all", repo):
         ran = clock(d for d in done if scope == "all" or d.repo == scope)
         if ran:

@@ -9,6 +9,7 @@ or counts, never a path, because the harness writes failing test ids into the pu
 import hashlib
 import json
 import os
+import pathlib
 import re
 import subprocess
 import sys
@@ -291,8 +292,8 @@ def test_every_quoted_line_names_its_pointer_and_an_unresolved_one_is_printed_ne
     assert "RULE the-gate-stays-shut (all): The gate stays shut after dark. | check: it holds [FILE" in out
     assert "(unresolvable by kind)]" in out
     assert _section(out, "DUE") == [
-        "== DUE: 0 of 4 rule(s) in scope are due; intervals 1, 2, 3, 5, 8, ... runs; staggered starts adopted "
-        "(most due in one of the first 100 runs, for 5 rules: 5 unstaggered, 2 staggered)",
+        "== DUE: 0 of 4 rule(s) in scope are due; intervals 1, 2, 3, 5, 8, ... runs; a rule never confirmed is "
+        "first due within 13 runs of its entry",
         "clock all: no run completed", "clock concordance-2: no run completed"]
 
 
@@ -315,12 +316,9 @@ def test_a_line_break_in_a_claim_or_a_finding_keeps_one_line_and_its_ledger_poin
         assert f"previous finding: {finding} [LEDGER concordance-2 {RUN} 6]" in lines
 
 
-def test_due_lists_the_rules_due_the_confirmations_not_counted_and_the_ones_ignored(tmp_path):
-    s = _setup(str(tmp_path))
-    t1, done = "2026-01-03T00:00:00+00:00", "2026-01-02-done"
-    ev = lambda **e: json.dumps({"ts": t1, **e}, sort_keys=True)          # noqa: E731
-    confirm = lambda by, text: ev(ev="note", by=by, kind="confirm", text=text)  # noqa: E731
-    _write(s["c2"], f"docs/harness/runs/{done}.jsonl", "\n".join([
+def _completed_run(s, run, ts, confirms=()):
+    ev = lambda **e: json.dumps({"ts": ts, **e}, sort_keys=True)          # noqa: E731
+    _write(s["c2"], f"docs/harness/runs/{run}.jsonl", "\n".join([
         ev(ev="open", by="lead", head=s["sha2"]),
         ev(ev="plan", by="lead", goal="Finish a run.", done=["it is finished"]),
         ev(ev="verdict", by="checker-1", step="plan", findings=[], **{"pass": True}),
@@ -329,31 +327,84 @@ def test_due_lists_the_rules_due_the_confirmations_not_counted_and_the_ones_igno
         ev(ev="verdict", by="checker-3", step="d1", findings=[], **{"pass": True}),
         ev(ev="commit", by="lead", step="d1", sha=s["sha2"], paths=[]),
         ev(ev="note", by="lead", kind="ship", text="nothing ships", **{"pass": True}),
-        ev(ev="verdict", by="checker-3", step="live", findings=[], head=s["sha2"], **{"pass": True}),
-        confirm("checker-3", "RULE keep-the-lamp-lit failed: the lamp was out"),
-        confirm("checker-3", "RULE the-gate-stays-shut held: it was shut"),
-        confirm("builder-1", "RULE c2-only-rule held: a builder's word"),
-        confirm("checker-9", "RULE c2-only-rule held: a checker with no verdict here"),
-        confirm("checker-3", "RULE no-such-rule held: there is no such rule"),
-        confirm("checker-3", "RULE v3-only-rule held: a V3 rule, confirmed in a concordance-2 run"),
-        confirm("checker-3", "the lamp was fine, in free words")]) + "\n")
+        ev(ev="verdict", by="checker-3", step="live", findings=[], head=s["sha2"], **{"pass": True})]
+        + [ev(ev="note", by=by, kind="confirm", text=text) for by, text in confirms]) + "\n")
+
+
+def test_due_lists_the_rules_due_the_confirmations_not_counted_and_the_ones_ignored(tmp_path):
+    # The fixture's rules, ranked by id at their one entry commit, start at runs 9, 4, 12, 7 and 2.
+    s = _setup(str(tmp_path))
+    done = "2026-01-02-done"
+    _completed_run(s, done, "2026-01-03T00:00:00+00:00", [
+        ("checker-3", "RULE keep-the-lamp-lit failed: the lamp was out"),
+        ("checker-3", "RULE the-gate-stays-shut held: it was shut"),
+        ("builder-1", "RULE c2-only-rule held: a builder's word"),
+        ("checker-9", "RULE c2-only-rule held: a checker with no verdict here"),
+        ("checker-3", "RULE no-such-rule held: there is no such rule"),
+        ("checker-3", "RULE v3-only-rule held: a V3 rule, confirmed in a concordance-2 run"),
+        ("checker-3", "the lamp was fine, in free words")])
+    _completed_run(s, done + "-2", "2026-01-04T00:00:00+00:00")
+    _completed_run(s, done + "-3", "2026-01-05T00:00:00+00:00")
     rc, out, err = _brief(s, "builder", s["c2"], RUN, "s1")
     assert rc == 0, err.split(":")[0]
     _pointered(out)
     at = f"[LEDGER concordance-2 {done} "
     assert _section(out, "DUE") == [
-        "== DUE: 2 of 4 rule(s) in scope are due; intervals 1, 2, 3, 5, 8, ... runs; staggered starts adopted "
-        "(most due in one of the first 100 runs, for 5 rules: 5 unstaggered, 2 staggered)",
-        f"clock all: 1 run(s) completed, the latest concordance-2 {done} {at}8]",
-        f"clock concordance-2: 1 run(s) completed, the latest concordance-2 {done} {at}8]",
-        f"DUE c2-only-rule (concordance-2): run 2, never confirmed, first due in run 2 [LEDGER concordance-2 {RUN} 2]",
-        f"DUE keep-the-lamp-lit (all): run 2, interval 1, last counted: failed in run 1 {at}9]",
+        "== DUE: 2 of 4 rule(s) in scope are due; intervals 1, 2, 3, 5, 8, ... runs; a rule never confirmed is "
+        "first due within 13 runs of its entry",
+        f"clock all: 3 run(s) completed, the latest concordance-2 {done}-3 [LEDGER concordance-2 {done}-3 8]",
+        f"clock concordance-2: 3 run(s) completed, the latest concordance-2 {done}-3 [LEDGER concordance-2 {done}-3 8]",
+        f"DUE c2-only-rule (concordance-2): run 4, never confirmed, first due in run 4 [LEDGER concordance-2 {RUN} 2]",
+        f"DUE keep-the-lamp-lit (all): run 4, interval 1, last counted: failed in run 1 {at}9]",
         f"not counted: the-gate-stays-shut held in run 1, when it was not due {at}10]",
         f"ignored: a confirmation, because it is not by a checker {at}11]",
         f"ignored: a confirmation, because its checker has no verdict in this ledger {at}12]",
         f"ignored: a confirmation, because no such rule at the records commit {at}13]",
         f"ignored: a confirmation, because outside the rule's scope {at}14]",
         f"ignored: a confirmation, because it does not read 'RULE <id> held|failed: <evidence>' {at}15]"]
+
+
+def test_a_records_commit_the_parser_cannot_read_refuses_and_never_guesses(tmp_path):
+    s = _setup(str(tmp_path))
+    _commit(s["c2"], {cx.RULES_REL: _rules(s["sha1"]) + "Stray prose inside the last entry.\n"}, "a bad version")
+    rc, out, err = _brief(s, "lead", s["c2"], RUN)                  # HEAD holds the bad version: CORE cannot be read
+    assert rc == 2 and out == ""
+    assert "docs/harness/RULES.md at the records commit does not parse: line " in err
+    rc, out, err = _brief(s, "builder", s["c2"], RUN, "s1")         # the step's base is the good one
+    assert rc == 0, err.split(":")[0]
+
+
+SHALLOW_DUE = ("== DUE: not computed: this clone is shallow, so RULES.md's history cannot be read and no rule's "
+               "entry or first due run can be known")
+
+
+def test_a_shallow_clone_computes_no_schedule_and_prints_no_start(tmp_path):
+    s = _setup(str(tmp_path / "src"))
+    later = '## z-later-rule\n- scope: all\n- source: OWNER owner, chat, 2026-01-02 "later"\n- check: c\n> later\n\n'
+    kept = "## ".join(p for p in _rules(s["sha1"]).split("## ") if not p.startswith("anchor-gone"))
+    _commit(s["c2"], {cx.RULES_REL: kept + later}, "a rule removed, a rule added")      # the ledgers go in too
+    url = pathlib.Path(s["c2"]).as_uri()
+
+    def clone(name, *depth):
+        dest = str(tmp_path / name)
+        _git(str(tmp_path), "clone", "-q", *depth, url, dest)
+        return {**s, "c2": dest}
+
+    full = clone("full")
+    rc, out, err = _brief(full, "lead", full["c2"], RUN)
+    assert rc == 0, err.split(":")[0]
+    assert _section(out, "DUE")[0].startswith("== DUE: 0 of 4 rule(s) in scope are due")
+    assert _section(out, "DUE")[1:] == ["clock all: no run completed", "clock concordance-2: no run completed"]
+
+    for name, depth, briefs in (("d1", "1", (("lead", None),)), ("d2", "2", (("lead", None), ("builder", "s1")))):
+        c = clone(name, "--depth", depth)
+        for role, step in briefs:
+            rc, out, err = _brief(c, role, c["c2"], RUN, step)
+            assert rc == 0, err.split(":")[0]
+            assert _section(out, "DUE") == [SHALLOW_DUE]
+            assert "first due in run" not in out and "clock " not in out and "\nDUE " not in out
+            assert all(len(_section(out, name)) > 1 for name in ("CORE", "IN FLIGHT", "RUN", "WANTS"))
+            _pointered(out)
 
 
 def _snapshot(base):
