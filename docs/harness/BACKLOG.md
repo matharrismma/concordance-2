@@ -317,3 +317,11 @@ every pointer.
 - source: ORIGIN 2026-11-03 lead
 > The private-names file lists every joined form of a name explicitly, and never a phrase whose
 > common word would become private; the docstring of tools/context.py says so.
+
+## schedule-clock-reads-old-runs-at-the-records-commit
+- status: open
+- scope: concordance-2
+- source: ORIGIN 2026-11-03 lead
+> The schedule's clock uses done_problems from the records commit, so a later harness requirement
+> could make old runs read incomplete and silently drop the run count; fixing that needs a reviewed
+> bootstrap. A format change also refuses briefs for steps open across it, which is loud and safe.

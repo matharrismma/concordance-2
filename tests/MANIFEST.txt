@@ -86,6 +86,7 @@ test_contact.py
 test_context.py
 test_context_brief.py
 test_context_integration.py
+test_context_procedures.py
 test_context_records.py
 test_context_schedule.py
 test_core.py

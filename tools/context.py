@@ -127,6 +127,50 @@ never change what an old version entered. All of this needs RULES.md's whole his
 clone, when git cannot give it, or when a version is not text, DUE is one line saying the schedule
 is not computed, and no start or due rule is printed; the other sections print as usual.
 
+CI. `python tools/context.py ci OWNER/REPO SHA` reads a commit's CI and changes nothing: it runs `gh
+run list` and `gh run view` and no other gh command, ever. SHA is the full 40-hex id, and a run gh
+lists on any other commit is ignored and counted as ignored. It prints each run, each job's
+conclusion, and pytest's summary lines from that job's log ('SUITE none' for a log with none). Exit 0,
+CI GREEN, needs at least one run on that commit, every run and every job of it completed with
+conclusion success (skipped, cancelled or neutral is not green), every finished job's log readable, at
+least one suite count line among them, and every count line in a successful job showing a test passed
+and no failure or error. A line that passed nothing (no tests ran, or only skips or deselections) is a
+suite that checked nothing, so it is not green beside any other job or line. A job that prints no count
+line at all is named and changes nothing, since a job need not hold a suite. Anything else is exit 1, CI
+NOT GREEN, saying why; exit 2, REFUSED, is a loose repository or commit, or a gh that gives no answer.
+ci, like check, changes nothing and so never refuses on a modified tools/context.py.
+
+RECORD. `python tools/context.py record ROOT RUN [-F MESSAGE_FILE]` carries out RULES.md's
+record-a-run-from-a-worktree up to the push. ROOT is the checkout holding the run's ledger, in any
+repository. It runs the procedure's steps (1) to (4) and (6): it asks origin for its default branch,
+fetches, and confirms that branch is at the run's last pushed commit; adds a detached worktree there
+in a temporary directory; copies the ledger in; runs harness record with HARNESS_ROOT at that worktree;
+and compares the recorded ledger with the working copy, ignoring CRLF. It keeps the worktree, and
+prints steps (5), (7) and (8), the push and the cleanup through bringing the checkout to the record
+commit, and never runs one of them: only the lead pushes, and a printed line is read before it runs.
+The printed commands compare the ledger once more after the push and before the discard, so a line
+that reaches the ledger after this record stops the procedure instead of being discarded. Nothing in
+ROOT changes but its remote-tracking refs and its list of worktrees.
+
+The run's last pushed commit is the last commit event's sha, or the head of a rebase note after it,
+since a rebase leaves the commit events at their old shas. Origin is at it when its default branch is
+that commit, or when every commit above it touches this run's ledger and nothing else: the run's own
+records, so a note written after a record is recorded on top of it. Any other commit above it, another
+run's record, an empty commit or a pair that cancels out included, is not this run's last pushed
+commit, and refuses.
+
+record makes history, so it is conservative. It runs only from committed code: it refuses when
+tools/context.py, or the tools/harness.py beside it that it will run, differs from that checkout's HEAD
+or is not committed there, since whatever harness runs could do anything record says it will not. Exit
+2, REFUSED, comes before anything is made, on those and on: a step in flight, a secret in the ledger, a
+ledger naming no commit, origin anywhere else, a ledger with nothing new, or one that does not extend
+origin's, which is a checkout lacking a record commit. Exit 1, RECORD FAIL, is a worktree add or a
+harness record that failed, or a comparison that differs: no push is printed and the cleanup is. Exit 0
+is RECORD PASS.
+The harness that runs is the one beside this file, or the worktree's HEAD's when that differs, by the
+harness's own rule; so a repository that tracks no harness is served too. Without -F the commit
+message is one plain line naming the run.
+
 Refusals name lines and fields, never a record's words. Stdlib only, like the harness it serves.
 """
 from __future__ import annotations
@@ -136,8 +180,10 @@ import ipaddress
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, Iterator, List, Mapping, Optional, Sequence, Tuple
 
@@ -608,9 +654,9 @@ def scan(text: str, config: Config, kinds: Iterable[str] = SCAN_KINDS) -> List[T
 _REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def _git(root: str, *args: str) -> Optional[bytes]:
+def _git(root: str, *args: str, timeout: int = 60) -> Optional[bytes]:
     try:
-        r = subprocess.run(["git", "-C", root, *args], capture_output=True, timeout=60)
+        r = subprocess.run(["git", "-C", root, *args], capture_output=True, timeout=timeout)
     except (OSError, subprocess.TimeoutExpired):
         return None
     return r.stdout if r.returncode == 0 else None
@@ -1031,16 +1077,22 @@ def _blob(repo: str, sha: str, rel: str) -> Optional[str]:
     return None if raw is None else raw.decode("utf-8")
 
 
-def _self_unchanged() -> Optional[str]:
-    """Why tools/context.py may not brief (it differs from HEAD, or is not committed), or None."""
-    blob = _git(_REPO, "cat-file", "blob", "HEAD:tools/context.py")
+def _committed_here(rel: str) -> Optional[str]:
+    """Why `rel`, in the checkout this file is in, may not run (it differs from HEAD, or is not committed),
+    or None."""
+    blob = _git(_REPO, "cat-file", "blob", f"HEAD:{rel}")
     if blob is None:
-        return "tools/context.py is not committed at this checkout's HEAD"
-    with open(os.path.abspath(__file__), "rb") as fh:
+        return f"{rel} is not committed at this checkout's HEAD"
+    with open(os.path.join(_REPO, *rel.split("/")), "rb") as fh:
         here = fh.read()
     if here.replace(b"\r\n", b"\n") != blob.replace(b"\r\n", b"\n"):
-        return "tools/context.py differs from HEAD; a brief runs only from committed code"
+        return f"{rel} differs from HEAD; a brief or a record runs only from committed code"
     return None
+
+
+def _self_unchanged() -> Optional[str]:
+    """Why tools/context.py may not brief or record, or None."""
+    return _committed_here("tools/context.py")
 
 
 def _harness_at(sha: str):
@@ -1349,6 +1401,273 @@ def _assemble(H, role: str, repo: str, root: str, run: str, step: Optional[str],
     return o.lines
 
 
+# ------------------------------------------------------------------------- ci: reading a commit's CI
+
+_GH_READS = (("run", "list"), ("run", "view"))        # the only gh commands this module ever runs
+_SLUG = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]*/[A-Za-z0-9][A-Za-z0-9._-]*")
+_STAMP = re.compile(r"\ufeff?[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z ")
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+_TALLY = r"[0-9]+ (?:passed|failed|errors?|skipped|xfailed|xpassed|deselected|warnings?|rerun)"
+_SUITE = re.compile(rf"(?:{_TALLY}(?:, {_TALLY})*|no tests ran) in [0-9.]+s(?: \([0-9:]+\))?")
+_RED_COUNT = re.compile(r"(?<![0-9])[1-9][0-9]* (?:failed|errors?)\b")
+_PASSED_COUNT = re.compile(r"(?<![0-9])[1-9][0-9]* passed\b")
+
+
+def _gh(*args: str) -> Optional[bytes]:
+    """What a read-only gh command printed, or None. Anything but `run list` or `run view` raises."""
+    if args[:2] not in _GH_READS:
+        raise ValueError("ci reads: it runs gh run list and gh run view and nothing else")
+    exe = shutil.which("gh")              # by PATHEXT, which a bare "gh" to CreateProcess would not use
+    if exe is None:
+        return None
+    try:
+        r = subprocess.run([exe, *args], stdin=subprocess.DEVNULL, capture_output=True, timeout=120)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return r.stdout if r.returncode == 0 else None
+
+
+def _gh_json(*args: str) -> object:
+    raw = _gh(*args)
+    try:
+        return None if raw is None else json.loads(raw)
+    except ValueError:
+        return None
+
+
+def suite_lines(log: str) -> List[str]:
+    """pytest's summary lines in a job's log, as gh prints one: job, step and '<stamp> <text>', tab
+    separated. A line counts only when pytest's summary is all of its text, and the step field, which
+    reads UNKNOWN STEP today, is never read."""
+    found = []
+    for ln in log.splitlines():
+        text = _ANSI.sub("", ln.split("\t", 2)[-1])
+        stamp = _STAMP.match(text)
+        text = (text[stamp.end():] if stamp else text).strip(" =")
+        if _SUITE.fullmatch(text):
+            found.append(text)
+    return found
+
+
+def _concluded(item: Mapping[str, object]) -> str:
+    """A run's or a job's state: its conclusion once completed, else its status."""
+    if item.get("status") == "completed":
+        return str(item.get("conclusion") or "no conclusion")
+    return str(item.get("status") or "unknown")
+
+
+def ci(slug: str, sha: str) -> Tuple[int, List[str]]:
+    """(exit code, lines to print) for `ci OWNER/REPO SHA`: see the module docstring."""
+    if not _SLUG.fullmatch(slug):
+        return 2, ["REFUSED: the repository is named OWNER/REPO"]
+    if not _SHA.fullmatch(sha):
+        return 2, ["REFUSED: the commit is its full 40-hex sha, so CI is read for exactly that commit"]
+    listed = _gh_json("run", "list", "--repo", slug, "--commit", sha, "--limit", "100",
+                      "--json", "databaseId,workflowName,event,headSha")
+    if not isinstance(listed, list):
+        return 2, ["REFUSED: gh run list gave no answer; is gh installed and signed in?"]
+    runs = [r for r in listed if r.get("headSha") == sha]
+    out = [f"CI {slug} {sha}: {len(runs)} run(s)"]
+    if len(listed) > len(runs):
+        out.append(f"IGNORED {len(listed) - len(runs)} run(s) on another commit")
+    red: List[str] = []
+    n_jobs = n_counts = 0
+    for run in sorted(runs, key=lambda r: r["databaseId"]):
+        rid = run["databaseId"]
+        view = _gh_json("run", "view", str(rid), "--repo", slug, "--json", "status,conclusion,headSha,jobs")
+        if not isinstance(view, dict) or view.get("headSha") != sha:
+            red.append(f"run {rid} could not be read for this commit")
+            continue
+        state = _concluded(view)
+        out.append(f"RUN {rid} {run.get('workflowName')} ({run.get('event')}): {state}")
+        if state != "success":
+            red.append(f"run {rid} is {state}")
+        jobs = view.get("jobs") or []
+        if not jobs:
+            red.append(f"run {rid} has no job")
+        for job in sorted(jobs, key=lambda j: str(j.get("name"))):
+            n_jobs += 1
+            name, state = " ".join(str(job.get("name")).split()), _concluded(job)
+            out.append(f"JOB {name}: {state}")
+            if state != "success":
+                red.append(f"job {name} is {state}")
+            if job.get("status") != "completed":
+                continue
+            log = _gh("run", "view", "--job", str(job["databaseId"]), "--repo", slug, "--log")
+            if log is None:
+                out.append("  LOG unreadable")
+                red.append(f"job {name} has no readable log")
+                continue
+            counts = suite_lines(log.decode("utf-8", "replace"))
+            n_counts += len(counts)
+            out += [f"  SUITE {c}" for c in counts] or ["  SUITE none: no count line in this job's log"]
+            if state == "success" and any(_RED_COUNT.search(c) for c in counts):
+                red.append(f"job {name} reports failures in a success")
+            elif state == "success" and not all(_PASSED_COUNT.search(c) for c in counts):
+                red.append(f"job {name} has a count line that passed nothing")
+    if not runs:
+        red.append("no workflow run on this commit")
+    elif not red and not n_counts:
+        red.append("no job printed a suite count line")
+    if red:
+        out.append("CI NOT GREEN: " + "; ".join(red))
+        return 1, out
+    out.append(f"CI GREEN: {len(runs)} run(s), {n_jobs} job(s), {n_counts} suite count line(s), "
+               f"every job a success, on {sha}")
+    return 0, out
+
+
+# ---------------------------------------------------------------------- record: a run from a worktree
+
+def _refused(why: str) -> Tuple[int, List[str]]:
+    return 2, [f"REFUSED: {why}"]
+
+
+def _lf(raw: bytes) -> bytes:
+    return raw.replace(b"\r\n", b"\n")
+
+
+def _quoted(path: str) -> str:
+    """A path in a printed command: forward slashes and double quotes read alike in every shell here."""
+    return '"' + path.replace("\\", "/") + '"'
+
+
+def _origin_default(root: str) -> Optional[Tuple[str, str]]:
+    """(origin's default branch, its sha) as origin itself says, or None."""
+    raw = _git(root, "ls-remote", "--symref", "origin", "HEAD", timeout=120)
+    m = re.match(r"ref: refs/heads/(\S+)\tHEAD\n([0-9a-f]{40})\tHEAD\n", (raw or b"").decode("utf-8", "replace"))
+    return (m.group(1), m.group(2)) if m else None
+
+
+def _last_pushed(events: Sequence[dict]) -> Optional[str]:
+    """The run's last pushed commit: a rebase leaves the commit events behind, and its note's head is it."""
+    for e in reversed(events):
+        if e.get("ev") == "commit":
+            return e.get("sha")
+        if e.get("ev") == "note" and e.get("kind") == "rebase":
+            return e.get("head")
+    return None
+
+
+def _at_last_pushed(root: str, tip: str, pushed: str, rel: str) -> bool:
+    """Is `tip` the run's last pushed commit: that commit itself, or only this run's own records above it?
+    Commit by commit, never the net diff, which an empty commit or a pair that cancels out would pass."""
+    if tip == pushed:
+        return True
+    if _git(root, "merge-base", "--is-ancestor", pushed, tip) is None:
+        return False
+    above = (_git(root, "rev-list", f"{pushed}..{tip}") or b"").split()
+    touched = (_git(root, "log", "--format=", "--name-only", f"{pushed}..{tip}") or b"").decode("utf-8", "replace")
+    return bool(above) and touched.split() == [rel] * len(above)
+
+
+def _record_failed(root: str, wt: str, why: str) -> Tuple[int, List[str]]:
+    return 1, ["the worktree is kept for a look, and nothing is pushed; remove it with:",
+               f"  git -C {_quoted(root)} worktree remove --force {_quoted(wt)}",
+               f"RECORD FAIL: {why}; do not push"]
+
+
+def _harness_record(wt: str, run: str, message: str) -> Optional[str]:
+    """Run harness record with HARNESS_ROOT at the worktree. None when it recorded, else why not."""
+    tool = os.path.join(_REPO, *harness.SELF_REL.split("/"))
+    try:
+        r = subprocess.run([sys.executable, tool, "record", run, "-F", message], cwd=wt,
+                           env={**os.environ, "HARNESS_ROOT": wt}, capture_output=True, timeout=300)
+    except (OSError, subprocess.TimeoutExpired) as e:
+        return f"harness record did not finish ({type(e).__name__})"
+    if r.returncode == 0:
+        return None
+    said = r.stderr.decode("utf-8", "replace").strip().splitlines()
+    return "harness record failed" + (f": {said[-1]}" if said else "")
+
+
+def record(root: str, run: str, message: Optional[str] = None) -> Tuple[int, List[str]]:
+    """(exit code, lines to print) for `record ROOT RUN`: see the module docstring. Never pushes."""
+    why = _self_unchanged() or _committed_here(harness.SELF_REL)
+    if why:
+        return _refused(why)
+    if not harness._ID.match(run):
+        return _refused("the run id is not a harness run id")
+    if message is not None and not os.path.isfile(message):
+        return _refused("there is no such message file")
+    if (_git(root, "rev-parse", "--show-prefix") or b"-").strip():
+        return _refused("ROOT is not the top of a git checkout")
+    L = harness.Ledger(root, run)
+    if not L.exists():
+        return _refused("ROOT holds no ledger for this run")
+    try:
+        flying = [s for s in L.steps() if L.state(s) not in ("committed", "abandoned")]
+        harness._scan_ledger(L)
+        pushed = _last_pushed(L.events())
+    except harness.HarnessError as e:
+        return _refused(str(e))
+    except (ValueError, KeyError):
+        return _refused("the run's ledger cannot be read")
+    if flying:
+        return _refused(f"step {flying[0]} is in flight, and a record would move HEAD under it")
+    if not pushed:
+        return _refused("the ledger names no commit of this run")
+
+    origin = _origin_default(root)
+    if origin is None:
+        return _refused("origin's default branch cannot be read")
+    branch, tip = origin
+    if _git(root, "fetch", "origin", timeout=300) is None:
+        return _refused("git fetch failed")
+    if (_git(root, "rev-parse", f"refs/remotes/origin/{branch}") or b"").decode().strip() != tip:
+        return _refused(f"origin/{branch} is not where origin says after the fetch")
+    if not _at_last_pushed(root, tip, pushed, L.rel):
+        return _refused(f"origin/{branch} is at {tip[:10]}, not at the run's last pushed commit {pushed[:10]}")
+    with open(L.path, "rb") as fh:
+        copy = _lf(fh.read())
+    held = _lf(_git(root, "cat-file", "blob", f"{tip}:{L.rel}") or b"")
+    if copy == held:
+        return _refused("the ledger has nothing new to record")
+    if not copy.startswith(held):
+        return _refused("this checkout's ledger does not extend origin's: bring the checkout to origin first")
+
+    wt = tempfile.mkdtemp(prefix="record-")
+    if _git(root, "worktree", "add", "--quiet", "--detach", wt, tip, timeout=600) is None:
+        return _record_failed(root, wt, "git worktree add failed")
+    target = os.path.join(wt, *L.rel.split("/"))
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    shutil.copyfile(L.path, target)
+    with tempfile.TemporaryDirectory(prefix="record-message-") as td:
+        if message is None:
+            message = os.path.join(td, "message.txt")
+            with open(message, "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(f"Harness run {run}: the ledger is recorded\n")
+        why = _harness_record(wt, run, message)
+    if why:
+        return _record_failed(root, wt, why)
+    recorded = _git(wt, "show", f"HEAD:{L.rel}")
+    with open(L.path, "rb") as fh:
+        copy = _lf(fh.read())
+    if recorded is None or _lf(recorded) != copy:
+        return _record_failed(root, wt, "the recorded ledger differs from the working copy, CRLF aside")
+
+    sha = (_git(wt, "rev-parse", "HEAD") or b"").decode().strip()
+    on = (_git(root, "symbolic-ref", "-q", "--short", "HEAD") or b"").decode().strip()
+    arrive = f"merge --ff-only origin/{branch}" if on == branch else f"switch -c <next branch> origin/{branch}"
+    checkout, kept = _quoted(root), _quoted(wt)
+    return 0, [
+        "recorded in a worktree kept for the push; nothing is pushed, and the checkout's files are as they were",
+        "run these yourself, in order; this tool never runs them:",
+        f"  git -C {kept} push origin HEAD:refs/heads/{branch}",
+        f"  git -C {checkout} fetch origin",
+        f"  git -C {checkout} diff --ignore-cr-at-eol --exit-code origin/{branch} -- {L.rel}",
+        f"  git -C {checkout} worktree remove {kept}",
+        f"  git -C {checkout} checkout -- {L.rel}",
+        f"  git -C {checkout} {arrive}",
+        "the diff exits 0 when the ledger matches; a non-zero exit means a line reached the ledger after this "
+        "record: stop there, before the discard",
+        f"held when git diff origin/{branch} -- {L.rel} is empty in the checkout; "
+        "never append to this run's ledger in a checkout that lacks the record commit",
+        f"RECORD PASS: {run} as {sha} on origin/{branch} at {tip}; the recorded ledger equals the working copy, "
+        "CRLF aside",
+    ]
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     import argparse
     ap = argparse.ArgumentParser(prog="context.py", description="The harness's records of record.")
@@ -1361,6 +1680,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     b.add_argument("root", help="the checkout holding the run's ledger")
     b.add_argument("run")
     b.add_argument("step", nargs="?")
+    g = sub.add_parser("ci", help="read a commit's CI: each job's conclusion and the suite count lines")
+    g.add_argument("repo", metavar="OWNER/REPO")
+    g.add_argument("sha")
+    r = sub.add_parser("record", help="record a run in a kept worktree at origin's default branch; never pushes")
+    r.add_argument("root", help="the checkout holding the run's ledger")
+    r.add_argument("run")
+    r.add_argument("-F", dest="message", help="the commit message file (default: one plain line naming the run)")
     a = ap.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -1374,7 +1700,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         sys.stdout.buffer.write(("\n".join(lines) + "\n").encode("utf-8"))
         sys.stdout.buffer.flush()
         return 0
-    code, lines = check(os.path.abspath(a.root))
+    if a.cmd == "ci":
+        code, lines = ci(a.repo, a.sha)
+    elif a.cmd == "record":
+        code, lines = record(os.path.abspath(a.root), a.run, a.message and os.path.abspath(a.message))
+    else:
+        code, lines = check(os.path.abspath(a.root))
     for ln in lines:
         print(ln)
     return code
