@@ -59,6 +59,7 @@ test_claim_grammar.py
 test_clarify.py
 test_clean_urls.py
 test_coach.py
+test_code_exec_flag.py
 test_codex.py
 test_combinatorics.py
 test_commentary.py
@@ -245,6 +246,7 @@ test_neuroscience.py
 test_new_domain_verifiers.py
 test_no_keys_on_the_wire.py
 test_no_llm_in_the_loop.py
+test_no_other_route.py
 test_no_stale_reads.py
 test_node_roles.py
 test_nothing_is_isolated.py
@@ -388,6 +390,7 @@ test_trust_kernel_edges.py
 test_tv.py
 test_unchecked.py
 test_unchecked_route.py
+test_undefined_refused.py
 test_understanding.py
 test_units.py
 test_validate.py
@@ -416,10 +419,13 @@ test_corpus_cache.py
 test_crisis_profession.py
 test_crisis_threshold.py
 test_explore_views.py
+test_expression_parser.py
 test_floors_reach_the_root.py
 test_graph_inverses.py
 test_papers.py
 test_parable.py
+test_parse_differential.py
+test_parse_route.py
 test_reach_front_door.py
 test_resonance_floor.py
 test_roots.py

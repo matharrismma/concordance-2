@@ -50,7 +50,7 @@ def test_the_graph_is_extracted_from_the_code_and_has_the_known_shape():
     g = SI.GRAPH
     assert g.get("physical_constants") == ["si_units"]
     assert set(g.get("chemistry", [])) == {"alpha_scale", "molar_scale", "thermal_scale"}      # a confluence
-    assert set(g.get("physics", [])) == {"grav_scale", "planck_scale", "rela_scale"}
+    assert set(g.get("physics", [])) == {"grav_scale", "mathematics", "planck_scale", "rela_scale"}
     assert "scale_base" in g.get("alpha_scale", [])
     # the measure floor is depended on by several; the leaves are the majority
     deps = {d for ds in g.values() for d in ds}

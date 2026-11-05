@@ -22,8 +22,10 @@ Conservation format:
      "tolerance_relative": 0.001}
 """
 from __future__ import annotations
+from keyword import iskeyword
 from typing import Any, Dict, List, Optional
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
+from .mathematics import ExpressionRefused, parse_expression  # the one way a text reaches sympy
 from . import rela_scale as _rela  # c-anchored mass-energy / Lorentz factor
 from . import grav_scale as _grav  # G-anchored Newtonian gravitation
 from . import planck_scale as _planck  # h-anchored; the Planck units join h, G, c, k_B
@@ -31,18 +33,18 @@ from . import planck_scale as _planck  # h-anchored; the Planck units join h, G,
 # sympy (with sympy.physics.units) is a ~4s import. Only the dimensional-
 # consistency check needs it, so it loads on first use rather than at module
 # import — this keeps the engine's cold start fast.
-sympify = simplify = Symbol = u = None   # populated by _ensure_sympy()
+Integer = simplify = Symbol = u = None   # populated by _ensure_sympy()
 _UNIT_TABLE = None                       # built lazily (sympy unit objects)
 
 
 def _ensure_sympy() -> None:
     """Import sympy and build the unit table on first use. Idempotent."""
-    global sympify, simplify, Symbol, u, _UNIT_TABLE
+    global Integer, simplify, Symbol, u, _UNIT_TABLE
     if _UNIT_TABLE is not None:
         return
-    from sympy import sympify as _sympify, simplify as _simplify, Symbol as _Symbol
+    from sympy import Integer as _Integer, simplify as _simplify, Symbol as _Symbol
     from sympy.physics import units as _u
-    sympify, simplify, Symbol, u = _sympify, _simplify, _Symbol, _u
+    Integer, simplify, Symbol, u = _Integer, _simplify, _Symbol, _u
     _UNIT_TABLE = {
         # length
         "m": u.meter, "meter": u.meter, "meters": u.meter,
@@ -72,10 +74,15 @@ def _ensure_sympy() -> None:
 def _parse_unit(unit_str: str):
     """Parse 'meter/second**2' or 'kg*m/s**2' into a sympy units expression."""
     _ensure_sympy()
-    s = unit_str.replace("^", "**")
-    # Replace bare unit tokens with sympify-friendly wrappers
-    expr = sympify(s, locals=_UNIT_TABLE)
-    return expr
+    if not isinstance(unit_str, str):
+        raise ExpressionRefused("a unit is a text")
+    return parse_expression(unit_str, _UNIT_TABLE)
+
+
+def _plain_identifier(name: Any) -> bool:
+    """A symbols key is a name the parser can read back: a Python identifier that is no keyword and does
+    not begin with an underscore. Any other key is refused with the packet."""
+    return isinstance(name, str) and name.isidentifier() and not iskeyword(name) and not name.startswith("_")
 
 
 def verify_dimensional_consistency(
@@ -86,10 +93,20 @@ def verify_dimensional_consistency(
 
     Strategy: substitute each symbol with its unit expression, then convert
     both sides to a fixed set of SI base units and compare unit signatures.
+
+    An equation, a unit or a symbols table the parser will not read returns NOT_APPLICABLE: nothing was
+    checked, so no reading can stand on it, and run() lets no passing check in the packet stand beside it.
     """
     _ensure_sympy()
+    check = "physics.dimensional"
+    if not isinstance(symbols, dict) or not symbols:
+        return na(check, "symbols must name each symbol and its unit")
+    if not all(_plain_identifier(k) for k in symbols):
+        return na(check, "a symbols key must be a plain identifier")
+    if not isinstance(equation, str):
+        return na(check, "an equation is a text")
     if "=" not in equation:
-        return error("physics.dimensional", f"no '=' in equation {equation!r}")
+        return error(check, f"no '=' in equation {equation!r}")
 
     lhs_str, rhs_str = equation.split("=", 1)
 
@@ -97,16 +114,16 @@ def verify_dimensional_consistency(
     # that 'm', 's', etc. are read as variables, not as unit tokens.
     eq_locals = {name: Symbol(name) for name in symbols.keys()}
     try:
-        lhs = sympify(lhs_str.strip(), locals=eq_locals)
-        rhs = sympify(rhs_str.strip(), locals=eq_locals)
-    except Exception as e:
-        return error("physics.dimensional", f"equation parse failure: {e}")
+        lhs = parse_expression(lhs_str, eq_locals)
+        rhs = parse_expression(rhs_str, eq_locals)
+    except ExpressionRefused as e:
+        return na(check, f"the equation is not read: {e}")
 
     # Parse units with the unit table (separate namespace).
     try:
         subs = {Symbol(name): _parse_unit(unit_str) for name, unit_str in symbols.items()}
-    except Exception as e:
-        return error("physics.dimensional", f"unit parse failure: {e}")
+    except ExpressionRefused as e:
+        return na(check, f"a unit is not read: {e}")
 
     base_units = [u.kilogram, u.meter, u.second, u.ampere, u.kelvin, u.mol, u.candela]
     try:
@@ -117,7 +134,7 @@ def verify_dimensional_consistency(
 
     def _unit_signature(expr):
         if expr.is_number:
-            return sympify(1)
+            return Integer(1)
         coeff, rest = expr.as_coeff_Mul()
         return rest
 
@@ -482,6 +499,10 @@ def run(packet: Dict[str, Any]) -> List[VerifierResult]:
 
     if not results:
         results.append(na("physics", "no PHYS_VERIFY artifacts present"))
+    if any(r.name == "physics.dimensional" and r.status == "NOT_APPLICABLE" for r in results):
+        # As in mathematics: a step's status drops NOT_APPLICABLE, so a passing check beside a refused text would read
+        # the whole packet as HOLDS, and it goes. A MISMATCH or an error stands, so a refused text hides no false claim.
+        return [r for r in results if r.status != "CONFIRMED"]
     return results
 
 
