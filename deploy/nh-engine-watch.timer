@@ -1,0 +1,8 @@
+[Unit]
+Description=Read nh-engine's and nh-mcp's health every 30 s
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=30s
+AccuracySec=5s
+[Install]
+WantedBy=timers.target

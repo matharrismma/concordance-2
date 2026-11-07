@@ -20,6 +20,8 @@ ExecStart=/home/nh/concordance-2/.venv/bin/python -m concordance serve --host 12
 LimitNOFILE=65536
 Restart=on-failure
 RestartSec=3
+# A cell the kernel ends for memory is that cell's death alone: the unit and the agents' door stay up.
+OOMPolicy=continue
 
 [Install]
 WantedBy=multi-user.target

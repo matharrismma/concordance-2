@@ -1,0 +1,9 @@
+[Unit]
+Description=Outside watchdog for nh-engine and nh-mcp: restarts each after repeated failed health reads
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/nh-engine-watch
+# A oneshot's start has no limit of its own, and a run that never ends keeps the timer from firing again. A run reads
+# each engine once at curl's -m 10 and may restart both. Neither engine's unit sets TimeoutStopSec, so each stop may
+# take systemd's default of 90 s: 2 x 10 s + 2 x 90 s = 200 s. This bounds the run past that.
+TimeoutStartSec=240s

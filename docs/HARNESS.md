@@ -130,6 +130,12 @@ and its commit says so.
 - Only the lead touches the box, and only through a gated ship path, never by hand:
   - **this repository** — `sh tools/deploy.sh <files>`: snapshot, transfer, restart, the four on-box
     gates, automatic revert on any regression, then the drift check;
+  - **the outside watch** — `deploy/install_watch.sh`, copied with the watch files into a private
+    folder on the box and run there with sudo, since `deploy/` is not on the box; the folder is
+    removed after. It snapshots what it replaces, installs the watch and each engine's
+    `OOMPolicy=continue` drop-in, reloads systemd, restarts neither engine and reads each back. On
+    any failed read-back it restores the snapshot and exits non-zero; exit 3 means the restore
+    itself failed and a human must look. `--undo` restores the snapshot by hand;
   - **the `.org` app (witness)** — witness's `tools/ship.sh`, streamed from the lead's machine with
     Git Bash (`ssh <box> 'bash -s' < tools/ship.sh`; PowerShell 5.1 has no `<`, and piping from it
     turns the script's line endings to CRLF), so it never runs from the checkout it rewrites. It

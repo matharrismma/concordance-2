@@ -1,1 +1,2 @@
 *.sh text eol=lf
+deploy/nh-engine-watch* text eol=lf
