@@ -23,7 +23,7 @@ from urllib.parse import parse_qsl, urlencode
 
 from .. import __version__, cas, corpus, telemetry
 from ..config import EngineConfig
-from ..derivation import verify_derivation
+from ..derivation import use_cells, verify_derivation
 # NOTE: scripture (a witness verifier) is imported LAZILY inside the witness-gated branches
 # below — never at module top. The secular surface (.com) must not load witness code.
 
@@ -4390,7 +4390,9 @@ def redirect_for(surface: str, path: str):
 
 def serve(host: str = "127.0.0.1", port: int = 8000, surface: str = "secular",
           site_dir: str = None) -> None:
-    """Thin http.server shell: the API + (optionally) the static site, same-origin. Stdlib only."""
+    """Thin http.server shell: the API + (optionally) the static site, same-origin. Stdlib only.
+    Reads run in cells (cells.py): what holds Python's global lock must not hold this process."""
+    use_cells()                 # before the warm, so the warm leaves the heavy libraries to the cells
     httpd = build_server(host, port, surface, site_dir)
     where = f" + site {site_dir}" if site_dir else ""
     print(f"Narrow Highway API ({surface}) on http://{host}:{port}{where}")
@@ -4407,8 +4409,10 @@ def serve_many(host: str, listeners: "list[tuple[int, str]]", site_dir: str = No
     idle one paged out to swap so the .org paid swap-in on its first use after idle.
 
     The trade, stated: one failure domain — a crash takes both faces down together (deploy.sh's gate and
-    auto-revert remain; its staggered witness-first canary does not apply to one unit). Ctrl-C stops all."""
+    auto-revert remain; its staggered witness-first canary does not apply to one unit). Ctrl-C stops all.
+    Reads run in cells (cells.py), and one pool serves every listener."""
     import threading
+    use_cells()                 # before the warm, so the warm leaves the heavy libraries to the cells
     servers = []
     for i, (port, surface) in enumerate(listeners):
         httpd = build_server(host, port, surface, site_dir, warm=(i == 0))

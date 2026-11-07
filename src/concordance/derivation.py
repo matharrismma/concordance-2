@@ -21,13 +21,14 @@ import json
 import logging
 import os
 import threading as _threading
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
+from . import cells as _cells
 from . import verifiers as _verifiers
 from .validate import canonical_json_bytes, sha256_bytes
 from .verifiers import bridges as _bridges
 from .verifiers import mathematics as _math
-from .verifiers.base import PowerFloorRefused
+from .verifiers.base import NeedsTheKeeping, PowerFloorRefused
 
 _log = logging.getLogger("concordance")
 _TERMINAL_FAIL = ("MISMATCH", "ERROR")
@@ -67,33 +68,40 @@ _MAX_SPEC_CHARS = int(os.environ.get("CONCORDANCE_MAX_EXPR_CHARS", "4000") or 40
 _VERIFY_TIMEOUT_S = float(os.environ.get("CONCORDANCE_VERIFY_TIMEOUT_S", "8") or 8)
 
 
-# Bounded, PROCESS-WIDE verify pool: at most _MAX_WORKERS sympy workers run at once. A
-# timed-out worker is not killable (sympy is C-bound), so it keeps its slot until it finishes
-# — which IS the bound: under a many-IP flood, excess verifications get an immediate "busy"
-# ERROR (never HOLDS) instead of piling up unkillable threads that pin every core.
+# Bounded, PROCESS-WIDE verify pool: at most _MAX_WORKERS reads run at once, and excess verifications
+# get an immediate "busy" ERROR (never HOLDS) instead of piling up. With cells on (serve) a read runs in
+# a process that is killed at the window, so no slot outlives its cell (cells.py). Library use stays on
+# threads: a thread cannot be killed, so one that timed out keeps its slot until it finishes, and a read
+# that holds Python's global lock stops every thread in the process until it ends, the window with them.
 _MAX_WORKERS = max(1, int(os.environ.get("CONCORDANCE_VERIFY_WORKERS", "4") or 4))
 _POOL = _futures.ThreadPoolExecutor(max_workers=_MAX_WORKERS, thread_name_prefix="verify")
 _SLOTS = _threading.BoundedSemaphore(_MAX_WORKERS)
-
-
-class _Saturated(Exception):
-    """All verify slots are busy — shed load rather than queue unbounded work."""
+_Saturated = _cells.Saturated
 
 
 class _NotCheckable(Exception):
     """The power floor refused this claim's check. It was not checked, so it reads as a gap."""
 
 
-def _call_with_timeout(fn, arg):
-    """Run a verifier with a hard wall-clock bound on a bounded shared pool. result() returns
-    control on timeout so the request never hangs; the worker releases its slot when it ends.
-    A power the floor refused ends here, in the worker: the claim reads as not checkable."""
+def _call_with_timeout(fn, *args):
+    """Run a verifier with a hard wall-clock bound on a bounded shared pool: in a cell when cells are
+    on, else on a thread, where result() returns control on timeout and the worker releases its slot
+    when it ends. A power the floor refused ends here: the claim reads as not checkable. A read that
+    needs the keeping comes back from its cell and runs on the thread path, under its window and slots."""
+    cells = _cells.active()
+    if cells is not None:
+        try:
+            return cells.call(fn, args, _VERIFY_TIMEOUT_S)
+        except PowerFloorRefused as refused:
+            raise _NotCheckable(str(refused)) from None
+        except NeedsTheKeeping:
+            pass
     if not _SLOTS.acquire(blocking=False):
         raise _Saturated()
 
     def _run():
         try:
-            return fn(arg)
+            return fn(*args)
         except PowerFloorRefused as refused:
             raise _NotCheckable(str(refused)) from None
         finally:
@@ -106,13 +114,20 @@ def _call_with_timeout(fn, arg):
 # verification in a fresh worker pays that import INSIDE the wall-clock bound, it can — under
 # load — exceed it and turn a TRUE claim into a transient ERROR (errs SAFE, never a false HOLDS,
 # but a false negative all the same). warm() pre-pays it at BOOT, outside the timed path.
-_HEAVY_LIBS = ("sympy", "numpy", "scipy.stats", "scipy.optimize", "scipy.linalg", "scipy.special")
+_HEAVY_LIBS = ("sympy", "sympy.physics.units", "numpy", "scipy.stats", "scipy.optimize", "scipy.linalg", "scipy.special")
+# What a read imports on first use and no domain names, so a cell holds it before its first read too.
+_CELL_MODULES = ("verifiers.riemann_accel", "verifiers.scripture", "verifiers.spec", "strongs", "pronounce", "thesaurus",
+                 "corpus")
 
 
 def warm() -> None:
     """Pre-import the heavy verify deps at boot so no request pays a cold C-extension import
     inside the per-verification timeout. Best-effort: a minimal sovereign install without these
-    still boots (the affected domains simply return NOT_APPLICABLE, never a false result)."""
+    still boots (the affected domains simply return NOT_APPLICABLE, never a false result). With cells
+    on the reads are not here, so nothing is: a cell has its own preload, and the front stays light."""
+    if _cells.active() is not None:
+        _log.info("verify deps stay out of the front: reads run in cells")
+        return
     import importlib
     warmed = []
     try:
@@ -126,6 +141,19 @@ def warm() -> None:
         except Exception:  # noqa: BLE001 — warming is optional
             pass
     _log.info("verify deps warmed: %s", ", ".join(warmed) or "(none available)")
+
+
+def cell_preload() -> Tuple[str, ...]:
+    """What a cell has loaded before its first read, so no read pays for an import inside its window."""
+    verifiers = sorted({path for path in _verifiers.VERIFIERS.values() if path.startswith(__package__ + ".")})
+    return (*_HEAVY_LIBS, __name__, *verifiers, *(f"{__package__}.{name}" for name in _CELL_MODULES))
+
+
+def use_cells() -> None:
+    """Send every read from here on to a cell (cells.py). serve() and serve_many() call this before the warm;
+    importing never does, so a script that imports the engine starts no process. One cell starts now, off any
+    request."""
+    _cells.enable(_MAX_WORKERS, warm=True, preload=cell_preload())
 
 
 # math mode -> verifier function. params (the spec body) is passed straight in.
@@ -195,6 +223,11 @@ def _reduce_domain_results(results: List[Any]) -> Dict[str, str]:
             "data": merged}
 
 
+def _read_domain(domain: str, packet: Dict[str, Any]) -> List[Any]:
+    """One domain's read, by name, so a cell can be told which function to run."""
+    return _verifiers.run_for_domain(domain, packet, surface="secular")
+
+
 def verify_domain(domain: str, spec: Dict[str, Any]) -> Dict[str, str]:
     """Route a non-math domain claim to its deterministic fleet verifier(s) via
     run_for_domain, on the SECULAR surface only. Same DoS bounds as the math path (size guard
@@ -204,8 +237,7 @@ def verify_domain(domain: str, spec: Dict[str, Any]) -> Dict[str, str]:
     if len(json.dumps(packet, default=str)) > _MAX_SPEC_CHARS:  # DoS guard, before any verifier
         return {"status": "ERROR", "detail": f"packet too large (> {_MAX_SPEC_CHARS} chars)"}
     try:
-        results = _call_with_timeout(
-            lambda p: _verifiers.run_for_domain(domain, p, surface="secular"), packet)
+        results = _call_with_timeout(_read_domain, domain, packet)
     except _futures.TimeoutError:
         _log.warning("verify timed out (>%.0fs) domain=%s — shed to ERROR (errs safe, never a false HOLDS)",
                      _VERIFY_TIMEOUT_S, domain)
@@ -231,8 +263,8 @@ def verify_step(domain: str, spec: Dict[str, Any]) -> Dict[str, str]:
         if domain in ("mathematics", "math"):
             return verify_math(spec or {})
         return verify_domain(domain, spec or {})
-    except Exception as exc:  # noqa: BLE001 — fail closed
-        return {"status": "ERROR", "detail": f"verifier raised: {type(exc).__name__}: {str(exc)[:200]}"}
+    except Exception as exc:  # noqa: BLE001 — fail closed; a raise inside a cell names its own type
+        return {"status": "ERROR", "detail": f"verifier raised: {getattr(exc, 'kind', type(exc).__name__)}: {str(exc)[:200]}"}
 
 
 def verify_derivation(steps: List[Dict[str, Any]]) -> Dict[str, Any]:

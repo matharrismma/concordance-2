@@ -16,10 +16,12 @@ import builtins as _builtins
 import math as _math
 import operator as _operator
 import re as _re
+import sys as _sys
 import types as _types
 import unicodedata as _unicodedata
 from typing import Any, Dict, List
 
+from .. import cells as _cells
 from .base import PowerFloorRefused, VerifierResult, clamp_tol, confirm, error, mismatch, na
 from .base import stated_precision, stated_tolerance_abs, stated_window, window_for
 from .base import dispatch  # declarative run() driver
@@ -37,14 +39,24 @@ _CONSTANTS: Dict[str, Any] = {}     # the only names that read as a value withou
 _NOT_SYMBOLS = frozenset()  # every other name sympy would read as something other than a symbol
 
 
+def sympy_is_loaded() -> bool:
+    """Is sympy in this process? sys.modules can answer yes: sympy is pure Python, so a read of the process's
+    mapped files shows nothing of it either way."""
+    return "sympy" in _sys.modules
+
+
 def _ensure_sympy() -> bool:
     """Import sympy on first use. Idempotent. Returns True if sympy is available, False on a
     stdlib-only box (the optional `math` extra is not installed). Callers degrade to a clean
     NOT_APPLICABLE — the symbolic checks genuinely need sympy — rather than crash, so the engine
-    keeps running offline. (set_algebra does not need sympy; it uses the pure-stdlib engine.)"""
+    keeps running offline. (set_algebra does not need sympy; it uses the pure-stdlib engine.)
+    In a process with cells on it raises instead: this is the one way sympy loads, so this is the
+    wall that keeps sympy out of the front, by default and with no list of handlers."""
     global simplify, diff, integrate, limit, solve
     global Symbol, oo, S, expand, _SympifyError, _PARSE_ERRORS, _sympy_loaded, _sympy_ok
     global _sp, _SYMPY_VALUES, _FUNCTIONS, _CONSTANTS, _NOT_SYMBOLS
+    if _cells.active() is not None:
+        raise PowerFloorRefused("sympy does not load in the front; a read that needs it runs in a cell")
     if _sympy_loaded:
         return _sympy_ok
     try:
@@ -305,10 +317,12 @@ def _left_under_the_root(whole: int, exponent) -> int:
 
 def _root_past_the_floor(integer, exponent) -> bool:
     """A root, before sympy's own root reads it. An exact root multiplies out only the power _power_bits
-    measured. Past that, this never hands perfect_power or factors more than _MAX_ROOT_BITS to prove,
-    since refusing first is the point: a perfect power of that much is refused with the rest. The primes
-    of an integer of n bits multiply to at most n bits and each stays under the denominator, so a root
-    small on both counts has nothing to measure, and the two sympy calls are not made twice for it."""
+    measured. Past that, this hands perfect_power and factors no more than _MAX_ROOT_BITS to prove: a
+    perfect power of that much is refused with the rest. The primes of an integer of n bits multiply to
+    at most n bits and each stays under the denominator, so a root small on both counts has nothing to
+    measure, and the two sympy calls are not made twice for it. That is all this bounds: it says nothing
+    of how long its own reads of the integer take, or of what sympy's own root does with what passes here.
+    Neither is refused here, and a read that stalls on either ends at a cell's window."""
     whole = abs(int(integer.p))
     bits = whole.bit_length()
     if bits <= _MAX_ROOT_BITS and bits * (exponent.q - 1) <= _MAX_POW_BITS:

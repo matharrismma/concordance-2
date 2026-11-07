@@ -21,10 +21,18 @@ VerifierStatus = Literal["CONFIRMED", "MISMATCH", "NOT_APPLICABLE", "ERROR"]
 
 
 class PowerFloorRefused(BaseException):
-    """A power past the bound, refused where sympy computes it. A BaseException, so no `except Exception`
-    in a verifier or in sympy can catch it and read it as an answer. Only the two places that run the
-    verifiers for a caller catch it, derivation._call_with_timeout's worker and engine._run_validation,
-    and each reads the claim as not checkable: never HOLDS, never BROKEN."""
+    """A power past the bound, refused where sympy computes it, or sympy itself, refused in a process whose
+    reads run in cells. A BaseException, so no `except Exception` in a verifier or in sympy can catch it and
+    read it as an answer. Only what runs the verifiers for a caller catches it: derivation._call_with_timeout,
+    on its thread and across a cell's wall, and engine._run_validation. Each reads the claim as not checkable:
+    never HOLDS, never BROKEN. Anywhere else it passes every handler and the connection closes with no answer,
+    which is the wall failing closed."""
+
+
+class NeedsTheKeeping(BaseException):
+    """A read in a cell reached for the keeping, which only the front holds. A BaseException beside
+    PowerFloorRefused, so a verifier's `except Exception` cannot read it as a miss: the cell answers with it
+    and the front runs the read again on its own thread path, where the keeping is."""
 
 
 @dataclass(frozen=True)

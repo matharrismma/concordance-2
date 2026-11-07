@@ -21,7 +21,9 @@ import unicodedata
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from . import cells as _cells
 from .ops import STUB_BODY_CHARS  # the one definition of "stub" — never redefined here
+from .verifiers.base import NeedsTheKeeping
 
 _log = logging.getLogger("concordance.corpus")
 
@@ -1651,15 +1653,24 @@ def add_to_default(card: dict) -> None:
         _DEFAULT.add_card(card)
 
 
+def _the_keeping_is_in_the_front() -> None:
+    """A cell holds no keeping, and a read there must not take that for a shelf without the word: a check that
+    declines in a cell and confirms in a loaded front would change a verdict. So the read goes back to the front."""
+    if _cells.in_a_cell():
+        raise NeedsTheKeeping()
+
+
 def loaded() -> bool:
     """True once the default corpus has been built in this process. A verifier that only READS a shelf asks this
     first and declines when False: a cold process must never start the ~18 s corpus build inside a verify
     budget (2026-10-08: the recall gate shed every shelf-reading row as SYSTEM_ERROR that way)."""
+    _the_keeping_is_in_the_front()
     return _DEFAULT is not None
 
 
 def default_corpus(path: Optional[Path] = None) -> Corpus:
     global _DEFAULT
+    _the_keeping_is_in_the_front()
     if _DEFAULT is None:  # double-checked lock: build once, even under concurrent first-hits
         with _DEFAULT_LOCK:
             if _DEFAULT is None:
