@@ -26,6 +26,7 @@ from keyword import iskeyword
 from typing import Any, Dict, List, Optional
 from .base import VerifierResult, na, confirm, mismatch, error, clamp_tol
 from .mathematics import ExpressionRefused, parse_expression  # the one way a text reaches sympy
+from .mathematics import _ensure_sympy as _load_sympy          # the one way sympy loads, with its power floor
 from . import rela_scale as _rela  # c-anchored mass-energy / Lorentz factor
 from . import grav_scale as _grav  # G-anchored Newtonian gravitation
 from . import planck_scale as _planck  # h-anchored; the Planck units join h, G, c, k_B
@@ -42,6 +43,7 @@ def _ensure_sympy() -> None:
     global Integer, simplify, Symbol, u, _UNIT_TABLE
     if _UNIT_TABLE is not None:
         return
+    _load_sympy()
     from sympy import Integer as _Integer, simplify as _simplify, Symbol as _Symbol
     from sympy.physics import units as _u
     Integer, simplify, Symbol, u = _Integer, _simplify, _Symbol, _u

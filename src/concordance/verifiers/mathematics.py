@@ -20,7 +20,7 @@ import types as _types
 import unicodedata as _unicodedata
 from typing import Any, Dict, List
 
-from .base import VerifierResult, clamp_tol, confirm, error, mismatch, na
+from .base import PowerFloorRefused, VerifierResult, clamp_tol, confirm, error, mismatch, na
 from .base import stated_precision, stated_tolerance_abs, stated_window, window_for
 from .base import dispatch  # declarative run() driver
 
@@ -68,6 +68,7 @@ def _ensure_sympy() -> bool:
             | {n for n, v in vars(_builtins).items() if isinstance(v, _types.BuiltinFunctionType)})
         _SYMPY_VALUES = (_sympy.Basic, _sympy.MatrixBase)
         _sp = _sympy
+        _install_power_floor()
         _sympy_ok = True
     except ModuleNotFoundError:
         _sympy_ok = False
@@ -97,6 +98,10 @@ _MOD_WORD_RE = _re.compile(r"\bmod\b(?!\s*\()", _re.IGNORECASE)
 # Compute-DoS guards: a short input like 9**9**9 expands to a ~369M-digit bignum.
 _MAX_POW_EXP = 10000
 _MAX_POW_BITS = 2 ** 20     # the size of an integer or rational power, however its base was built
+_ROOT_TRIAL_TO = 2 ** 15    # where sympy's own root stops dividing an integer by primes
+# What that leaves, sympy's root must prove prime or a perfect power before it goes on. Measured 2026-11-06, that proof
+# reaches the verify window near this size, and it is no longer bounded by anything well before _MAX_POW_BITS.
+_MAX_ROOT_BITS = 2 ** 14
 _MAX_AST_NODES = 2000
 _MAX_AST_DEPTH = 60
 _MAX_EXPR_CHARS = 4000
@@ -266,6 +271,84 @@ def _bound_power(base, exponent) -> None:
         raise PowerRefused("exponent too large")
     if exponent.is_Rational and _power_bits(base, exponent) > _MAX_POW_BITS:
         raise PowerRefused("power too large")
+
+
+def _unfactored_bits(whole: int) -> int:
+    """The bits of what trial division leaves of an integer, stopping where sympy's own root stops."""
+    for prime in _sp.primerange(2, _ROOT_TRIAL_TO + 1):
+        if whole == 1:
+            break
+        if whole % prime == 0:
+            whole //= prime ** _sp.multiplicity(prime, whole)
+    return whole.bit_length()
+
+
+def _left_under_the_root(whole: int, exponent) -> int:
+    """The bits Integer._eval_power multiplies out under a root, read as it reads them. Each prime goes in
+    with its multiplicity times the numerator, less the whole powers _power_bits has measured, so what
+    stays is under the denominator: the numerator alone says nothing of it. All of them are divided by
+    their common divisor, so primes that each appear the same number of times leave the integer as it
+    was, however long the exponent. A remainder sharing a divisor with the denominator leaves for a
+    power of its own, as does a perfect power's one root, and each meets this floor there. A prime is at
+    least one bit, so a power past the bound is past it at any prime: clipped there, no float overflows."""
+    if _sp.perfect_power(whole):
+        return 0
+    left = {}
+    for factor, times in _sp.Integer(whole).factors(limit=_ROOT_TRIAL_TO).items():
+        remainder = times * exponent.p % exponent.q
+        if remainder and _math.gcd(remainder, exponent.q) == 1:
+            left[factor] = remainder
+    common = _math.gcd(*left.values())
+    return 1 + int(sum(min(remainder // common, _MAX_POW_BITS + 1) * _math.log2(factor)
+                       for factor, remainder in left.items()))
+
+
+def _root_past_the_floor(integer, exponent) -> bool:
+    """A root, before sympy's own root reads it. An exact root multiplies out only the power _power_bits
+    measured. Past that, this never hands perfect_power or factors more than _MAX_ROOT_BITS to prove,
+    since refusing first is the point: a perfect power of that much is refused with the rest. The primes
+    of an integer of n bits multiply to at most n bits and each stays under the denominator, so a root
+    small on both counts has nothing to measure, and the two sympy calls are not made twice for it."""
+    whole = abs(int(integer.p))
+    bits = whole.bit_length()
+    if bits <= _MAX_ROOT_BITS and bits * (exponent.q - 1) <= _MAX_POW_BITS:
+        return False
+    if _sp.integer_nthroot(whole, exponent.q)[1]:
+        return False
+    return _unfactored_bits(whole) > _MAX_ROOT_BITS or _left_under_the_root(whole, exponent) > _MAX_POW_BITS
+
+
+def _past_the_floor(base, exponent) -> bool:
+    """The result passes _MAX_POW_BITS as _power_bits measures it, or an Integer's root is past what it
+    may multiply out or leave to prove. A negative exponent inverts and a Rational splits into an Integer
+    for each side, so every root reaches _root_past_the_floor with the exponent sympy really reads."""
+    if _power_bits(base, exponent) > _MAX_POW_BITS:
+        return True
+    return base.is_Integer and exponent.q > 1 and exponent.p > 0 and _root_past_the_floor(base, exponent)
+
+
+def _floored(power):
+    """sympy's own Integer or Rational power, behind the floor: what _past_the_floor reads as past it is
+    refused before any arithmetic, and everything else goes straight on. `unfloored` is
+    sympy's own power, kept for the differential test's oracle alone: the engine sets it and never reads
+    it, nothing under src or tools names it, and no evaluator here reads an attribute, so no text can
+    ask for it. tests/test_power_floor.py holds all three."""
+    def _eval_power(self, exponent):
+        if isinstance(exponent, _sp.Rational) and _past_the_floor(self, exponent):
+            raise PowerFloorRefused("a power past the bound is not computed")
+        return power(self, exponent)
+    _eval_power.unfloored = power
+    return _eval_power
+
+
+def _install_power_floor() -> None:
+    """The floor under _bound_power: that bound reads what a request wrote, and this is the same bound
+    at the layer that computes, where big-integer work holds Python's global lock and stops every
+    thread in the engine. It stands at these two powers only, so it does not bound every long read.
+    0, 1 and -1 have powers of their own in sympy, and those never grow."""
+    for kind in (_sp.Integer, _sp.Rational):
+        if not hasattr(kind._eval_power, "unfloored"):
+            kind._eval_power = _floored(kind._eval_power)
 
 
 def _require_sympy_values(value) -> None:

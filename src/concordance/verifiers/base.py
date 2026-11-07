@@ -20,6 +20,13 @@ from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, Seque
 VerifierStatus = Literal["CONFIRMED", "MISMATCH", "NOT_APPLICABLE", "ERROR"]
 
 
+class PowerFloorRefused(BaseException):
+    """A power past the bound, refused where sympy computes it. A BaseException, so no `except Exception`
+    in a verifier or in sympy can catch it and read it as an answer. Only the two places that run the
+    verifiers for a caller catch it, derivation._call_with_timeout's worker and engine._run_validation,
+    and each reads the claim as not checkable: never HOLDS, never BROKEN."""
+
+
 @dataclass(frozen=True)
 class VerifierResult:
     name: str

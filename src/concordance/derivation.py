@@ -27,6 +27,7 @@ from . import verifiers as _verifiers
 from .validate import canonical_json_bytes, sha256_bytes
 from .verifiers import bridges as _bridges
 from .verifiers import mathematics as _math
+from .verifiers.base import PowerFloorRefused
 
 _log = logging.getLogger("concordance")
 _TERMINAL_FAIL = ("MISMATCH", "ERROR")
@@ -79,15 +80,22 @@ class _Saturated(Exception):
     """All verify slots are busy — shed load rather than queue unbounded work."""
 
 
+class _NotCheckable(Exception):
+    """The power floor refused this claim's check. It was not checked, so it reads as a gap."""
+
+
 def _call_with_timeout(fn, arg):
     """Run a verifier with a hard wall-clock bound on a bounded shared pool. result() returns
-    control on timeout so the request never hangs; the worker releases its slot when it ends."""
+    control on timeout so the request never hangs; the worker releases its slot when it ends.
+    A power the floor refused ends here, in the worker: the claim reads as not checkable."""
     if not _SLOTS.acquire(blocking=False):
         raise _Saturated()
 
     def _run():
         try:
             return fn(arg)
+        except PowerFloorRefused as refused:
+            raise _NotCheckable(str(refused)) from None
         finally:
             _SLOTS.release()
 
@@ -107,6 +115,10 @@ def warm() -> None:
     still boots (the affected domains simply return NOT_APPLICABLE, never a false result)."""
     import importlib
     warmed = []
+    try:
+        _math._ensure_sympy()       # the one way sympy loads, so its first load carries the power floor
+    except Exception:  # noqa: BLE001 — warming is optional
+        pass
     for lib in _HEAVY_LIBS:
         try:
             importlib.import_module(lib)
@@ -149,6 +161,9 @@ def verify_math(spec: Dict[str, Any]) -> Dict[str, str]:
     except _Saturated:
         _log.warning("verify pool saturated mode=%s — shed to ERROR (errs safe)", mode)
         return {"status": "ERROR", "detail": "verifier busy (too many concurrent verifications) — retry shortly"}
+    except _NotCheckable as refused:
+        _log.warning("power floor refused mode=%s — reads as not checkable", mode)
+        return {"status": "NOT_APPLICABLE", "detail": f"not checkable: {refused}"}
     return {"status": res.status, "detail": (res.detail or "")[:300], "data": dict(res.data or {})}
 
 
@@ -198,6 +213,9 @@ def verify_domain(domain: str, spec: Dict[str, Any]) -> Dict[str, str]:
     except _Saturated:
         _log.warning("verify pool saturated domain=%s — shed to ERROR (errs safe)", domain)
         return {"status": "ERROR", "detail": "verifier busy (too many concurrent verifications) — retry shortly"}
+    except _NotCheckable as refused:
+        _log.warning("power floor refused domain=%s — reads as not checkable", domain)
+        return {"status": "NOT_APPLICABLE", "detail": f"not checkable: {refused}"}
     return _reduce_domain_results(results)
 
 

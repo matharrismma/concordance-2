@@ -22,6 +22,7 @@ Every input here is inert: the oracle evaluates only these sources and the liter
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import subprocess
@@ -192,12 +193,31 @@ def _parser(text, names, **kw):
         return None, str(e) or "refused"
 
 
-def _oracle(text, names, word_mod=False, **kw):
-    """sympify, as each caller handed it a text: no surrounding space, and in mathematics the word form of mod."""
+@contextlib.contextmanager
+def _sympys_own_powers():
+    """The power floor lifted for one read and put back, whether that read finished or not."""
+    M._ensure_sympy()
+    kinds = (sympy.Integer, sympy.Rational)
+    floored = [kind._eval_power for kind in kinds]
+    for kind, power in zip(kinds, floored):
+        kind._eval_power = power.unfloored
     try:
-        return sympy.sympify((M._MOD_WORD_RE.sub("%", text) if word_mod else text).strip(), locals=dict(names), **kw), None
-    except Exception as e:  # noqa: BLE001 — the oracle's own failure is a reading: it refused
-        return None, type(e).__name__
+        yield
+    finally:
+        for kind, power in zip(kinds, floored):
+            kind._eval_power = power
+
+
+def _oracle(text, names, word_mod=False, **kw):
+    """sympify, as each caller handed it a text: no surrounding space, and in mathematics the word form of mod. It reads
+    raw sympy: this is the record of what sympify reads with no guard of ours, and the parser is measured against that
+    record. The power floor is the engine's guard and no part of sympify, so it does not belong here. Under it a row the
+    parser refuses and sympify read could no longer say so, and the record would be measuring the engine against itself."""
+    with _sympys_own_powers():
+        try:
+            return sympy.sympify((M._MOD_WORD_RE.sub("%", text) if word_mod else text).strip(), locals=dict(names), **kw), None
+        except Exception as e:  # noqa: BLE001 — the oracle's own failure is a reading: it refused
+            return None, type(e).__name__
 
 
 def _same(a, b) -> bool:
@@ -568,6 +588,17 @@ def test_each_listed_form_is_refused_and_sympify_read_it(text):
     _value, oracle_refused = _oracle(text, names, word_mod=True)
     assert oracle_refused is None, f"{text!r} is listed, and sympify refused it too ({oracle_refused})"
     assert REFUSED[text]
+
+
+def test_the_oracle_reads_raw_sympy_and_puts_the_floor_back():
+    """Lifted for the oracle's read and nothing else, whether sympify read the text or refused it."""
+    names = _names("math", ())
+    value, oracle_refused = _oracle("(2**1000)**2000", names)
+    assert oracle_refused is None and value == 2 ** 2000000
+    assert _oracle("1+", names)[1] is not None
+    assert all(hasattr(kind._eval_power, "unfloored") for kind in (sympy.Integer, sympy.Rational))
+    with pytest.raises(M.PowerFloorRefused):
+        sympy.Integer(2 ** 1000) ** sympy.Integer(2001)
 
 
 def _sympy_mismatch(a: str, b: str):

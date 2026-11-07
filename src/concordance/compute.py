@@ -18,6 +18,13 @@ import operator
 import re
 from typing import Optional
 
+from .verifiers.mathematics import _MAX_POW_BITS
+
+# A text past this is declined before anything reads it, and it falls through to search. The longest
+# question in eval/live_probes.jsonl is 84 characters, and an average of a hundred numbers is 419.
+# It bounds _temperature, _convert and every other reader here, and the operations one expression holds.
+_MAX_TEXT_CHARS = 500
+
 # ── unit conversion — factor to a base unit per dimension (L=meter, M=gram, V=liter, T=second) ──
 _UNITS = {
     "meter": ("L", 1.0), "meters": ("L", 1.0), "metre": ("L", 1.0), "m": ("L", 1.0),
@@ -102,8 +109,27 @@ def _convert(t: str) -> Optional[str]:
 # ── arithmetic — a SAFE evaluator (ast, numeric only; never eval()) ──
 _LEAD = re.compile(r"^\s*(?:what\s+is|what's|whats|calculate|compute|evaluate|solve|how much is|"
                    r"what\s+does|what's the value of|whats the value of|work out|figure out)\s+", re.I)
-_OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: operator.mul,
-        ast.Div: operator.truediv, ast.Pow: operator.pow, ast.Mod: operator.mod,
+
+
+def _bounded_power(base, exponent):
+    """base ** exponent, the size of an integer result measured first, as _power_bits measures it. A
+    negative exponent gives a float, and 0, 1 and -1 stay one bit, so neither has anything to measure."""
+    if isinstance(base, int) and isinstance(exponent, int) and exponent > 0 and abs(base) > 1 \
+            and abs(base).bit_length() * exponent > _MAX_POW_BITS:
+        raise ValueError("power too large")
+    return base ** exponent
+
+
+def _bounded_product(left, right):
+    """left * right, the size of an integer result measured first: its operands' bits, summed."""
+    if isinstance(left, int) and isinstance(right, int) \
+            and left.bit_length() + right.bit_length() > _MAX_POW_BITS:
+        raise ValueError("product too large")
+    return left * right
+
+
+_OPS = {ast.Add: operator.add, ast.Sub: operator.sub, ast.Mult: _bounded_product,
+        ast.Div: operator.truediv, ast.Pow: _bounded_power, ast.Mod: operator.mod,
         ast.USub: operator.neg, ast.UAdd: operator.pos}
 _N = r"-?\d+(?:\.\d+)?"
 
@@ -220,8 +246,7 @@ def _arith(t: str) -> Optional[str]:
         return None
     # Decline BEFORE computing an absurd exponent — "2 ** 99999999" is a valid expression but its
     # result has no exact, displayable answer (and computing/formatting it wastes CPU for nothing).
-    # A bound here also protects the process: without it, a large-enough exponent raises later during
-    # formatting (see below) — caught, but only after paying for the giant intermediate integer.
+    # This reads the text, so it is a first line and no bound: _safe_eval's bounded functions are that.
     if any(abs(float(e)) > 1000 for e in re.findall(r"\*\*\s*(-?\d+(?:\.\d+)?)", s)):
         return None
     try:
@@ -247,7 +272,10 @@ def _arith(t: str) -> Optional[str]:
 
 def answer(text: str) -> Optional[str]:
     """A direct, exact answer to a computational question, or None to fall through to search."""
-    raw = _denumber((text or "").strip())
+    text = (text or "").strip()
+    if len(text) > _MAX_TEXT_CHARS:
+        return None
+    raw = _denumber(text)
     t = raw.rstrip("?.! ").lower()
     if not t:
         return None

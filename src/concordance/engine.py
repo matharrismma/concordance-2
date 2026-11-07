@@ -11,6 +11,7 @@ Five gates fire in order:
   WAIT    — a deliberate wait window has elapsed before sealing (was GOD; quarantine)
 
 RED and FLOOR are HARD gates (reject). PATH can reject. WITNESS and WAIT quarantine.
+A claim the power floor refused quarantines at RED: not checked, so neither passed nor contradicted.
 Ported from 1.0 src/concordance_engine/engine.py — logic faithful, names neutral.
 """
 from __future__ import annotations
@@ -25,7 +26,7 @@ from .gates import ok, quarantine, reject
 from .packet import DecisionStatus, EngineResult, GateResult
 from .record import Anchor, ClosestCase, WitnessRecord, axis_coords_for
 from .validate import resolve_schema, validate_against_schema
-from .verifiers.base import VerifierResult
+from .verifiers.base import PowerFloorRefused, VerifierResult, na
 
 # Wait windows by scope (seconds). Neutral scope names (1.0: adapter/mesh/canon).
 WAIT_WINDOWS = {
@@ -160,7 +161,14 @@ def _run_validation(packet: Dict[str, Any], *, now_epoch: Optional[int],
 
     # RED — verifier dispatch (does the math/logic actually hold)
     if config.run_verifiers:
-        ver_results = _verifiers.run_for_domain(domain, packet, surface=config.surface)
+        try:
+            ver_results = _verifiers.run_for_domain(domain, packet, surface=config.surface)
+        except PowerFloorRefused as refused:
+            # These verifiers run on the caller's own thread, outside derivation's worker, so the refusal
+            # ends here. PASS would read a claim nobody checked as passed, and REJECT as contradicted.
+            verifier_results.append(na(domain, f"not checkable: {refused}"))
+            gate_results.append(quarantine("RED", f"not checkable: {refused}"))
+            return gate_results, tuple(verifier_results), "QUARANTINE"
         verifier_results.extend(ver_results)
         ver_failures = [v for v in ver_results if v.failed]
         ver_passes = [v for v in ver_results if v.passed]
