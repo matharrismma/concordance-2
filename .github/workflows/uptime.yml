@@ -1,0 +1,88 @@
+# The outside watch: harness run 2026-11-07-outside-uptime, plan five. Every ten minutes, at minutes ending in 7, a
+# runner reads five public faces by GET (tools/uptime.py), and when a face stays down it sends one push through
+# ntfy.sh to the owner's phone, and one more when every face is back. It only reads and reports: it holds no key to
+# the box, restarts nothing, writes nothing on any face, opens no issue and sends no email.
+#
+# GITHUB'S SCHEDULE, STATED IN FULL. Scheduled runs can be delayed under load, most of all at the top of the hour,
+# and some queued runs may be dropped, so ten minutes is the best case and not a bound. GitHub turns off a public
+# repository's schedules after 60 days with no activity, which the weekly heartbeat would show as silence; whether
+# GitHub sends a notice before it turns schedules off is not known here. ntfy.sh is a third party with its own rate
+# limits, counted as far as known per sending address, and runners share addresses, so a push can be refused; it is
+# retried and then owed. It shares nothing with the box. The watch on the box still answers a frozen engine in about
+# two minutes; this one answers a dead box, DNS, TLS or the edge in about twenty, since it needs two runs.
+#
+# NO EMAIL, AS FAR AS THIS FILE CAN MAKE IT. GitHub emails the user who last changed a scheduled workflow's cron line
+# when a run fails, so no run here fails: every step is continue-on-error with its own timeout (2 + 2 + 6 + 2 = 12
+# minutes, under the job's 20), a step that times out is a failed step under continue-on-error, the tool exits 0 on
+# every path, and there is no concurrency group, so GitHub never cancels a queued run for a newer one. Nothing here
+# opens an issue, assigns or mentions anyone, or calls gh. What this file cannot rule out: a lost runner, an outage of
+# GitHub's own, a workflow file GitHub rejects, and GitHub's own notices, such as one before it turns schedules off.
+# Only the owner's own Actions notification setting makes 'never' certain; it covers his other repositories too, so
+# it is his to choose.
+#
+# Checkout's own cleanup at the end of the job, which continue-on-error may not cover, does next to nothing with
+# persist-credentials false. With no concurrency group two runs can overlap, one started by hand or a delayed
+# scheduled run beside the next: both restore the same state, the later save wins, and the worst case is a duplicate
+# push. The state is saved under a key carrying the run id and its attempt and restored by prefix, so the newest is
+# found, and it is saved only when the tool says it finished, so a state that made it crash is never saved again.
+# The only secret is NTFY_TOPIC. Every action is pinned by a full commit SHA, with its tag beside it.
+name: Uptime
+
+on:
+  schedule:
+    - cron: "7,17,27,37,47,57 * * * *"
+  workflow_dispatch:
+    inputs:
+      drill:
+        description: "A drill: one push marked as a drill, from a sixth face at a closed port on the runner"
+        type: choice
+        options:
+          - "no"
+          - "yes"
+        default: "no"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  watch:
+    if: github.repository == 'matharrismma/concordance-2'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the tool
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        continue-on-error: true
+        timeout-minutes: 2
+        with:
+          persist-credentials: false
+
+      - name: Restore the watch's state
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        continue-on-error: true
+        timeout-minutes: 2
+        env:
+          SEGMENT_DOWNLOAD_TIMEOUT_MINS: 1
+        with:
+          path: .uptime-state.json
+          key: uptime-state-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: uptime-state-
+
+      - name: Read the faces, decide, push
+        id: watch
+        continue-on-error: true
+        timeout-minutes: 6
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          UPTIME_DRILL: ${{ inputs.drill }}
+        run: python3 tools/uptime.py --state .uptime-state.json --ntfy https://ntfy.sh
+
+      - name: Save the watch's state
+        if: steps.watch.outputs.finished == 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        continue-on-error: true
+        timeout-minutes: 2
+        with:
+          path: .uptime-state.json
+          key: uptime-state-${{ github.run_id }}-${{ github.run_attempt }}

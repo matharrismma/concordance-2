@@ -437,3 +437,4 @@ test_roots_overlap.py
 test_sticks_catalog.py
 test_syntax.py
 test_tool_dispatch_parity.py
+test_uptime.py
