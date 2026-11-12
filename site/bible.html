@@ -188,12 +188,13 @@ async function openStudy(ref, rowEl, studyEl){
   rowEl.classList.add('open'); studyEl.classList.add('open');
   if(studyEl.dataset.loaded){ return; }
   studyEl.innerHTML = '<p class="dim">gathering the original words, the commentary, and the connections…</p>';
-  const [orig, cmt, xref, tsk, proph] = await Promise.all([
+  const [orig, cmt, xref, tsk, proph, fathers] = await Promise.all([
     getJSON('/original?ref=' + encodeURIComponent(ref)),
     getJSON('/commentary?ref=' + encodeURIComponent(ref)),
     getJSON('/cross_refs?ref=' + encodeURIComponent(ref)),
     getJSON('/tsk?ref=' + encodeURIComponent(ref)),
     getJSON('/prophecy?ref=' + encodeURIComponent(ref)),
+    getJSON('/commentary?source=catena-aurea&ref=' + encodeURIComponent(ref)),
   ]);
   let html = '';
   // The whole verse, in order. /original returns the words that carry a Strong's number (the chips)
@@ -228,6 +229,16 @@ async function openStudy(ref, rowEl, studyEl){
     html += '<div class="slabel" style="margin-top:1rem">commentary</div>' +
       '<div class="cmt">' + body + '</div>' +
       '<div class="cmt-attr">' + esc(cmt.attribution || '') + (cmt.license ? ' · ' + esc(cmt.license) : '') + '</div>';
+  }
+  // the Fathers beside Henry: the Catena Aurea, where its build serves an excerpt on this verse. Each excerpt is
+  // named as the 1841-45 edition prints its writer; a later writer is labelled so. Self-gating: none, nothing shown.
+  if(fathers && fathers.status === 'ok' && fathers.commentary && fathers.commentary.length){
+    html += '<div class="slabel" style="margin-top:1rem">the Fathers (Catena Aurea)</div>' +
+      fathers.commentary.map(e => '<div class="cmt"><b>' + esc(e.author_as_printed || '') + '</b>' +
+        (e.writer ? ' <span class="dim">(' + esc(e.writer) + ')</span>' : '') + ' ' + esc(e.text || '') +
+        (e.citation && e.citation !== 'citation not confirmed' ? ' <span class="dim">[' + esc(e.citation) + ']</span>' : '') +
+        (e.editors_mark ? '<div class="cmt-attr">the editors: ' + esc(e.editors_mark.quote || '') + '</div>' : '') + '</div>').join('') +
+      '<div class="cmt-attr">' + esc(fathers.attribution || '') + (fathers.license ? ' · ' + esc(fathers.license) : '') + '</div>';
   }
   // the OT speaks of Christ — where the NT itself takes this passage up as fulfilled (CONCORDANT),
   // Scripture's own witness, attributed. Self-gating: shows only where a fulfillment exists.

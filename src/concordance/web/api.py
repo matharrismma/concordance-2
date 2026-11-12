@@ -2611,6 +2611,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not ref:
             return _err(400, "ref required")
         from .. import commentary
+        if (query.get("sources") or "").strip().lower() in ("1", "true", "yes"):
+            # Which sources cover the reference: a separate answer, never a change to the default response.
+            return _ok(commentary.sources_for(ref))
         return _ok(commentary.for_ref(ref, source=(query.get("source") or commentary.DEFAULT_SOURCE)))
 
     if method == "GET" and path == "/tsk":

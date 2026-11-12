@@ -808,10 +808,14 @@ def _witness_tools() -> List[dict]:
         # One excellent tool for the situation. The paginated /word_occurrences WEB route stays as the
         # full concordance-listing view (which word_study's inline occurrences do not paginate).
         {"name": "commentary",
-         "description": ("Public-domain, attributed commentary (Matthew Henry) on a reference — the "
-                         "commentator's own words, found and cited, never generated."),
+         "description": ("Public-domain, attributed commentary on a reference — the commentator's own words, "
+                         "found and cited, never generated. source: matthew-henry (the default), adam-clarke, "
+                         "john-gill, or catena-aurea (the Fathers and later writers Thomas Aquinas gathered on the "
+                         "Gospels, English edition of 1841-45, each excerpt named as printed). sources: true "
+                         "answers which sources cover the reference."),
          "inputSchema": {"type": "object", "properties": {
-             "ref": {"type": "string"}, "source": {"type": "string"}}, "required": ["ref"]}},
+             "ref": {"type": "string"}, "source": {"type": "string"}, "sources": {"type": "boolean"}},
+             "required": ["ref"]}},
         {"name": "tsk_cross_references",
          "description": ("Editorial cross-references for a verse (openbible.info, CC BY — expansion of "
                          "the public-domain TSK), ranked by relevance votes. Found + attributed."),
@@ -1793,6 +1797,8 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
     # route /word_occurrences keeps the paginated concordance-listing view.
     if name == "commentary" and knowledge:
         from .. import commentary  # lazy: witness-only
+        if args.get("sources") is True:  # which sources cover the reference: a separate answer, never the default
+            return commentary.sources_for(args.get("ref", ""))
         return commentary.for_ref(args.get("ref", ""), source=args.get("source") or commentary.DEFAULT_SOURCE)
     if name == "tsk_cross_references" and knowledge:
         from .. import xrefs  # lazy: witness-only

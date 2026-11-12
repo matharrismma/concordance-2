@@ -1,0 +1,47 @@
+{
+ "blocks": [
+  {
+   "chapter": 5,
+   "covers_in_this_chapter": [
+    1,
+    13
+   ],
+   "end_chapter": 5,
+   "excerpts": [
+    {
+     "author_as_printed": "ALCUIN",
+     "author_key": "alcuin",
+     "citation": "citation not confirmed",
+     "page": 171,
+     "text": "The pool by the sheep-market, is the place where the priest washed the animals that were going to be sacrificed."
+    }
+   ],
+   "range": "John 5:1-13",
+   "verse": 1,
+   "verse_end": 13
+  },
+  {
+   "chapter": 5,
+   "covers_in_this_chapter": [
+    31,
+    40
+   ],
+   "end_chapter": 5,
+   "excerpts": [
+    {
+     "author_as_printed": "ALCUIN",
+     "author_key": "alcuin",
+     "citation": "citation not confirmed",
+     "page": 202,
+     "text": "That He enlightens the blind, that He opens the deaf ear, looses the mouth of the dumb, casts out devils, raises the dead; these works bear witness of Christ."
+    }
+   ],
+   "range": "John 5:31-40",
+   "verse": 31,
+   "verse_end": 40
+  }
+ ],
+ "book": "John",
+ "chapter": 5,
+ "source": "catena-aurea"
+}

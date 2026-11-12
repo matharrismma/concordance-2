@@ -233,12 +233,14 @@ def test_the_hash_refuses_an_empty_output_an_empty_directory_and_a_symlink(bb, t
 # ------------------------------------------------------------------------------------------------ the listing
 
 def test_the_listing_holds_the_canary_and_canary_fail_each_after_a_comment(bb):
+    # The canary and canary-fail entries, by name: a real build may be listed beside them (run
+    # 2026-11-11-fathers-shelf, step catena2, lists catena-aurea), and what this pins of the two is unchanged.
     text = LISTING.read_text(encoding="utf-8")
     entries = bb.parse_listing(text)
-    assert sorted(entries) == ["canary", "canary-fail"]
-    assert {e.tool for e in entries.values()} == {"tools/build_canary.py"}
+    canaries = {name: entries[name] for name in ("canary", "canary-fail")}
+    assert {e.tool for e in canaries.values()} == {"tools/build_canary.py"}
     assert (entries["canary"].args, entries["canary-fail"].args) == (("ok",), ("fail",))
-    assert all(e.inputs == () and 1 <= e.cap_mb <= 1024 for e in entries.values())
+    assert all(e.inputs == () and 1 <= e.cap_mb <= 1024 for e in canaries.values())
     lines = text.splitlines()
     for e in entries.values():
         before = lines[e.line - 2]

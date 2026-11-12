@@ -1,0 +1,130 @@
+{
+ "blocks": [
+  {
+   "chapter": 1,
+   "covers_in_this_chapter": [
+    1,
+    1
+   ],
+   "end_chapter": 1,
+   "excerpts": [
+    {
+     "author_as_printed": "CHRYS",
+     "author_key": "chrysostom",
+     "citation": "citation not confirmed",
+     "page": 10,
+     "text": "And do not consider this genealogy a small thing to hear: for truly it is a marvellous thing that God should descend to be born of a woman, and to have as His ancestors David and Abraham."
+    },
+    {
+     "author_as_printed": "REMIGIUS",
+     "author_key": "remigius",
+     "citation": "citation not confirmed",
+     "page": 10,
+     "text": "Though any affirm that the prophet (Isaiah) does speak of His human generation, we need not answer to his enquiry, Who shall declare it? \"No man;\" but,\" Very few;\" because Matthew and Luke have."
+    },
+    {
+     "author_as_printed": "PSEUDO-CHRYS",
+     "author_key": "pseudo_chrysostom",
+     "citation": "citation not confirmed",
+     "page": 11,
+     "text": "Another reason is that royal dignity is above natural, though Abraham was first in time, yet David in honour."
+    },
+    {
+     "author_as_printed": "AUG",
+     "author_key": "augustine",
+     "citation": "citation not confirmed",
+     "page": 13,
+     "text": "Sabellius they say was a disciple of Noetus, who taught that the same Christ was one and the same Father and Holy Spirit."
+    },
+    {
+     "author_as_printed": "CYRIL",
+     "author_key": "cyril_alexandria",
+     "citation": "citation not confirmed",
+     "page": 15,
+     "text": "We account those persons mad who have suspected that so much as the shadow of change could take place in the nature of the Divine Word; it abides what it ever was, neither is nor can be changed."
+    }
+   ],
+   "range": "Matthew 1:1",
+   "verse": 1,
+   "verse_end": 1
+  },
+  {
+   "chapter": 1,
+   "covers_in_this_chapter": [
+    17,
+    17
+   ],
+   "end_chapter": 1,
+   "excerpts": [
+    {
+     "author_as_printed": "REMIG",
+     "author_key": "remigius",
+     "citation": "citation not confirmed",
+     "page": 38,
+     "text": "He made fourteen generations, because the ten denotes the decalogue, and the four the four books of the Gospel; whence this shews the agreement of the Law and the Gospel. And he put the fourteen three times over, that he might shew that the perfection of law, prophecy, and grace, consists in the faith of the Holy Trinity."
+    },
+    {
+     "author_as_printed": "GLOSS",
+     "author_key": "gloss",
+     "citation": "citation not confirmed",
+     "page": 39,
+     "text": "Or, the ten refers to the decalogue, the four to this life present, which passes through four seasons; or by the ten is meant the Old Testament, by the four the New."
+    },
+    {
+     "author_as_printed": "REMIG",
+     "author_key": "remigius",
+     "citation": "citation not confirmed",
+     "page": 39,
+     "text": "But if any, maintaining that it is not the same Jeconiah, but two different persons, make the number forty and two, we then shall say that the Holy Church is signified; for this number is the product of seven, and six; (for six times seven make forty-two;) the six denotes labour, and the seven rest."
+    }
+   ],
+   "range": "Matthew 1:17",
+   "verse": 17,
+   "verse_end": 17
+  },
+  {
+   "chapter": 1,
+   "covers_in_this_chapter": [
+    18,
+    18
+   ],
+   "end_chapter": 1,
+   "excerpts": [
+    {
+     "author_as_printed": "GLOSS",
+     "author_key": "gloss",
+     "citation": "citation not confirmed",
+     "page": 42,
+     "text": "The name of His Mother is added, Mary."
+    },
+    {
+     "author_as_printed": "PSEUDO-CHRYS",
+     "author_key": "pseudo_chrysostom",
+     "citation": "citation not confirmed",
+     "page": 42,
+     "text": "Mary was therefore betrothed to a carpenter, because Christ the Spouse of the Church was to work the salvation of all men through the wood of the Cross."
+    },
+    {
+     "author_as_printed": "GLOSS",
+     "author_key": "gloss",
+     "citation": "citation not confirmed",
+     "page": 42,
+     "text": "But the words denote carnal knowledge."
+    },
+    {
+     "author_as_printed": "JEROME",
+     "author_key": "jerome",
+     "citation": "citation not confirmed",
+     "page": 44,
+     "text": "Therefore it by no means follows that they did come together afterwards; Scripture however shews not what did happen."
+    }
+   ],
+   "range": "Matthew 1:18",
+   "verse": 18,
+   "verse_end": 18
+  }
+ ],
+ "book": "Matthew",
+ "chapter": 1,
+ "source": "catena-aurea"
+}

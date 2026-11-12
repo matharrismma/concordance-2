@@ -5232,7 +5232,21 @@
   {
    "id": "Luke-s11-p292",
    "gospel": "Luke",
-   "verse": "Luke 8:48",
+   "verse": "Luke 8:40-48",
+   "verse_corrections": [
+    {
+     "was": "Luke 8:48",
+     "read": "Luke 8:40-48",
+     "page_images": [
+      "https://archive.org/download/catenaaureacomme03thomuoft/page/n306.jpg",
+      "https://archive.org/download/catenaaureacomme03thomuoft/page/n311.jpg"
+     ],
+     "basis": "page 287 prints the section's Gospel text from verse 40 under the running head 'VER. 40—48.', which the odd pages repeat through page 293; page 292, where this excerpt stands, prints no Gospel text; both copies' ranges read 8:40-48 (builder-30, ledger line 49)",
+     "read_by": "builder-30",
+     "read_on": "2026-11-12",
+     "asked_by": "plan twelve, run 2026-11-11-fathers-shelf"
+    }
+   ],
    "selected_by": "seed",
    "item": "catenaaureacomme03thomuoft",
    "leaf": 311,
@@ -7008,7 +7022,21 @@
   {
    "id": "John-s20-p216",
    "gospel": "John",
-   "verse": "John 6:12-14",
+   "verse": "John 6:1-14",
+   "verse_corrections": [
+    {
+     "was": "John 6:12-14",
+     "read": "John 6:1-14",
+     "page_images": [
+      "https://archive.org/download/catenaaureacomme04thomuoft/page/n216.jpg",
+      "https://archive.org/download/catenaaureacomme04thomuoft/page/n223.jpg"
+     ],
+     "basis": "page 209 prints the section's Gospel text through verse 14 under the running head 'VER. 1—14.', the section opening at 'CHAP. VI.' with verse 1 on page 208; the running heads read 'VER. 1—14.' through page 215 and 'VER. 15—21.' on page 217; page 216, where this excerpt stands, prints no Gospel text; both copies' ranges read 6:1-14 (builder-30, ledger line 49)",
+     "read_by": "builder-30",
+     "read_on": "2026-11-12",
+     "asked_by": "plan twelve, run 2026-11-11-fathers-shelf"
+    }
+   ],
    "selected_by": "seed",
    "item": "catenaaureacomme04thomuoft",
    "leaf": 223,

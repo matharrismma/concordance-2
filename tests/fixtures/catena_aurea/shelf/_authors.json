@@ -1,0 +1,464 @@
+{
+ "alcuin": {
+  "dates": {
+   "born": "about 735",
+   "died": "19 May, 804",
+   "ocr_corrections": [
+    {
+     "field": "died",
+     "kind": "not found in the OCR by the extractor; read from the page image",
+     "ocr": null,
+     "read": "19 May, 804"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0001/page/n317.jpg"
+  },
+  "edition_table_name": "Alcuin",
+  "identified_as": "Alcuin",
+  "kind": "later_writer",
+  "language": "not stated"
+ },
+ "ambrose": {
+  "dates": {
+   "born": "probably 340",
+   "died": "4 April, 397",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "place or surrounding words left out",
+     "ocr": "probably 340, at Trier, Arles, or Lyons",
+     "read": "probably 340"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0001/page/n426.jpg"
+  },
+  "edition_table_name": "Ambrose",
+  "identified_as": "Ambrose of Milan",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "athanasius": {
+  "dates": {
+   "born": "c. 296",
+   "died": "2 May, 373",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "OCR misreading",
+     "ocr": "ec. 296",
+     "read": "c. 296"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0002/page/n58.jpg"
+  },
+  "edition_table_name": "Athanasius",
+  "identified_as": "Athanasius",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "augustine": {
+  "dates": {
+   "born": "13 November, 354",
+   "died": "28 August, 430",
+   "ocr_corrections": [],
+   "page_image": "https://archive.org/download/b33397491_0002/page/n109.jpg"
+  },
+  "edition_table_name": "Augustine",
+  "identified_as": "Augustine of Hippo",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "basil": {
+  "dates": null,
+  "edition_table_name": "Basil",
+  "identified_as": null,
+  "kind": "unresolved",
+  "language": "not stated"
+ },
+ "bede": {
+  "dates": {
+   "born": "672 or 673",
+   "died": "735",
+   "ocr_corrections": [],
+   "page_image": "https://archive.org/download/b33397491_0002/page/n441.jpg"
+  },
+  "edition_table_name": "Bede",
+  "identified_as": "Bede",
+  "kind": "father",
+  "language": "Latin"
+ },
+ "cassian": {
+  "dates": {
+   "born": "probably about 360",
+   "died": "about 435",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "place or surrounding words left out",
+     "ocr": "probably in Provence about 360",
+     "read": "probably about 360"
+    },
+    {
+     "field": "died",
+     "kind": "place or surrounding words left out",
+     "ocr": "about 435, probably near Marseilles",
+     "read": "about 435"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0003/page/n461.jpg"
+  },
+  "edition_table_name": "Cassion",
+  "identified_as": "John Cassian",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "chrysostom": {
+  "dates": {
+   "born": "c. 347",
+   "died": "14 September, 407",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "place or surrounding words left out",
+     "ocr": "at Antioch, c. 347",
+     "read": "c. 347"
+    },
+    {
+     "field": "died",
+     "kind": "OCR misreading",
+     "ocr": "at Comana in Pontus, 14 Sep- tember, 407",
+     "read": "14 September, 407"
+    }
+   ],
+   "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n514.jpg"
+  },
+  "edition_table_name": "Chrysostom",
+  "identified_as": "John Chrysostom",
+  "kind": "father",
+  "language": "Greek"
+ },
+ "cyril_alexandria": {
+  "dates": {
+   "born_left_out": "the article's opening gives no date of birth",
+   "died": "the 9th or the 27th of June, 444",
+   "died_ocr": null,
+   "died_page_image": "https://archive.org/download/b33397491_0004/page/n673.jpg",
+   "ocr_corrections": [],
+   "page_image": "https://archive.org/download/b33397491_0004/page/n671.jpg"
+  },
+  "edition_table_name": "Cyril of Alexandria",
+  "identified_as": "Cyril of Alexandria",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "eusebius": {
+  "dates": {
+   "born": "about 260",
+   "died": "before 341",
+   "ocr_corrections": [],
+   "page_image": "https://archive.org/download/b33397491_0005/page/n700.jpg"
+  },
+  "edition_table_name": "Eusebius",
+  "identified_as": "Eusebius of Caesarea",
+  "kind": "father_age_writer",
+  "language": "not stated"
+ },
+ "gloss": {
+  "dates": {
+   "left_out": "the article is on scriptural glosses; the one date near the Glossa ordinaria is its author Walafrid Strabo's death, not a date of the Gloss",
+   "ocr_corrections": [],
+   "page_image": "https://archive.org/download/b33397491_0006/page/n671.jpg"
+  },
+  "edition_table_name": "Glossa Ordinaria; —— Interlinearis",
+  "identified_as": "the Gloss (Glossa ordinaria and interlinearis)",
+  "kind": "later_writer",
+  "language": "not stated"
+ },
+ "gregory_great": {
+  "dates": {
+   "born": "about 540",
+   "died": "12 March, 604",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "place or surrounding words left out",
+     "ocr": "at Rome about 540",
+     "read": "about 540"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0006/page/n873.jpg"
+  },
+  "edition_table_name": "Gregory the Great",
+  "identified_as": "Gregory the Great",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "gregory_nazianzus": {
+  "dates": {
+   "born": "c. 325",
+   "died": "c. 389",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "place or surrounding words left out",
+     "ocr": "at Arianzus, in Asia Minor, c. 325",
+     "read": "c. 325"
+    },
+    {
+     "field": "died",
+     "kind": "OCR text cut short by the extractor; completed from the page image",
+     "ocr": "at the same place, c",
+     "read": "c. 389"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0007/page/n33.jpg"
+  },
+  "edition_table_name": "Gregory of Nazianzus",
+  "identified_as": "Gregory of Nazianzus",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "gregory_nyssa": {
+  "dates": {
+   "born_left_out": "the article: date of birth unknown",
+   "died": "after 385 or 386",
+   "ocr_corrections": [
+    {
+     "field": "died",
+     "kind": "not found in the OCR by the extractor; read from the page image",
+     "ocr": null,
+     "read": "after 385 or 386"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0007/page/n39.jpg"
+  },
+  "edition_table_name": "Gregory of Nyssa",
+  "identified_as": "Gregory of Nyssa",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "hilary": {
+  "dates": {
+   "born": "at the beginning of the fourth century",
+   "died": "368",
+   "died_note": "the day is printed two ways: 1 November, according to the most accredited opinion, or, according to the Roman Breviary, 13 January",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "place or surrounding words left out",
+     "ocr": "in that city at the beginning of the fourth century",
+     "read": "at the beginning of the fourth century"
+    },
+    {
+     "field": "died",
+     "kind": "place or surrounding words left out",
+     "ocr": "there 1 November, according to the most accredited opinion, or, according to the Roman Breviary, on 13 January, 368",
+     "read": "368"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0007/page/n404.jpg"
+  },
+  "edition_table_name": "Hilary",
+  "identified_as": "Hilary of Poitiers",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "idem": {
+  "dates": null,
+  "edition_table_name": null,
+  "identified_as": null,
+  "kind": "idem",
+  "language": "not stated"
+ },
+ "isidore": {
+  "dates": null,
+  "edition_table_name": "Isidore of Pelusium; Isidore",
+  "identified_as": null,
+  "kind": "unresolved",
+  "language": "not stated"
+ },
+ "jerome": {
+  "dates": {
+   "born": "about the year 340–2",
+   "died": "30 September, 420",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "OCR misreading",
+     "ocr": "at Stridon, a town on the confines of Dalmatia and \"Pannonia, about the year 340-2",
+     "read": "about the year 340–2"
+    },
+    {
+     "field": "died",
+     "kind": "place or surrounding words left out",
+     "ocr": "at Bethlehem, 30 September, 420",
+     "read": "30 September, 420"
+    }
+   ],
+   "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n397.jpg"
+  },
+  "edition_table_name": "Jerome",
+  "identified_as": "Jerome",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "john_damascene": {
+  "dates": {
+   "born": "about 676",
+   "died": "some time between 754 and 787",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "OCR misreading",
+     "ocr": "at Damascus, about wo",
+     "read": "about 676"
+    }
+   ],
+   "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n521.jpg"
+  },
+  "edition_table_name": "John Damascene",
+  "identified_as": "John Damascene",
+  "kind": "father",
+  "language": "Greek"
+ },
+ "leo": {
+  "dates": {
+   "born_left_out": "the article: place and date of birth unknown",
+   "died": "10 November, 461",
+   "ocr_corrections": [
+    {
+     "field": "died",
+     "kind": "place or surrounding words left out",
+     "ocr": "10 November, 461 Leo’s pontificate, next to that of St",
+     "read": "10 November, 461"
+    }
+   ],
+   "office": {
+    "as": "pope",
+    "dates": "440–61"
+   },
+   "page_image": "https://archive.org/download/b33397491_0009/page/n181.jpg"
+  },
+  "edition_table_name": "Leo the Great",
+  "identified_as": "Leo the Great",
+  "kind": "father",
+  "language": "not stated"
+ },
+ "maximus": {
+  "dates": null,
+  "edition_table_name": "Maximus of Turin; Maximus (? of Constantinople, 645.)",
+  "identified_as": null,
+  "kind": "unresolved",
+  "language": "not stated"
+ },
+ "origen": {
+  "dates": {
+   "born_left_out": "the article's opening gives no date of birth",
+   "died": "253 or 254",
+   "died_note": "printed after \"he died, probably, from the results of the sufferings endured during the persecution\"",
+   "died_ocr": null,
+   "died_page_image": "https://archive.org/download/b33397491_0011/page/n340.jpg",
+   "ocr_corrections": [],
+   "page_image": "https://archive.org/download/b33397491_0011/page/n339.jpg"
+  },
+  "edition_table_name": "Origen",
+  "identified_as": "Origen",
+  "kind": "father_age_writer",
+  "language": "Greek"
+ },
+ "pseudo_chrysostom": {
+  "dates": {
+   "left_out": "the article dates the work (written by an Arian in the first half of the fifth century); it gives no writer's birth or death",
+   "ocr_corrections": [],
+   "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n518.jpg"
+  },
+  "edition_table_name": null,
+  "identified_as": null,
+  "kind": "pseudo",
+  "language": "Latin"
+ },
+ "pseudo_jerome": {
+  "dates": null,
+  "edition_table_name": null,
+  "identified_as": null,
+  "kind": "pseudo",
+  "language": "not stated"
+ },
+ "rabanus": {
+  "dates": {
+   "born": "about 776 (784?)",
+   "died": "4 February, 856",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "place or surrounding words left out",
+     "ocr": "at Mainz about 776 (784?)",
+     "read": "about 776 (784?)"
+    },
+    {
+     "field": "died",
+     "kind": "place or surrounding words left out",
+     "ocr": "at Winkel (Vinicellum) near Mainz on 4 February, 856",
+     "read": "4 February, 856"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0012/page/n702.jpg"
+  },
+  "edition_table_name": "Rabanus Maurus",
+  "identified_as": "Rabanus Maurus",
+  "kind": "later_writer",
+  "language": "not stated"
+ },
+ "remigius": {
+  "dates": {
+   "born": "about the middle of the ninth century",
+   "died": "908",
+   "ocr_corrections": [],
+   "page_image": "https://archive.org/download/b33397491_0012/page/n863.jpg"
+  },
+  "edition_table_name": "Remigius (of Auxerre)",
+  "identified_as": "Remigius of Auxerre",
+  "kind": "later_writer",
+  "language": "not stated"
+ },
+ "sever": {
+  "dates": null,
+  "edition_table_name": null,
+  "identified_as": null,
+  "kind": "unresolved",
+  "language": "not stated"
+ },
+ "theod": {
+  "dates": null,
+  "edition_table_name": null,
+  "identified_as": null,
+  "kind": "unresolved",
+  "language": "not stated"
+ },
+ "theophylact": {
+  "dates": null,
+  "edition_table_name": "Theophylact",
+  "identified_as": "Theophylact",
+  "kind": "later_writer",
+  "language": "not stated"
+ },
+ "titus_bostra": {
+  "dates": {
+   "born": "about 362–371",
+   "born_note": "as printed",
+   "ocr_corrections": [
+    {
+     "field": "born",
+     "kind": "OCR misreading",
+     "ocr": "about 362-371. Sozo- men (Hist. eccl., III, xiv) names Titus among the great men of the time of Constantius",
+     "read": "about 362–371"
+    }
+   ],
+   "page_image": "https://archive.org/download/b33397491_0014/page/n825.jpg"
+  },
+  "edition_table_name": null,
+  "identified_as": "Titus of Bostra",
+  "kind": "father",
+  "language": "not stated"
+ }
+}

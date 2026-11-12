@@ -50,6 +50,7 @@ test_canonical.py
 test_capabilities.py
 test_caps_fresh.py
 test_cas.py
+test_catena_build.py
 test_catena_measure.py
 test_cells.py
 test_cells_proof.py
@@ -69,6 +70,7 @@ test_codex.py
 test_combinatorics.py
 test_commentary.py
 test_commentary_cards.py
+test_commentary_catena.py
 test_community.py
 test_compare.py
 test_compendium.py

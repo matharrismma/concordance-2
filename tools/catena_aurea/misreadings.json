@@ -1,0 +1,480 @@
+{
+ "about": "OCR forms that both copies of one typesetting may share: each is a letter-only token that copy A's OCR gave where the page image (the golden) reads another word, and that never occurs among the golden's words; plus the forms of '&c.' the OCR is known to give (fyc., Sfc., Hfc.). An excerpt holding one of them is held by tools/build_catena.py. Made by code from tools/catena_aurea/golden.json's ocr_corrections.",
+ "misreadings": [
+  {
+   "ocr": "AndChrjs.",
+   "read": "And",
+   "seen_in": [
+    "John-s23-p301"
+   ]
+  },
+  {
+   "ocr": "Anrl",
+   "read": "And",
+   "seen_in": [
+    "Matthew-s29-p502"
+   ]
+  },
+  {
+   "ocr": "arc",
+   "read": "are",
+   "seen_in": [
+    "Matthew-s07-p265"
+   ]
+  },
+  {
+   "ocr": "AriansAug.",
+   "read": "Arians",
+   "seen_in": [
+    "John-s16-p181"
+   ]
+  },
+  {
+   "ocr": "arid",
+   "read": "and",
+   "seen_in": [
+    "Mark-s02-p222"
+   ]
+  },
+  {
+   "ocr": "bandits",
+   "read": "bundles",
+   "seen_in": [
+    "Matthew-s29-p502"
+   ]
+  },
+  {
+   "ocr": "bd",
+   "read": "be",
+   "seen_in": [
+    "Matthew-1-1-20"
+   ]
+  },
+  {
+   "ocr": "benefiting",
+   "read": "benefitting",
+   "seen_in": [
+    "John-s27-p153"
+   ]
+  },
+  {
+   "ocr": "bom",
+   "read": "born",
+   "seen_in": [
+    "Matthew-1-1-28"
+   ]
+  },
+  {
+   "ocr": "bum",
+   "read": "burn",
+   "seen_in": [
+    "Matthew-t01-p866"
+   ]
+  },
+  {
+   "ocr": "Caesar,",
+   "read": "Cæsar,",
+   "seen_in": [
+    "Matthew-t04-p752",
+    "Luke-s09-p662",
+    "Luke-s09-p662"
+   ]
+  },
+  {
+   "ocr": "corning.",
+   "read": "coming.",
+   "seen_in": [
+    "John-s03-p55"
+   ]
+  },
+  {
+   "ocr": "cotists",
+   "read": "coasts",
+   "seen_in": [
+    "Matthew-s22-p573"
+   ]
+  },
+  {
+   "ocr": "docs",
+   "read": "does",
+   "seen_in": [
+    "Mark-s02-p222"
+   ]
+  },
+  {
+   "ocr": "fyc",
+   "read": "&c.",
+   "seen_in": []
+  },
+  {
+   "ocr": "fyc.",
+   "read": "&c.",
+   "seen_in": [
+    "Mark-s22-p90"
+   ]
+  },
+  {
+   "ocr": "Hfc",
+   "read": "&c.",
+   "seen_in": []
+  },
+  {
+   "ocr": "Hfc.",
+   "read": "&c.",
+   "seen_in": [
+    "Matthew-s29-p502"
+   ]
+  },
+  {
+   "ocr": "hira;",
+   "read": "him;",
+   "seen_in": [
+    "Matthew-s29-p502"
+   ]
+  },
+  {
+   "ocr": "Ho",
+   "read": "He",
+   "seen_in": [
+    "Matthew-s29-p502"
+   ]
+  },
+  {
+   "ocr": "icith",
+   "read": "with",
+   "seen_in": [
+    "Luke-s02-p715"
+   ]
+  },
+  {
+   "ocr": "icorld",
+   "read": "world",
+   "seen_in": [
+    "Matthew-1-1-18"
+   ]
+  },
+  {
+   "ocr": "ike",
+   "read": "the",
+   "seen_in": [
+    "Matthew-s11-p434"
+   ]
+  },
+  {
+   "ocr": "Iliin;",
+   "read": "Him;",
+   "seen_in": [
+    "Matthew-s22-p573"
+   ]
+  },
+  {
+   "ocr": "ItBede",
+   "read": "It",
+   "seen_in": [
+    "Mark-s30-p39"
+   ]
+  },
+  {
+   "ocr": "ivheat",
+   "read": "wheat",
+   "seen_in": [
+    "Matthew-s05-p499"
+   ]
+  },
+  {
+   "ocr": "Jive",
+   "read": "five",
+   "seen_in": [
+    "Luke-s14-p512"
+   ]
+  },
+  {
+   "ocr": "late",
+   "read": "law",
+   "seen_in": [
+    "John-s08-p264"
+   ]
+  },
+  {
+   "ocr": "lie",
+   "read": "He",
+   "seen_in": [
+    "Matthew-1-1-20"
+   ]
+  },
+  {
+   "ocr": "Manichaeus",
+   "read": "Manichæus",
+   "seen_in": [
+    "Matthew-1-1-28"
+   ]
+  },
+  {
+   "ocr": "Manichgeans",
+   "read": "Manichæans",
+   "seen_in": [
+    "Matthew-1-1-24"
+   ]
+  },
+  {
+   "ocr": "MiKjtdun.",
+   "read": "Magedan.",
+   "seen_in": [
+    "Matthew-s22-p573"
+   ]
+  },
+  {
+   "ocr": "ninny",
+   "read": "many",
+   "seen_in": [
+    "John-s11-p260"
+   ]
+  },
+  {
+   "ocr": "nmlliludes",
+   "read": "multitudes",
+   "seen_in": [
+    "Matthew-s22-p573"
+   ]
+  },
+  {
+   "ocr": "nnio",
+   "read": "unto",
+   "seen_in": [
+    "Matthew-s09-p421"
+   ]
+  },
+  {
+   "ocr": "nwaif",
+   "read": "away",
+   "seen_in": [
+    "Matthew-s22-p573"
+   ]
+  },
+  {
+   "ocr": "ofBede",
+   "read": "of",
+   "seen_in": [
+    "Mark-s24-p155"
+   ]
+  },
+  {
+   "ocr": "ofii.",
+   "read": "of",
+   "seen_in": [
+    "Matthew-1-1-25"
+   ]
+  },
+  {
+   "ocr": "perhups",
+   "read": "perhaps",
+   "seen_in": [
+    "Matthew-s09-p421"
+   ]
+  },
+  {
+   "ocr": "Pie",
+   "read": "He",
+   "seen_in": [
+    "Matthew-1-1-26"
+   ]
+  },
+  {
+   "ocr": "Pnature;",
+   "read": "nature;",
+   "seen_in": [
+    "Matthew-1-1-23"
+   ]
+  },
+  {
+   "ocr": "rilled",
+   "read": "filled",
+   "seen_in": [
+    "Matthew-1-1-26"
+   ]
+  },
+  {
+   "ocr": "scnants",
+   "read": "servants",
+   "seen_in": [
+    "Matthew-s18-p500"
+   ]
+  },
+  {
+   "ocr": "seventyseventh",
+   "read": "seventy-seventh",
+   "seen_in": [
+    "Luke-s13-p139"
+   ]
+  },
+  {
+   "ocr": "Sfc.",
+   "read": "&c.",
+   "seen_in": [
+    "Matthew-s21-p420"
+   ]
+  },
+  {
+   "ocr": "Site",
+   "read": "She",
+   "seen_in": [
+    "Matthew-s24-p50"
+   ]
+  },
+  {
+   "ocr": "Soiled",
+   "read": "Sowed",
+   "seen_in": [
+    "Matthew-s29-p502"
+   ]
+  },
+  {
+   "ocr": "spirituallitteram",
+   "read": "spiritual",
+   "seen_in": [
+    "John-s14-p179"
+   ]
+  },
+  {
+   "ocr": "tarex;",
+   "read": "tares,",
+   "seen_in": [
+    "Matthew-s29-p502"
+   ]
+  },
+  {
+   "ocr": "thatT",
+   "read": "that",
+   "seen_in": [
+    "John-s04-p533"
+   ]
+  },
+  {
+   "ocr": "thejj",
+   "read": "the",
+   "seen_in": [
+    "Matthew-1-1-13"
+   ]
+  },
+  {
+   "ocr": "tins",
+   "read": "this",
+   "seen_in": [
+    "John-s11-p260"
+   ]
+  },
+  {
+   "ocr": "tJic",
+   "read": "the",
+   "seen_in": [
+    "Mark-s09-p234"
+   ]
+  },
+  {
+   "ocr": "tlie",
+   "read": "the",
+   "seen_in": [
+    "John-s08-p264"
+   ]
+  },
+  {
+   "ocr": "Tliere",
+   "read": "There",
+   "seen_in": [
+    "Luke-s28-p317"
+   ]
+  },
+  {
+   "ocr": "tliis.",
+   "read": "this,",
+   "seen_in": [
+    "Matthew-s29-p502"
+   ]
+  },
+  {
+   "ocr": "tlw",
+   "read": "the",
+   "seen_in": [
+    "Matthew-s22-p573"
+   ]
+  },
+  {
+   "ocr": "tocome.",
+   "read": "to-come.",
+   "seen_in": [
+    "John-s11-p260"
+   ]
+  },
+  {
+   "ocr": "toOrig.",
+   "read": "to",
+   "seen_in": [
+    "John-s03-p55"
+   ]
+  },
+  {
+   "ocr": "trith",
+   "read": "with",
+   "seen_in": [
+    "Matthew-s17-p471"
+   ]
+  },
+  {
+   "ocr": "ttg",
+   "read": "light",
+   "seen_in": [
+    "John-s21-p12"
+   ]
+  },
+  {
+   "ocr": "tvith",
+   "read": "with",
+   "seen_in": [
+    "Matthew-1-1-18"
+   ]
+  },
+  {
+   "ocr": "vrere",
+   "read": "were",
+   "seen_in": [
+    "Matthew-s26-p545"
+   ]
+  },
+  {
+   "ocr": "wliich",
+   "read": "which",
+   "seen_in": [
+    "Matthew-t01-p866"
+   ]
+  },
+  {
+   "ocr": "wotdd",
+   "read": "would",
+   "seen_in": [
+    "Matthew-s09-p421"
+   ]
+  },
+  {
+   "ocr": "y",
+   "read": "ye",
+   "seen_in": [
+    "Luke-s12-p446"
+   ]
+  },
+  {
+   "ocr": "Zacchaeus",
+   "read": "Zacchæus",
+   "seen_in": [
+    "Luke-s01-p626",
+    "Luke-s01-p626"
+   ]
+  },
+  {
+   "ocr": "Zacchteus",
+   "read": "Zacchæus",
+   "seen_in": [
+    "Luke-s01-p626"
+   ]
+  }
+ ]
+}

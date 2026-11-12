@@ -1063,6 +1063,19 @@
   },
   {
    "key": "chrysostom",
+   "editors_mark_in_parts": {
+    "mk": {
+     "quote": "Many of the passages ascribed to S. Chrysostom are not found in the works of that Father.",
+     "and": "contains far the greater number of the same passages marked as S. Chrysostom's in the Catena Aurea. It is commonly ascribed to Victor of Antioch",
+     "and_of": "'A Latin Version of this Catena or Commentary', the Greek Catena on S. Mark the preface names, in which most of these passages occur",
+     "where": "the Preface to the Commentary on S. Mark, Catena Aurea vol. II (1842), its first page",
+     "item": "catenaaureacomme02thomuoft",
+     "leaf": 10,
+     "page_image": "https://archive.org/download/catenaaureacomme02thomuoft/page/n10.jpg",
+     "ocr_corrections": [],
+     "read": "copied by code from copy A's OCR (lines 9-10 and 17-19 of the page) and checked word by word against the page image by builder-30, 2026-11-12; served beside every CHRYS. excerpt in Mark (plan twelve)"
+    }
+   },
    "printed_forms": [
     {
      "form": "CHRYS",

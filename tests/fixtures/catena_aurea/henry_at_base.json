@@ -1,0 +1,348 @@
+{
+ "about": "Matthew Henry's default responses at the base of step catena (run 2026-11-11-fathers-shelf, commit e2c807f), over the fixture store below: for_ref with and without source, GET /commentary with and without source, and the MCP commentary tool, on both faces, each as the sha256 of its JSON bytes (sorted keys, UTF-8). The store's text is placeholder, labelled so, standing in for the migrated Henry store; tests/test_commentary_catena.py recomputes each response and holds it byte-identical.",
+ "refs": [
+  "John 3:16",
+  "John 3:10",
+  "John 3",
+  "Psalm 23",
+  "Psalms 23:1",
+  "Matthew 1:1",
+  "Matthew 1:3",
+  "Matthew 1",
+  "Matthew 5:1",
+  "Matthew 5:3",
+  "Matthew 5:14",
+  "Mark 1:1",
+  "Luke 2:1",
+  "John 99",
+  "Zzz 1",
+  "garbage",
+  ""
+ ],
+ "responses": {
+  "secular ": {
+   "api": "394bf7c57a22a0c50cdb196edcf65abf7010ed26125f28422e05f42ae48c9725",
+   "api_henry": "394bf7c57a22a0c50cdb196edcf65abf7010ed26125f28422e05f42ae48c9725",
+   "for_ref": "7ffe09ae3b7eb6fd1910ff4df3414d2a7081a4cf989d1d9167d0fb431db75c44",
+   "for_ref_henry": "7ffe09ae3b7eb6fd1910ff4df3414d2a7081a4cf989d1d9167d0fb431db75c44",
+   "mcp": "a305d667bf26b26dc02a2163cbfe1864e91bec027b6a987d5ffa0e488818e764"
+  },
+  "secular John 3": {
+   "api": "c183112040ee3268cca6716ef479db1fa55216b93aa94c354b065a7afa0b6cd6",
+   "api_henry": "c183112040ee3268cca6716ef479db1fa55216b93aa94c354b065a7afa0b6cd6",
+   "for_ref": "af4bb639f04ea14c0185ca4bc85ef572cfc15f65741c609b157e818e4134f581",
+   "for_ref_henry": "af4bb639f04ea14c0185ca4bc85ef572cfc15f65741c609b157e818e4134f581",
+   "mcp": "5d4e1699aa9a4be191472d8d568cb40c872781c7ad362b7c5aafbca43def8b4b"
+  },
+  "secular John 3:10": {
+   "api": "856ef2ee01bb35edfdeeac9b371f97cd96198780f626e55ff7aa3fd1247c4ce5",
+   "api_henry": "856ef2ee01bb35edfdeeac9b371f97cd96198780f626e55ff7aa3fd1247c4ce5",
+   "for_ref": "aff70e1e25daac67ab94f8cb2d4761ea15f51e410ea1645aec4c3f456cbbd55d",
+   "for_ref_henry": "aff70e1e25daac67ab94f8cb2d4761ea15f51e410ea1645aec4c3f456cbbd55d",
+   "mcp": "aafdc33faac90fe76e3a855c84a347e242e9f2f97e99eac5ec54cf41d5f35618"
+  },
+  "secular John 3:16": {
+   "api": "5064b969922d372c334ff6fa4e0d5df7cda8008f4cfdff8b514169185ab379b3",
+   "api_henry": "5064b969922d372c334ff6fa4e0d5df7cda8008f4cfdff8b514169185ab379b3",
+   "for_ref": "efd8b25a29ddee190ff97963064b91a66ef3fc1c0b7feb91af9cdfec28c5462c",
+   "for_ref_henry": "efd8b25a29ddee190ff97963064b91a66ef3fc1c0b7feb91af9cdfec28c5462c",
+   "mcp": "90d8d298b779993d154b46879c4927ca16d798b9a875023e2e73a8bd5974c0e4"
+  },
+  "secular John 99": {
+   "api": "32a20afdd21184440e4a108051409e37feb96a029d077674e6d93b8c1e1f8267",
+   "api_henry": "32a20afdd21184440e4a108051409e37feb96a029d077674e6d93b8c1e1f8267",
+   "for_ref": "f423046dfe818377f53c20c0c03bb04b7100210086e68fb571e48ee377edd62f",
+   "for_ref_henry": "f423046dfe818377f53c20c0c03bb04b7100210086e68fb571e48ee377edd62f",
+   "mcp": "3d8a2380e46fab5805fd75947fa79aea1fd4073fe837a423227612fba1fc478d"
+  },
+  "secular Luke 2:1": {
+   "api": "468aa16efd2dcf6de9a4c855cf9b2ee96d1aa6c739958d04ba9664cd3d7b27af",
+   "api_henry": "468aa16efd2dcf6de9a4c855cf9b2ee96d1aa6c739958d04ba9664cd3d7b27af",
+   "for_ref": "95933e383fa8444a40fc2a1810857cb59bc07be34adbe8d68e7d2faf43f03ed6",
+   "for_ref_henry": "95933e383fa8444a40fc2a1810857cb59bc07be34adbe8d68e7d2faf43f03ed6",
+   "mcp": "7fe863f803192af913546207c7689018659408c0b4238c59186752cac8fa3009"
+  },
+  "secular Mark 1:1": {
+   "api": "61a201dc822872a4757e5fb475d63150446cb7f079c1494c565e181c2e48b525",
+   "api_henry": "61a201dc822872a4757e5fb475d63150446cb7f079c1494c565e181c2e48b525",
+   "for_ref": "af8132f7b7c45bbd73851611056b04edc12b1a52f5cb341b4cec0bacf479d144",
+   "for_ref_henry": "af8132f7b7c45bbd73851611056b04edc12b1a52f5cb341b4cec0bacf479d144",
+   "mcp": "96000dbe717bcacc37ff965988362b481a3eb14fa71e64d102d8c6ef0e8cabbc"
+  },
+  "secular Matthew 1": {
+   "api": "f7cf4aa5df6b4c3eff24a561940b38a5d0d14adfd94de4ea764debe7d8e11ca8",
+   "api_henry": "f7cf4aa5df6b4c3eff24a561940b38a5d0d14adfd94de4ea764debe7d8e11ca8",
+   "for_ref": "e653297e6e0c12a19279db3df7339b35d9f2d174c7d85872aa508b2394d5eaea",
+   "for_ref_henry": "e653297e6e0c12a19279db3df7339b35d9f2d174c7d85872aa508b2394d5eaea",
+   "mcp": "f909f597a19462e2ef21f02edcd45c67c4d31d1b9cf9f1b1cd60a682dbb05ae9"
+  },
+  "secular Matthew 1:1": {
+   "api": "50040dd86a5c3067ab7cf46d171e9ba476b80903dc6bd5f08ef867279cc001d0",
+   "api_henry": "50040dd86a5c3067ab7cf46d171e9ba476b80903dc6bd5f08ef867279cc001d0",
+   "for_ref": "fa65066f45820ce31da5e49ae1ab767bc995f890d57dd85c9197b2f5f64162f1",
+   "for_ref_henry": "fa65066f45820ce31da5e49ae1ab767bc995f890d57dd85c9197b2f5f64162f1",
+   "mcp": "da31261800cc17b0baa43824315aaaa37bb86e98c20cfae57620bc4e11f859fc"
+  },
+  "secular Matthew 1:3": {
+   "api": "4965a6d02048d555378c2aa88d66b2a5e29510fb4b9cd53946886dd653c6d793",
+   "api_henry": "4965a6d02048d555378c2aa88d66b2a5e29510fb4b9cd53946886dd653c6d793",
+   "for_ref": "381fe546af3fe465a0e84a530eb074c6cafc1468f75b0a6737eda738f9822f23",
+   "for_ref_henry": "381fe546af3fe465a0e84a530eb074c6cafc1468f75b0a6737eda738f9822f23",
+   "mcp": "aa71bd1a3ab0ca51b34cc4e9f6f6d4f23c1c21003983b79d95227011f5a5b2c7"
+  },
+  "secular Matthew 5:1": {
+   "api": "b44fec5c01e538ffedee3ac256e6e25845cf1c25233a69a70495cefe7447dee1",
+   "api_henry": "b44fec5c01e538ffedee3ac256e6e25845cf1c25233a69a70495cefe7447dee1",
+   "for_ref": "45e71d50c87c4ca981abac0576d2dcb62bb9b23ea0f592189b29143ad4a054cf",
+   "for_ref_henry": "45e71d50c87c4ca981abac0576d2dcb62bb9b23ea0f592189b29143ad4a054cf",
+   "mcp": "85168939a4f3819f537156a0200135d8059381318bb3d2ee7a765ffa34be65cd"
+  },
+  "secular Matthew 5:14": {
+   "api": "cddb6e1f8c3bcc50d6b81c9d4dbfeaa2afd394829b118e4975c6a7f9d3dc22e5",
+   "api_henry": "cddb6e1f8c3bcc50d6b81c9d4dbfeaa2afd394829b118e4975c6a7f9d3dc22e5",
+   "for_ref": "767c2700f9216d8b11929be9d4b7018b801a43cc954b7c950e3a145ec60de6dc",
+   "for_ref_henry": "767c2700f9216d8b11929be9d4b7018b801a43cc954b7c950e3a145ec60de6dc",
+   "mcp": "9639979d402b916818d25b9877ad8fd843a789e4e9982070ab32b45b84e317a1"
+  },
+  "secular Matthew 5:3": {
+   "api": "534671ff9cb11955fe45967522e94477a6ad2c6f72ff61f9cba8502937aceffe",
+   "api_henry": "534671ff9cb11955fe45967522e94477a6ad2c6f72ff61f9cba8502937aceffe",
+   "for_ref": "076999b4956148975a735a22cb083d2d05ee71718b7b21d3a28f488d9905a279",
+   "for_ref_henry": "076999b4956148975a735a22cb083d2d05ee71718b7b21d3a28f488d9905a279",
+   "mcp": "e27890ff8dbe0c8db12575638e1a6465e2a8a094fdf52bc7537541e069750105"
+  },
+  "secular Psalm 23": {
+   "api": "f3910b7c65e9fbfc2ab29e49c4e127cfa6ca92c6c121d0d4d18359dcc7b49db1",
+   "api_henry": "f3910b7c65e9fbfc2ab29e49c4e127cfa6ca92c6c121d0d4d18359dcc7b49db1",
+   "for_ref": "ce764ca2d50f9ef17cc4b761e460b598e9438f244f7847f52e4557da3f445524",
+   "for_ref_henry": "ce764ca2d50f9ef17cc4b761e460b598e9438f244f7847f52e4557da3f445524",
+   "mcp": "ff3515e2d83bf0f9aa8efd8d154328e2946118688acd75029cb9052bcbebcb14"
+  },
+  "secular Psalms 23:1": {
+   "api": "6dc6e1071b49824e556a04a1106af005983a6c68c1be55255ab66990ecc47c49",
+   "api_henry": "6dc6e1071b49824e556a04a1106af005983a6c68c1be55255ab66990ecc47c49",
+   "for_ref": "864424e656960a43394ff145944dea4ac7cd6b9b735cdcad983cb82ff8455db7",
+   "for_ref_henry": "864424e656960a43394ff145944dea4ac7cd6b9b735cdcad983cb82ff8455db7",
+   "mcp": "bdfdfcb17df82a9ad0fc4ee62f10aa08c77a155252319aa83003797e65303295"
+  },
+  "secular Zzz 1": {
+   "api": "c92c5ca8f7f9e16c5bf4a12221851ae8f6e994482549f50bfecd91e447384cfb",
+   "api_henry": "c92c5ca8f7f9e16c5bf4a12221851ae8f6e994482549f50bfecd91e447384cfb",
+   "for_ref": "de5e4ee519a39ac51315a174021bc74cf4bd9e90521fa5df480ab45442bf290a",
+   "for_ref_henry": "de5e4ee519a39ac51315a174021bc74cf4bd9e90521fa5df480ab45442bf290a",
+   "mcp": "914db8ad271e412fdbdd29818c94b6ccf09f9f9869dd068025746716de287c5e"
+  },
+  "secular garbage": {
+   "api": "f1ce41c15b0bc030d52d0735e2de84ea74df06a8f08ea655868729937240038b",
+   "api_henry": "f1ce41c15b0bc030d52d0735e2de84ea74df06a8f08ea655868729937240038b",
+   "for_ref": "6f0321d8404d6aff292b10103d8e2dd2126d415227edd400a73e715003b253aa",
+   "for_ref_henry": "6f0321d8404d6aff292b10103d8e2dd2126d415227edd400a73e715003b253aa",
+   "mcp": "0473fdb9d228ac5d78e0ec7e154eddc7588bf93c3815757fa74e1e169174e48e"
+  },
+  "witness ": {
+   "api": "394bf7c57a22a0c50cdb196edcf65abf7010ed26125f28422e05f42ae48c9725",
+   "api_henry": "394bf7c57a22a0c50cdb196edcf65abf7010ed26125f28422e05f42ae48c9725",
+   "for_ref": "7ffe09ae3b7eb6fd1910ff4df3414d2a7081a4cf989d1d9167d0fb431db75c44",
+   "for_ref_henry": "7ffe09ae3b7eb6fd1910ff4df3414d2a7081a4cf989d1d9167d0fb431db75c44",
+   "mcp": "a305d667bf26b26dc02a2163cbfe1864e91bec027b6a987d5ffa0e488818e764"
+  },
+  "witness John 3": {
+   "api": "c183112040ee3268cca6716ef479db1fa55216b93aa94c354b065a7afa0b6cd6",
+   "api_henry": "c183112040ee3268cca6716ef479db1fa55216b93aa94c354b065a7afa0b6cd6",
+   "for_ref": "af4bb639f04ea14c0185ca4bc85ef572cfc15f65741c609b157e818e4134f581",
+   "for_ref_henry": "af4bb639f04ea14c0185ca4bc85ef572cfc15f65741c609b157e818e4134f581",
+   "mcp": "5d4e1699aa9a4be191472d8d568cb40c872781c7ad362b7c5aafbca43def8b4b"
+  },
+  "witness John 3:10": {
+   "api": "856ef2ee01bb35edfdeeac9b371f97cd96198780f626e55ff7aa3fd1247c4ce5",
+   "api_henry": "856ef2ee01bb35edfdeeac9b371f97cd96198780f626e55ff7aa3fd1247c4ce5",
+   "for_ref": "aff70e1e25daac67ab94f8cb2d4761ea15f51e410ea1645aec4c3f456cbbd55d",
+   "for_ref_henry": "aff70e1e25daac67ab94f8cb2d4761ea15f51e410ea1645aec4c3f456cbbd55d",
+   "mcp": "aafdc33faac90fe76e3a855c84a347e242e9f2f97e99eac5ec54cf41d5f35618"
+  },
+  "witness John 3:16": {
+   "api": "5064b969922d372c334ff6fa4e0d5df7cda8008f4cfdff8b514169185ab379b3",
+   "api_henry": "5064b969922d372c334ff6fa4e0d5df7cda8008f4cfdff8b514169185ab379b3",
+   "for_ref": "efd8b25a29ddee190ff97963064b91a66ef3fc1c0b7feb91af9cdfec28c5462c",
+   "for_ref_henry": "efd8b25a29ddee190ff97963064b91a66ef3fc1c0b7feb91af9cdfec28c5462c",
+   "mcp": "90d8d298b779993d154b46879c4927ca16d798b9a875023e2e73a8bd5974c0e4"
+  },
+  "witness John 99": {
+   "api": "32a20afdd21184440e4a108051409e37feb96a029d077674e6d93b8c1e1f8267",
+   "api_henry": "32a20afdd21184440e4a108051409e37feb96a029d077674e6d93b8c1e1f8267",
+   "for_ref": "f423046dfe818377f53c20c0c03bb04b7100210086e68fb571e48ee377edd62f",
+   "for_ref_henry": "f423046dfe818377f53c20c0c03bb04b7100210086e68fb571e48ee377edd62f",
+   "mcp": "3d8a2380e46fab5805fd75947fa79aea1fd4073fe837a423227612fba1fc478d"
+  },
+  "witness Luke 2:1": {
+   "api": "468aa16efd2dcf6de9a4c855cf9b2ee96d1aa6c739958d04ba9664cd3d7b27af",
+   "api_henry": "468aa16efd2dcf6de9a4c855cf9b2ee96d1aa6c739958d04ba9664cd3d7b27af",
+   "for_ref": "95933e383fa8444a40fc2a1810857cb59bc07be34adbe8d68e7d2faf43f03ed6",
+   "for_ref_henry": "95933e383fa8444a40fc2a1810857cb59bc07be34adbe8d68e7d2faf43f03ed6",
+   "mcp": "7fe863f803192af913546207c7689018659408c0b4238c59186752cac8fa3009"
+  },
+  "witness Mark 1:1": {
+   "api": "61a201dc822872a4757e5fb475d63150446cb7f079c1494c565e181c2e48b525",
+   "api_henry": "61a201dc822872a4757e5fb475d63150446cb7f079c1494c565e181c2e48b525",
+   "for_ref": "af8132f7b7c45bbd73851611056b04edc12b1a52f5cb341b4cec0bacf479d144",
+   "for_ref_henry": "af8132f7b7c45bbd73851611056b04edc12b1a52f5cb341b4cec0bacf479d144",
+   "mcp": "96000dbe717bcacc37ff965988362b481a3eb14fa71e64d102d8c6ef0e8cabbc"
+  },
+  "witness Matthew 1": {
+   "api": "f7cf4aa5df6b4c3eff24a561940b38a5d0d14adfd94de4ea764debe7d8e11ca8",
+   "api_henry": "f7cf4aa5df6b4c3eff24a561940b38a5d0d14adfd94de4ea764debe7d8e11ca8",
+   "for_ref": "e653297e6e0c12a19279db3df7339b35d9f2d174c7d85872aa508b2394d5eaea",
+   "for_ref_henry": "e653297e6e0c12a19279db3df7339b35d9f2d174c7d85872aa508b2394d5eaea",
+   "mcp": "f909f597a19462e2ef21f02edcd45c67c4d31d1b9cf9f1b1cd60a682dbb05ae9"
+  },
+  "witness Matthew 1:1": {
+   "api": "50040dd86a5c3067ab7cf46d171e9ba476b80903dc6bd5f08ef867279cc001d0",
+   "api_henry": "50040dd86a5c3067ab7cf46d171e9ba476b80903dc6bd5f08ef867279cc001d0",
+   "for_ref": "fa65066f45820ce31da5e49ae1ab767bc995f890d57dd85c9197b2f5f64162f1",
+   "for_ref_henry": "fa65066f45820ce31da5e49ae1ab767bc995f890d57dd85c9197b2f5f64162f1",
+   "mcp": "da31261800cc17b0baa43824315aaaa37bb86e98c20cfae57620bc4e11f859fc"
+  },
+  "witness Matthew 1:3": {
+   "api": "4965a6d02048d555378c2aa88d66b2a5e29510fb4b9cd53946886dd653c6d793",
+   "api_henry": "4965a6d02048d555378c2aa88d66b2a5e29510fb4b9cd53946886dd653c6d793",
+   "for_ref": "381fe546af3fe465a0e84a530eb074c6cafc1468f75b0a6737eda738f9822f23",
+   "for_ref_henry": "381fe546af3fe465a0e84a530eb074c6cafc1468f75b0a6737eda738f9822f23",
+   "mcp": "aa71bd1a3ab0ca51b34cc4e9f6f6d4f23c1c21003983b79d95227011f5a5b2c7"
+  },
+  "witness Matthew 5:1": {
+   "api": "b44fec5c01e538ffedee3ac256e6e25845cf1c25233a69a70495cefe7447dee1",
+   "api_henry": "b44fec5c01e538ffedee3ac256e6e25845cf1c25233a69a70495cefe7447dee1",
+   "for_ref": "45e71d50c87c4ca981abac0576d2dcb62bb9b23ea0f592189b29143ad4a054cf",
+   "for_ref_henry": "45e71d50c87c4ca981abac0576d2dcb62bb9b23ea0f592189b29143ad4a054cf",
+   "mcp": "85168939a4f3819f537156a0200135d8059381318bb3d2ee7a765ffa34be65cd"
+  },
+  "witness Matthew 5:14": {
+   "api": "cddb6e1f8c3bcc50d6b81c9d4dbfeaa2afd394829b118e4975c6a7f9d3dc22e5",
+   "api_henry": "cddb6e1f8c3bcc50d6b81c9d4dbfeaa2afd394829b118e4975c6a7f9d3dc22e5",
+   "for_ref": "767c2700f9216d8b11929be9d4b7018b801a43cc954b7c950e3a145ec60de6dc",
+   "for_ref_henry": "767c2700f9216d8b11929be9d4b7018b801a43cc954b7c950e3a145ec60de6dc",
+   "mcp": "9639979d402b916818d25b9877ad8fd843a789e4e9982070ab32b45b84e317a1"
+  },
+  "witness Matthew 5:3": {
+   "api": "534671ff9cb11955fe45967522e94477a6ad2c6f72ff61f9cba8502937aceffe",
+   "api_henry": "534671ff9cb11955fe45967522e94477a6ad2c6f72ff61f9cba8502937aceffe",
+   "for_ref": "076999b4956148975a735a22cb083d2d05ee71718b7b21d3a28f488d9905a279",
+   "for_ref_henry": "076999b4956148975a735a22cb083d2d05ee71718b7b21d3a28f488d9905a279",
+   "mcp": "e27890ff8dbe0c8db12575638e1a6465e2a8a094fdf52bc7537541e069750105"
+  },
+  "witness Psalm 23": {
+   "api": "f3910b7c65e9fbfc2ab29e49c4e127cfa6ca92c6c121d0d4d18359dcc7b49db1",
+   "api_henry": "f3910b7c65e9fbfc2ab29e49c4e127cfa6ca92c6c121d0d4d18359dcc7b49db1",
+   "for_ref": "ce764ca2d50f9ef17cc4b761e460b598e9438f244f7847f52e4557da3f445524",
+   "for_ref_henry": "ce764ca2d50f9ef17cc4b761e460b598e9438f244f7847f52e4557da3f445524",
+   "mcp": "ff3515e2d83bf0f9aa8efd8d154328e2946118688acd75029cb9052bcbebcb14"
+  },
+  "witness Psalms 23:1": {
+   "api": "6dc6e1071b49824e556a04a1106af005983a6c68c1be55255ab66990ecc47c49",
+   "api_henry": "6dc6e1071b49824e556a04a1106af005983a6c68c1be55255ab66990ecc47c49",
+   "for_ref": "864424e656960a43394ff145944dea4ac7cd6b9b735cdcad983cb82ff8455db7",
+   "for_ref_henry": "864424e656960a43394ff145944dea4ac7cd6b9b735cdcad983cb82ff8455db7",
+   "mcp": "bdfdfcb17df82a9ad0fc4ee62f10aa08c77a155252319aa83003797e65303295"
+  },
+  "witness Zzz 1": {
+   "api": "c92c5ca8f7f9e16c5bf4a12221851ae8f6e994482549f50bfecd91e447384cfb",
+   "api_henry": "c92c5ca8f7f9e16c5bf4a12221851ae8f6e994482549f50bfecd91e447384cfb",
+   "for_ref": "de5e4ee519a39ac51315a174021bc74cf4bd9e90521fa5df480ab45442bf290a",
+   "for_ref_henry": "de5e4ee519a39ac51315a174021bc74cf4bd9e90521fa5df480ab45442bf290a",
+   "mcp": "914db8ad271e412fdbdd29818c94b6ccf09f9f9869dd068025746716de287c5e"
+  },
+  "witness garbage": {
+   "api": "f1ce41c15b0bc030d52d0735e2de84ea74df06a8f08ea655868729937240038b",
+   "api_henry": "f1ce41c15b0bc030d52d0735e2de84ea74df06a8f08ea655868729937240038b",
+   "for_ref": "6f0321d8404d6aff292b10103d8e2dd2126d415227edd400a73e715003b253aa",
+   "for_ref_henry": "6f0321d8404d6aff292b10103d8e2dd2126d415227edd400a73e715003b253aa",
+   "mcp": "0473fdb9d228ac5d78e0ec7e154eddc7588bf93c3815757fa74e1e169174e48e"
+  }
+ },
+ "store": {
+  "JHN/3.json": {
+   "blocks": [
+    {
+     "text": "fixture block, John 3:1",
+     "verse": 1
+    },
+    {
+     "text": "fixture block, John 3:16 — with a dash",
+     "verse": 16
+    }
+   ],
+   "book": "John",
+   "book_code": "JHN",
+   "chapter": 3,
+   "introduction": "fixture introduction, John 3",
+   "source": "matthew-henry"
+  },
+  "MAT/1.json": {
+   "blocks": [
+    {
+     "text": "fixture block, Matthew 1:1",
+     "verse": 1
+    },
+    {
+     "text": "fixture block, Matthew 1:18",
+     "verse": 18
+    }
+   ],
+   "book": "Matthew",
+   "book_code": "MAT",
+   "chapter": 1,
+   "introduction": "fixture introduction, Matthew 1",
+   "source": "matthew-henry"
+  },
+  "MAT/5.json": {
+   "blocks": [
+    {
+     "text": "fixture block, Matthew 5:3",
+     "verse": 3
+    },
+    {
+     "text": "fixture block, Matthew 5:13",
+     "verse": 13
+    }
+   ],
+   "book": "Matthew",
+   "book_code": "MAT",
+   "chapter": 5,
+   "introduction": "",
+   "source": "matthew-henry"
+  },
+  "PSA/23.json": {
+   "blocks": [
+    {
+     "text": "fixture block, Psalm 23:1",
+     "verse": 1
+    }
+   ],
+   "book": "Psalms",
+   "book_code": "PSA",
+   "chapter": 23,
+   "introduction": "fixture introduction, Psalm 23",
+   "source": "matthew-henry"
+  },
+  "_books.json": [
+   {
+    "chapters": 28,
+    "code": "MAT",
+    "commonName": "Matthew",
+    "name": "Matthew"
+   },
+   {
+    "chapters": 21,
+    "code": "JHN",
+    "commonName": "John",
+    "name": "John"
+   },
+   {
+    "chapters": 150,
+    "code": "PSA",
+    "commonName": "Psalms",
+    "name": "Psalms"
+   }
+  ]
+ }
+}

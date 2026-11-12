@@ -12,3 +12,5 @@
 canary tools/build_canary.py 65df645acfb8c0db9d7d2baaf2100b95f0910f9e3bdcba8be4a5a49cde99b690 128 "ok"
 # canary-fail: tools/build_canary.py writes canary-fail.txt into its temporary directory and exits 1; nothing may land.
 canary-fail tools/build_canary.py 2536bbd158047ad8a9c19780a8efa3ec1c546bd314204de042bdf0f1f1274eb3 128 "fail"
+# catena-aurea: the Catena Aurea on the four Gospels (1841-45), each excerpt read alike in two archive.org scans of the printing, from both copies' ABBYY layout files, fetched by their pinned sha256, sections checked against the engine's verse numbers (run 2026-11-11-fathers-shelf, steps catena and catena2); a peak of 170 MB measured (a laptop run, private bytes), capped at 512.
+catena-aurea tools/build_catena.py d5cfd9a8a1f0f51aa88190b47d3e8e217ae01942616be52c9712b7c8db6a15c7 512 in=tools/catena_aurea/authors.json in=tools/catena_aurea/census.json in=tools/catena_aurea/golden.json in=tools/catena_aurea/gospel_verses.json in=tools/catena_aurea/misreadings.json "fetch"
