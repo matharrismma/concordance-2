@@ -34,10 +34,12 @@ test_bible_places.py
 test_binding.py
 test_biology.py
 test_bookofdays.py
+test_box_build.py
 test_branch.py
 test_bridges.py
 test_bridges_late_shelf.py
 test_bsd_formula.py
+test_build_ship.py
 test_byom.py
 test_cabinet.py
 test_calendar_time.py

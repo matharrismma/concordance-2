@@ -24,6 +24,15 @@ HOST="nh@5.78.186.55"
 KEY="$HOME/.ssh/id_ed25519_nh"
 DEST="/home/nh/concordance-2"
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
+# THE BUILD PATH (run 2026-11-11-box-build): `--build <name>` and `--build-verify <name>` never reach the lines below.
+# They go whole to tools/build_ship.sh, handed the box in its environment so that no other file names it. A deploy
+# without them runs exactly as before.
+case "${1:-}" in
+    --build|--build-verify)
+        BUILD_HOST=$HOST BUILD_KEY=$KEY BUILD_DEST=$DEST
+        export BUILD_HOST BUILD_KEY BUILD_DEST
+        exec sh "$REPO/tools/build_ship.sh" "$@" ;;
+esac
 
 [ "$#" -ge 1 ] || { echo "usage: sh tools/deploy.sh <repo-relative file> [...]"; exit 2; }
 

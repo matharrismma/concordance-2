@@ -130,6 +130,35 @@ and its commit says so.
 - Only the lead touches the box, and only through a gated ship path, never by hand:
   - **this repository** — `sh tools/deploy.sh <files>`: snapshot, transfer, restart, the four on-box
     gates, automatic revert on any regression, then the drift check;
+  - **built data** (run 2026-11-11-box-build) — **build first, then the ordinary deploy of the pin and
+    its reader.** `sh tools/deploy.sh --build <name>` (repeatable) is handed, by lines in `tools/deploy.sh`
+    after those that name the box, to `tools/build_ship.sh` with the box in its environment. A name is an
+    entry of `tools/box_builds.txt`, never a path or a free argument: a tool under `tools/` that imports only
+    the standard library, its fixed arguments, the content hash its output must have, a memory cap of at
+    most 1024 MB and its inputs, tracked files outside `data/`. It sends the listing, `tools/box_build.py`
+    and the tool to their paths and each input only into `data/builds/.inputs/<run id>/`, starts the unit
+    on the box detached with a fresh run id, and polls for at most 45 minutes for
+    `data/builds/.results/<run id>.json`, taking only a result that holds that run id. The unit holds
+    `data/builds/.lock`, a lock the kernel drops if it dies; refuses to start below the cap plus 256 MB of
+    available memory or 2 GB plus the last build's size free on `data/`'s filesystem; runs the tool with
+    oom_score_adj 1000 and the cap as its address-space limit, under nice and ionice, with no
+    `CONCORDANCE_` variable, an empty scratch data directory outside `data/` and its inputs read-only; and
+    renames the output to `data/builds/<name>/<content hash>/` only when it hashes to the listed hash
+    (`python tools/box_build.py hash <dir>`: each file's sha256 and forward-slash path, sorted, hashed). A
+    build only ever adds a directory nothing serves, so a failed build, a dropped session or a timed-out
+    poll changes nothing the site serves. A Windows checkout sends its inputs with CRLF line endings, so a
+    tool parses its inputs and never copies their bytes into its output. The engine reads built data only
+    through `src/concordance/builds.py`, and only the hash pinned in `src/concordance/build_pins.json`. A served
+    change ships as one fail-closed chain, `sh tools/deploy.sh --build-verify <name> && sh tools/deploy.sh
+    src/concordance/build_pins.json <reader files>`: the verify takes the pin from the laptop's pins file
+    and fails unless that build is on the box and re-hashes to its name. The live assay guards only probes
+    that have passed before, so a first ship's new probes are read after the deploy and its revert is the
+    lead's, by hand: an ordinary deploy of the previous pin and reader. The old pattern, a seed run on the
+    box over ssh by hand, is retired. `tools/backup.sh` carries `data/builds/` like other data and leaves
+    nothing inside it out: `data/builds/.tmp/` and `data/builds/.inputs/` are in the nightly copy too. Both
+    are empty between builds; a build running at backup time puts its partial output and its staged inputs
+    in that night's copy, and the next build removes them on the box. Old hash directories are never
+    pruned; their growth on disk and in the nightly copy is a want (the canary adds one 74-byte file);
   - **the outside watch** — `deploy/install_watch.sh`, copied with the watch files into a private
     folder on the box and run there with sudo, since `deploy/` is not on the box; the folder is
     removed after. It snapshots what it replaces, installs the watch and each engine's
@@ -158,5 +187,7 @@ and its commit says so.
 - `docs/harness/baseline.txt` — the known reds (with fingerprints) and vacuous passes, each with its
   reason. Re-measured only in a bootstrap, with `python tools/harness.py measure`.
 - `docs/harness/runs/<run>.jsonl` — one ledger per run, committed with its steps: the audit trail.
+- `tools/box_builds.txt` — every build the box may run; `tools/box_build.py` builds one;
+  `tests/test_box_build.py` and `tests/test_build_ship.py` pin the build path.
 - Private secret patterns (box host, key file names) go one regex per line in
   `~/.config/harness/secret_patterns.txt`, never in this repo.

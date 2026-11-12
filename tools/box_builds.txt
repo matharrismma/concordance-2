@@ -1,0 +1,14 @@
+# THE BUILD LISTING: every build tools/box_build.py may run on the box (run 2026-11-11-box-build). One entry per line:
+#
+#   NAME TOOL SHA256 CAP_MB [in=PATH]... ["ARG"]...
+#
+# NAME is [a-z0-9][a-z0-9-]*, the only thing `sh tools/deploy.sh --build` takes. TOOL is a tools/*.py file that imports
+# only the standard library. SHA256 is the content hash its output must have, from `python tools/box_build.py hash DIR`
+# on a run of the tool with exactly the listed inputs. CAP_MB is its memory cap, 1 to 1024. Each in=PATH is a tracked
+# file outside data/, sent only into the build's staging directory and handed to the tool read-only. Each "ARG" is a
+# fixed argument. A comment line just before each entry says what it builds and from where.
+
+# canary: one fixed file, canary.txt (74 bytes), written by tools/build_canary.py from nothing; the path's first build.
+canary tools/build_canary.py 65df645acfb8c0db9d7d2baaf2100b95f0910f9e3bdcba8be4a5a49cde99b690 128 "ok"
+# canary-fail: tools/build_canary.py writes canary-fail.txt into its temporary directory and exits 1; nothing may land.
+canary-fail tools/build_canary.py 2536bbd158047ad8a9c19780a8efa3ec1c546bd314204de042bdf0f1f1274eb3 128 "fail"
