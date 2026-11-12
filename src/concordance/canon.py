@@ -201,6 +201,33 @@ TRADITION_ADDITIONS: Dict[str, Dict[str, Any]] = {
 
 
 # ---------------------------------------------------------------------------
+# KEPT AS — where each Greek addition stands in the texts the canon layers keep
+# ---------------------------------------------------------------------------
+# The canon layers (src/concordance/canon_layers.py, run 2026-11-11-full-canons) serve the Greek additions as
+# the editions hold them, never cut out of the verses they stand in. Esther (Greek) and Daniel (Greek) are books
+# of the layer; the rest stand inside a book. Spans are in the World English Bible's numbering (eBible.org
+# eng-web); the Douay-Rheims prints the Esther and Daniel additions inside its Esther and Daniel, books of the
+# 66 that no layer holds. tools/canon_tables/book_codes.json holds the same places, checked against the text.
+KEPT_AS: Dict[str, str] = {
+    "additions to esther": "read within Esther (Greek), a book of the layer, whose verses hold them",
+    "prayer of azariah": "Daniel (Greek) 3:24-90, in the World English Bible's numbering",
+    "susanna": "Daniel (Greek) 13",
+    "bel and the dragon": "Daniel (Greek) 14",
+    "letter of jeremiah": "Baruch 6",
+}
+
+# Two books of the 66 as the Greek tradition holds them, with additions read within them. Each is a book of the
+# canon layers under this name, never under the 66 book's own name. "esther (greek)" is also an alias of the
+# Additions to Esther above, and canon_status keeps answering that alias as it always has.
+GREEK_FORMS: Dict[str, Dict[str, Any]] = {
+    "daniel (greek)": {"of": "daniel", "aliases": ["daniel (greek)", "greek daniel"],
+                       "within": ["prayer of azariah", "susanna", "bel and the dragon"]},
+    "esther (greek)": {"of": "esther", "aliases": ["esther (greek)", "greek esther"],
+                       "within": ["additions to esther"]},
+}
+
+
+# ---------------------------------------------------------------------------
 # Lookup index: alias -> (tradition_key, canonical_book_name)
 # ---------------------------------------------------------------------------
 # A single book can be held by more than one tradition (e.g. Tobit is held by
@@ -331,13 +358,39 @@ def canon_status(book_name: str) -> Dict[str, Any]:
     canonical = _ALIAS_INDEX.get(key) or _ALIAS_INDEX.get(key.rstrip("."))
     if canonical:
         holders = _holders_for_canonical(canonical)
-        return {
+        out = {
             "book": raw,
             "in_undisputed_66": False,
             "held_by": holders,
             "historical_note": _historical_note_for(holders, canonical),
             # canonical name surfaced so callers can dedupe aliases.
             "canonical_name": canonical,
+        }
+        if canonical in KEPT_AS:
+            out["kept_as"] = KEPT_AS[canonical]
+        return out
+
+    # 2b) A Greek form of a book of the 66 (Daniel (Greek)): the 66 book with additions read within it.
+    form = next((name for name, f in GREEK_FORMS.items() if key in f["aliases"]), None)
+    if form:
+        within = GREEK_FORMS[form]["within"]
+        holders: List[str] = []
+        for w in within:
+            for h in _holders_for_canonical(w):
+                if h not in holders:
+                    holders.append(h)
+        of = GREEK_FORMS[form]["of"].title()
+        return {
+            "book": raw,
+            "in_undisputed_66": False,
+            "held_by": holders,
+            "greek_form_of": of,
+            "within": list(within),
+            "canonical_name": form,
+            "historical_note": (
+                f"{of} as the Greek tradition holds it, with additions read within it ({', '.join(within)}). "
+                f"{of} itself is in the undisputed 66, held by all; the additions are held on the tradition "
+                "layers: " + _historical_note_for(holders, within[0])),
         }
 
     # 3) Unknown — not in any known canon (likely a typo / non-scriptural).

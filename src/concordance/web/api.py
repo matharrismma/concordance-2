@@ -2546,7 +2546,9 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not ref:
             return _err(400, "ref required")
         from ..verifiers import scripture  # lazy: witness-only
-        return _ok(scripture.read_passage(ref, (query.get("lang") or "").strip() or None))
+        # edition: the canon layers' edition for a book beyond the 66 (eng-web by default, engDRA on request)
+        return _ok(scripture.read_passage(ref, (query.get("lang") or "").strip() or None,
+                                          edition=(query.get("edition") or "").strip() or None))
 
     if method == "GET" and path == "/languages":
         # THE BIBLES THIS NODE HOLDS (2026-10-04, Lighthouse 1.0 integrated, not retired): one public-

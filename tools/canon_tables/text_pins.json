@@ -1,0 +1,19 @@
+{
+ "note": "THE PINNED TEXTS of the canon layers (run 2026-11-11-full-canons), an input of tools/build_canon_layers.py. Each edition's verse-per-line text is the member of eBible.org's zip named here, and the build refuses it unless its sha256 is this one. The zip is never pinned: every member carries its build time. Pinned 2026-11-11 by builder-31 from the zips checker-99 measured at the run's ledger line 3 (eng-web ae3b6aca..944c, engDRA 7e267290..a7f0); eBible rebuilt eng-web's text on 2026-11-09, so a later rebuild fails the build closed and a new pin is a new step. Each source and its licence reason stand in the strict PD-only gate's table, tools/migrate_bible.py PD_VERIFIED_SOURCES.",
+ "editions": {
+  "eng-web": {
+   "source": "eBible.org eng-web",
+   "url": "https://ebible.org/Scriptures/eng-web_vpl.zip",
+   "member": "eng-web_vpl.txt",
+   "sha256": "ea6d1e59f9b9ae24ee38ff252763b1a72dab4fcb7416bec69814820d7eeba151",
+   "license": "Public domain: its translators dedicated the World English Bible to the public domain (eBible.org: 'The World English Bible is in the Public Domain'). A changed text may not be called the World English Bible, so every verse is kept whole and verbatim."
+  },
+  "engDRA": {
+   "source": "eBible.org engDRA",
+   "url": "https://ebible.org/Scriptures/engDRA_vpl.zip",
+   "member": "engDRA_vpl.txt",
+   "sha256": "96282bfa7c89a74680cea66fe873aafa5e7cd446407f0ff2531a723e19eee2c2",
+   "license": "Public domain by its date: the Douay-Rheims American Edition of 1899, the printing of Challoner's 1749-52 revision (eBible.org: 'Public Domain')."
+  }
+ }
+}

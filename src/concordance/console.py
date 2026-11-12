@@ -79,9 +79,21 @@ def _is_bare_scripture_ref(text: str) -> bool:
         return False
     try:
         from .verifiers import scripture as _sc
-        return bool((_sc.read_passage(t) or {}).get("verses"))
+        return bool(_in_prose(_sc.read_passage(t) or {}, t).get("verses"))
     except Exception:  # noqa: BLE001 — a missing/corrupt corpus just declines to the ask path
         return False
+
+
+def _in_prose(ps: Dict[str, Any], ref: str) -> Dict[str, Any]:
+    """THE PROSE GUARD (canon_layers.py, run 2026-11-11-full-canons): what the console reads from what a person
+    typed reaches a book beyond the 66 only by its full name. Any other reading of the canon layers ('sir 2:15',
+    'bar 3') reads as the 66 read it: no verse."""
+    if not ps.get("layer") or not ps.get("verses"):
+        return ps
+    from . import canon_layers
+    return ps if canon_layers.named_in_full(ref) else {"ref": ref, "verses": [], "count": 0, "status": "not_found"}
+
+
 _IN_ORIGINAL = re.compile(r"\bin (?:the )?(original|greek|hebrew|koine|tongue)\b", re.I)
 
 
@@ -251,7 +263,8 @@ def _seeing(text: str, gate_open: bool = False, answer_text: str = "") -> Dict[s
                 m = _SCRIPTURE_REF.search(answer_text or "")
                 if m:
                     ps = _sc.read_passage(m.group(1))
-                    verses = ps.get("verses") or []
+                    # the answer's own verse is one of the 66, as before: never a canon layer's reading
+                    verses = [] if ps.get("layer") else (ps.get("verses") or [])
                     if verses:
                         best = {"ref": str(ps.get("ref") or m.group(1)).strip(),
                                 "text": _trim(" ".join(v.get("text", "") for v in verses), 240),
@@ -847,10 +860,15 @@ def _read(text: str, config: Any, gate_open: bool, *, source_text: Optional[str]
     if ref_m:
         from .verifiers import scripture as _sc
         ref = ref_m.group(1).strip()
-        ps = _sc.read_passage(ref)
+        ps = _in_prose(_sc.read_passage(ref), ref)          # an added book by its full name only (canon_layers.py)
         verses = ps.get("verses") or []
         eng = _trim(" ".join(v.get("text", "") for v in verses), 420) if verses else ""
         shown = (ps.get("ref") or ref)
+        # a book beyond the 66 says its edition, numbering and standing (canon_layers.py); the 66 read as before
+        layer = ({k: ps[k] for k in ("edition", "translation", "source", "license", "numbering", "layer",
+                                     "standing", "within", "addition_ref") if ps.get(k) is not None}
+                 if verses and ps.get("layer") else {})
+        said_in = f", {layer['translation']}, {layer['layer']}" if layer else ""
         if _IN_ORIGINAL.search(text):
             ow = _sc.original_words(ref)
             words = ow.get("words") or []
@@ -866,7 +884,7 @@ def _read(text: str, config: Any, gate_open: bool, *, source_text: Optional[str]
             # Never "14 words" for a 17-word verse: name the verse's count, then how many are tagged.
             count_said = (f"{total} words, {len(words)} of them with a Strong's number"
                           if total and total != len(words) else f"{len(words)} words")
-            spoken = ((f"{eng} — {shown}. " if eng else "") +
+            spoken = ((f"{eng} — {shown}{said_in}. " if eng else "") +
                       (f"In the {tongue} it was given, {count_said}. Open it to read each one to "
                        f"its Strong's — the very tongue, by the cube." if words else
                        "I could not reach the original words just now."))
@@ -876,7 +894,8 @@ def _read(text: str, config: Any, gate_open: bool, *, source_text: Optional[str]
                     "next": [{"label": "Read it in the original", "ref": f"/bible.html?ref={shown}"},
                              {"label": f"Learn {tongue} by the cube",
                               "ref": "/read.html?subject=" + ("grc" if tongue == "Greek" else "he")}],
-                    "original": {"tongue": tongue, "count": len(words), "total": total}, "generated": False}
+                    "original": {"tongue": tongue, "count": len(words), "total": total}, "generated": False,
+                    **({"canon_layer": layer} if layer else {})}
         if eng:
             # the passage AS A BOOK PAGE: the ordered, numbered verses (bounded so the payload stays
             # small / LoRa-ready — the whole chapter is one tap away on the reader). The spoken form is
@@ -886,13 +905,13 @@ def _read(text: str, config: Any, gate_open: bool, *, source_text: Optional[str]
             shown_text = " ".join(v["text"] for v in vlist).strip() or eng
             more = max(0, len(verses) - CAP)
             return {"intent": "read", "kind": "scripture", "headline": shown,
-                    "spoken": f"{shown_text} — {shown}.",
+                    "spoken": f"{shown_text} — {shown}{said_in}.",
                     "caption": shown_text, "verses": vlist, "truncated": bool(more), "more": more,
                     "source": {"title": shown, "ref": f"/bible.html?ref={shown}"},
                     "next": ([{"label": f"Read the whole chapter ({more} more verses)" if more
                                else "Read the chapter", "ref": f"/bible.html?ref={shown}"},
                               {"label": "Hear it in the original", "ref": f"/bible.html?ref={shown}"}]),
-                    "generated": False}
+                    "generated": False, **({"canon_layer": layer} if layer else {})}
 
     # a WORK — strip the read cue (and any "section on / part about / chapter on"), find a readable
     # public-domain book. If they named a SPECIFIC AREA, LOCATE that passage and read it; if they asked

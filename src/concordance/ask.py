@@ -787,7 +787,7 @@ def find_ref(text: str):
         cand = m.group(1).strip() + " " + m.group(2) + ":" + m.group(3)
         try:
             from .verifiers import scripture as _s
-            if _s.resolve_ref(cand).get("status") == "ok":
+            if _s.resolve_ref(cand, added="prose").get("status") == "ok":     # an added book by its full name only
                 return cand + (("-" + m.group(4)) if m.group(4) else "")
         except Exception:  # noqa: BLE001
             return None
@@ -803,7 +803,7 @@ def find_ref(text: str):
             if book.lower() in _NOT_A_BOOK:
                 continue
             cand = book + " " + mc.group(2)
-            if _sc2.read_passage(cand).get("verses"):
+            if _sc2.read_passage(cand, added="prose").get("verses"):          # an added book by its full name only
                 return cand
     except Exception:  # noqa: BLE001
         pass
@@ -2078,17 +2078,25 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
         ref = find_ref(text) or ""
         study = bool(_EXPLAIN.search(text or ""))
         # a range, a chapter (no verse), or any ask for meaning reads the passage; a bare verse reads the verse
+        # A book beyond the 66 answers here only to its full name (the prose guard, canon_layers.py), and its
+        # reading carries its edition, numbering and standing.
         if "-" in ref or study or (ref and ":" not in ref):
-            p = scripture.read_passage(ref)
+            p = scripture.read_passage(ref, added="prose")
             verses = p.get("verses") or []
             rows = [{"ref": v.get("ref", ref), "text": v.get("text", "")} for v in verses[:24]]
             if len(verses) > 24:
                 rows.append({"ref": "", "text": "… and %d more verses in %s" % (len(verses) - 24, ref)})
+            got_read = p
         else:
-            one = scripture.resolve_ref(ref)
+            one = scripture.resolve_ref(ref, added="prose")
             rows = ([{"ref": one.get("ref", ref), "text": one.get("text", "")}]
                     if one.get("status") == "ok" else [])
+            got_read = one
         out = {**base, "scripture": rows}
+        if rows and got_read.get("layer"):
+            keep = ("edition", "translation", "source", "license", "numbering", "layer", "standing", "within",
+                    "addition_ref")
+            out["canon_layer"] = {k: got_read[k] for k in keep if got_read.get(k) is not None}
         # the strength, on the answer people seek most: the verse, verified, WITH the cloud of
         # witnesses the keeping connects to it. The exact-reference boost makes search(ref) find
         # the verse's own card first, so its links are the tradition around this passage.
