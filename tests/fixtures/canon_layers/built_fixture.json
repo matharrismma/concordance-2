@@ -1,0 +1,534 @@
+{
+ "note": "THE CANON LAYERS' BUILT FIXTURE (run 2026-11-11-full-canons): what tools/build_canon_layers.py writes from tests/fixtures/canon_layers/vpl_fixture.json with the real book-code table, the fixture's own counts and its own text sha256. tests/test_canon_layers.py places it where the engine reads a build, and holds the tool to it byte for byte.",
+ "files": {
+  "eng-web.jsonl": [
+   {
+    "book": "Tobit",
+    "chapter": 1,
+    "text": "The book of the words of Tobit, the son of Tobiel, the son of Ananiel, the son of Aduel, the son of Gabael, of the seed of Asiel, of the tribe of Naphtali;",
+    "verse": 1
+   },
+   {
+    "book": "Tobit",
+    "chapter": 4,
+    "text": "Don’t let the wages of any man who works for you wait with you, but give it to him out of hand. If you serve God, you will be rewarded. Take heed to yourself, my child, in all your works, and be discreet in all your behavior.",
+    "verse": 14
+   },
+   {
+    "book": "Tobit",
+    "chapter": 4,
+    "text": "And what you yourself hate, do to no man. Don’t drink wine to drunkenness, and don’t let drunkenness go with you on your way.",
+    "verse": 15
+   },
+   {
+    "book": "Tobit",
+    "chapter": 4,
+    "text": "Give of your bread to the hungry, and of your garments to those who are naked. Give alms from all your abundance. Don’t let your eye be envious when you give alms.",
+    "verse": 16
+   },
+   {
+    "book": "Judith",
+    "chapter": 1,
+    "text": "In the twelfth year of the reign of Nebuchadnezzar, who reigned over the Assyrians in Nineveh, the great city, in the days of Arphaxad, who reigned over the Medes in Ecbatana,",
+    "verse": 1
+   },
+   {
+    "book": "Esther (Greek)",
+    "chapter": 2,
+    "text": "After this, the king’s anger was pacified, and he no more mentioned Vashti, bearing in mind what she had said, and how he had condemned her.",
+    "verse": 1
+   },
+   {
+    "book": "Esther (Greek)",
+    "chapter": 10,
+    "text": "[Mordecai said, “These things have come from God.",
+    "verse": 4
+   },
+   {
+    "book": "Esther (Greek)",
+    "chapter": 10,
+    "text": "For I remember the dream which I had concerning these matters; for not one detail of them has failed.",
+    "verse": 5
+   },
+   {
+    "book": "Wisdom of Solomon",
+    "chapter": 2,
+    "text": "For they said within themselves, with unsound reasoning, “Our life is short and sorrowful. There is no healing when a man comes to his end, and no one was ever known who was released from Hades.",
+    "verse": 1
+   },
+   {
+    "book": "Wisdom of Solomon",
+    "chapter": 3,
+    "text": "But the souls of the righteous are in the hand of God, and no torment will touch them.",
+    "verse": 1
+   },
+   {
+    "book": "Sirach",
+    "chapter": 1,
+    "text": "Wisdom has been created before all things, and the understanding of prudence from everlasting.",
+    "verse": 4
+   },
+   {
+    "book": "Sirach",
+    "chapter": 1,
+    "text": "",
+    "verse": 5
+   },
+   {
+    "book": "Sirach",
+    "chapter": 1,
+    "text": "To whom has the root of wisdom been revealed? Who has known her shrewd counsels?",
+    "verse": 6
+   },
+   {
+    "book": "Sirach",
+    "chapter": 2,
+    "text": "Those who fear the Lord will not disobey his words. Those who love him will keep his ways.",
+    "verse": 15
+   },
+   {
+    "book": "Sirach",
+    "chapter": 3,
+    "text": "Water will quench a flaming fire; almsgiving will make atonement for sins.",
+    "verse": 30
+   },
+   {
+    "book": "Baruch",
+    "chapter": 3,
+    "text": "Who has found out her place? Who has come into her treasuries?",
+    "verse": 15
+   },
+   {
+    "book": "Baruch",
+    "chapter": 6,
+    "text": "A copy of a letter that Jeremy sent to those who were to be led captives into Babylon by the king of the Babylonians, to give them the message that God commanded him.",
+    "verse": 1
+   },
+   {
+    "book": "Baruch",
+    "chapter": 6,
+    "text": "Because of the sins which you have committed before God, you will be led away captives to Babylon by Nabuchodonosor king of the Babylonians.",
+    "verse": 2
+   },
+   {
+    "book": "1 Maccabees",
+    "chapter": 2,
+    "text": "In those days Mattathias the son of John, the son of Simeon, a priest of the sons of Joarib, from Jerusalem rose up; and he lived at Modin.",
+    "verse": 1
+   },
+   {
+    "book": "2 Maccabees",
+    "chapter": 1,
+    "text": "The kindred, the Jews who are in Jerusalem and those who are in the country of Judea, send greetings and good peace to the kindred, the Jews who are throughout Egypt.",
+    "verse": 1
+   },
+   {
+    "book": "1 Esdras",
+    "chapter": 1,
+    "text": "Josias held the Passover in Jerusalem to his Lord, and offered the Passover the fourteenth day of the first month,",
+    "verse": 1
+   },
+   {
+    "book": "Prayer of Manasseh",
+    "chapter": 1,
+    "text": "O LORD Almighty in heaven, God of our fathers Abraham, Isaac, and Jacob, and of their righteous offspring,",
+    "verse": 1
+   },
+   {
+    "book": "Psalm 151",
+    "chapter": 1,
+    "text": "This Psalm is a genuine one of David, though extra, composed when he fought in single combat with Goliath. I was small among my brothers, and youngest in my father’s house. I tended my father’s sheep.",
+    "verse": 1
+   },
+   {
+    "book": "Psalm 151",
+    "chapter": 1,
+    "text": "My hands formed a musical instrument, and my fingers tuned a lyre.",
+    "verse": 2
+   },
+   {
+    "book": "3 Maccabees",
+    "chapter": 1,
+    "text": "Now Philopater, on learning from those who came back that Antiochus had made himself master of the places which belonged to himself, sent orders to all his infantry and cavalry, took with him his sister Arsinoe, and marched out as far as the parts of Raphia, where Antiochus and his forces encamped.",
+    "verse": 1
+   },
+   {
+    "book": "4 Maccabees",
+    "chapter": 1,
+    "text": "As I am going to demonstrate a most philosophical proposition, namely, that religious reasoning is absolute master of the emotions. I would willingly advise you to give the utmost heed to philosophy.",
+    "verse": 1
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 1,
+    "text": "In the third year of the reign of Jehoiakim king of Judah, Nebuchadnezzar king of Babylon came to Jerusalem and besieged it.",
+    "verse": 1
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 3,
+    "text": "These three men, Shadrach, Meshach, and Abednego, fell down bound into the middle of the burning fiery furnace.",
+    "verse": 23
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 3,
+    "text": "They walked in the midst of the fire, praising God, and blessing the Lord.",
+    "verse": 24
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 3,
+    "text": "Then Azarias stood, and prayed like this. Opening his mouth in the midst of the fire he said,",
+    "verse": 25
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 3,
+    "text": "Therefore all that you have brought upon us, and everything that you have done to us, you have done in true judgment.",
+    "verse": 31
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 3,
+    "text": "O all you who worship the Lord, bless the God of gods, praise him, and give him thanks; for his mercy is forever!”",
+    "verse": 90
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 3,
+    "text": "Then Nebuchadnezzar the king was astonished and rose up in haste. He spoke and said to his counselors, “Didn’t we cast three men bound into the middle of the fire?” They answered the king, “True, O king.”",
+    "verse": 91
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 13,
+    "text": "A man lived in Babylon, and his name was Joakim.",
+    "verse": 1
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 13,
+    "text": "He took a wife, whose name was Susanna, the daughter of Helkias, a very fair woman, and one who feared the Lord.",
+    "verse": 2
+   },
+   {
+    "book": "Daniel (Greek)",
+    "chapter": 14,
+    "text": "King Astyages was gathered to his fathers, and Cyrus the Persian received his kingdom.",
+    "verse": 1
+   }
+  ],
+  "engDRA.jsonl": [
+   {
+    "book": "Tobit",
+    "chapter": 4,
+    "text": "If any man hath done any work for thee, immediately pay him his hire, and let not the wages of thy hired servant stay with thee at all.",
+    "verse": 15
+   },
+   {
+    "book": "Tobit",
+    "chapter": 4,
+    "text": "See thou never do to another what thou wouldst hate to have done to thee by another.",
+    "verse": 16
+   },
+   {
+    "book": "Judith",
+    "chapter": 1,
+    "text": "Now Arphaxad king of the Medes had brought many nations under his dominions, and he built a very strong city, which he called Ecbatana,",
+    "verse": 1
+   },
+   {
+    "book": "Wisdom of Solomon",
+    "chapter": 2,
+    "text": "For they have said, reasoning with themselves, but not right: The time of our life is short and tedious, and in the end of a man there is no remedy, and no man hath been known to have returned from hell:",
+    "verse": 1
+   },
+   {
+    "book": "Sirach",
+    "chapter": 2,
+    "text": "Woe to them that are fainthearted, who believe not God: and therefore they shall not be protected by him.",
+    "verse": 15
+   },
+   {
+    "book": "Sirach",
+    "chapter": 3,
+    "text": "The congregation of the proud shall not be healed: for the plant of wickedness shall take root in them, and it shall not be perceived.",
+    "verse": 30
+   },
+   {
+    "book": "Sirach",
+    "chapter": 3,
+    "text": "Water quencheth a flaming fire, and alms resisteth sins:",
+    "verse": 33
+   },
+   {
+    "book": "Baruch",
+    "chapter": 3,
+    "text": "Who hath found out her place? and who hath gone in to her treasures?",
+    "verse": 15
+   },
+   {
+    "book": "Baruch",
+    "chapter": 6,
+    "text": "For the sins that you have committed before God, you shall be carried away captives into Babylon by Nabuchodonosor the king of Babylon.",
+    "verse": 1
+   },
+   {
+    "book": "1 Maccabees",
+    "chapter": 2,
+    "text": "In those days arose Mathathias the son of John, the son of Simeon, a priest of the sons of Joarib, from Jerusalem, and he abode in the mountain of Modin.",
+    "verse": 1
+   },
+   {
+    "book": "2 Maccabees",
+    "chapter": 1,
+    "text": "To the brethren the Jews that are throughout Egypt, the brethren, the Jews that are in Jerusalem, and in the land of Judea, send health, and good peace.",
+    "verse": 1
+   }
+  ],
+  "layers.json": {
+   "build": "canon-layers",
+   "editions": {
+    "eng-web": {
+     "books": [
+      {
+       "chapters": 2,
+       "code": "TOB",
+       "name": "Tobit",
+       "verse_lines": 4
+      },
+      {
+       "chapters": 1,
+       "code": "JDT",
+       "name": "Judith",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 2,
+       "code": "ESG",
+       "name": "Esther (Greek)",
+       "verse_lines": 3
+      },
+      {
+       "chapters": 2,
+       "code": "WIS",
+       "name": "Wisdom of Solomon",
+       "verse_lines": 2
+      },
+      {
+       "chapters": 3,
+       "code": "SIR",
+       "name": "Sirach",
+       "verse_lines": 5
+      },
+      {
+       "chapters": 2,
+       "code": "BAR",
+       "name": "Baruch",
+       "verse_lines": 3
+      },
+      {
+       "chapters": 1,
+       "code": "1MA",
+       "name": "1 Maccabees",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 1,
+       "code": "2MA",
+       "name": "2 Maccabees",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 1,
+       "code": "1ES",
+       "name": "1 Esdras",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 1,
+       "code": "PRM",
+       "name": "Prayer of Manasseh",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 1,
+       "code": "PSX",
+       "name": "Psalm 151",
+       "verse_lines": 2
+      },
+      {
+       "chapters": 1,
+       "code": "3MA",
+       "name": "3 Maccabees",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 1,
+       "code": "4MA",
+       "name": "4 Maccabees",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 4,
+       "code": "DNG",
+       "name": "Daniel (Greek)",
+       "verse_lines": 10
+      }
+     ],
+     "in_the_66": {},
+     "license": "Public domain: its translators dedicated the World English Bible to the public domain (eBible.org: 'The World English Bible is in the Public Domain'). A changed text may not be called the World English Bible, so every verse is kept whole and verbatim.",
+     "member": "eng-web_vpl.txt",
+     "name": "World English Bible",
+     "numbering": "the World English Bible's own numbering, as eBible.org's eng-web file holds it",
+     "skipped": {
+      "4ES": "2 Esdras: canon.py lists it on no Catholic or Eastern Orthodox layer, so it is left out and named"
+     },
+     "skipped_66": [
+      "DAN",
+      "EST",
+      "GEN",
+      "JOH"
+     ],
+     "source": "eBible.org eng-web",
+     "text_sha256": "eb598c9c4572876d299852e586e04caf3d97b5ab9abf0a09567c0db6a42d24b7",
+     "url": "https://ebible.org/Scriptures/eng-web_vpl.zip",
+     "within": {
+      "additions to esther": {
+       "book": "Esther (Greek)"
+      },
+      "bel and the dragon": {
+       "book": "Daniel (Greek)",
+       "chapter": 14,
+       "first": 1,
+       "last": 1,
+       "whole_chapter": true
+      },
+      "letter of jeremiah": {
+       "book": "Baruch",
+       "chapter": 6,
+       "first": 1,
+       "last": 2,
+       "whole_chapter": true
+      },
+      "prayer of azariah": {
+       "book": "Daniel (Greek)",
+       "chapter": 3,
+       "first": 24,
+       "last": 90,
+       "whole_chapter": false
+      },
+      "susanna": {
+       "book": "Daniel (Greek)",
+       "chapter": 13,
+       "first": 1,
+       "last": 2,
+       "whole_chapter": true
+      }
+     }
+    },
+    "engDRA": {
+     "books": [
+      {
+       "chapters": 1,
+       "code": "TOB",
+       "name": "Tobit",
+       "verse_lines": 2
+      },
+      {
+       "chapters": 1,
+       "code": "JDT",
+       "name": "Judith",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 1,
+       "code": "WIS",
+       "name": "Wisdom of Solomon",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 2,
+       "code": "SIR",
+       "name": "Sirach",
+       "verse_lines": 3
+      },
+      {
+       "chapters": 2,
+       "code": "BAR",
+       "name": "Baruch",
+       "verse_lines": 2
+      },
+      {
+       "chapters": 1,
+       "code": "1MA",
+       "name": "1 Maccabees",
+       "verse_lines": 1
+      },
+      {
+       "chapters": 1,
+       "code": "2MA",
+       "name": "2 Maccabees",
+       "verse_lines": 1
+      }
+     ],
+     "in_the_66": {
+      "additions to esther": {
+       "book": "Esther",
+       "from": "10:4",
+       "to": "16:24"
+      },
+      "bel and the dragon": {
+       "book": "Daniel",
+       "chapter": 14,
+       "first": 1,
+       "last": 1,
+       "whole_chapter": true
+      },
+      "daniel (greek)": {
+       "book": "Daniel"
+      },
+      "prayer of azariah": {
+       "book": "Daniel",
+       "chapter": 3,
+       "first": 24,
+       "last": 90,
+       "whole_chapter": false
+      },
+      "susanna": {
+       "book": "Daniel",
+       "chapter": 13,
+       "first": 1,
+       "last": 1,
+       "whole_chapter": true
+      }
+     },
+     "license": "Public domain by its date: the Douay-Rheims American Edition of 1899, the printing of Challoner's 1749-52 revision (eBible.org: 'Public Domain').",
+     "member": "engDRA_vpl.txt",
+     "name": "Douay-Rheims 1899 American Edition",
+     "numbering": "the Douay-Rheims's own numbering, which follows the Latin Vulgate's, as eBible.org's engDRA file holds it; it is not the World English Bible's numbering, and no verse is renumbered to match it",
+     "skipped": {},
+     "skipped_66": [
+      "DAN",
+      "EST",
+      "GEN"
+     ],
+     "source": "eBible.org engDRA",
+     "text_sha256": "86ff8a5403f585733afa2713fd65ccc322644cf40c6ddca8792acf9bc36236b4",
+     "url": "https://ebible.org/Scriptures/engDRA_vpl.zip",
+     "within": {
+      "letter of jeremiah": {
+       "book": "Baruch",
+       "chapter": 6,
+       "first": 1,
+       "last": 1,
+       "whole_chapter": true
+      }
+     }
+    }
+   },
+   "the_66": "a book of the 66, which the engine reads from its own World English Bible and never from a layer, so a layer never changes a reading of the 66"
+  }
+ }
+}

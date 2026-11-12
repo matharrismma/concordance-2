@@ -464,45 +464,103 @@ def default_bible(path: Optional[Path] = None) -> Bible:
 
 
 def _reset() -> None:
-    """Test hook: drop the cached default (and every other language) so a new data path is picked up."""
+    """Test hook: drop the cached default (and every other language, and the canon layers' editions) so a new
+    data path is picked up."""
     global _DEFAULT, _LANGUAGES
     _DEFAULT = None
     _LANGUAGES = None
     _BIBLES.clear()
+    from .. import canon_layers
+    canon_layers._reset()
 
 
-def resolve_ref(ref: str, lang: Optional[str] = None) -> Dict[str, Any]:
+# ── THE CANON LAYERS (run 2026-11-11-full-canons): the books beyond the 66, never merged into them ──
+# `added` says how a reader reaches them (src/concordance/canon_layers.py): "names" by a full name or one of
+# canon.py's listed abbreviations, for the readers a caller asks by name; "prose" by a full name only, where text
+# is read as a possible reference (ask, the console); "off" never (the anchor verifier, which checks the 66).
+ADDED_MODES = ("off", "prose", "names")
+
+
+def _beside_the_66(b: "Bible", ref: str, out: Dict[str, Any], shape: str, edition: Any,
+                   added: str) -> Optional[Dict[str, Any]]:
+    """The canon layers' reading, asked only when the 66 recognise no book name in `ref` at all (never on a 66
+    book whose chapter or verse is not there, never on a name ambiguous among the 66), or by the one explicit
+    exception, Psalm 151. None leaves the 66's reading exactly as it was."""
+    if added not in ("prose", "names") or out.get("status") != "not_found" or not b.idx:
+        return None
+    from .. import canon_layers
+    m = _PASSAGE_RE.match(ref or "")
+    if m:
+        canon, hits = b._pick_book(m.group(1))
+        if canon == "Psalms" and int(m.group(2)) == 151:
+            if added == "prose" and not canon_layers.named_in_full(ref):
+                return None
+            return canon_layers.psalm_151(ref, m.group(3), m.group(4), shape, edition=edition)
+        if canon or hits:
+            return None
+    return canon_layers.lookup(ref, shape, edition=edition, mode=added)
+
+
+def _edition_note(out: Dict[str, Any], edition: Any) -> Dict[str, Any]:
+    """A reading of the 66 asked of another edition says that it is the WEB's: the layers hold only books
+    beyond the 66, so the 66 are never read from them."""
+    if edition is None or not str(edition).strip() or out.get("edition"):
+        return out
+    from .. import canon_layers
+    if canon_layers.edition_id(edition) != canon_layers.DEFAULT_EDITION:
+        out["edition_note"] = (f"the canon layers hold only books beyond the 66, so a book of the 66 is read in "
+                               f"this node's World English Bible, not in {str(edition)!r}")
+    return out
+
+
+def resolve_ref(ref: str, lang: Optional[str] = None, *, edition: Any = None,
+                added: str = "names") -> Dict[str, Any]:
     """Resolve a reference to its text — the WEB by default, or a held translation by lang, or the tongue
-    the book was named in ("Juan 3:16" → Reina-Valera): {ref, text, status, lang, translation}."""
+    the book was named in ("Juan 3:16" → Reina-Valera): {ref, text, status, lang, translation}. A book beyond
+    the 66 is read from the canon layers in `edition` (eng-web by default, engDRA on request), only when the 66
+    recognise no book name at all, as `added` allows (ADDED_MODES)."""
     eng, detected = localize_ref(ref)
     l = _choose_lang(lang, detected)
     if l != "en" and not _bible_path(l).exists():
         return _unknown_language(ref, l, "ref")
-    out = dict(bible(l).resolve(eng))
+    b = bible(l)
+    out = dict(b.resolve(eng))
     out.setdefault("lang", l)
     if detected:
         out["asked"] = ref
         out["named_in"] = detected
-    return out
+    if l == "en":
+        layered = _beside_the_66(b, eng, out, "ref", edition, added)
+        if layered is not None:
+            return layered
+    return _edition_note(out, edition)
 
 
-def read_passage(ref: str, lang: Optional[str] = None) -> Dict[str, Any]:
+def read_passage(ref: str, lang: Optional[str] = None, *, edition: Any = None,
+                 added: str = "names") -> Dict[str, Any]:
     """Read a passage (single verse / range / whole chapter) — the WEB by default, a held translation by
     lang (GET /languages lists them), or the tongue the book was named in: {ref, verses, count, status,
-    lang, translation}. The core reading primitive the study experience is built on."""
+    lang, translation}. The core reading primitive the study experience is built on. A book beyond the 66 is
+    read from the canon layers in `edition` (eng-web by default, engDRA on request), only when the 66 recognise
+    no book name at all, as `added` allows (ADDED_MODES), and labelled with its edition, numbering and standing."""
     eng, detected = localize_ref(ref)
     l = _choose_lang(lang, detected)
     if l != "en" and not _bible_path(l).exists():
         return _unknown_language(ref, l, "passage")
-    out = dict(bible(l).passage(eng))
+    b = bible(l)
+    out = dict(b.passage(eng))
     out["lang"] = l
     if detected:
         out["asked"] = ref
         out["named_in"] = detected
+    if l == "en":
+        layered = _beside_the_66(b, eng, out, "passage", edition, added)
+        if layered is not None:
+            return layered
     if out.get("status") == "ok":
         meta = next((x for x in languages() if x["lang"] == l), None)
         out["translation"] = (meta or {}).get("translation")
-    return out
+    return _edition_note(out, edition)
 
 
 def passage_text(ref: str) -> str:
@@ -777,7 +835,7 @@ def _verify_anchor(anchor: Any) -> VerifierResult:
         return error(name, f"anchor must be a ref string or {{ref,text}}, got {type(anchor).__name__}")
     if not ref:
         return na(name, "anchor missing 'ref'")
-    r = resolve_ref(ref)
+    r = resolve_ref(ref, added="off")       # an anchor is checked against the 66's WEB, as it always was
     if r["status"] == "source_missing":
         return na(name, r["detail"])
     if r["status"] != "ok":

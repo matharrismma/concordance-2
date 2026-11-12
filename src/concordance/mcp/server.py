@@ -791,9 +791,15 @@ def _witness_tools() -> List[dict]:
         {"name": "read_passage",
          "description": ("Read a passage — a single verse, a range (John 3:16-18), or a whole chapter "
                          "(John 3). The WEB by default; lang picks a held public-domain translation "
-                         "(es, fr, de, zh, he, la, ru, ar, ja, ko, …; an unknown lang lists what is held)."),
+                         "(es, fr, de, zh, he, la, ru, ar, ja, ko, …; an unknown lang lists what is held). "
+                         "The books beyond the 66 that the Catholic and Orthodox churches read (Tobit 4:15, "
+                         "Sirach 3:30, Psalm 151:1, Susanna 1) are read on their own layer, each with its edition, "
+                         "numbering and standing; edition picks eng-web (the World English Bible, the default) "
+                         "or engDRA (the Douay-Rheims 1899, in the Vulgate's numbering)."),
          "inputSchema": {"type": "object", "properties": {"ref": {"type": "string"},
-                                                          "lang": {"type": "string", "description": "ISO 639-1, default en"}},
+                                                          "lang": {"type": "string", "description": "ISO 639-1, default en"},
+                                                          "edition": {"type": "string", "enum": ["eng-web", "engDRA"],
+                                                                      "description": "the canon layers' edition, default eng-web"}},
                          "required": ["ref"]}},
         {"name": "word_study",
          "description": "Strong's word study — original-language definition + pronunciation + every occurrence.",
@@ -1782,7 +1788,8 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
         return scripture.resolve_ref(args.get("ref", ""))
     if name == "read_passage" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
-        return scripture.read_passage(args.get("ref", ""), (str(args.get("lang") or "").strip() or None))
+        return scripture.read_passage(args.get("ref", ""), (str(args.get("lang") or "").strip() or None),
+                                      edition=(str(args.get("edition") or "").strip() or None))
     if name == "word_study" and knowledge:
         from ..verifiers import scripture  # lazy: witness-only
         return scripture.word_study(args.get("strongs", ""))

@@ -59,6 +59,21 @@ HELD = {
     "sw": "Kiswahili Contemporary Version (Biblica) is licensed, not public domain",
 }
 
+# SOURCE -> (translation, why it is public domain): the gate keyed by SOURCE, not by language, for the texts kept
+# beside the 66 on the canon layers (run 2026-11-11-full-canons). Two English editions share a language, so a
+# language key cannot tell them apart. tools/build_canon_layers.py builds them on the box from the files that
+# tools/canon_tables/text_pins.json pins, each pin naming its source and carrying exactly the reason below
+# (tests/test_canon_layers.py holds the two equal); a source not listed here is never built.
+PD_VERIFIED_SOURCES = {
+    "eBible.org eng-web": ("World English Bible",
+                           "Public domain: its translators dedicated the World English Bible to the public domain "
+                           "(eBible.org: 'The World English Bible is in the Public Domain'). A changed text may not "
+                           "be called the World English Bible, so every verse is kept whole and verbatim."),
+    "eBible.org engDRA": ("Douay-Rheims 1899 American Edition",
+                          "Public domain by its date: the Douay-Rheims American Edition of 1899, the printing of "
+                          "Challoner's 1749-52 revision (eBible.org: 'Public Domain')."),
+}
+
 _FIELDS = ("book", "book_abbr", "chapter", "verse", "text", "translation", "lang", "year", "license")
 
 

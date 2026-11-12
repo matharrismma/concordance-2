@@ -235,10 +235,12 @@ def test_the_hash_refuses_an_empty_output_an_empty_directory_and_a_symlink(bb, t
 def test_the_listing_holds_the_canary_and_canary_fail_each_after_a_comment(bb):
     text = LISTING.read_text(encoding="utf-8")
     entries = bb.parse_listing(text)
-    assert sorted(entries) == ["canary", "canary-fail"]
-    assert {e.tool for e in entries.values()} == {"tools/build_canary.py"}
+    # canon-layers is the entry run 2026-11-11-full-canons adds (its plan four); tests/test_canon_layers.py pins it
+    assert sorted(entries) == ["canary", "canary-fail", "canon-layers"]
+    canaries = {name: e for name, e in entries.items() if name.startswith("canary")}
+    assert {e.tool for e in canaries.values()} == {"tools/build_canary.py"}
     assert (entries["canary"].args, entries["canary-fail"].args) == (("ok",), ("fail",))
-    assert all(e.inputs == () and 1 <= e.cap_mb <= 1024 for e in entries.values())
+    assert all(e.inputs == () and 1 <= e.cap_mb <= 1024 for e in canaries.values())
     lines = text.splitlines()
     for e in entries.values():
         before = lines[e.line - 2]

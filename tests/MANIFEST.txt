@@ -45,6 +45,7 @@ test_cabinet.py
 test_calendar_time.py
 test_calltree.py
 test_candidates.py
+test_canon_layers.py
 test_canon_original.py
 test_canonical.py
 test_capabilities.py

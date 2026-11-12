@@ -1,0 +1,12 @@
+{
+ "note": "THE COMMITTED VERSE COUNTS of the canon layers (run 2026-11-11-full-canons), an input of tools/build_canon_layers.py: the verse lines each added book holds in each pinned text, empty lines included (eng-web's Sirach has 24 lines with no text, each read as missing). Taken from checker-99's measurement at the run's ledger line 3 and matched by builder-31 on the pinned texts; the build refuses any count that differs, so a parse that drops a line, or a code mapped wrongly, cannot pass by agreeing with itself.",
+ "editions": {
+  "eng-web": {
+   "TOB": 244, "JDT": 339, "ESG": 205, "WIS": 436, "SIR": 1383, "BAR": 213, "1MA": 924, "2MA": 555,
+   "1ES": 448, "PRM": 15, "PSX": 7, "3MA": 228, "4MA": 484, "DNG": 530
+  },
+  "engDRA": {
+   "TOB": 298, "JDT": 345, "WIS": 439, "SIR": 1591, "BAR": 213, "1MA": 929, "2MA": 558
+  }
+ }
+}

@@ -12,3 +12,5 @@
 canary tools/build_canary.py 65df645acfb8c0db9d7d2baaf2100b95f0910f9e3bdcba8be4a5a49cde99b690 128 "ok"
 # canary-fail: tools/build_canary.py writes canary-fail.txt into its temporary directory and exits 1; nothing may land.
 canary-fail tools/build_canary.py 2536bbd158047ad8a9c19780a8efa3ec1c546bd314204de042bdf0f1f1274eb3 128 "fail"
+# canon-layers: the books beyond the 66 in eBible.org's eng-web and engDRA, fetched over https, each text held to its pin.
+canon-layers tools/build_canon_layers.py 137ffe0fc077ac93ec7d1759506e1d1158398b2c7a4359ed137adecf88b32343 512 in=tools/canon_tables/book_codes.json in=tools/canon_tables/text_pins.json in=tools/canon_tables/verse_counts.json
