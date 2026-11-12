@@ -1,0 +1,4659 @@
+{
+ "about": "Census for run 2026-11-11-fathers-shelf, step measure: the archive.org scans of the 1841-45 printing of the Catena Aurea in English, the transcriptions, the structure of the printing and of CCEL's transcription, and the share of excerpts the catena build can expect to serve. Measured 2026-11-11 from public downloads; nothing here is served.",
+ "edition": "Catena Aurea. Commentary on the Four Gospels, collected out of the works of the Fathers by S. Thomas Aquinas. Oxford: John Henry Parker; J. G. F. and J. Rivington, London. Vol. I Parts I-II MDCCCXLI, Part III MDCCCXLII; Vol. II MDCCCXLII; Vol. III Parts I-II MDCCCXLIII; Vol. IV Parts I-II MDCCCXLV. Printed by Baxter, Oxford.",
+ "translators_named_in_prefaces": {
+  "Vol. II (Mark)": "JOHN DOBREE DALGAIRNS, M. A. of Exeter College",
+  "Vol. III (Luke)": "THOMAS DUDLEY RYDER, M. A. of Oriel College",
+  "signed": "J. H. N."
+ },
+ "served_gospels": [
+  "Matthew",
+  "Mark",
+  "Luke",
+  "John"
+ ],
+ "parts": {
+  "mt1": {
+   "volume": "I",
+   "part": "I",
+   "gospel": "Matthew",
+   "chapters": "I-X",
+   "title_page_date": "MDCCCXLI",
+   "printed_pages": [
+    9,
+    402
+   ],
+   "copy_a": "catenaaureacomme00thomuoft",
+   "copy_b": "catenaaureacomme01thom",
+   "alternates": [
+    "commentgospel101newmuoft (no ABBYY file, so no small-capitals flag)"
+   ],
+   "distinct_copies": "different libraries and scanning centres: Kelly Library, University of Toronto (scanned at uoft) and Princeton Theological Seminary Library (scanned at nyc, ABBYY FineReader 8.0)",
+   "chapters_without_two_copies": [],
+   "expected_served": [
+    {
+     "copy_a": "catenaaureacomme00thomuoft",
+     "copy_b": "catenaaureacomme01thom",
+     "heads_a": 1942,
+     "heads_b": 1845,
+     "heads_a_by_terminator": {
+      ";": 492,
+      ".": 1450
+     },
+     "paired_heads": 1617,
+     "excerpts_equal_in_both": 272,
+     "expected_served_share_of_a": 0.14,
+     "equal_with_ambiguous_line_end_hyphen": 137
+    }
+   ]
+  },
+  "mt2": {
+   "volume": "I",
+   "part": "II",
+   "gospel": "Matthew",
+   "chapters": "XI-XXI",
+   "title_page_date": "MDCCCXLI",
+   "printed_pages": [
+    403,
+    737
+   ],
+   "copy_a": "a6788682p201thomuoft",
+   "copy_b": "catenaaureacomme01thom",
+   "alternates": [
+    "commentgospelp201newmuoft (no ABBYY file)"
+   ],
+   "distinct_copies": "different libraries and scanning centres: Saint Mary's College of California (scanned at uoft) and Princeton Theological Seminary Library (nyc)",
+   "chapters_without_two_copies": [],
+   "expected_served": [
+    {
+     "copy_a": "a6788682p201thomuoft",
+     "copy_b": "catenaaureacomme01thom",
+     "heads_a": 1453,
+     "heads_b": 1474,
+     "heads_a_by_terminator": {
+      ";": 587,
+      ".": 866
+     },
+     "paired_heads": 1035,
+     "excerpts_equal_in_both": 115,
+     "expected_served_share_of_a": 0.079,
+     "equal_with_ambiguous_line_end_hyphen": 84
+    }
+   ]
+  },
+  "mt3": {
+   "volume": "I",
+   "part": "III",
+   "gospel": "Matthew",
+   "chapters": "XXII-XXVIII",
+   "title_page_date": "MDCCCXLII",
+   "printed_pages": [
+    738,
+    990
+   ],
+   "copy_a": "catenaaureacomme01thomuoft",
+   "copy_b": "catenaurecommpt301thomuoft",
+   "alternates": [
+    "commentgospelp301newmuoft, commentgospel301newmuoft (no ABBYY file)"
+   ],
+   "distinct_copies": "both Toronto (call number AIM-9181 against the set described as \"Vol. 1, pt. 2 wanting in library copy\"); the page images differ physically: catenaurecommpt301thomuoft carries an accession stamp 110773 and a pencilled shelf mark on the title verso and foxing on the title page, which catenaaureacomme01thomuoft lacks (title leaves n3-n6 compared by eye)",
+   "chapters_without_two_copies": [],
+   "expected_served": [
+    {
+     "copy_a": "catenaaureacomme01thomuoft",
+     "copy_b": "catenaurecommpt301thomuoft",
+     "heads_a": 1248,
+     "heads_b": 1249,
+     "heads_a_by_terminator": {
+      ";": 549,
+      ".": 699
+     },
+     "paired_heads": 1199,
+     "excerpts_equal_in_both": 599,
+     "expected_served_share_of_a": 0.48,
+     "equal_with_ambiguous_line_end_hyphen": 45
+    }
+   ]
+  },
+  "mk": {
+   "volume": "II",
+   "part": null,
+   "gospel": "Mark",
+   "chapters": "I-XVI",
+   "title_page_date": "MDCCCXLII",
+   "printed_pages": [
+    5,
+    349
+   ],
+   "copy_a": "catenaaureacomme02thomuoft",
+   "copy_b": "catenaaureacomme02thom",
+   "alternates": [
+    "commentgospel02newmuoft (no ABBYY file)"
+   ],
+   "distinct_copies": "different libraries and scanning centres: Trinity College, University of Toronto (uoft) and Princeton Theological Seminary Library (nyc)",
+   "chapters_without_two_copies": [],
+   "expected_served": [
+    {
+     "copy_a": "catenaaureacomme02thomuoft",
+     "copy_b": "catenaaureacomme02thom",
+     "heads_a": 1411,
+     "heads_b": 1402,
+     "heads_a_by_terminator": {
+      ";": 674,
+      ".": 737
+     },
+     "paired_heads": 1281,
+     "excerpts_equal_in_both": 321,
+     "expected_served_share_of_a": 0.227,
+     "equal_with_ambiguous_line_end_hyphen": 84
+    }
+   ]
+  },
+  "lk1": {
+   "volume": "III",
+   "part": "I",
+   "gospel": "Luke",
+   "chapters": "I-X",
+   "title_page_date": "MDCCCXLIII",
+   "printed_pages": [
+    5,
+    382
+   ],
+   "copy_a": "catenaaureacomme03thomuoft",
+   "copy_b": "catenaaureacomme03thom",
+   "alternates": [
+    "a6788682p103thomuoft"
+   ],
+   "distinct_copies": "different libraries and scanning centres: Trinity College, University of Toronto (uoft) and Princeton Theological Seminary Library (nyc)",
+   "chapters_without_two_copies": [],
+   "expected_served": [
+    {
+     "copy_a": "catenaaureacomme03thomuoft",
+     "copy_b": "catenaaureacomme03thom",
+     "heads_a": 1747,
+     "heads_b": 1730,
+     "heads_a_by_terminator": {
+      ";": 1050,
+      ".": 697
+     },
+     "paired_heads": 1550,
+     "excerpts_equal_in_both": 435,
+     "expected_served_share_of_a": 0.249,
+     "equal_with_ambiguous_line_end_hyphen": 105
+    },
+    {
+     "copy_a": "catenaaureacomme03thomuoft",
+     "copy_b": "a6788682p103thomuoft",
+     "heads_a": 1747,
+     "heads_b": 1700,
+     "heads_a_by_terminator": {
+      ";": 1050,
+      ".": 697
+     },
+     "paired_heads": 1509,
+     "excerpts_equal_in_both": 255,
+     "expected_served_share_of_a": 0.146,
+     "equal_with_ambiguous_line_end_hyphen": 136
+    }
+   ]
+  },
+  "lk2": {
+   "volume": "III",
+   "part": "II",
+   "gospel": "Luke",
+   "chapters": "XI-XXIV",
+   "title_page_date": "MDCCCXLIII",
+   "printed_pages": [
+    385,
+    795
+   ],
+   "copy_a": "catenaaurept203thomuoft",
+   "copy_b": "p2catenaaureacom03thomuoft",
+   "alternates": [
+    "commentgospel203newmuoft (no ABBYY file)"
+   ],
+   "distinct_copies": "different libraries: Trinity College, University of Toronto (AIM-9181) and Kelly Library, University of Toronto (AJH-5369)",
+   "chapters_without_two_copies": [],
+   "expected_served": [
+    {
+     "copy_a": "catenaaurept203thomuoft",
+     "copy_b": "p2catenaaureacom03thomuoft",
+     "heads_a": 1764,
+     "heads_b": 1564,
+     "heads_a_by_terminator": {
+      ";": 826,
+      ".": 938
+     },
+     "paired_heads": 1408,
+     "excerpts_equal_in_both": 199,
+     "expected_served_share_of_a": 0.113,
+     "equal_with_ambiguous_line_end_hyphen": 151
+    }
+   ]
+  },
+  "jn1": {
+   "volume": "IV",
+   "part": "I",
+   "gospel": "John",
+   "chapters": "I-X",
+   "title_page_date": "MDCCCXLV",
+   "printed_pages": [
+    1,
+    366
+   ],
+   "copy_a": "catenaaureacomme04thomuoft",
+   "copy_b": "catenaaureacomme04thom",
+   "alternates": [
+    "catenaurecomment04thomuoft",
+    "p1catenaaureaco04thomuoft"
+   ],
+   "distinct_copies": "different libraries and scanning centres: Robarts Library, University of Toronto (uoft) and Princeton Theological Seminary Library (nyc)",
+   "chapters_without_two_copies": [],
+   "expected_served": [
+    {
+     "copy_a": "catenaaureacomme04thomuoft",
+     "copy_b": "catenaaureacomme04thom",
+     "heads_a": 1524,
+     "heads_b": 1412,
+     "heads_a_by_terminator": {
+      ";": 100,
+      ".": 1424
+     },
+     "paired_heads": 1250,
+     "excerpts_equal_in_both": 99,
+     "expected_served_share_of_a": 0.065,
+     "equal_with_ambiguous_line_end_hyphen": 158
+    },
+    {
+     "copy_a": "catenaaureacomme04thomuoft",
+     "copy_b": "catenaurecomment04thomuoft",
+     "heads_a": 1524,
+     "heads_b": 1538,
+     "heads_a_by_terminator": {
+      ";": 100,
+      ".": 1424
+     },
+     "paired_heads": 1427,
+     "excerpts_equal_in_both": 362,
+     "expected_served_share_of_a": 0.238,
+     "equal_with_ambiguous_line_end_hyphen": 75
+    },
+    {
+     "copy_a": "catenaaureacomme04thomuoft",
+     "copy_b": "p1catenaaureaco04thomuoft",
+     "heads_a": 1524,
+     "heads_b": 1460,
+     "heads_a_by_terminator": {
+      ";": 100,
+      ".": 1424
+     },
+     "paired_heads": 1258,
+     "excerpts_equal_in_both": 165,
+     "expected_served_share_of_a": 0.108,
+     "equal_with_ambiguous_line_end_hyphen": 120
+    }
+   ]
+  },
+  "jn2": {
+   "volume": "IV",
+   "part": "II",
+   "gospel": "John",
+   "chapters": "XI-XXI",
+   "title_page_date": "MDCCCXLV",
+   "printed_pages": [
+    369,
+    631
+   ],
+   "copy_a": "catenaaureacomm204arisuoft",
+   "copy_b": "catenaaureacomme04thom",
+   "alternates": [
+    "a6788682p204thomuoft",
+    "p2catenaaureacom04thomuoft",
+    "commentgospel104newmuoft"
+   ],
+   "distinct_copies": "different libraries and scanning centres: Robarts Library, University of Toronto (uoft) and Princeton Theological Seminary Library (nyc)",
+   "chapters_without_two_copies": [],
+   "expected_served": [
+    {
+     "copy_a": "catenaaureacomm204arisuoft",
+     "copy_b": "catenaaureacomme04thom",
+     "heads_a": 1130,
+     "heads_b": 1042,
+     "heads_a_by_terminator": {
+      ";": 1,
+      ".": 1129
+     },
+     "paired_heads": 949,
+     "excerpts_equal_in_both": 90,
+     "expected_served_share_of_a": 0.08,
+     "equal_with_ambiguous_line_end_hyphen": 104
+    },
+    {
+     "copy_a": "catenaaureacomm204arisuoft",
+     "copy_b": "a6788682p204thomuoft",
+     "heads_a": 1130,
+     "heads_b": 1111,
+     "heads_a_by_terminator": {
+      ";": 1,
+      ".": 1129
+     },
+     "paired_heads": 991,
+     "excerpts_equal_in_both": 153,
+     "expected_served_share_of_a": 0.135,
+     "equal_with_ambiguous_line_end_hyphen": 103
+    },
+    {
+     "copy_a": "catenaaureacomm204arisuoft",
+     "copy_b": "p2catenaaureacom04thomuoft",
+     "heads_a": 1130,
+     "heads_b": 1105,
+     "heads_a_by_terminator": {
+      ";": 1,
+      ".": 1129
+     },
+     "paired_heads": 1017,
+     "excerpts_equal_in_both": 169,
+     "expected_served_share_of_a": 0.15,
+     "equal_with_ambiguous_line_end_hyphen": 103
+    }
+   ]
+  }
+ },
+ "items": {
+  "The-catena-aurea-of-blessed-Thomas": {
+   "id": "The-catena-aurea-of-blessed-Thomas",
+   "url": "https://archive.org/details/The-catena-aurea-of-blessed-Thomas",
+   "contributor": null,
+   "sponsor": null,
+   "scanningcenter": null,
+   "ocr_engine": "tesseract 5.3.0-6-g76ae",
+   "call_number": null,
+   "catalogue_volume": null,
+   "catalogue_date": "1841",
+   "description": "All volumes of a 1841 edition of the Catena Aurea in pdf",
+   "notes": null,
+   "imagecount": null,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {},
+   "title_pages_ocr": null,
+   "rights_note": "archive.org gives this item no possible-copyright-status mark",
+   "not_usable": "a user upload of six PDFs with tesseract OCR; its source copy is not named"
+  },
+  "a6788682p103thomuoft": {
+   "id": "a6788682p103thomuoft",
+   "url": "https://archive.org/details/a6788682p103thomuoft",
+   "contributor": "Saint Mary's College of California",
+   "sponsor": "National Institute for Newman Studies",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "a6788682",
+   "catalogue_volume": "3, Pt.1",
+   "catalogue_date": "1841",
+   "description": [
+    "\"The catena aurea ... contains a series of passages selected from the writings of the various fathers, arranged in such order that the texts form a running commentary on the Gospels.\" -- Catholic encyclopædia",
+    "Preface signed: J.H.N. [John Henry Newman]",
+    "NINS98",
+    "Blehl",
+    "Library has: St. Matthew, pt. II; St. Luke, pt. I; St. John, pt. II",
+    "45"
+   ],
+   "notes": null,
+   "imagecount": 412,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "a6788682p103thomuoft_abbyy.gz",
+     "size": 13497802,
+     "sha256_fetched_2026_11_11": "6bf427cf21afa2c67b9d949621fb152fdfc452b177d753095d42e805d755504c"
+    },
+    "chocr_html_gz": {
+     "name": "a6788682p103thomuoft_chocr.html.gz",
+     "size": 11313605
+    },
+    "djvu_txt": {
+     "name": "a6788682p103thomuoft_djvu.txt",
+     "size": 1039334
+    },
+    "djvu_xml": {
+     "name": "a6788682p103thomuoft_djvu.xml",
+     "size": 12490911
+    },
+    "hocr_html": {
+     "name": "a6788682p103thomuoft_hocr.html",
+     "size": 23024715
+    },
+    "jp2_zip": {
+     "name": "a6788682p103thomuoft_jp2.zip",
+     "size": 276463543
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.   III.    PART  I. | ST.  LUKE. | MDCCCXLIII."
+   ],
+   "ocr_text": {
+    "bytes": 1039334,
+    "u_fffd": 0,
+    "words": 158544,
+    "old_forms": {
+     "shews": 57,
+     "shew": 79,
+     "shewed": 24,
+     "hath": 133,
+     "saith": 10,
+     "thee": 184,
+     "thou": 350,
+     "thy": 223,
+     "doth": 8,
+     "unto": 354
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      5,
+      382
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 700,
+     ";": 1006
+    },
+    "superscript_words": 0,
+    "abbyy_pages": 412
+   },
+   "rights_note": "archive.org gives this item no possible-copyright-status mark; its title page (OCR) is dated MDCCCXLIII"
+  },
+  "a6788682p201thomuoft": {
+   "id": "a6788682p201thomuoft",
+   "url": "https://archive.org/details/a6788682p201thomuoft",
+   "contributor": "Saint Mary's College of California",
+   "sponsor": "National Institute for Newman Studies",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "a6788682",
+   "catalogue_volume": "1, Pt.2",
+   "catalogue_date": "1841",
+   "description": [
+    "\"The catena aurea ... contains a series of passages selected from the writings of the various fathers, arranged in such order that the texts form a running commentary on the Gospels.\" -- Catholic encyclopædia",
+    "Preface signed: J.H.N. [John Henry Newman]",
+    "NINS98",
+    "Blehl",
+    "Library has: St. Matthew, pt. II; St. Luke, pt. I; St. John, pt. II",
+    "45"
+   ],
+   "notes": null,
+   "imagecount": 354,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "a6788682p201thomuoft_abbyy.gz",
+     "size": 11869378,
+     "sha256_fetched_2026_11_11": "25ff787fedf1db372292107d1da6b8b35247ed32364d63164922f2467f608d0d"
+    },
+    "chocr_html_gz": {
+     "name": "a6788682p201thomuoft_chocr.html.gz",
+     "size": 9826598
+    },
+    "djvu_txt": {
+     "name": "a6788682p201thomuoft_djvu.txt",
+     "size": 898901
+    },
+    "djvu_xml": {
+     "name": "a6788682p201thomuoft_djvu.xml",
+     "size": 10830876
+    },
+    "hocr_html": {
+     "name": "a6788682p201thomuoft_hocr.html",
+     "size": 19949502
+    },
+    "jp2_zip": {
+     "name": "a6788682p201thomuoft_jp2.zip",
+     "size": 232686852
+    }
+   },
+   "title_pages_ocr": [
+    "^  VOL.  I. | ST.  MATTHEW.    PART  11. | MDCCCXLI."
+   ],
+   "ocr_text": {
+    "bytes": 898901,
+    "u_fffd": 0,
+    "words": 138271,
+    "old_forms": {
+     "shews": 93,
+     "shew": 82,
+     "shewed": 23,
+     "hath": 74,
+     "saith": 53,
+     "thee": 153,
+     "thou": 207,
+     "thy": 93,
+     "doth": 9,
+     "unto": 412
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      403,
+      737
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 866,
+     ";": 587
+    },
+    "superscript_words": 0,
+    "abbyy_pages": 354
+   },
+   "rights_note": "archive.org gives this item no possible-copyright-status mark; its title page (OCR) is dated MDCCCXLI"
+  },
+  "a6788682p204thomuoft": {
+   "id": "a6788682p204thomuoft",
+   "url": "https://archive.org/details/a6788682p204thomuoft",
+   "contributor": "Saint Mary's College of California",
+   "sponsor": "National Institute for Newman Studies",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "a6788682",
+   "catalogue_volume": "4, Pt.2",
+   "catalogue_date": "1841",
+   "description": [
+    "\"The catena aurea ... contains a series of passages selected from the writings of the various fathers, arranged in such order that the texts form a running commentary on the Gospels.\" -- Catholic encyclopædia",
+    "Preface signed: J.H.N. [John Henry Newman]",
+    "NINS98",
+    "Blehl",
+    "Library has: St. Matthew, pt. II; St. Luke, pt. I; St. John, pt. II",
+    "45"
+   ],
+   "notes": null,
+   "imagecount": 284,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "a6788682p204thomuoft_abbyy.gz",
+     "size": 9418465,
+     "sha256_fetched_2026_11_11": "2db5b9894b1cd9e7c17be3ee83ab3c1e4070d00dc40718a670592a1944127451"
+    },
+    "chocr_html_gz": {
+     "name": "a6788682p204thomuoft_chocr.html.gz",
+     "size": 7860749
+    },
+    "djvu_txt": {
+     "name": "a6788682p204thomuoft_djvu.txt",
+     "size": 705353
+    },
+    "djvu_xml": {
+     "name": "a6788682p204thomuoft_djvu.xml",
+     "size": 8572213
+    },
+    "hocr_html": {
+     "name": "a6788682p204thomuoft_hocr.html",
+     "size": 15814458
+    },
+    "jp2_zip": {
+     "name": "a6788682p204thomuoft_jp2.zip",
+     "size": 189736148
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.    IV.      PART    II. | ST.  JOHN. | MDCCCXLV.",
+    "VOL.  IV. | MDCCCXLV."
+   ],
+   "ocr_text": {
+    "bytes": 705353,
+    "u_fffd": 0,
+    "words": 109124,
+    "old_forms": {
+     "shews": 76,
+     "shew": 100,
+     "shewed": 29,
+     "hath": 149,
+     "saith": 185,
+     "thee": 166,
+     "thou": 458,
+     "thy": 106,
+     "doth": 19,
+     "unto": 423
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      369,
+      631
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 1115,
+     ";": 1
+    },
+    "superscript_words": 330,
+    "abbyy_pages": 284
+   },
+   "rights_note": "archive.org gives this item no possible-copyright-status mark; its title page (OCR) is dated MDCCCXLV"
+  },
+  "bwb_S0-CLW-823": {
+   "id": "bwb_S0-CLW-823",
+   "url": "https://archive.org/details/bwb_S0-CLW-823",
+   "contributor": "Internet Archive",
+   "sponsor": null,
+   "scanningcenter": "cebu",
+   "ocr_engine": "tesseract 5.3.0-6-g76ae",
+   "call_number": null,
+   "catalogue_volume": "1",
+   "catalogue_date": "1820",
+   "description": null,
+   "notes": null,
+   "imagecount": 662,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "chocr_html_gz": {
+     "name": "bwb_S0-CLW-823_chocr.html.gz",
+     "size": 41301823
+    },
+    "djvu_txt": {
+     "name": "bwb_S0-CLW-823_djvu.txt",
+     "size": 2968685
+    },
+    "djvu_xml": {
+     "name": "bwb_S0-CLW-823_djvu.xml",
+     "size": 36266028
+    },
+    "hocr_html": {
+     "name": "bwb_S0-CLW-823_hocr.html",
+     "size": 73037196
+    },
+    "jp2_zip": {
+     "name": "bwb_S0-CLW-823_jp2.zip",
+     "size": 350602116
+    }
+   },
+   "title_pages_ocr": null,
+   "rights_note": "archive.org gives this item no possible-copyright-status mark",
+   "not_usable": "catalogued 1820; a Better World Books scan with tesseract OCR and no ABBYY file"
+  },
+  "catenaaurea0012dtho": {
+   "id": "catenaaurea0012dtho",
+   "url": "https://archive.org/details/catenaaurea0012dtho",
+   "contributor": "Internet Archive",
+   "sponsor": null,
+   "scanningcenter": "cebu",
+   "ocr_engine": "tesseract 5.3.0-6-g76ae",
+   "call_number": null,
+   "catalogue_volume": "1-2",
+   "catalogue_date": "1845",
+   "description": null,
+   "notes": null,
+   "imagecount": 898,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "chocr_html_gz": {
+     "name": "catenaaurea0012dtho_chocr.html.gz",
+     "size": 78288861
+    },
+    "djvu_txt": {
+     "name": "catenaaurea0012dtho_djvu.txt",
+     "size": 5604849
+    },
+    "djvu_xml": {
+     "name": "catenaaurea0012dtho_djvu.xml",
+     "size": 66398711
+    },
+    "hocr_html": {
+     "name": "catenaaurea0012dtho_hocr.html",
+     "size": 128990049
+    },
+    "jp2_zip": {
+     "name": "catenaaurea0012dtho_jp2.zip",
+     "size": 913388114
+    }
+   },
+   "title_pages_ocr": null,
+   "rights_note": "archive.org gives this item no possible-copyright-status mark",
+   "not_usable": "catalogued 1845 but scanned at cebu with tesseract and no ABBYY file; physical copy and printing not established"
+  },
+  "catenaaureacomm204arisuoft": {
+   "id": "catenaaureacomm204arisuoft",
+   "url": "https://archive.org/details/catenaaureacomm204arisuoft",
+   "contributor": "Robarts - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AIM-9181",
+   "catalogue_volume": "4",
+   "catalogue_date": "1841-1845",
+   "description": "vol. 4",
+   "notes": null,
+   "imagecount": 278,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomm204arisuoft_abbyy.gz",
+     "size": 9023387,
+     "sha256_fetched_2026_11_11": "bc2dd78f6737e3c28de47fbf7acabd445279ab2bdfbfcd6e089035614dd3ddcd"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomm204arisuoft_chocr.html.gz",
+     "size": 7569882
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomm204arisuoft_djvu.txt",
+     "size": 702762
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomm204arisuoft_djvu.xml",
+     "size": 8569455
+    },
+    "hocr_html": {
+     "name": "catenaaureacomm204arisuoft_hocr.html",
+     "size": 15807005
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomm204arisuoft_jp2.zip",
+     "size": 367380603
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.    IV.      PART    II. | ST.  JOHN. | MDCCCXLV."
+   ],
+   "ocr_text": {
+    "bytes": 702762,
+    "u_fffd": 0,
+    "words": 108647,
+    "old_forms": {
+     "shews": 76,
+     "shew": 100,
+     "shewed": 26,
+     "hath": 146,
+     "saith": 181,
+     "thee": 165,
+     "thou": 442,
+     "thy": 106,
+     "doth": 20,
+     "unto": 424
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      369,
+      631
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 1129,
+     ";": 1
+    },
+    "superscript_words": 459,
+    "abbyy_pages": 278
+   }
+  },
+  "catenaaureacomme00thomuoft": {
+   "id": "catenaaureacomme00thomuoft",
+   "url": "https://archive.org/details/catenaaureacomme00thomuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AJH-5369",
+   "catalogue_volume": null,
+   "catalogue_date": "1841-1845",
+   "description": [
+    "4 v. in 8",
+    "\"The catena aurea ... contains a series of passages selected from the writings of the various Fathers, arranged in such order that the texts form a running commentary on the Gospels.\" - Catholic encyc",
+    "Preface signed J.H.N. i.e. John Henry Newman",
+    "v. 1, pt. 1-3. St. Matthew -- v. 2. St. Mark -- v. 3. pt. 1-2. St. Luke -- v. 4. pt. 1-2. St. John"
+   ],
+   "notes": null,
+   "imagecount": 434,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomme00thomuoft_abbyy.gz",
+     "size": 14297038,
+     "sha256_fetched_2026_11_11": "e2c38038a4b7b5cb5c3d221957d0321ccdeb5ae9d7e0e94bf7ed89737fe6c7df"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomme00thomuoft_chocr.html.gz",
+     "size": 12094247
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomme00thomuoft_djvu.txt",
+     "size": 1132568
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomme00thomuoft_djvu.xml",
+     "size": 13633542
+    },
+    "hocr_html": {
+     "name": "catenaaureacomme00thomuoft_hocr.html",
+     "size": 25131916
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomme00thomuoft_jp2.zip",
+     "size": 685745676
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.  I. | ST.  MATTHEW.     PART  T. | MDCCCXLI."
+   ],
+   "ocr_text": {
+    "bytes": 1132568,
+    "u_fffd": 0,
+    "words": 172348,
+    "old_forms": {
+     "shews": 99,
+     "shew": 104,
+     "shewed": 36,
+     "hath": 62,
+     "saith": 33,
+     "thee": 97,
+     "thou": 207,
+     "thy": 168,
+     "doth": 8,
+     "unto": 190
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      1,
+      402
+     ]
+    ],
+    "heads_by_terminator": {
+     ";": 509,
+     ".": 1474
+    },
+    "superscript_words": 503,
+    "abbyy_pages": 434
+   }
+  },
+  "catenaaureacomme01thom": {
+   "id": "catenaaureacomme01thom",
+   "url": "https://archive.org/details/catenaaureacomme01thom",
+   "contributor": "Princeton Theological Seminary Library",
+   "sponsor": "Internet Archive",
+   "scanningcenter": "nyc",
+   "ocr_engine": "ABBYY FineReader 8.0",
+   "call_number": "178509",
+   "catalogue_volume": "1",
+   "catalogue_date": "1841",
+   "description": "Vol. 1:3; 3:1, 2d edition",
+   "notes": null,
+   "imagecount": 776,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomme01thom_abbyy.gz",
+     "size": 26653592,
+     "sha256_fetched_2026_11_11": "05d80e90cc49cfd7163105166e60e6246560de5aa4ba24e91c14a72d58c46c43"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomme01thom_chocr.html.gz",
+     "size": 22237325
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomme01thom_djvu.txt",
+     "size": 2042101
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomme01thom_djvu.xml",
+     "size": 24445690
+    },
+    "hocr_html": {
+     "name": "catenaaureacomme01thom_hocr.html",
+     "size": 45013193
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomme01thom_jp2.zip",
+     "size": 305294264
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.  I. | ST.  MATTHEW.     PART  I | MDCCCXLI.",
+    "VOL.  I. | ST.  MATTHEW.      PAKT  IF. | MDCCCXLL"
+   ],
+   "ocr_text": {
+    "bytes": 2042101,
+    "u_fffd": 0,
+    "words": 310865,
+    "old_forms": {
+     "shews": 195,
+     "shew": 182,
+     "shewed": 59,
+     "hath": 134,
+     "saith": 83,
+     "thee": 249,
+     "thou": 398,
+     "thy": 241,
+     "doth": 17,
+     "unto": 582
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      1,
+      670
+     ],
+     [
+      676,
+      737
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 2274,
+     ";": 1088
+    },
+    "superscript_words": 0,
+    "abbyy_pages": 778
+   },
+   "parts_bound": "Vol. I Parts I and II (1841)"
+  },
+  "catenaaureacomme01thomuoft": {
+   "id": "catenaaureacomme01thomuoft",
+   "url": "https://archive.org/details/catenaaureacomme01thomuoft",
+   "contributor": "Robarts - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AIM-9181",
+   "catalogue_volume": "1",
+   "catalogue_date": "1841-1845",
+   "description": "vol. 1",
+   "notes": null,
+   "imagecount": 270,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomme01thomuoft_abbyy.gz",
+     "size": 8687438,
+     "sha256_fetched_2026_11_11": "138fab9c92d1742c625d44ea6498ea4cec89d4be3b5e55eb4464a21717828ef1"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomme01thomuoft_chocr.html.gz",
+     "size": 7364803
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomme01thomuoft_djvu.txt",
+     "size": 686612
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomme01thomuoft_djvu.xml",
+     "size": 8318554
+    },
+    "hocr_html": {
+     "name": "catenaaureacomme01thomuoft_hocr.html",
+     "size": 15330808
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomme01thomuoft_jp2.zip",
+     "size": 374577628
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.  I. | ST.  MATTHEW.      PART  IIL | MDCCCXLII."
+   ],
+   "ocr_text": {
+    "bytes": 686612,
+    "u_fffd": 0,
+    "words": 104836,
+    "old_forms": {
+     "shews": 58,
+     "shew": 80,
+     "shewed": 9,
+     "hath": 33,
+     "saith": 23,
+     "thee": 51,
+     "thou": 138,
+     "thy": 61,
+     "doth": 3,
+     "unto": 213
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      738,
+      990
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 699,
+     ";": 549
+    },
+    "superscript_words": 209,
+    "abbyy_pages": 270
+   }
+  },
+  "catenaaureacomme02thom": {
+   "id": "catenaaureacomme02thom",
+   "url": "https://archive.org/details/catenaaureacomme02thom",
+   "contributor": "Princeton Theological Seminary Library",
+   "sponsor": "Internet Archive",
+   "scanningcenter": "nyc",
+   "ocr_engine": "ABBYY FineReader 8.0",
+   "call_number": "178509",
+   "catalogue_volume": "2",
+   "catalogue_date": "1841",
+   "description": "Vol. 1:3; 3:1, 2d edition",
+   "notes": null,
+   "imagecount": 626,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomme02thom_abbyy.gz",
+     "size": 21599965,
+     "sha256_fetched_2026_11_11": "f4a637d3b7a1886bfc240d244a1d1a4b5caf7753dff6328e147725c931b81b18"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomme02thom_chocr.html.gz",
+     "size": 18090299
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomme02thom_djvu.txt",
+     "size": 1615829
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomme02thom_djvu.xml",
+     "size": 19434513
+    },
+    "hocr_html": {
+     "name": "catenaaureacomme02thom_hocr.html",
+     "size": 36093990
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomme02thom_jp2.zip",
+     "size": 254159848
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.  I. | ST.  MATTHEW.   PAET  III. | M  DCC'C  LXV.",
+    "VOL.   IT. | ST.    MARK. | MDCCCXLII."
+   ],
+   "ocr_text": {
+    "bytes": 1615829,
+    "u_fffd": 0,
+    "words": 247652,
+    "old_forms": {
+     "shews": 139,
+     "shew": 181,
+     "shewed": 32,
+     "hath": 115,
+     "saith": 112,
+     "thee": 160,
+     "thou": 361,
+     "thy": 167,
+     "doth": 11,
+     "unto": 738
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      -1,
+      349
+     ],
+     [
+      738,
+      991
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 1967,
+     ";": 669
+    },
+    "superscript_words": 465,
+    "abbyy_pages": 632
+   },
+   "parts_bound": "Vol. I Part III, Second Edition, Oxford and London: John Henry and James Parker, MDCCCLXV (not the 1841-45 printing), then Vol. II (1842)"
+  },
+  "catenaaureacomme02thomuoft": {
+   "id": "catenaaureacomme02thomuoft",
+   "url": "https://archive.org/details/catenaaureacomme02thomuoft",
+   "contributor": "Trinity College - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AIM-9181",
+   "catalogue_volume": "2",
+   "catalogue_date": "1841-1845",
+   "description": "vol. 2",
+   "notes": null,
+   "imagecount": 372,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomme02thomuoft_abbyy.gz",
+     "size": 11724917,
+     "sha256_fetched_2026_11_11": "8712e7e13998ba8b733fc6922d8e982fceb8e8b80f0f8cb441c503667d51d307"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomme02thomuoft_chocr.html.gz",
+     "size": 9927043
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomme02thomuoft_djvu.txt",
+     "size": 927160
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomme02thomuoft_djvu.xml",
+     "size": 11283123
+    },
+    "hocr_html": {
+     "name": "catenaaureacomme02thomuoft_hocr.html",
+     "size": 20795084
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomme02thomuoft_jp2.zip",
+     "size": 489040134
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.   IT. | ST.    MARK. | MDCCCXLII."
+   ],
+   "ocr_text": {
+    "bytes": 927160,
+    "u_fffd": 0,
+    "words": 141836,
+    "old_forms": {
+     "shews": 80,
+     "shew": 103,
+     "shewed": 24,
+     "hath": 78,
+     "saith": 91,
+     "thee": 104,
+     "thou": 216,
+     "thy": 105,
+     "doth": 8,
+     "unto": 524
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      -1,
+      349
+     ]
+    ],
+    "heads_by_terminator": {
+     ";": 674,
+     ".": 737
+    },
+    "superscript_words": 364,
+    "abbyy_pages": 372
+   }
+  },
+  "catenaaureacomme03thom": {
+   "id": "catenaaureacomme03thom",
+   "url": "https://archive.org/details/catenaaureacomme03thom",
+   "contributor": "Princeton Theological Seminary Library",
+   "sponsor": "Internet Archive",
+   "scanningcenter": "nyc",
+   "ocr_engine": "ABBYY FineReader 8.0",
+   "call_number": "178509",
+   "catalogue_volume": "3",
+   "catalogue_date": "1841",
+   "description": "Vol. 1:3; 3:1, 2d edition",
+   "notes": null,
+   "imagecount": 832,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomme03thom_abbyy.gz",
+     "size": 27868777,
+     "sha256_fetched_2026_11_11": "586009c8d83630a6dc764c24f0e00fc91ff369028f51cc349b7d8b05a7231721"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomme03thom_chocr.html.gz",
+     "size": 23438227
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomme03thom_djvu.txt",
+     "size": 2106842
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomme03thom_djvu.xml",
+     "size": 25339786
+    },
+    "hocr_html": {
+     "name": "catenaaureacomme03thom_hocr.html",
+     "size": 46737334
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomme03thom_jp2.zip",
+     "size": 360911801
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.   ITI.    PART  I. | ST.  LUKE. | MDCCCXLIII.",
+    "VOL.  III.     PART  II. | ST.  LUKE* | M  DCCC  LXV."
+   ],
+   "ocr_text": {
+    "bytes": 2106842,
+    "u_fffd": 0,
+    "words": 323568,
+    "old_forms": {
+     "shews": 98,
+     "shew": 146,
+     "shewed": 39,
+     "hath": 221,
+     "saith": 30,
+     "thee": 380,
+     "thou": 817,
+     "thy": 481,
+     "doth": 26,
+     "unto": 810
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      5,
+      383
+     ],
+     [
+      385,
+      795
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 2355,
+     ";": 1019
+    },
+    "superscript_words": 431,
+    "abbyy_pages": 834
+   },
+   "parts_bound": "Vol. III Part I (1843), then Part II, Second Edition, MDCCCLXV (not the 1841-45 printing)"
+  },
+  "catenaaureacomme03thomuoft": {
+   "id": "catenaaureacomme03thomuoft",
+   "url": "https://archive.org/details/catenaaureacomme03thomuoft",
+   "contributor": "Trinity College - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AIM-9181",
+   "catalogue_volume": "3",
+   "catalogue_date": "1841-1845",
+   "description": "vol. 3",
+   "notes": null,
+   "imagecount": 412,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomme03thomuoft_abbyy.gz",
+     "size": 13184170,
+     "sha256_fetched_2026_11_11": "0dbcb7eddaaf909b2390a79c43a9efc60669603128e77b1848714143de61a061"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomme03thomuoft_chocr.html.gz",
+     "size": 11103200
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomme03thomuoft_djvu.txt",
+     "size": 1036500
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomme03thomuoft_djvu.xml",
+     "size": 12557936
+    },
+    "hocr_html": {
+     "name": "catenaaureacomme03thomuoft_hocr.html",
+     "size": 23166140
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomme03thomuoft_jp2.zip",
+     "size": 503150778
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.   III.    PART  I. | ST.  LUKE. | MDCCCXLIII."
+   ],
+   "ocr_text": {
+    "bytes": 1036500,
+    "u_fffd": 0,
+    "words": 158412,
+    "old_forms": {
+     "shews": 57,
+     "shew": 81,
+     "shewed": 24,
+     "hath": 131,
+     "saith": 12,
+     "thee": 178,
+     "thou": 354,
+     "thy": 227,
+     "doth": 8,
+     "unto": 359
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      -3,
+      3
+     ],
+     [
+      5,
+      382
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 702,
+     ";": 1050
+    },
+    "superscript_words": 316,
+    "abbyy_pages": 412
+   }
+  },
+  "catenaaureacomme04thom": {
+   "id": "catenaaureacomme04thom",
+   "url": "https://archive.org/details/catenaaureacomme04thom",
+   "contributor": "Princeton Theological Seminary Library",
+   "sponsor": "Internet Archive",
+   "scanningcenter": "nyc",
+   "ocr_engine": "ABBYY FineReader 8.0",
+   "call_number": "178509",
+   "catalogue_volume": "4",
+   "catalogue_date": "1841",
+   "description": "Vol. 1:3; 3:1, 2d edition",
+   "notes": "Missing pages 367-369. No apparent loss of continuity.\n",
+   "imagecount": 654,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomme04thom_abbyy.gz",
+     "size": 22556468,
+     "sha256_fetched_2026_11_11": "6cbeffdba6919dcc04a6b888baec5b76b0241576d5f577a23b9a2c7005e98841"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomme04thom_chocr.html.gz",
+     "size": 18813745
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomme04thom_djvu.txt",
+     "size": 1726356
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomme04thom_djvu.xml",
+     "size": 20853977
+    },
+    "hocr_html": {
+     "name": "catenaaureacomme04thom_hocr.html",
+     "size": 38393143
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomme04thom_jp2.zip",
+     "size": 282996063
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.  IV. | ST.    .JOHN. | MDCCCXLV."
+   ],
+   "ocr_text": {
+    "bytes": 1726356,
+    "u_fffd": 0,
+    "words": 264090,
+    "old_forms": {
+     "shews": 141,
+     "shew": 213,
+     "shewed": 48,
+     "hath": 412,
+     "saith": 343,
+     "thee": 319,
+     "thou": 901,
+     "thy": 223,
+     "doth": 66,
+     "unto": 835
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      -1,
+      367
+     ],
+     [
+      370,
+      631
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 2369,
+     ";": 96
+    },
+    "superscript_words": 0,
+    "abbyy_pages": 656
+   },
+   "parts_bound": "Vol. IV Parts I and II (1845); its notes say pages 367-369 are missing; the general title is followed by the Table of Fathers, Doctors, and Commentators (abbyy pages 11-12, page images n10-n11)"
+  },
+  "catenaaureacomme04thomuoft": {
+   "id": "catenaaureacomme04thomuoft",
+   "url": "https://archive.org/details/catenaaureacomme04thomuoft",
+   "contributor": "Robarts - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AIM-9181",
+   "catalogue_volume": "4",
+   "catalogue_date": "1841-1845",
+   "description": "vol. 4",
+   "notes": null,
+   "imagecount": 382,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaureacomme04thomuoft_abbyy.gz",
+     "size": 12922687,
+     "sha256_fetched_2026_11_11": "472ab1185cacb798ed4d99b92422e94c0e1b365df4a3691d36992184ba85a5e3"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaureacomme04thomuoft_chocr.html.gz",
+     "size": 10879720
+    },
+    "djvu_txt": {
+     "name": "catenaaureacomme04thomuoft_djvu.txt",
+     "size": 1011996
+    },
+    "djvu_xml": {
+     "name": "catenaaureacomme04thomuoft_djvu.xml",
+     "size": 12329128
+    },
+    "hocr_html": {
+     "name": "catenaaureacomme04thomuoft_hocr.html",
+     "size": 22699967
+    },
+    "jp2_zip": {
+     "name": "catenaaureacomme04thomuoft_jp2.zip",
+     "size": 540897190
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.    IV,      PART    1. | ST.  JOHN. | MDCCCXLV."
+   ],
+   "ocr_text": {
+    "bytes": 1011996,
+    "u_fffd": 0,
+    "words": 155375,
+    "old_forms": {
+     "shews": 67,
+     "shew": 118,
+     "shewed": 21,
+     "hath": 266,
+     "saith": 173,
+     "thee": 151,
+     "thou": 467,
+     "thy": 118,
+     "doth": 46,
+     "unto": 430
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      1,
+      366
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 1424,
+     ";": 100
+    },
+    "superscript_words": 569,
+    "abbyy_pages": 382
+   }
+  },
+  "catenaaurept203thomuoft": {
+   "id": "catenaaurept203thomuoft",
+   "url": "https://archive.org/details/catenaaurept203thomuoft",
+   "contributor": "Trinity College - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AIM-9181",
+   "catalogue_volume": "3 pt.2",
+   "catalogue_date": "1841-1845",
+   "description": "Vol. 3 Part 2",
+   "notes": null,
+   "imagecount": 430,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaaurept203thomuoft_abbyy.gz",
+     "size": 13666603,
+     "sha256_fetched_2026_11_11": "904b7a7f3d1b1a41c377a71afdb5249904ed2c6e3159ee0bc98bac0abeeb3e16"
+    },
+    "chocr_html_gz": {
+     "name": "catenaaurept203thomuoft_chocr.html.gz",
+     "size": 11501592
+    },
+    "djvu_txt": {
+     "name": "catenaaurept203thomuoft_djvu.txt",
+     "size": 1072771
+    },
+    "djvu_xml": {
+     "name": "catenaaurept203thomuoft_djvu.xml",
+     "size": 13020366
+    },
+    "hocr_html": {
+     "name": "catenaaurept203thomuoft_hocr.html",
+     "size": 24054286
+    },
+    "jp2_zip": {
+     "name": "catenaaurept203thomuoft_jp2.zip",
+     "size": 515701892
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.  III.     PART  II. | ST.  LUKE. | MDCCCXLIII."
+   ],
+   "ocr_text": {
+    "bytes": 1072771,
+    "u_fffd": 0,
+    "words": 164417,
+    "old_forms": {
+     "shews": 42,
+     "shew": 66,
+     "shewed": 15,
+     "hath": 88,
+     "saith": 18,
+     "thee": 185,
+     "thou": 441,
+     "thy": 247,
+     "doth": 17,
+     "unto": 447
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      384,
+      795
+     ]
+    ],
+    "heads_by_terminator": {
+     ";": 826,
+     ".": 938
+    },
+    "superscript_words": 238,
+    "abbyy_pages": 430
+   }
+  },
+  "catenaurecomment04thomuoft": {
+   "id": "catenaurecomment04thomuoft",
+   "url": "https://archive.org/details/catenaurecomment04thomuoft",
+   "contributor": "Trinity College - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": null,
+   "catalogue_volume": "4",
+   "catalogue_date": "1841-1845",
+   "description": [
+    "v. 1, pt. 1-3. St. Matthew -- v. 2. St. Mark -- v. 3. pt. 1-2. St. Luke -- v. 4. pt. 1-2. St. John",
+    "Vol. 1, pt. 2 wanting in library copy",
+    "43"
+   ],
+   "notes": null,
+   "imagecount": 382,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaurecomment04thomuoft_abbyy.gz",
+     "size": 12610365,
+     "sha256_fetched_2026_11_11": "3d0f2027660b6af89b70ebe9bf0d2f9aa82331edbd82f3f6d902df07a66bdb62"
+    },
+    "chocr_html_gz": {
+     "name": "catenaurecomment04thomuoft_chocr.html.gz",
+     "size": 10559178
+    },
+    "djvu_txt": {
+     "name": "catenaurecomment04thomuoft_djvu.txt",
+     "size": 1009561
+    },
+    "djvu_xml": {
+     "name": "catenaurecomment04thomuoft_djvu.xml",
+     "size": 12283466
+    },
+    "hocr_html": {
+     "name": "catenaurecomment04thomuoft_hocr.html",
+     "size": 22690226
+    },
+    "jp2_zip": {
+     "name": "catenaurecomment04thomuoft_jp2.zip",
+     "size": 491156672
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.    IV.      PART    1. | ST.  JOHN. | MDCCCXLV."
+   ],
+   "ocr_text": {
+    "bytes": 1009561,
+    "u_fffd": 0,
+    "words": 155311,
+    "old_forms": {
+     "shews": 67,
+     "shew": 119,
+     "shewed": 21,
+     "hath": 267,
+     "saith": 174,
+     "thee": 152,
+     "thou": 469,
+     "thy": 113,
+     "doth": 46,
+     "unto": 434
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      1,
+      366
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 1440,
+     ";": 98
+    },
+    "superscript_words": 528,
+    "abbyy_pages": 382
+   }
+  },
+  "catenaurecommpt301thomuoft": {
+   "id": "catenaurecommpt301thomuoft",
+   "url": "https://archive.org/details/catenaurecommpt301thomuoft",
+   "contributor": "Trinity College - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": null,
+   "catalogue_volume": "1",
+   "catalogue_date": "1841-1845",
+   "description": [
+    "v. 1, pt. 1-3. St. Matthew -- v. 2. St. Mark -- v. 3. pt. 1-2. St. Luke -- v. 4. pt. 1-2. St. John",
+    "Vol. 1, pt. 2 wanting in library copy",
+    "43"
+   ],
+   "notes": null,
+   "imagecount": 270,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "catenaurecommpt301thomuoft_abbyy.gz",
+     "size": 8553675,
+     "sha256_fetched_2026_11_11": "903d507df9a0f012a6b512bccf73cca5f6e52292cad96632c93c6daa449abdbc"
+    },
+    "chocr_html_gz": {
+     "name": "catenaurecommpt301thomuoft_chocr.html.gz",
+     "size": 7179273
+    },
+    "djvu_txt": {
+     "name": "catenaurecommpt301thomuoft_djvu.txt",
+     "size": 685905
+    },
+    "djvu_xml": {
+     "name": "catenaurecommpt301thomuoft_djvu.xml",
+     "size": 8289566
+    },
+    "hocr_html": {
+     "name": "catenaurecommpt301thomuoft_hocr.html",
+     "size": 15316861
+    },
+    "jp2_zip": {
+     "name": "catenaurecommpt301thomuoft_jp2.zip",
+     "size": 322813241
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.  I. | ST.  MATTHEW.      PART  III. | MDCCCXUI."
+   ],
+   "ocr_text": {
+    "bytes": 685905,
+    "u_fffd": 0,
+    "words": 104871,
+    "old_forms": {
+     "shews": 58,
+     "shew": 79,
+     "shewed": 9,
+     "hath": 36,
+     "saith": 23,
+     "thee": 52,
+     "thou": 141,
+     "thy": 62,
+     "doth": 3,
+     "unto": 215
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      738,
+      990
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 700,
+     ";": 549
+    },
+    "superscript_words": 172,
+    "abbyy_pages": 270
+   }
+  },
+  "commentgospel02newmuoft": {
+   "id": "commentgospel02newmuoft",
+   "url": "https://archive.org/details/commentgospel02newmuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": null,
+   "scanningcenter": null,
+   "ocr_engine": null,
+   "call_number": "5493814",
+   "catalogue_volume": null,
+   "catalogue_date": "1842-00-00",
+   "description": "Collected out of the Works of the Fathers by S.Thomas Aquinas  - Volume 2",
+   "notes": null,
+   "imagecount": null,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+   "layout_files": {
+    "djvu_xml": {
+     "name": "commentgospel02newmuoft_djvu.xml",
+     "size": 9726924
+    },
+    "jp2_zip": {
+     "name": "commentgospel02newmuoft_jp2.zip",
+     "size": 565453684
+    }
+   },
+   "title_pages_ocr": null,
+   "rights_note": "archive.org gives this item no possible-copyright-status mark",
+   "not_usable": "no ABBYY layout file, so no small-capitals flag for the head rule"
+  },
+  "commentgospel101newmuoft": {
+   "id": "commentgospel101newmuoft",
+   "url": "https://archive.org/details/commentgospel101newmuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": null,
+   "scanningcenter": null,
+   "ocr_engine": null,
+   "call_number": "2426427",
+   "catalogue_volume": null,
+   "catalogue_date": "1841",
+   "description": "Collected out of the Works of the Fathers by S. Thomas Aquinas  Part 1 Volume 1",
+   "notes": null,
+   "imagecount": null,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+   "layout_files": {
+    "djvu_xml": {
+     "name": "commentgospel101newmuoft_djvu.xml",
+     "size": 11637032
+    },
+    "jp2_zip": {
+     "name": "commentgospel101newmuoft_jp2.zip",
+     "size": 614197666
+    }
+   },
+   "title_pages_ocr": null,
+   "rights_note": "archive.org gives this item no possible-copyright-status mark",
+   "not_usable": "no ABBYY layout file, so no small-capitals flag for the head rule"
+  },
+  "commentgospel104newmuoft": {
+   "id": "commentgospel104newmuoft",
+   "url": "https://archive.org/details/commentgospel104newmuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": null,
+   "scanningcenter": null,
+   "ocr_engine": null,
+   "call_number": "5493814",
+   "catalogue_volume": null,
+   "catalogue_date": "1845",
+   "description": "Collected out of the Works of the Fathers by S. Thomas Aquinas",
+   "notes": null,
+   "imagecount": 302,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "commentgospel104newmuoft_abbyy.gz",
+     "size": 9718368
+    },
+    "djvu_txt": {
+     "name": "commentgospel104newmuoft_djvu.txt",
+     "size": 634073
+    },
+    "djvu_xml": {
+     "name": "commentgospel104newmuoft_djvu.xml",
+     "size": 5885102
+    },
+    "jp2_zip": {
+     "name": "commentgospel104newmuoft_jp2.zip",
+     "size": 137757933
+    }
+   },
+   "title_pages_ocr": [
+    "VOL. IV. | ST. JOHN. | MDCCCXLV.",
+    "VOL. IV. PART II. | ST. JOHN. | MDCCCXLV."
+   ],
+   "ocr_text": {
+    "bytes": 634073,
+    "u_fffd": 0,
+    "words": 116003,
+    "old_forms": {
+     "shews": 77,
+     "shew": 99,
+     "shewed": 29,
+     "hath": 145,
+     "saith": 181,
+     "thee": 163,
+     "thou": 447,
+     "thy": 103,
+     "doth": 20,
+     "unto": 419
+    }
+   },
+   "rights_note": "archive.org gives this item no possible-copyright-status mark; its title page (OCR) is dated MDCCCXLV"
+  },
+  "commentgospel203newmuoft": {
+   "id": "commentgospel203newmuoft",
+   "url": "https://archive.org/details/commentgospel203newmuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": null,
+   "scanningcenter": null,
+   "ocr_engine": null,
+   "call_number": "5493814",
+   "catalogue_volume": null,
+   "catalogue_date": "1843",
+   "description": "Collected out of the Works of the Fathers  by S. Thomas Aquinas",
+   "notes": null,
+   "imagecount": null,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+   "layout_files": {
+    "djvu_txt": {
+     "name": "commentgospel203newmuoft_djvu.txt",
+     "size": 913730
+    },
+    "djvu_xml": {
+     "name": "commentgospel203newmuoft_djvu.xml",
+     "size": 8310022
+    },
+    "jp2_zip": {
+     "name": "commentgospel203newmuoft_jp2.zip",
+     "size": 631619903
+    }
+   },
+   "title_pages_ocr": [
+    "VOL. III. PART II. | ST. LUKE, | MDCCCXLIII."
+   ],
+   "ocr_text": {
+    "bytes": 913730,
+    "u_fffd": 0,
+    "words": 165610,
+    "old_forms": {
+     "shews": 41,
+     "shew": 66,
+     "shewed": 16,
+     "hath": 86,
+     "saith": 16,
+     "thee": 183,
+     "thou": 433,
+     "thy": 242,
+     "doth": 17,
+     "unto": 441
+    }
+   },
+   "rights_note": "archive.org gives this item no possible-copyright-status mark; its title page (OCR) is dated MDCCCXLIII",
+   "not_usable": "no ABBYY layout file, so no small-capitals flag for the head rule"
+  },
+  "commentgospel301newmuoft": {
+   "id": "commentgospel301newmuoft",
+   "url": "https://archive.org/details/commentgospel301newmuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": null,
+   "scanningcenter": null,
+   "ocr_engine": null,
+   "call_number": "5493814",
+   "catalogue_volume": null,
+   "catalogue_date": "1842",
+   "description": "collected out of the Works of the Fathers by S. Thomas Aquinas",
+   "notes": null,
+   "imagecount": null,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+   "layout_files": {
+    "djvu_xml": {
+     "name": "commentgospel301newmuoft_djvu.xml",
+     "size": 7422325
+    },
+    "jp2_zip": {
+     "name": "commentgospel301newmuoft_jp2.zip",
+     "size": 448542413
+    }
+   },
+   "title_pages_ocr": null,
+   "rights_note": "archive.org gives this item no possible-copyright-status mark",
+   "not_usable": "no ABBYY layout file, so no small-capitals flag for the head rule"
+  },
+  "commentgospelp201newmuoft": {
+   "id": "commentgospelp201newmuoft",
+   "url": "https://archive.org/details/commentgospelp201newmuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": null,
+   "scanningcenter": null,
+   "ocr_engine": null,
+   "call_number": "5493814",
+   "catalogue_volume": null,
+   "catalogue_date": "1841-1845",
+   "description": "Collected out of the Works of the Fathers by S. Thomas Aquinas  Part 2  Volume 1",
+   "notes": null,
+   "imagecount": null,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+   "layout_files": {
+    "djvu_xml": {
+     "name": "commentgospelp201newmuoft_djvu.xml",
+     "size": 9751040
+    },
+    "jp2_zip": {
+     "name": "commentgospelp201newmuoft_jp2.zip",
+     "size": 568325360
+    }
+   },
+   "title_pages_ocr": null,
+   "rights_note": "archive.org gives this item no possible-copyright-status mark",
+   "not_usable": "no ABBYY layout file, so no small-capitals flag for the head rule"
+  },
+  "commentgospelp301newmuoft": {
+   "id": "commentgospelp301newmuoft",
+   "url": "https://archive.org/details/commentgospelp301newmuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": null,
+   "scanningcenter": null,
+   "ocr_engine": null,
+   "call_number": "5493814",
+   "catalogue_volume": null,
+   "catalogue_date": "1842",
+   "description": "Collected out of the Works of the Fathers by  S Thomas Aquinas  Part 3 Volume 1",
+   "notes": null,
+   "imagecount": null,
+   "possible_copyright_status": null,
+   "rights": null,
+   "licenseurl": "http://creativecommons.org/licenses/publicdomain/",
+   "layout_files": {
+    "djvu_xml": {
+     "name": "commentgospelp301newmuoft_djvu.xml",
+     "size": 8014132
+    },
+    "jp2_zip": {
+     "name": "commentgospelp301newmuoft_jp2.zip",
+     "size": 636407216
+    }
+   },
+   "title_pages_ocr": null,
+   "rights_note": "archive.org gives this item no possible-copyright-status mark",
+   "not_usable": "no ABBYY layout file, so no small-capitals flag for the head rule"
+  },
+  "p1catenaaureaco04thomuoft": {
+   "id": "p1catenaaureaco04thomuoft",
+   "url": "https://archive.org/details/p1catenaaureaco04thomuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AJH-5369",
+   "catalogue_volume": "4, Part 1",
+   "catalogue_date": "1841-1845",
+   "description": [
+    "v. 1, pt. 1-3. St. Matthew -- v. 2. St. Mark -- v. 3. pt. 1-2. St. Luke -- v. 4. pt. 1-2. St. John",
+    "28 31 45"
+   ],
+   "notes": null,
+   "imagecount": 382,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "p1catenaaureaco04thomuoft_abbyy.gz",
+     "size": 13182117,
+     "sha256_fetched_2026_11_11": "fc9d0dbcd22c0dd295fe334c9d4cccfb2553da9979604af9a2ca46e1c702b725"
+    },
+    "chocr_html_gz": {
+     "name": "p1catenaaureaco04thomuoft_chocr.html.gz",
+     "size": 10953084
+    },
+    "djvu_txt": {
+     "name": "p1catenaaureaco04thomuoft_djvu.txt",
+     "size": 1014230
+    },
+    "djvu_xml": {
+     "name": "p1catenaaureaco04thomuoft_djvu.xml",
+     "size": 12125607
+    },
+    "hocr_html": {
+     "name": "p1catenaaureaco04thomuoft_hocr.html",
+     "size": 22444596
+    },
+    "jp2_zip": {
+     "name": "p1catenaaureaco04thomuoft_jp2.zip",
+     "size": 123273785
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.    IV.      PART    1. | ST.  JOHN. | MDCCCXLV."
+   ],
+   "ocr_text": {
+    "bytes": 1014230,
+    "u_fffd": 0,
+    "words": 155539,
+    "old_forms": {
+     "shews": 68,
+     "shew": 118,
+     "shewed": 21,
+     "hath": 267,
+     "saith": 175,
+     "thee": 157,
+     "thou": 472,
+     "thy": 116,
+     "doth": 47,
+     "unto": 433
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      1,
+      365
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 1359,
+     ";": 101
+    },
+    "superscript_words": 484,
+    "abbyy_pages": 382
+   }
+  },
+  "p2catenaaureacom03thomuoft": {
+   "id": "p2catenaaureacom03thomuoft",
+   "url": "https://archive.org/details/p2catenaaureacom03thomuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AJH-5369",
+   "catalogue_volume": "3",
+   "catalogue_date": "1841-1845",
+   "description": [
+    "v. 1, pt. 1-3. St. Matthew -- v. 2. St. Mark -- v. 3. pt. 1-2. St. Luke -- v. 4. pt. 1-2. St. John",
+    "28 31 45"
+   ],
+   "notes": null,
+   "imagecount": 432,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "p2catenaaureacom03thomuoft_abbyy.gz",
+     "size": 13970406,
+     "sha256_fetched_2026_11_11": "a6b87ca85c98ca7bb0955d421cbd3798b01806bc6bd1aeeded932c6990022686"
+    },
+    "chocr_html_gz": {
+     "name": "p2catenaaureacom03thomuoft_chocr.html.gz",
+     "size": 11629302
+    },
+    "djvu_txt": {
+     "name": "p2catenaaureacom03thomuoft_djvu.txt",
+     "size": 1073848
+    },
+    "djvu_xml": {
+     "name": "p2catenaaureacom03thomuoft_djvu.xml",
+     "size": 12901897
+    },
+    "hocr_html": {
+     "name": "p2catenaaureacom03thomuoft_hocr.html",
+     "size": 23821184
+    },
+    "jp2_zip": {
+     "name": "p2catenaaureacom03thomuoft_jp2.zip",
+     "size": 197207688
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.  in.     PART  II. | ST.  LUKE. | MDCCCXLIII."
+   ],
+   "ocr_text": {
+    "bytes": 1073848,
+    "u_fffd": 0,
+    "words": 164408,
+    "old_forms": {
+     "shews": 42,
+     "shew": 66,
+     "shewed": 15,
+     "hath": 87,
+     "saith": 18,
+     "thee": 197,
+     "thou": 451,
+     "thy": 244,
+     "doth": 17,
+     "unto": 446
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      385,
+      795
+     ]
+    ],
+    "heads_by_terminator": {
+     ";": 746,
+     ".": 818
+    },
+    "superscript_words": 0,
+    "abbyy_pages": 432
+   }
+  },
+  "p2catenaaureacom04thomuoft": {
+   "id": "p2catenaaureacom04thomuoft",
+   "url": "https://archive.org/details/p2catenaaureacom04thomuoft",
+   "contributor": "Kelly - University of Toronto",
+   "sponsor": "MSN",
+   "scanningcenter": "uoft",
+   "ocr_engine": null,
+   "call_number": "AJH-5369",
+   "catalogue_volume": "4, Part 2",
+   "catalogue_date": "1841-1845",
+   "description": [
+    "v. 1, pt. 1-3. St. Matthew -- v. 2. St. Mark -- v. 3. pt. 1-2. St. Luke -- v. 4. pt. 1-2. St. John",
+    "28 31 45"
+   ],
+   "notes": null,
+   "imagecount": 280,
+   "possible_copyright_status": "NOT_IN_COPYRIGHT",
+   "rights": null,
+   "licenseurl": null,
+   "layout_files": {
+    "abbyy_gz": {
+     "name": "p2catenaaureacom04thomuoft_abbyy.gz",
+     "size": 9462490,
+     "sha256_fetched_2026_11_11": "428f4d2af688e8338449fcfe850e89c168638c5e2456685cacff64093b700e4b"
+    },
+    "chocr_html_gz": {
+     "name": "p2catenaaureacom04thomuoft_chocr.html.gz",
+     "size": 7947901
+    },
+    "djvu_txt": {
+     "name": "p2catenaaureacom04thomuoft_djvu.txt",
+     "size": 702914
+    },
+    "djvu_xml": {
+     "name": "p2catenaaureacom04thomuoft_djvu.xml",
+     "size": 8580935
+    },
+    "hocr_html": {
+     "name": "p2catenaaureacom04thomuoft_hocr.html",
+     "size": 15776637
+    },
+    "jp2_zip": {
+     "name": "p2catenaaureacom04thomuoft_jp2.zip",
+     "size": 163918061
+    }
+   },
+   "title_pages_ocr": [
+    "VOL.    IV.      PART    II. | ST.  JOHN. | MDCCCXLV."
+   ],
+   "ocr_text": {
+    "bytes": 702914,
+    "u_fffd": 0,
+    "words": 108871,
+    "old_forms": {
+     "shews": 76,
+     "shew": 101,
+     "shewed": 29,
+     "hath": 150,
+     "saith": 185,
+     "thee": 162,
+     "thou": 455,
+     "thy": 106,
+     "doth": 20,
+     "unto": 425
+    }
+   },
+   "layout_census": {
+    "printed_page_runs": [
+     [
+      369,
+      631
+     ]
+    ],
+    "heads_by_terminator": {
+     ".": 1105
+    },
+    "superscript_words": 454,
+    "abbyy_pages": 280
+   }
+  }
+ },
+ "transcriptions": {
+  "CCEL catena1.xml": {
+   "url": "https://www.ccel.org/ccel/aquinas/catena1.xml",
+   "gospels": [
+    "Matthew"
+   ],
+   "bytes": 3021275,
+   "sha256": "943a6b5fd668ef021877e99f210d96b84abbbe81212fe5627c6bb206f9ce1618",
+   "u_fffd": 0,
+   "curly_quotes": 11246,
+   "words": 400013,
+   "old_forms": {
+    "shews": 250,
+    "shew": 266,
+    "shewed": 67,
+    "hath": 176,
+    "saith": 112,
+    "thee": 323,
+    "thou": 578,
+    "thy": 328,
+    "doth": 19,
+    "unto": 842
+   },
+   "rights": "DC.Rights is empty; the file carries the comment \"Copyright Christian Classics Ethereal Library\"; ccel.org asks permission to republish",
+   "use": "compared against, never served (its permission follows the transcription)"
+  },
+  "CCEL catena2.xml": {
+   "url": "https://www.ccel.org/ccel/aquinas/catena2.xml",
+   "gospels": [
+    "Mark"
+   ],
+   "bytes": 971399,
+   "sha256": "69c8f2d198186de50e444c6a618dd3de24d3b89e8af879042b06c5a46c89168f",
+   "u_fffd": 0,
+   "curly_quotes": 3672,
+   "words": 137523,
+   "old_forms": {
+    "shews": 79,
+    "shew": 103,
+    "shewed": 24,
+    "hath": 76,
+    "saith": 92,
+    "thee": 104,
+    "thou": 217,
+    "thy": 104,
+    "doth": 8,
+    "unto": 523
+   },
+   "rights": "DC.Rights is empty; the file carries the comment \"Copyright Christian Classics Ethereal Library\"; ccel.org asks permission to republish",
+   "use": "compared against, never served (its permission follows the transcription)"
+  },
+  "isidore.co CAMatthew.htm": {
+   "url": "https://isidore.co/aquinas/english/CAMatthew.htm",
+   "gospels": [
+    "Matthew"
+   ],
+   "bytes": 3450815,
+   "sha256": "e03e0eda6d2135333f55ff09a1b93f72620f35f2a29f6ef84bd2c559f253603d",
+   "u_fffd": 11298,
+   "curly_quotes": 0,
+   "words": 404425,
+   "old_forms": {
+    "shews": 252,
+    "shew": 266,
+    "shewed": 68,
+    "hath": 176,
+    "saith": 112,
+    "thee": 323,
+    "thou": 581,
+    "thy": 330,
+    "doth": 20,
+    "unto": 842
+   },
+   "rights": "no rights statement on the page or on the index (index credits Fr. Joseph Kenny, O.P. as compiler)",
+   "use": "a copy of CCEL's transcription (same typos and note forms, checker-100 line 6): compared against, never served"
+  },
+  "isidore.co CAMark.htm": {
+   "url": "https://isidore.co/aquinas/english/CAMark.htm",
+   "gospels": [
+    "Mark"
+   ],
+   "bytes": 1297441,
+   "sha256": "5bf48be7e1667cafbd6dc5036bfc28e3eb2932c9ac87c1e8d39479b74d1e627d",
+   "u_fffd": 3668,
+   "curly_quotes": 0,
+   "words": 137342,
+   "old_forms": {
+    "shews": 79,
+    "shew": 103,
+    "shewed": 24,
+    "hath": 76,
+    "saith": 92,
+    "thee": 104,
+    "thou": 217,
+    "thy": 104,
+    "doth": 8,
+    "unto": 523
+   },
+   "rights": "no rights statement on the page or on the index (index credits Fr. Joseph Kenny, O.P. as compiler)",
+   "use": "a copy of CCEL's transcription: compared against, never served"
+  },
+  "isidore.co CALuke.htm": {
+   "url": "https://isidore.co/aquinas/english/CALuke.htm",
+   "gospels": [
+    "Luke"
+   ],
+   "bytes": 1802642,
+   "sha256": "f3b5c9b9757037e99f25c3bc5884d96e49ad0f9323460ac8ebc7b4fe4c27b05e",
+   "u_fffd": 0,
+   "curly_quotes": 1312,
+   "words": 305644,
+   "old_forms": {
+    "shews": 0,
+    "shew": 0,
+    "shewed": 0,
+    "hath": 0,
+    "saith": 0,
+    "thee": 9,
+    "thou": 3,
+    "thy": 12,
+    "doth": 9,
+    "unto": 16
+   },
+   "rights": "no rights statement on the page or on the index (index credits Fr. Joseph Kenny, O.P. as compiler)",
+   "use": "modernized wording (old forms 0, see counts): not the printing; compared against only for missing or added words"
+  },
+  "isidore.co CAJohn.htm": {
+   "url": "https://isidore.co/aquinas/english/CAJohn.htm",
+   "gospels": [
+    "John"
+   ],
+   "bytes": 1434414,
+   "sha256": "fdb4ed22c4b451e790eb7f3aaa56a67fe74eccf89787dfd52d77cc69b447148d",
+   "u_fffd": 0,
+   "curly_quotes": 935,
+   "words": 250432,
+   "old_forms": {
+    "shews": 0,
+    "shew": 0,
+    "shewed": 0,
+    "hath": 5,
+    "saith": 2,
+    "thee": 8,
+    "thou": 4,
+    "thy": 1,
+    "doth": 0,
+    "unto": 29
+   },
+   "rights": "no rights statement on the page or on the index (index credits Fr. Joseph Kenny, O.P. as compiler)",
+   "use": "modernized wording: not the printing; compared against only for missing or added words"
+  }
+ },
+ "scan_old_forms_copy_a": {
+  "Matthew": {
+   "copies_summed": [
+    "catenaaureacomme00thomuoft",
+    "a6788682p201thomuoft",
+    "catenaaureacomme01thomuoft"
+   ],
+   "old_forms": {
+    "shews": 250,
+    "shew": 266,
+    "shewed": 68,
+    "hath": 169,
+    "saith": 109,
+    "thee": 301,
+    "thou": 552,
+    "thy": 322,
+    "doth": 20,
+    "unto": 815
+   }
+  },
+  "Mark": {
+   "copies_summed": [
+    "catenaaureacomme02thomuoft"
+   ],
+   "old_forms": {
+    "shews": 80,
+    "shew": 103,
+    "shewed": 24,
+    "hath": 78,
+    "saith": 91,
+    "thee": 104,
+    "thou": 216,
+    "thy": 105,
+    "doth": 8,
+    "unto": 524
+   }
+  },
+  "Luke": {
+   "copies_summed": [
+    "catenaaureacomme03thomuoft",
+    "catenaaurept203thomuoft"
+   ],
+   "old_forms": {
+    "shews": 99,
+    "shew": 147,
+    "shewed": 39,
+    "hath": 219,
+    "saith": 30,
+    "thee": 363,
+    "thou": 795,
+    "thy": 474,
+    "doth": 25,
+    "unto": 806
+   }
+  },
+  "John": {
+   "copies_summed": [
+    "catenaaureacomme04thomuoft",
+    "catenaaureacomm204arisuoft"
+   ],
+   "old_forms": {
+    "shews": 143,
+    "shew": 218,
+    "shewed": 47,
+    "hath": 412,
+    "saith": 354,
+    "thee": 316,
+    "thou": 909,
+    "thy": 224,
+    "doth": 66,
+    "unto": 854
+   }
+  }
+ },
+ "structure": {
+  "ccel_matthew": {
+   "chapters": 33,
+   "scripture_paragraphs": 1063,
+   "comment_paragraphs": 6110,
+   "verse_mark_forms": {
+    "N.": 1046,
+    "N-M.": 4,
+    "irregular": 13
+   },
+   "verse_ranges": 4,
+   "verse_mark_irregular": [
+    [
+     "ii.xii-p71",
+     "21, And in h"
+    ],
+    [
+     "ii.xiii-p158",
+     "3l. Another "
+    ],
+    [
+     "ii.xiii-p159",
+     "32, Which in"
+    ],
+    [
+     "ii.xiv-p1",
+     "l. At that t"
+    ],
+    [
+     "ii.xv-p164",
+     "33, And his "
+    ],
+    [
+     "ii.xvii-p1",
+     "l. And after"
+    ],
+    [
+     "ii.xviii-p1",
+     "l. At the sa"
+    ],
+    [
+     "ii.xix-p1",
+     "l. And it ca"
+    ],
+    [
+     "ii.xxi-p1",
+     "l. And when "
+    ],
+    [
+     "ii.xxiv-p1",
+     "l. And Jesus"
+    ],
+    [
+     "ii.xxiv-p191",
+     "[30] “And th"
+    ],
+    [
+     "ii.xxvii-p299",
+     "65 Pilate sa"
+    ],
+    [
+     "ii.xxvii-p300",
+     "66 So they w"
+    ]
+   ],
+   "comment_paragraphs_without_head": 1274,
+   "link_phrase_paragraphs": {
+    "Then follows": 6,
+    "It follows": 34,
+    "And it follows": 1,
+    "Wherefore it follows": 2
+   },
+   "editors_note_forms": {
+    "[ed. note:": 105,
+    "[ed. note,": 47,
+    "[margin note": 79,
+    "[marg. note": 83,
+    "[note:": 0,
+    "(note:": 0,
+    "[Note:": 0
+   },
+   "page_breaks": 983
+  },
+  "ccel_mark": {
+   "chapters": 19,
+   "scripture_paragraphs": 684,
+   "comment_paragraphs": 2458,
+   "verse_mark_forms": {
+    "irregular": 2,
+    "N.": 679,
+    "no leading verse mark": 3
+   },
+   "verse_ranges": 0,
+   "verse_mark_irregular": [
+    [
+     "iii.i-p1",
+     "Ver. 1: The "
+    ],
+    [
+     "iii.iv-p3",
+     "3: “Hearken:"
+    ]
+   ],
+   "comment_paragraphs_without_head": 953,
+   "link_phrase_paragraphs": {
+    "There follows": 103,
+    "Wherefore there follows": 62,
+    "It goes on": 175,
+    "Wherefore it goes on": 70,
+    "It continues": 6,
+    "It follows": 1,
+    "Wherefore it continues": 7,
+    "Wherefore it follows": 2,
+    "Then there follows": 1,
+    "But it continues": 1
+   },
+   "editors_note_forms": {
+    "[ed. note:": 66,
+    "[ed. note,": 0,
+    "[margin note": 0,
+    "[marg. note": 0,
+    "[note:": 2,
+    "(note:": 1,
+    "[Note:": 0
+   },
+   "page_breaks": 343
+  },
+  "ccel_head_forms_matthew": [
+   [
+    "Jerome",
+    844
+   ],
+   [
+    "Chrys.",
+    830
+   ],
+   [
+    "Aug.",
+    633
+   ],
+   [
+    "Pseudo-Chrys.",
+    427
+   ],
+   [
+    "Remig.",
+    377
+   ],
+   [
+    "Hilary",
+    341
+   ],
+   [
+    "Origen",
+    309
+   ],
+   [
+    "Raban.",
+    197
+   ],
+   [
+    "Greg.",
+    165
+   ],
+   [
+    "Gloss.",
+    130
+   ],
+   [
+    "Rabanus",
+    95
+   ],
+   [
+    "Gloss",
+    76
+   ],
+   [
+    "Gloss. ord.",
+    61
+   ],
+   [
+    "Ambrose",
+    45
+   ],
+   [
+    "Leo",
+    28
+   ],
+   [
+    "Bede",
+    26
+   ],
+   [
+    "Pseudo-Aug.",
+    22
+   ],
+   [
+    "Cyprian",
+    20
+   ],
+   [
+    "Pseudo-Origen",
+    18
+   ],
+   [
+    "Gloss. interlin.",
+    17
+   ],
+   [
+    "Gloss. ap. Anselm",
+    17
+   ],
+   [
+    "Chrysol.",
+    16
+   ],
+   [
+    "Gregory",
+    12
+   ],
+   [
+    "Chrysologus",
+    10
+   ],
+   [
+    "Gloss. non occ.",
+    9
+   ],
+   [
+    "Cassian",
+    6
+   ],
+   [
+    "Raban",
+    6
+   ],
+   [
+    "Augustine",
+    5
+   ],
+   [
+    "Haymo",
+    5
+   ],
+   [
+    "Euseb.",
+    4
+   ],
+   [
+    "Cyril",
+    3
+   ],
+   [
+    "Greg",
+    3
+   ],
+   [
+    "Pseudo-Athan.",
+    2
+   ],
+   [
+    "Isidore",
+    2
+   ],
+   [
+    "Pseudo-Chyrs.",
+    2
+   ],
+   [
+    "Chyrs.",
+    2
+   ],
+   [
+    "Gloss. ord",
+    2
+   ],
+   [
+    "Theodotus",
+    2
+   ],
+   [
+    "Damascenus",
+    2
+   ],
+   [
+    "Damas.",
+    2
+   ],
+   [
+    "Hil.",
+    2
+   ],
+   [
+    "Gloss. Ordinaria",
+    1
+   ],
+   [
+    "Remigius",
+    1
+   ],
+   [
+    "Cyril of Alexandria",
+    1
+   ],
+   [
+    "But what Eutyches ventured [margin note",
+    1
+   ],
+   [
+    "Remig",
+    1
+   ],
+   [
+    "Remig. Christ is also Booz [ed. note",
+    1
+   ],
+   [
+    "Aram is interpreted ‘elect’ or ‘lofty’ [ed. note",
+    1
+   ],
+   [
+    "Next is Salomon [ed. note",
+    1
+   ],
+   [
+    "Roboam [ed. note",
+    1
+   ],
+   [
+    "He is also Asa [ed. note",
+    1
+   ],
+   [
+    "He is also Jotham [ed. note",
+    1
+   ],
+   [
+    "He is also Ahaz [ed. note",
+    1
+   ],
+   [
+    "He is also Aaron [ed note",
+    1
+   ],
+   [
+    "He is also Josias",
+    1
+   ],
+   [
+    "He is also Eliacim [ed. note",
+    1
+   ],
+   [
+    "But of this matter Africanus the chronologist [ed. note",
+    1
+   ],
+   [
+    "Gennadius",
+    1
+   ],
+   [
+    "The Council of Ephesus",
+    1
+   ],
+   [
+    "What he would shew then is this",
+    1
+   ],
+   [
+    "The Martyr Ignatius [margin note",
+    1
+   ],
+   [
+    "Petrus Alfonsus",
+    1
+   ],
+   [
+    "Gloss. ord. et ap. Anselm ex Beda cit.",
+    1
+   ],
+   [
+    "Gregory Nyss.",
+    1
+   ],
+   [
+    "Gloss. Anselm",
+    1
+   ],
+   [
+    "Pseudo-Dionysius",
+    1
+   ],
+   [
+    "Josephus",
+    1
+   ],
+   [
+    "Maximus",
+    1
+   ],
+   [
+    "Aug. Serm.",
+    1
+   ],
+   [
+    "Isid. Hisp. Orig. 8. 4",
+    1
+   ],
+   [
+    "Theod. non occ.",
+    1
+   ],
+   [
+    "Ambrose. non occ.",
+    1
+   ],
+   [
+    "Faustus",
+    1
+   ],
+   [
+    "Or by “the last farthing” [margin note",
+    1
+   ],
+   [
+    "Ambrosiaster",
+    1
+   ],
+   [
+    "Isid.",
+    1
+   ],
+   [
+    "Nemesius",
+    1
+   ],
+   [
+    "Ambrosiaster Comm. in 1 Cor 12",
+    1
+   ],
+   [
+    "Anselm",
+    1
+   ],
+   [
+    "Ambrose.",
+    1
+   ],
+   [
+    "Chrys",
+    1
+   ],
+   [
+    "Thus",
+    1
+   ],
+   [
+    "Raban. e Beda in Luc.",
+    1
+   ],
+   [
+    "Aug. Quaest. Ev.",
+    1
+   ],
+   [
+    "Or otherwise; We read in Plato [margin note",
+    1
+   ],
+   [
+    "Psuedo-Aug.",
+    1
+   ],
+   [
+    "Cyril [ed. note",
+    1
+   ],
+   [
+    "Second Council of Constantinople",
+    1
+   ],
+   [
+    "Remig. see Bed. in Luc. 9",
+    1
+   ],
+   [
+    "Others interpret [margin note",
+    1
+   ],
+   [
+    "Or otherwise; It is written in the Gospel [ed. note",
+    1
+   ],
+   [
+    "Aug",
+    1
+   ],
+   [
+    "Dionys.",
+    1
+   ],
+   [
+    "Raban. [ed. note",
+    1
+   ],
+   [
+    "And so Josephus [marg. note",
+    1
+   ],
+   [
+    "Or",
+    1
+   ],
+   [
+    "Paschasius",
+    1
+   ],
+   [
+    "Lanfranc",
+    1
+   ],
+   [
+    "Dionysius",
+    1
+   ],
+   [
+    "Dionys. ad Polycarp. Ep. 7",
+    1
+   ],
+   [
+    "Damasc.",
+    1
+   ],
+   [
+    "Chrysol",
+    1
+   ]
+  ],
+  "ccel_head_forms_mark": [
+   [
+    "Bede",
+    432
+   ],
+   [
+    "Theophylact",
+    359
+   ],
+   [
+    "Pseudo-Jerome",
+    226
+   ],
+   [
+    "Pseudo-Chrys.",
+    105
+   ],
+   [
+    "Augustine",
+    92
+   ],
+   [
+    "Chrys.",
+    86
+   ],
+   [
+    "Gloss.",
+    33
+   ],
+   [
+    "Greg.",
+    32
+   ],
+   [
+    "Gloss",
+    11
+   ],
+   [
+    "Wherefore it is said",
+    11
+   ],
+   [
+    "For it goes on",
+    10
+   ],
+   [
+    "Origen",
+    9
+   ],
+   [
+    "For there follows",
+    9
+   ],
+   [
+    "Severianus",
+    9
+   ],
+   [
+    "Jerome",
+    8
+   ],
+   [
+    "Chrysostom",
+    8
+   ],
+   [
+    "Remig.",
+    7
+   ],
+   [
+    "Gregory",
+    4
+   ],
+   [
+    "Theophlyact",
+    4
+   ],
+   [
+    "Pseudo-Augustine",
+    3
+   ],
+   [
+    "Hilary",
+    2
+   ],
+   [
+    "Pseudo-Aug.",
+    2
+   ],
+   [
+    "Psuedo-Chrys.",
+    2
+   ],
+   [
+    "Cyril",
+    2
+   ],
+   [
+    "Ambrose",
+    2
+   ],
+   [
+    "Greg",
+    2
+   ],
+   [
+    "Origin",
+    2
+   ],
+   [
+    "For it is clear [ed. note",
+    1
+   ],
+   [
+    "And therefore there follows",
+    1
+   ],
+   [
+    "Whence it goes on",
+    1
+   ],
+   [
+    "And this is that which is added",
+    1
+   ],
+   [
+    "Cyril [ed. note",
+    1
+   ],
+   [
+    "Whence it follows",
+    1
+   ],
+   [
+    "Whence there follows",
+    1
+   ],
+   [
+    "And therefore it continues",
+    1
+   ],
+   [
+    "Bede; see Ambr. in Luc. 6",
+    1
+   ],
+   [
+    "For in counting a hundred",
+    1
+   ],
+   [
+    "Greg. Nyss.",
+    1
+   ],
+   [
+    "Pseudo-Chyrs.",
+    1
+   ],
+   [
+    "Titus",
+    1
+   ],
+   [
+    "Wherefore it also follows",
+    1
+   ],
+   [
+    "Gloss [ed. note",
+    1
+   ],
+   [
+    "Gloss. [ed. note",
+    1
+   ],
+   [
+    "For there comes after",
+    1
+   ],
+   [
+    "Chrys. [ed. note",
+    1
+   ],
+   [
+    "But Luke says [ed. note",
+    1
+   ],
+   [
+    "Afterwards he brings in a witness from Leviticus",
+    1
+   ],
+   [
+    "One which He adds",
+    1
+   ],
+   [
+    "Or else",
+    1
+   ],
+   [
+    "And therefore they add",
+    1
+   ],
+   [
+    "And this is what is added",
+    1
+   ],
+   [
+    "Wherefore concluding this parable He adds",
+    1
+   ],
+   [
+    "Where it is said",
+    1
+   ],
+   [
+    "Leo",
+    1
+   ],
+   [
+    "Augustine [ed. note",
+    1
+   ],
+   [
+    "Wherefore it is added",
+    1
+   ],
+   [
+    "With the form of a serpent [ed. note",
+    1
+   ],
+   [
+    "Wherefore the Apostle says",
+    1
+   ],
+   [
+    "I goes on",
+    1
+   ],
+   [
+    "Theophyact",
+    1
+   ]
+  ],
+  "printing_per_part_copy_a": {
+   "mt1": {
+    "gospel_type_runs": 123,
+    "footnote_lines": 243,
+    "margin_entries": 2064,
+    "superscript_words": 483,
+    "line_end_hyphens": 164,
+    "link_phrases": {
+     "it follows": 41,
+     "It follows": 5,
+     "whence it follows": 8,
+     "Hence it follows": 1
+    }
+   },
+   "mt2": {
+    "gospel_type_runs": 60,
+    "footnote_lines": 117,
+    "margin_entries": 962,
+    "superscript_words": 0,
+    "line_end_hyphens": 540,
+    "link_phrases": {
+     "it follows": 82,
+     "whence it follows": 38,
+     "It follows": 34
+    }
+   },
+   "mk": {
+    "gospel_type_runs": 99,
+    "footnote_lines": 246,
+    "margin_entries": 2065,
+    "superscript_words": 362,
+    "line_end_hyphens": 175,
+    "link_phrases": {
+     "There follows": 109,
+     "there follows": 105,
+     "it goes on": 116,
+     "whence it follows": 3,
+     "It goes on": 174,
+     "Wherefore it is said": 22,
+     "It continues": 6,
+     "It follows": 2,
+     "it follows": 5
+    }
+   },
+   "lk1": {
+    "gospel_type_runs": 126,
+    "footnote_lines": 82,
+    "margin_entries": 1850,
+    "superscript_words": 312,
+    "line_end_hyphens": 144,
+    "link_phrases": {
+     "Hence it follows": 135,
+     "It follows": 62,
+     "it follows": 279
+    }
+   },
+   "lk2": {
+    "gospel_type_runs": 112,
+    "footnote_lines": 50,
+    "margin_entries": 1690,
+    "superscript_words": 238,
+    "line_end_hyphens": 160,
+    "link_phrases": {
+     "Hence it follows": 97,
+     "it follows": 284,
+     "It follows": 59,
+     "there follows": 3,
+     "whence it follows": 6
+    }
+   },
+   "jn1": {
+    "gospel_type_runs": 102,
+    "footnote_lines": 236,
+    "margin_entries": 2846,
+    "superscript_words": 569,
+    "line_end_hyphens": 187,
+    "link_phrases": {
+     "it follows": 29,
+     "It follows": 14,
+     "Wherefore it is said": 1,
+     "there follows": 1,
+     "it goes on": 1
+    }
+   },
+   "jn2": {
+    "gospel_type_runs": 68,
+    "footnote_lines": 33,
+    "margin_entries": 1917,
+    "superscript_words": 459,
+    "line_end_hyphens": 123,
+    "link_phrases": {
+     "it follows": 22,
+     "It follows": 15
+    }
+   }
+  },
+  "printing_head_forms_read_alike_in_both_copies": [
+   [
+    "AUG",
+    3323,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "CHRYS",
+    3161,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "BEDE",
+    2317,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "THEOPHYL",
+    1723,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "JEROME",
+    1102,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "AMBROSE",
+    1063,
+    [
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "GREG",
+    822,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "PSEUDO-CHRYS",
+    787,
+    [
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "ORIGEN",
+    759,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "CYRIL",
+    725,
+    [
+     "jn1",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1"
+    ]
+   ],
+   [
+    "GLOSS",
+    695,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "HILARY",
+    616,
+    [
+     "jn1",
+     "jn2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "REMIG",
+    501,
+    [
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "PSEUDO-JEROME",
+    428,
+    [
+     "mk"
+    ]
+   ],
+   [
+    "RABAN",
+    318,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "ALCUIN",
+    306,
+    [
+     "jn1",
+     "jn2"
+    ]
+   ],
+   [
+    "BASIL",
+    234,
+    [
+     "jn1",
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "ID",
+    159,
+    [
+     "jn1",
+     "lk1",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "GREG. NYSS",
+    140,
+    [
+     "lk1",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "TIT. BOST",
+    112,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "EUSEB",
+    109,
+    [
+     "jn1",
+     "lk1",
+     "lk2",
+     "mt1"
+    ]
+   ],
+   [
+    "ATHAN",
+    72,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "CHRVS",
+    61,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "CHKYS",
+    59,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "RABANUS",
+    57,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "VOL",
+    52,
+    [
+     "jn1",
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1"
+    ]
+   ],
+   [
+    "GREG. NAZ",
+    44,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "THE-OPHYL",
+    42,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "CYPRIAN",
+    39,
+    [
+     "lk1",
+     "lk2",
+     "mt1"
+    ]
+   ],
+   [
+    "CHUYS",
+    31,
+    [
+     "jn1",
+     "jn2",
+     "lk2",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "CIIRYS",
+    31,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "GREGORY",
+    29,
+    [
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "PSEUDO-ORIGEN",
+    29,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "CHRYSOST",
+    27,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "THEO-PHYL",
+    27,
+    [
+     "jn1",
+     "jn2",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "LEO",
+    26,
+    [
+     "mk",
+     "mt1"
+    ]
+   ],
+   [
+    "PSEUDO-AUG",
+    22,
+    [
+     "lk1",
+     "lk2",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "THEOPHYLACT",
+    22,
+    [
+     "lk1",
+     "mk"
+    ]
+   ],
+   [
+    "OKIGEN",
+    21,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "mk",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "BEDK",
+    21,
+    [
+     "jn1",
+     "lk1",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "CHRYSOSTOM",
+    20,
+    [
+     "lk1",
+     "mt1"
+    ]
+   ],
+   [
+    "JKROME",
+    20,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "HAYMO",
+    18,
+    [
+     "jn1",
+     "mt1"
+    ]
+   ],
+   [
+    "EUSEBIUS",
+    18,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "RKMIG",
+    17,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "SEVER",
+    16,
+    [
+     "mk"
+    ]
+   ],
+   [
+    "TITUS BOST",
+    16,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "DIDYMUS",
+    16,
+    [
+     "jn2"
+    ]
+   ],
+   [
+    "BKDE",
+    15,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "ISIDORE",
+    13,
+    [
+     "lk1",
+     "lk2",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "JEKOME",
+    13,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "CHIIYS",
+    13,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "THEOFHYL",
+    12,
+    [
+     "jn1",
+     "lk1",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "AM BROSE",
+    12,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "AM-BROSE",
+    12,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "GKEG",
+    11,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "ORIGKN",
+    11,
+    [
+     "jn1",
+     "jn2",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "CHHYS",
+    11,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mt2"
+    ]
+   ],
+   [
+    "BEDS",
+    11,
+    [
+     "jn1",
+     "lk1",
+     "mk"
+    ]
+   ],
+   [
+    "TIIEOPHYL",
+    11,
+    [
+     "jn1",
+     "jn2",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "THEOPIIYL",
+    11,
+    [
+     "jn1",
+     "jn2",
+     "lk1",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "PSEUDO-CIIRYS",
+    10,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "ORIGEX",
+    10,
+    [
+     "jn1",
+     "lk1",
+     "lk2",
+     "mt2"
+    ]
+   ],
+   [
+    "THEOPHVL",
+    10,
+    [
+     "jn2",
+     "lk1",
+     "mk"
+    ]
+   ],
+   [
+    "EPIPH",
+    10,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "MAXIM",
+    10,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "CASSIAN",
+    9,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "CHRYSOLOGUS",
+    9,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "MAXIMUS",
+    9,
+    [
+     "lk1",
+     "mt1"
+    ]
+   ],
+   [
+    "PSEUDO-CHRVS",
+    9,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "THKOPHYL",
+    9,
+    [
+     "jn2",
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "JKKOMK",
+    8,
+    [
+     "mt2"
+    ]
+   ],
+   [
+    "ORIOEN",
+    8,
+    [
+     "mt2"
+    ]
+   ],
+   [
+    "DAMASCENE",
+    8,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "DAMAS",
+    8,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "IIABAN",
+    7,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    ".JEROME",
+    7,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "RABAX",
+    7,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "KABAN",
+    7,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "PSEU DO-JEROME",
+    7,
+    [
+     "mk"
+    ]
+   ],
+   [
+    "TITUS",
+    7,
+    [
+     "lk1",
+     "lk2",
+     "mk"
+    ]
+   ],
+   [
+    "HABAN",
+    6,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "PSEDDO-CHRYS",
+    6,
+    [
+     "mk",
+     "mt1"
+    ]
+   ],
+   [
+    "REMIO",
+    6,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "GRKG",
+    6,
+    [
+     "jn2",
+     "lk2",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "REG",
+    5,
+    [
+     "jn2",
+     "lk2",
+     "mk",
+     "mt2"
+    ]
+   ],
+   [
+    "THEOPH",
+    5,
+    [
+     "mk"
+    ]
+   ],
+   [
+    "TIT",
+    5,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "ORIG",
+    5,
+    [
+     "jn1",
+     "lk1"
+    ]
+   ],
+   [
+    "ALCDIN",
+    5,
+    [
+     "jn1",
+     "jn2"
+    ]
+   ],
+   [
+    "PSEUDO-ATHAN",
+    4,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "AUGUSTINE",
+    4,
+    [
+     "lk1",
+     "mt1"
+    ]
+   ],
+   [
+    "THEODOTUS",
+    4,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "PSEUDO-CHKYS",
+    4,
+    [
+     "lk2",
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "PSKUDO-CHRYS",
+    4,
+    [
+     "mk",
+     "mt1"
+    ]
+   ],
+   [
+    "JEIIOME",
+    4,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "PSEUDO-CHUYS",
+    4,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "JEUOME",
+    4,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "RAUAN",
+    4,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "JKROMK",
+    4,
+    [
+     "mt2"
+    ]
+   ],
+   [
+    "DAMASC",
+    4,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "MAX",
+    4,
+    [
+     "lk1",
+     "lk2"
+    ]
+   ],
+   [
+    "PSETJDO-CHRYS",
+    3,
+    [
+     "mk",
+     "mt1"
+    ]
+   ],
+   [
+    "AMBROSIASTER",
+    3,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "HILAKY",
+    3,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "JEROMI",
+    3,
+    [
+     "mt1",
+     "mt2"
+    ]
+   ],
+   [
+    "CHRIS",
+    3,
+    [
+     "jn1",
+     "mt2"
+    ]
+   ],
+   [
+    "CYRIL*",
+    3,
+    [
+     "mk",
+     "mt2"
+    ]
+   ],
+   [
+    "JKKOME",
+    3,
+    [
+     "mt2"
+    ]
+   ],
+   [
+    "LOSS",
+    3,
+    [
+     "mt2"
+    ]
+   ],
+   [
+    "BEDE'",
+    3,
+    [
+     "mk",
+     "mt2"
+    ]
+   ],
+   [
+    "HIL.\\RY",
+    3,
+    [
+     "mt2"
+    ]
+   ],
+   [
+    "AMRROSE",
+    3,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "PSEUDO-BASIL",
+    3,
+    [
+     "lk2"
+    ]
+   ],
+   [
+    "PSEUDO-CHRYSOSTOM",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "REMIGIUS",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "CYRIL OF ALEXANDRIA",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "THE COUNCIL OF EPHESUS",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "CHRYSOLOG",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "PETRUS ALFONSUS",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "REM",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "THEOD",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "GLOS?",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "DAMASCENUS",
+    2,
+    [
+     "mt1"
+    ]
+   ],
+   [
+    "GRKGORY",
+    2,
+    [
+     "mt2"
+    ]
+   ],
+   [
+    "JLROME",
+    2,
+    [
+     "mt2"
+    ]
+   ],
+   [
+    "CHAP",
+    2,
+    [
+     "mt2"
+    ]
+   ],
+   [
+    "THEOPKYL",
+    2,
+    [
+     "mk"
+    ]
+   ],
+   [
+    "SEVERIANUS",
+    2,
+    [
+     "mk"
+    ]
+   ],
+   [
+    "TITUS BOSTRENSIS",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "ATHANASIUS",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "GREEK EXPOSITOR",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "CYRIL OF JERUS",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "ATHANAS",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "EPIPHAN",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "NYSS",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "PELEUS",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "BEUE",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "OPHYL",
+    2,
+    [
+     "lk1"
+    ]
+   ],
+   [
+    "THEOPH YL",
+    2,
+    [
+     "lk2"
+    ]
+   ],
+   [
+    "AMBRQSE",
+    2,
+    [
+     "lk2"
+    ]
+   ],
+   [
+    "CLEM. ALEX",
+    2,
+    [
+     "lk2"
+    ]
+   ],
+   [
+    "DIONYS",
+    2,
+    [
+     "lk2"
+    ]
+   ],
+   [
+    "GESTIS CONC. EPH",
+    2,
+    [
+     "jn1"
+    ]
+   ],
+   [
+    "ALCUIX",
+    2,
+    [
+     "jn1"
+    ]
+   ],
+   [
+    "IT",
+    2,
+    [
+     "jn2"
+    ]
+   ]
+  ],
+  "printing_head_forms_read_in_one_copy_only": {
+   "distinct_forms": 441,
+   "occurrences": 620
+  }
+ },
+ "measurement_method": {
+  "layout": "ABBYY FineReader XML (_abbyy.gz) parsed streaming (iterparse, peak about 1 MB per file); per page: the running head is the top line; the body column is the commonest line start to the commonest justified right edge; words outside it are margin; small-type lines below the last body-size line are footnotes; lines more than 1.05 times the page's commonest type size are Gospel text.",
+  "heads": "a run of words flagged smallcaps ending in \";\" or \".\" (or followed by \";\")",
+  "expected_share": "heads of the two copies aligned by (name, printed page); an excerpt counts when the next head also aligns and its words are equal after folding quotes, dropping superscripts, deciding line-end hyphens by the volume vocabulary and removing spaces before punctuation",
+  "old_forms": "whole-word, case-insensitive counts over each source's text (markup stripped)"
+ },
+ "findings": [
+  "The 1841-45 printing is on archive.org in five scan sets (Toronto: Robarts/Trinity AIM-9181, Trinity \"43\", Kelly AJH-5369, Kelly scribe-2005 items; Saint Mary's College of California; Princeton Theological Seminary). Every volume part has at least two scans of different physical copies of the 1841-45 printing with an ABBYY layout file, so no chapter is left out.",
+  "Princeton's Vol. I Part III and Vol. III Part II are the Second Edition of 1865 (title pages read from its OCR), so they are not used; Luke XI-XXIV and Matthew XXII-XXVIII are paired from two Toronto copies.",
+  "Heads: the printing sets each head in small capitals, but ends abbreviated heads with a full stop (AUG., CHRYS., GLOSS., THEOPHYL., ID.) and full names with a semicolon (JEROME;, AMBROSE;, BEDE;). In copy A, \";\" ends 492 of 1942 heads in Matthew Part I and 100 of 1524 in John Part I. A head rule that needs a semicolon misses most heads; the rule must take the small-capitals name followed by \";\" or \".\".",
+  "Small-capitals runs that are not heads: chapter headings (CHAP. XVI.), signatures (VOL. I.), and margin words (Trinity's John Part I reads the margin \"s. 60.\" as a small-capitals \"GO.\"). Copy A misses heads by not flagging them (golden cases head_missed_by_ocr_copy_a).",
+  "Gospel text: the Gospel runs are set in a larger type, but on some pages only slightly larger (OCR sizes 11 against 10.5 in John Part I), so a size ratio of 1.05 misses them; a run crossing a page break changes size and is split. The verse of an excerpt read from the OCR was wrong for many golden entries; the golden verse is read from the page image (and for Matthew and Mark checked against CCEL's verse marks).",
+  "Footnotes: most are in a smaller type below the text, in two columns that the OCR can read across each other (John 12:44-50 note e); some are in the body's type size (John 7:14-18 note c). Footnote reference marks are superscripts; the OCR also flags real words as superscript, in both copies at once (John 1:3 \"that\").",
+  "Agreement is not proof: among 154 golden excerpts whose span is the OCR’s, copies A and B gave equal words in 30, and 5 of those differ from the page image: Mark 5:1-20, \"&c.\" read \"fyc.\" by both; Mark 8:22-26, a margin word fused to the text by both; Matthew 26:20-25, a line-end hyphen lost by both (wicked ness); Matthew 25:1-13, a line-end hyphen lost by both (dis course); Matthew 22:15-22, a line-end hyphen lost by both and the ligature æ read as ae by both. The Matthew Part III pair (two Toronto copies, one OCR engine) shares its errors, which also raises its expected share.",
+  "Italic capital I is read as \"/\", \"1\" or dropped; \"&c.\" as \"fyc.\", \"Sfc.\", \"8$c.\" or \"$c.\"; the ligature \"æ\" as \"a\", \"ae\", \"g\" or \"ce\". Margin words fuse with the first or last word of a line.",
+  "Line-end hyphens: the stated rule (keep where only the hyphenated form occurs in the volume, join where only the joined form occurs, else hold) holds several golden excerpts: money-changer (Luke 1:1-4), seventy-seventh (Luke 3:23-38), never-ending (Matthew 13:24-30), threefold (Matthew 1:1), to-come (John 7:14-18).",
+  "The expected served share (excerpts whose head pairs and whose words are equal in both copies, census normalization) is 0.07 to 0.48 of copy A's heads per part (see parts); most excerpts will be held.",
+  "Continuation paragraphs: CCEL splits many excerpts into paragraphs that open with no head (1,274 in Matthew); in the printing those run on inside one paragraph (for example the Gloss on Matthew 1:1 and its sentence beginning Generation, he says); the golden keeps such excerpts whole.",
+  "Old forms: CCEL's Matthew and Mark keep the printing's forms (shews 250 and 79 against 250 and 80 in the scans); isidore.co's Luke and John are modernized (shews 0).",
+  "The edition holds its own list of writers: the Table of Fathers, Doctors, and Commentators printed in Vol. IV (read into authors.json)."
+ ],
+ "golden": {
+  "excerpts": 162,
+  "per_gospel": {
+   "Matthew": 70,
+   "Mark": 30,
+   "Luke": 31,
+   "John": 31
+  }
+ }
+}

@@ -1,0 +1,3696 @@
+{
+ "about": "Every attribution the head census of step measure found in the 1841-45 printing (forms read alike in both copies, and forms read in one copy only where they name a writer), and CCEL's head forms for Matthew and Mark, each mapped to a writer only where the printed form, the edition's own Table or the margins name him; otherwise served as printed and never guessed. Pseudo- authors stay distinct. Dates are read from the Catholic Encyclopedia (Robert Appleton, 1907-12) as the golden is read: the article opening’s OCR (archive.org) copied by code with place phrases trimmed, checked by eye against the page image named in page_image, and every difference listed in ocr_corrections; birth and death are stored as printed, or left out with the reason. Greek or Latin is given only where the article states it, with the phrase and its page image; otherwise ‘not stated’. Unresolved printed forms carry their candidate articles but no dates.",
+ "later_writer_rule": "a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that",
+ "edition_table": {
+  "title_as_printed": "Table of Fathers, Doctors, and Commentators, out of whom the Catena Aurea on the Four Gospels is gathered.",
+  "source": "Vol. IV (1845), Princeton Theological Seminary copy, archive.org catenaaureacomme04thom, ABBYY pages 11-12 (page images n10-n11); OCR corrected against the page image",
+  "ocr_corrections": [
+   {
+    "ocr": "Nemesiiis",
+    "read": "Nemesius"
+   },
+   {
+    "ocr": "Antipater of Boslrum",
+    "read": "Antipater of Bostrum"
+   },
+   {
+    "ocr": "■lohn Climacus",
+    "read": "John Climacus"
+   },
+   {
+    "ocr": "Bade",
+    "read": "Bede"
+   },
+   {
+    "ocr": "Remigiiis (of Auxerre)",
+    "read": "Remigius (of Auxerre)"
+   },
+   {
+    "ocr": "Anseliu",
+    "read": "Anselm"
+   },
+   {
+    "ocr": "Symeon Metajjhrastes",
+    "read": "Symeon Metaphrastes"
+   },
+   {
+    "ocr": "Theopbanes",
+    "read": "Theophanes"
+   },
+   {
+    "ocr": "Alexander Monachiis",
+    "read": "Alexander Monachus"
+   },
+   {
+    "ocr": "Interlinearis",
+    "read": "—— Interlinearis"
+   }
+  ],
+  "entries": [
+   {
+    "century_heading": "Cent. III.",
+    "name": "Origen",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. III.",
+    "name": "Cyprian",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Eusebius",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Athanasius",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Hilary",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Gregory of Nazianzus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Gregory of Nyssa",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Ambrose",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Jerome",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Nemesius",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Augustine",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Chrysostom",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Prosper",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Damasus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Apollinaris of Laodicea",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IV.",
+    "name": "Amphilochius of Iconium",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Asterius of Amasea",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Evagrius Ponticus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Isidore of Pelusium",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Cyril of Alexandria",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Maximus of Turin",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Cassion",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Chrysologus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Basil",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Theodotus of Ancyra",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Leo the Great",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Gennadius",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Victor of Antioch",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Council of Ephesus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Antipater of Bostrum",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. V.",
+    "name": "Nilus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VI.",
+    "name": "Dionysius Areopagita",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VI.",
+    "name": "Gregory the Great",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VI.",
+    "name": "Isidore",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VI.",
+    "name": "Eutychius (Patriarch of Constantinople)",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VI.",
+    "name": "Isaac (Bp. of Nineveh)",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VI.",
+    "name": "Severus (Bp. of Antioch)",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VI.",
+    "name": "John Climacus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VI.",
+    "name": "Fulgentius",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VII.",
+    "name": "Maximus (? of Constantinople, 645.)",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VIII.",
+    "name": "Bede",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VIII.",
+    "name": "John Damascene",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. VIII.",
+    "name": "Alcuin",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n10.jpg"
+   },
+   {
+    "century_heading": "Cent. IX.",
+    "name": "Haymo (of Halberstadt)",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Cent. IX.",
+    "name": "Photius (of Constantinople)",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Cent. IX.",
+    "name": "Rabanus Maurus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Cent. IX.",
+    "name": "Remigius (of Auxerre)",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Cent. IX.",
+    "name": "Paschasius Radbertus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Cent. XI.",
+    "name": "Theophylact",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Cent. XI.",
+    "name": "Anselm",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Cent. XI.",
+    "name": "Petrus Alphonsus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Cent. XI.",
+    "name": "Laufranc",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Of uncertain date.",
+    "name": "Symeon Metaphrastes",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Of uncertain date.",
+    "name": "Symeon Abbas",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Of uncertain date.",
+    "name": "Theophanes",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Of uncertain date.",
+    "name": "Geometer",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Of uncertain date.",
+    "name": "Alexander Monachus",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Of uncertain date.",
+    "name": "Glossa Ordinaria",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   },
+   {
+    "century_heading": "Of uncertain date.",
+    "name": "—— Interlinearis",
+    "page_image": "https://archive.org/download/catenaaureacomme04thom/page/n11.jpg"
+   }
+  ]
+ },
+ "census_forms_not_held": [
+  {
+   "form": "CHRVS",
+   "occurrences_both_copies_counted": 61,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk1",
+    "lk2",
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form CHRYS (similarity 0.80)"
+  },
+  {
+   "form": "CHKYS",
+   "occurrences_both_copies_counted": 59,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk1",
+    "lk2",
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form CHRYS (similarity 0.80)"
+  },
+  {
+   "form": "VOL",
+   "occurrences_both_copies_counted": 52,
+   "parts": [
+    "jn1",
+    "lk1",
+    "lk2",
+    "mk",
+    "mt1"
+   ],
+   "reading": "page furniture: a signature line (VOL. I. B) or a chapter heading set in small capitals"
+  },
+  {
+   "form": "CHUYS",
+   "occurrences_both_copies_counted": 31,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk2",
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form CHRYS (similarity 0.80)"
+  },
+  {
+   "form": "CIIRYS",
+   "occurrences_both_copies_counted": 31,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk1",
+    "lk2",
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form CHRYS (similarity 0.73)"
+  },
+  {
+   "form": "OKIGEN",
+   "occurrences_both_copies_counted": 21,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk1",
+    "mk",
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form ORIGEN (similarity 0.83)"
+  },
+  {
+   "form": "BEDK",
+   "occurrences_both_copies_counted": 21,
+   "parts": [
+    "jn1",
+    "lk1",
+    "lk2",
+    "mk"
+   ],
+   "reading": "an OCR misreading; nearest held form BEDE (similarity 0.75)"
+  },
+  {
+   "form": "JKROME",
+   "occurrences_both_copies_counted": 20,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form JEROME (similarity 0.83)"
+  },
+  {
+   "form": "RKMIG",
+   "occurrences_both_copies_counted": 17,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form REMIG (similarity 0.80)"
+  },
+  {
+   "form": "BKDE",
+   "occurrences_both_copies_counted": 15,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk1",
+    "lk2",
+    "mk"
+   ],
+   "reading": "an OCR misreading; nearest held form BEDE (similarity 0.75)"
+  },
+  {
+   "form": "JEKOME",
+   "occurrences_both_copies_counted": 13,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form JEROME (similarity 0.83)"
+  },
+  {
+   "form": "CHIIYS",
+   "occurrences_both_copies_counted": 13,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk1",
+    "lk2"
+   ],
+   "reading": "an OCR misreading; nearest held form CHRYS (similarity 0.73)"
+  },
+  {
+   "form": "THEOFHYL",
+   "occurrences_both_copies_counted": 12,
+   "parts": [
+    "jn1",
+    "lk1",
+    "lk2",
+    "mk"
+   ],
+   "reading": "an OCR misreading; nearest held form THEOPHYL (similarity 0.88)"
+  },
+  {
+   "form": "GKEG",
+   "occurrences_both_copies_counted": 11,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk1",
+    "lk2",
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form GREG (similarity 0.75)"
+  },
+  {
+   "form": "ORIGKN",
+   "occurrences_both_copies_counted": 11,
+   "parts": [
+    "jn1",
+    "jn2",
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form ORIGEN (similarity 0.83)"
+  },
+  {
+   "form": "CHHYS",
+   "occurrences_both_copies_counted": 11,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk1",
+    "lk2",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form CHRYS (similarity 0.80)"
+  },
+  {
+   "form": "BEDS",
+   "occurrences_both_copies_counted": 11,
+   "parts": [
+    "jn1",
+    "lk1",
+    "mk"
+   ],
+   "reading": "an OCR misreading; nearest held form BEDE (similarity 0.75)"
+  },
+  {
+   "form": "TIIEOPHYL",
+   "occurrences_both_copies_counted": 11,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk2",
+    "mk"
+   ],
+   "reading": "an OCR misreading; nearest held form THEOPHYL (similarity 0.82)"
+  },
+  {
+   "form": "THEOPIIYL",
+   "occurrences_both_copies_counted": 11,
+   "parts": [
+    "jn1",
+    "jn2",
+    "lk1",
+    "lk2",
+    "mk"
+   ],
+   "reading": "an OCR misreading; nearest held form THEOPHYL (similarity 0.82)"
+  },
+  {
+   "form": "PSEUDO-CIIRYS",
+   "occurrences_both_copies_counted": 10,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form PSEUDO-CHRYS (similarity 0.88)"
+  },
+  {
+   "form": "ORIGEX",
+   "occurrences_both_copies_counted": 10,
+   "parts": [
+    "jn1",
+    "lk1",
+    "lk2",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form ORIGEN (similarity 0.83)"
+  },
+  {
+   "form": "THEOPHVL",
+   "occurrences_both_copies_counted": 10,
+   "parts": [
+    "jn2",
+    "lk1",
+    "mk"
+   ],
+   "reading": "an OCR misreading; nearest held form THEOPHYL (similarity 0.88)"
+  },
+  {
+   "form": "PSEUDO-CHRVS",
+   "occurrences_both_copies_counted": 9,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form PSEUDO-CHRYS (similarity 0.92)"
+  },
+  {
+   "form": "THKOPHYL",
+   "occurrences_both_copies_counted": 9,
+   "parts": [
+    "jn2",
+    "lk1",
+    "lk2"
+   ],
+   "reading": "an OCR misreading; nearest held form THEOPHYL (similarity 0.88)"
+  },
+  {
+   "form": "JKKOMK",
+   "occurrences_both_copies_counted": 8,
+   "parts": [
+    "mt2"
+   ],
+   "reading": "not an attribution as read (nearest held form JEROME, similarity 0.50)"
+  },
+  {
+   "form": "ORIOEN",
+   "occurrences_both_copies_counted": 8,
+   "parts": [
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form ORIGEN (similarity 0.83)"
+  },
+  {
+   "form": "IIABAN",
+   "occurrences_both_copies_counted": 7,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form RABAN (similarity 0.73)"
+  },
+  {
+   "form": ".JEROME",
+   "occurrences_both_copies_counted": 7,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form JEROME (similarity 0.92)"
+  },
+  {
+   "form": "RABAX",
+   "occurrences_both_copies_counted": 7,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form RABAN (similarity 0.80)"
+  },
+  {
+   "form": "KABAN",
+   "occurrences_both_copies_counted": 7,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form RABAN (similarity 0.80)"
+  },
+  {
+   "form": "PSEU DO-JEROME",
+   "occurrences_both_copies_counted": 7,
+   "parts": [
+    "mk"
+   ],
+   "reading": "an OCR misreading; nearest held form PSEUDO-JEROME (similarity 0.96)"
+  },
+  {
+   "form": "HABAN",
+   "occurrences_both_copies_counted": 6,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form RABAN (similarity 0.80)"
+  },
+  {
+   "form": "PSEDDO-CHRYS",
+   "occurrences_both_copies_counted": 6,
+   "parts": [
+    "mk",
+    "mt1"
+   ],
+   "reading": "an OCR misreading; nearest held form PSEUDO-CHRYS (similarity 0.92)"
+  },
+  {
+   "form": "REMIO",
+   "occurrences_both_copies_counted": 6,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form REMIG (similarity 0.80)"
+  },
+  {
+   "form": "GRKG",
+   "occurrences_both_copies_counted": 6,
+   "parts": [
+    "jn2",
+    "lk2",
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form GREG (similarity 0.75)"
+  },
+  {
+   "form": "REG",
+   "occurrences_both_copies_counted": 5,
+   "parts": [
+    "jn2",
+    "lk2",
+    "mk",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form GREG (similarity 0.86)"
+  },
+  {
+   "form": "ALCDIN",
+   "occurrences_both_copies_counted": 5,
+   "parts": [
+    "jn1",
+    "jn2"
+   ],
+   "reading": "an OCR misreading; nearest held form ALCUIN (similarity 0.83)"
+  },
+  {
+   "form": "PSEUDO-CHKYS",
+   "occurrences_both_copies_counted": 4,
+   "parts": [
+    "lk2",
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form PSEUDO-CHRYS (similarity 0.92)"
+  },
+  {
+   "form": "PSKUDO-CHRYS",
+   "occurrences_both_copies_counted": 4,
+   "parts": [
+    "mk",
+    "mt1"
+   ],
+   "reading": "an OCR misreading; nearest held form PSEUDO-CHRYS (similarity 0.92)"
+  },
+  {
+   "form": "JEIIOME",
+   "occurrences_both_copies_counted": 4,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form JEROME (similarity 0.77)"
+  },
+  {
+   "form": "PSEUDO-CHUYS",
+   "occurrences_both_copies_counted": 4,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form PSEUDO-CHRYS (similarity 0.92)"
+  },
+  {
+   "form": "JEUOME",
+   "occurrences_both_copies_counted": 4,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form JEROME (similarity 0.83)"
+  },
+  {
+   "form": "RAUAN",
+   "occurrences_both_copies_counted": 4,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form RABAN (similarity 0.80)"
+  },
+  {
+   "form": "JKROMK",
+   "occurrences_both_copies_counted": 4,
+   "parts": [
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form JEROME (similarity 0.67)"
+  },
+  {
+   "form": "PSETJDO-CHRYS",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "mk",
+    "mt1"
+   ],
+   "reading": "an OCR misreading; nearest held form PSEUDO-CHRYS (similarity 0.88)"
+  },
+  {
+   "form": "HILAKY",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form HILARY (similarity 0.83)"
+  },
+  {
+   "form": "JEROMI",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "mt1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form JEROME (similarity 0.83)"
+  },
+  {
+   "form": "CHRIS",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "jn1",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form CHRYS (similarity 0.80)"
+  },
+  {
+   "form": "CYRIL*",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "mk",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form CYRIL (similarity 0.91)"
+  },
+  {
+   "form": "JKKOME",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form JEROME (similarity 0.67)"
+  },
+  {
+   "form": "LOSS",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form GLOSS (similarity 0.89)"
+  },
+  {
+   "form": "BEDE'",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "mk",
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form BEDE (similarity 0.89)"
+  },
+  {
+   "form": "HIL.\\RY",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form HILARY (similarity 0.77)"
+  },
+  {
+   "form": "AMRROSE",
+   "occurrences_both_copies_counted": 3,
+   "parts": [
+    "lk1"
+   ],
+   "reading": "an OCR misreading; nearest held form AMBROSE (similarity 0.86)"
+  },
+  {
+   "form": "GLOS?",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "mt1"
+   ],
+   "reading": "an OCR misreading; nearest held form GLOSS (similarity 0.80)"
+  },
+  {
+   "form": "GRKGORY",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form GREGORY (similarity 0.86)"
+  },
+  {
+   "form": "JLROME",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "mt2"
+   ],
+   "reading": "an OCR misreading; nearest held form JEROME (similarity 0.83)"
+  },
+  {
+   "form": "CHAP",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "mt2"
+   ],
+   "reading": "page furniture: a signature line (VOL. I. B) or a chapter heading set in small capitals"
+  },
+  {
+   "form": "THEOPKYL",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "mk"
+   ],
+   "reading": "an OCR misreading; nearest held form THEOPHYL (similarity 0.88)"
+  },
+  {
+   "form": "NYSS",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "lk1"
+   ],
+   "reading": "an OCR misreading; nearest held form DIONYS (similarity 0.60)"
+  },
+  {
+   "form": "PELEUS",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "lk1"
+   ],
+   "reading": "an OCR misreading; nearest held form ISID. PELEUS (similarity 0.67)"
+  },
+  {
+   "form": "BEUE",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "lk1"
+   ],
+   "reading": "an OCR misreading; nearest held form BEDE (similarity 0.75)"
+  },
+  {
+   "form": "OPHYL",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "lk1"
+   ],
+   "reading": "an OCR misreading; nearest held form THEOPHYL (similarity 0.77)"
+  },
+  {
+   "form": "THEOPH YL",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "lk2"
+   ],
+   "reading": "an OCR misreading; nearest held form THEOPHYL (similarity 0.94)"
+  },
+  {
+   "form": "AMBRQSE",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "lk2"
+   ],
+   "reading": "an OCR misreading; nearest held form AMBROSE (similarity 0.86)"
+  },
+  {
+   "form": "ALCUIX",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "jn1"
+   ],
+   "reading": "an OCR misreading; nearest held form ALCUIN (similarity 0.83)"
+  },
+  {
+   "form": "IT",
+   "occurrences_both_copies_counted": 2,
+   "parts": [
+    "jn2"
+   ],
+   "reading": "an OCR misreading; nearest held form TIT (similarity 0.80)"
+  }
+ ],
+ "ocr_misreadings_of_heads": {
+  "distinct_forms_in_one_copy_only": 441,
+  "occurrences": 620,
+  "note": "forms such as CHRVS, CHKYS, JKROME are OCR misreadings of the forms above; the build holds an excerpt whose head the table does not hold"
+ },
+ "counts": {
+  "entries": 60,
+  "by_kind": {
+   "father": 24,
+   "pseudo": 7,
+   "later_writer": 9,
+   "anonymous": 2,
+   "father_age_writer": 4,
+   "unresolved": 10,
+   "idem": 1,
+   "council": 2,
+   "jewish_historian": 1
+  },
+  "with_encyclopedia_article": 40,
+  "with_dates": 33,
+  "with_language": 8,
+  "date_ocr_corrections": 34
+ },
+ "authors": [
+  {
+   "key": "augustine",
+   "printed_forms": [
+    {
+     "form": "AUG",
+     "occurrences_both_copies_counted": 3323,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "AUGUSTINE",
+     "occurrences_both_copies_counted": 4,
+     "parts": [
+      "lk1",
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Aug. (Matthew)": 633,
+    "Augustine (Matthew)": 5,
+    "Augustine (Mark)": 92,
+    "Aug (Matthew)": 1
+   },
+   "edition_table_name": "Augustine",
+   "kind": "father",
+   "identified_as": "Augustine of Hippo",
+   "identification_basis": "AUG. abbreviates the Table's Augustine; margins cite his works (de Haer., cont. Faust., Tract. in Joan.)",
+   "catholic_encyclopedia": {
+    "article": "Augustine of Hippo, Saint",
+    "volume": 2,
+    "year": 1907,
+    "archive_org_item": "b33397491_0002",
+    "ocr_text_line": 16901,
+    "url": "https://archive.org/details/b33397491_0002"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0002/page/n109.jpg",
+    "born": "13 November, 354",
+    "died": "28 August, 430",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "chrysostom",
+   "printed_forms": [
+    {
+     "form": "CHRYS",
+     "occurrences_both_copies_counted": 3161,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "CHRYSOSTOM",
+     "occurrences_both_copies_counted": 20,
+     "parts": [
+      "lk1",
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "CHRYSOST",
+     "occurrences_both_copies_counted": 27,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Chrys. (Matthew)": 830,
+    "Chrys. (Mark)": 86,
+    "Chrysostom (Mark)": 8,
+    "Chrys (Matthew)": 1
+   },
+   "edition_table_name": "Chrysostom",
+   "kind": "father",
+   "identified_as": "John Chrysostom",
+   "identification_basis": "the Table's Chrysostom; margins cite his homilies (Hom. in Matt., Hom. in Joan.)",
+   "catholic_encyclopedia": {
+    "article": "John Chrysostom, Saint",
+    "volume": 8,
+    "year": 1910,
+    "archive_org_item": "07470918.8.emory.edu",
+    "ocr_text_line": 81795,
+    "url": "https://archive.org/details/07470918.8.emory.edu"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n514.jpg",
+    "born": "c. 347",
+    "died": "14 September, 407",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Antioch, c. 347",
+      "read": "c. 347",
+      "kind": "place or surrounding words left out"
+     },
+     {
+      "field": "died",
+      "ocr": "at Comana in Pontus, 14 Sep- tember, 407",
+      "read": "14 September, 407",
+      "kind": "OCR misreading"
+     }
+    ]
+   },
+   "language": "Greek",
+   "language_basis": {
+    "phrase": "the most prominent doctor of the Greek Church",
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n514.jpg"
+   }
+  },
+  {
+   "key": "pseudo_chrysostom",
+   "printed_forms": [
+    {
+     "form": "PSEUDO-CHRYS",
+     "occurrences_both_copies_counted": 787,
+     "parts": [
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "PSEUDO-CHRYSOSTOM",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Pseudo-Chrys. (Matthew)": 427,
+    "Pseudo-Chrys. (Mark)": 105,
+    "Psuedo-Chrys. (Mark)": 2,
+    "Pseudo-Chyrs. (Matthew)": 2,
+    "Pseudo-Chyrs. (Mark)": 1
+   },
+   "edition_table_name": null,
+   "kind": "pseudo",
+   "identified_as": null,
+   "identification_basis": "kept distinct from Chrysostom. In Matthew the margins cite Homil. in Matt. (the Opus imperfectum, which the Catholic Encyclopedia's article on Chrysostom calls a spurious Latin work by an Arian); in Mark the margins name Victor of Antioch (Vict. Ant. e Cat. in Marc.), whom the Table lists but the encyclopedia OCR has no article for",
+   "catholic_encyclopedia": {
+    "article": "John Chrysostom, Saint (on the Opus imperfectum)",
+    "volume": 8,
+    "year": 1910,
+    "archive_org_item": "07470918.8.emory.edu",
+    "ocr_text_line": 82461,
+    "url": "https://archive.org/details/07470918.8.emory.edu"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n518.jpg",
+    "left_out": "the article dates the work (written by an Arian in the first half of the fifth century); it gives no writer's birth or death",
+    "ocr_corrections": []
+   },
+   "language": "Latin",
+   "language_basis": {
+    "phrase": "The most important spurious work in Latin is the \"Opus imperfectum\"",
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n518.jpg"
+   },
+   "editors_mark": "Mark's preface says most \"Chrys.\" passages in Mark are Victor of Antioch's; margins in Mark: Vict. Ant. e Cat. in Marc."
+  },
+  {
+   "key": "bede",
+   "printed_forms": [
+    {
+     "form": "BEDE",
+     "occurrences_both_copies_counted": 2317,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Bede (Matthew)": 26,
+    "Bede (Mark)": 432
+   },
+   "edition_table_name": "Bede",
+   "kind": "father",
+   "identified_as": "Bede",
+   "identification_basis": "the Table's Bede (Cent. VIII); the encyclopedia's \"Fathers of the Church\" calls him \"quite patristic\"",
+   "catholic_encyclopedia": {
+    "article": "Bede, The Venerable",
+    "volume": 2,
+    "year": 1907,
+    "archive_org_item": "b33397491_0002",
+    "ocr_text_line": 71954,
+    "url": "https://archive.org/details/b33397491_0002"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0002/page/n441.jpg",
+    "born": "672 or 673",
+    "died": "735",
+    "ocr_corrections": []
+   },
+   "language": "Latin",
+   "language_basis": {
+    "phrase": "Though Latin was to him a still living tongue",
+    "page_image": "https://archive.org/download/b33397491_0002/page/n442.jpg"
+   }
+  },
+  {
+   "key": "theophylact",
+   "printed_forms": [
+    {
+     "form": "THEOPHYL",
+     "occurrences_both_copies_counted": 1723,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "THEOPHYLACT",
+     "occurrences_both_copies_counted": 22,
+     "parts": [
+      "lk1",
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "THEOPH",
+     "occurrences_both_copies_counted": 5,
+     "parts": [
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "THEO-PHYL",
+     "occurrences_both_copies_counted": 27,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk2",
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "THE-OPHYL",
+     "occurrences_both_copies_counted": 42,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Theophylact (Mark)": 359,
+    "Theophlyact (Mark)": 4,
+    "Theophyact (Mark)": 1
+   },
+   "edition_table_name": "Theophylact",
+   "kind": "later_writer",
+   "identified_as": "Theophylact",
+   "identification_basis": "the Table lists Theophylact under Cent. XI; a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss",
+   "note": "THEO-PHYL and THE-OPHYL are the head broken across a line end"
+  },
+  {
+   "key": "jerome",
+   "printed_forms": [
+    {
+     "form": "JEROME",
+     "occurrences_both_copies_counted": 1102,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Jerome (Matthew)": 844,
+    "Jerome (Mark)": 8
+   },
+   "edition_table_name": "Jerome",
+   "kind": "father",
+   "identified_as": "Jerome",
+   "identification_basis": "the Table's Jerome; margins cite Hier. Comm. in Matt.",
+   "catholic_encyclopedia": {
+    "article": "Jerome, Saint",
+    "volume": 8,
+    "year": 1910,
+    "archive_org_item": "07470918.8.emory.edu",
+    "ocr_text_line": 62419,
+    "url": "https://archive.org/details/07470918.8.emory.edu"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n397.jpg",
+    "born": "about the year 340–2",
+    "died": "30 September, 420",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Stridon, a town on the confines of Dalmatia and \"Pannonia, about the year 340-2",
+      "read": "about the year 340–2",
+      "kind": "OCR misreading"
+     },
+     {
+      "field": "died",
+      "ocr": "at Bethlehem, 30 September, 420",
+      "read": "30 September, 420",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "pseudo_jerome",
+   "printed_forms": [
+    {
+     "form": "PSEUDO-JEROME",
+     "occurrences_both_copies_counted": 428,
+     "parts": [
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Pseudo-Jerome (Mark)": 226
+   },
+   "edition_table_name": null,
+   "kind": "pseudo",
+   "identified_as": null,
+   "identification_basis": "kept distinct from Jerome",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss",
+   "editors_mark": "Mark's preface calls the commentary under Jerome's name spurious"
+  },
+  {
+   "key": "ambrose",
+   "printed_forms": [
+    {
+     "form": "AMBROSE",
+     "occurrences_both_copies_counted": 1063,
+     "parts": [
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "AM BROSE",
+     "occurrences_both_copies_counted": 12,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "AM-BROSE",
+     "occurrences_both_copies_counted": 12,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Ambrose (Matthew)": 45,
+    "Ambrose (Mark)": 2,
+    "Ambrose. (Matthew)": 1
+   },
+   "edition_table_name": "Ambrose",
+   "kind": "father",
+   "identified_as": "Ambrose of Milan",
+   "identification_basis": "the Table's Ambrose; margins cite Ambros. in Luc.",
+   "catholic_encyclopedia": {
+    "article": "Ambrose, Saint",
+    "volume": 1,
+    "year": 1907,
+    "archive_org_item": "b33397491_0001",
+    "ocr_text_line": 71740,
+    "url": "https://archive.org/details/b33397491_0001"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0001/page/n426.jpg",
+    "born": "probably 340",
+    "died": "4 April, 397",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "probably 340, at Trier, Arles, or Lyons",
+      "read": "probably 340",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "ambrosiaster",
+   "printed_forms": [
+    {
+     "form": "AMBROSIASTER",
+     "occurrences_both_copies_counted": 3,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Ambrosiaster (Matthew)": 1
+   },
+   "edition_table_name": null,
+   "kind": "anonymous",
+   "identified_as": "the author called Ambrosiaster",
+   "identification_basis": "the printed head itself",
+   "catholic_encyclopedia": {
+    "article": "Ambrosiaster",
+    "volume": 1,
+    "year": 1907,
+    "archive_org_item": "b33397491_0001",
+    "ocr_text_line": 75872,
+    "url": "https://archive.org/details/b33397491_0001"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0001/page/n451.jpg",
+    "left_out": "the article names no birth or death for the author; it dates the commentary by Pope Damasus (366-384), who is mentioned as reigning",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "gregory_great",
+   "printed_forms": [
+    {
+     "form": "GREG",
+     "occurrences_both_copies_counted": 822,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "GREGORY",
+     "occurrences_both_copies_counted": 29,
+     "parts": [
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Greg. (Matthew)": 165,
+    "Greg. (Mark)": 32,
+    "Gregory (Matthew)": 12,
+    "Gregory (Mark)": 4,
+    "Greg (Matthew)": 3,
+    "Greg (Mark)": 2
+   },
+   "edition_table_name": "Gregory the Great",
+   "kind": "father",
+   "identified_as": "Gregory the Great",
+   "identification_basis": "the Table lists three Gregorys; the other two are printed with their sees (GREG. NAZ., GREG. NYSS.), and the margins of plain GREG. cite Gregory the Great's Moralia and Homilies (Greg. Mor., Greg. in Hom.)",
+   "catholic_encyclopedia": {
+    "article": "Gregory I (the Great), Saint",
+    "volume": 6,
+    "year": 1909,
+    "archive_org_item": "b33397491_0006",
+    "ocr_text_line": 145472,
+    "url": "https://archive.org/details/b33397491_0006"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0006/page/n873.jpg",
+    "born": "about 540",
+    "died": "12 March, 604",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Rome about 540",
+      "read": "about 540",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "gregory_nyssa",
+   "printed_forms": [
+    {
+     "form": "GREG. NYSS",
+     "occurrences_both_copies_counted": 140,
+     "parts": [
+      "lk1",
+      "lk2",
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "GREGORY NYSS",
+     "occurrences": 1,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": false
+    }
+   ],
+   "ccel_forms": {
+    "Gregory Nyss. (Matthew)": 1,
+    "Greg. Nyss. (Mark)": 1
+   },
+   "edition_table_name": "Gregory of Nyssa",
+   "kind": "father",
+   "identified_as": "Gregory of Nyssa",
+   "identification_basis": "the printed head names the see",
+   "catholic_encyclopedia": {
+    "article": "Gregory of Nyssa, Saint",
+    "volume": 7,
+    "year": 1910,
+    "archive_org_item": "b33397491_0007",
+    "ocr_text_line": 4579,
+    "url": "https://archive.org/details/b33397491_0007"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0007/page/n39.jpg",
+    "died": "after 385 or 386",
+    "born_left_out": "the article: date of birth unknown",
+    "ocr_corrections": [
+     {
+      "field": "died",
+      "ocr": null,
+      "read": "after 385 or 386",
+      "kind": "not found in the OCR by the extractor; read from the page image"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "gregory_nazianzus",
+   "printed_forms": [
+    {
+     "form": "GREG. NAZ",
+     "occurrences_both_copies_counted": 44,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": "Gregory of Nazianzus",
+   "kind": "father",
+   "identified_as": "Gregory of Nazianzus",
+   "identification_basis": "the printed head names the see",
+   "catholic_encyclopedia": {
+    "article": "Gregory of Nazianzus, Saint",
+    "volume": 7,
+    "year": 1910,
+    "archive_org_item": "b33397491_0007",
+    "ocr_text_line": 3544,
+    "url": "https://archive.org/details/b33397491_0007"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0007/page/n33.jpg",
+    "born": "c. 325",
+    "died": "c. 389",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Arianzus, in Asia Minor, c. 325",
+      "read": "c. 325",
+      "kind": "place or surrounding words left out"
+     },
+     {
+      "field": "died",
+      "ocr": "at the same place, c",
+      "read": "c. 389",
+      "kind": "OCR text cut short by the extractor; completed from the page image"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "origen",
+   "printed_forms": [
+    {
+     "form": "ORIGEN",
+     "occurrences_both_copies_counted": 759,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "ORIG",
+     "occurrences_both_copies_counted": 5,
+     "parts": [
+      "jn1",
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Origen (Matthew)": 309,
+    "Origen (Mark)": 9,
+    "Origin (Mark)": 2
+   },
+   "edition_table_name": "Origen",
+   "kind": "father_age_writer",
+   "identified_as": "Origen",
+   "identification_basis": "the Table's Origen (Cent. III); of the age of the Fathers by the same article's bounds (dies before about 754, or is named within them)",
+   "catholic_encyclopedia": {
+    "article": "Origen and Origenism",
+    "volume": 11,
+    "year": 1911,
+    "archive_org_item": "b33397491_0011",
+    "ocr_text_line": 56456,
+    "url": "https://archive.org/details/b33397491_0011"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0011/page/n339.jpg",
+    "died": "253 or 254",
+    "died_page_image": "https://archive.org/download/b33397491_0011/page/n340.jpg",
+    "died_ocr": null,
+    "born_left_out": "the article's opening gives no date of birth",
+    "died_note": "printed after \"he died, probably, from the results of the sufferings endured during the persecution\"",
+    "ocr_corrections": []
+   },
+   "language": "Greek",
+   "language_basis": {
+    "phrase": "There remain in Greek only eight books of the \"Commentary on St. Matthew\"",
+    "page_image": "https://archive.org/download/b33397491_0011/page/n340.jpg"
+   }
+  },
+  {
+   "key": "pseudo_origen",
+   "printed_forms": [
+    {
+     "form": "PSEUDO-ORIGEN",
+     "occurrences_both_copies_counted": 29,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Pseudo-Origen (Matthew)": 18
+   },
+   "edition_table_name": null,
+   "kind": "pseudo",
+   "identified_as": null,
+   "identification_basis": "kept distinct from Origen",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "cyril_alexandria",
+   "printed_forms": [
+    {
+     "form": "CYRIL",
+     "occurrences_both_copies_counted": 725,
+     "parts": [
+      "jn1",
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "CYRIL OF ALEXANDRIA",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Cyril (Matthew)": 3,
+    "Cyril (Mark)": 2,
+    "Cyril of Alexandria (Matthew)": 1
+   },
+   "edition_table_name": "Cyril of Alexandria",
+   "kind": "father",
+   "identified_as": "Cyril of Alexandria",
+   "identification_basis": "the Table lists one Cyril, of Alexandria; Cyril of Jerusalem is printed with his see (CYRIL OF JERUS.); the Luke preface names Cyril's commentary on Luke",
+   "catholic_encyclopedia": {
+    "article": "Cyril of Alexandria, Saint",
+    "volume": 4,
+    "year": 1908,
+    "archive_org_item": "b33397491_0004",
+    "ocr_text_line": 109671,
+    "url": "https://archive.org/details/b33397491_0004"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0004/page/n671.jpg",
+    "died": "the 9th or the 27th of June, 444",
+    "died_page_image": "https://archive.org/download/b33397491_0004/page/n673.jpg",
+    "died_ocr": null,
+    "born_left_out": "the article's opening gives no date of birth",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "cyril_jerusalem",
+   "printed_forms": [
+    {
+     "form": "CYRIL OF JERUS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "father",
+   "identified_as": "Cyril of Jerusalem",
+   "identification_basis": "the printed head names the see",
+   "catholic_encyclopedia": {
+    "article": "Cyril of Jerusalem, Saint",
+    "volume": 4,
+    "year": 1908,
+    "archive_org_item": "b33397491_0004",
+    "ocr_text_line": 110163,
+    "url": "https://archive.org/details/b33397491_0004"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0004/page/n674.jpg",
+    "born": "about 315",
+    "died": "probably 18 March, 386",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "gloss",
+   "printed_forms": [
+    {
+     "form": "GLOSS",
+     "occurrences_both_copies_counted": 695,
+     "parts": [
+      "jn1",
+      "jn2",
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Gloss. (Matthew)": 130,
+    "Gloss. (Mark)": 33,
+    "Gloss (Matthew)": 76,
+    "Gloss (Mark)": 11,
+    "Gloss. ord. (Matthew)": 61,
+    "Gloss. interlin. (Matthew)": 17,
+    "Gloss. ap. Anselm (Matthew)": 17,
+    "Gloss. non occ. (Matthew)": 9,
+    "Gloss. Ordinaria (Matthew)": 1,
+    "Gloss. ord (Matthew)": 2,
+    "Gloss. Anselm (Matthew)": 1
+   },
+   "edition_table_name": "Glossa Ordinaria; —— Interlinearis",
+   "kind": "later_writer",
+   "identified_as": "the Gloss (Glossa ordinaria and interlinearis)",
+   "identification_basis": "the Table lists Glossa Ordinaria and Interlinearis among writers of uncertain date; the encyclopedia names Walafrid Strabo (d. 849) as author of the ordinary gloss; a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that",
+   "catholic_encyclopedia": {
+    "article": "Glosses, Scriptural",
+    "volume": 6,
+    "year": 1909,
+    "archive_org_item": "b33397491_0006",
+    "ocr_text_line": 109982,
+    "url": "https://archive.org/details/b33397491_0006"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0006/page/n671.jpg",
+    "left_out": "the article is on scriptural glosses; the one date near the Glossa ordinaria is its author Walafrid Strabo's death, not a date of the Gloss",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null,
+   "note": "the Luke preface says glosses found in neither the ordinary nor the interlinear gloss are supposed to be St. Thomas's own; margins read Gloss. non occ. for those"
+  },
+  {
+   "key": "hilary",
+   "printed_forms": [
+    {
+     "form": "HILARY",
+     "occurrences_both_copies_counted": 616,
+     "parts": [
+      "jn1",
+      "jn2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Hilary (Matthew)": 341,
+    "Hilary (Mark)": 2,
+    "Hil. (Matthew)": 2
+   },
+   "edition_table_name": "Hilary",
+   "kind": "father",
+   "identified_as": "Hilary of Poitiers",
+   "identification_basis": "the Table's Hilary (Cent. IV)",
+   "catholic_encyclopedia": {
+    "article": "Hilary of Poitiers, Saint",
+    "volume": 7,
+    "year": 1910,
+    "archive_org_item": "b33397491_0007",
+    "ocr_text_line": 65432,
+    "url": "https://archive.org/details/b33397491_0007"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0007/page/n404.jpg",
+    "born": "at the beginning of the fourth century",
+    "died": "368",
+    "died_note": "the day is printed two ways: 1 November, according to the most accredited opinion, or, according to the Roman Breviary, 13 January",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "in that city at the beginning of the fourth century",
+      "read": "at the beginning of the fourth century",
+      "kind": "place or surrounding words left out"
+     },
+     {
+      "field": "died",
+      "ocr": "there 1 November, according to the most accredited opinion, or, according to the Roman Breviary, on 13 January, 368",
+      "read": "368",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null,
+   "editors_mark": "on Matthew 1:1 the editors' note b gives the passage to \"a work commonly ascribed to Hilary the Deacon\" (golden Matthew-1-1-11); the ascription is served as printed with the mark"
+  },
+  {
+   "key": "remigius",
+   "printed_forms": [
+    {
+     "form": "REMIG",
+     "occurrences_both_copies_counted": 501,
+     "parts": [
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "REMIGIUS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "REM",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Remig. (Matthew)": 377,
+    "Remig. (Mark)": 7,
+    "Remigius (Matthew)": 1,
+    "Remig (Matthew)": 1
+   },
+   "edition_table_name": "Remigius (of Auxerre)",
+   "kind": "later_writer",
+   "identified_as": "Remigius of Auxerre",
+   "identification_basis": "the Table: Remigius (of Auxerre), Cent. IX; a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that",
+   "catholic_encyclopedia": {
+    "article": "Remigius of Auxerre",
+    "volume": 12,
+    "year": 1911,
+    "archive_org_item": "b33397491_0012",
+    "ocr_text_line": 140873,
+    "url": "https://archive.org/details/b33397491_0012"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0012/page/n863.jpg",
+    "born": "about the middle of the ninth century",
+    "died": "908",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "rabanus",
+   "printed_forms": [
+    {
+     "form": "RABAN",
+     "occurrences_both_copies_counted": 318,
+     "parts": [
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "RABANUS",
+     "occurrences_both_copies_counted": 57,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Raban. (Matthew)": 197,
+    "Rabanus (Matthew)": 95,
+    "Raban (Matthew)": 6
+   },
+   "edition_table_name": "Rabanus Maurus",
+   "kind": "later_writer",
+   "identified_as": "Rabanus Maurus",
+   "identification_basis": "the Table: Rabanus Maurus, Cent. IX; a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that",
+   "catholic_encyclopedia": {
+    "article": "Rabanus Maurus, Blessed",
+    "volume": 12,
+    "year": 1911,
+    "archive_org_item": "b33397491_0012",
+    "ocr_text_line": 114086,
+    "url": "https://archive.org/details/b33397491_0012"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0012/page/n702.jpg",
+    "born": "about 776 (784?)",
+    "died": "4 February, 856",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Mainz about 776 (784?)",
+      "read": "about 776 (784?)",
+      "kind": "place or surrounding words left out"
+     },
+     {
+      "field": "died",
+      "ocr": "at Winkel (Vinicellum) near Mainz on 4 February, 856",
+      "read": "4 February, 856",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "alcuin",
+   "printed_forms": [
+    {
+     "form": "ALCUIN",
+     "occurrences_both_copies_counted": 306,
+     "parts": [
+      "jn1",
+      "jn2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": "Alcuin",
+   "kind": "later_writer",
+   "identified_as": "Alcuin",
+   "identification_basis": "the Table: Alcuin, Cent. VIII; a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that",
+   "catholic_encyclopedia": {
+    "article": "Alcuin",
+    "volume": 1,
+    "year": 1907,
+    "archive_org_item": "b33397491_0001",
+    "ocr_text_line": 52450,
+    "url": "https://archive.org/details/b33397491_0001"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0001/page/n317.jpg",
+    "born": "about 735",
+    "died": "19 May, 804",
+    "ocr_corrections": [
+     {
+      "field": "died",
+      "ocr": null,
+      "read": "19 May, 804",
+      "kind": "not found in the OCR by the extractor; read from the page image"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "haymo",
+   "printed_forms": [
+    {
+     "form": "HAYMO",
+     "occurrences_both_copies_counted": 18,
+     "parts": [
+      "jn1",
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Haymo (Matthew)": 5
+   },
+   "edition_table_name": "Haymo (of Halberstadt)",
+   "kind": "later_writer",
+   "identified_as": "Haymo of Halberstadt",
+   "identification_basis": "the Table: Haymo (of Halberstadt), Cent. IX; a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that",
+   "catholic_encyclopedia": {
+    "article": "Haymo",
+    "volume": 7,
+    "year": 1910,
+    "archive_org_item": "b33397491_0007",
+    "ocr_text_line": 31195,
+    "url": "https://archive.org/details/b33397491_0007"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0007/page/n201.jpg",
+    "died": "26 March, 853",
+    "born_left_out": "the article: the exact date and place of his birth are unknown",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "anselm",
+   "printed_forms": [
+    {
+     "form": "ANSELM",
+     "occurrences": 1,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": false
+    }
+   ],
+   "ccel_forms": {
+    "Anselm (Matthew)": 1
+   },
+   "edition_table_name": "Anselm",
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "the Table lists Anselm under Cent. XI without a see; the encyclopedia has Anselm of Canterbury (vol. I) and Anselm of Laon (vol. I), and CCEL's margins pair the Gloss with Anselm; not resolved, served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss",
+   "candidates": [
+    {
+     "article": "Anselm, Saint",
+     "volume": 1,
+     "year": 1907,
+     "archive_org_item": "b33397491_0001",
+     "ocr_text_line": 101124,
+     "url": "https://archive.org/details/b33397491_0001"
+    },
+    {
+     "article": "Anselm of Laon",
+     "volume": 1,
+     "year": 1907,
+     "archive_org_item": "b33397491_0001",
+     "ocr_text_line": 101834,
+     "url": "https://archive.org/details/b33397491_0001"
+    }
+   ],
+   "later_writer": true
+  },
+  {
+   "key": "lanfranc",
+   "printed_forms": [],
+   "ccel_forms": {
+    "Lanfranc (Matthew)": 1
+   },
+   "edition_table_name": "Laufranc",
+   "kind": "later_writer",
+   "identified_as": "Lanfranc",
+   "identification_basis": "the Table prints \"Laufranc\" (sic) under Cent. XI; a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that",
+   "catholic_encyclopedia": {
+    "article": "Lanfranc",
+    "volume": 8,
+    "year": 1910,
+    "archive_org_item": "07470918.8.emory.edu",
+    "ocr_text_line": 140487,
+    "url": "https://archive.org/details/07470918.8.emory.edu"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n866.jpg",
+    "born": "c. 1005",
+    "died": "24 May, 1089",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Pavia, c. 100.\"",
+      "read": "c. 1005",
+      "kind": "OCR misreading"
+     },
+     {
+      "field": "died",
+      "ocr": null,
+      "read": "24 May, 1089",
+      "kind": "not found in the OCR by the extractor; read from the page image"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "petrus_alfonsus",
+   "printed_forms": [
+    {
+     "form": "PETRUS ALFONSUS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Petrus Alfonsus (Matthew)": 1
+   },
+   "edition_table_name": "Petrus Alphonsus",
+   "kind": "later_writer",
+   "identified_as": "Petrus Alfonsus",
+   "identification_basis": "the Table: Petrus Alphonsus, Cent. XI; a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that",
+   "catholic_encyclopedia": {
+    "article": "Petrus Alfonsus",
+    "volume": 11,
+    "year": 1911,
+    "archive_org_item": "b33397491_0011",
+    "ocr_text_line": 141939,
+    "url": "https://archive.org/details/b33397491_0011"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0011/page/n862.jpg",
+    "born": "1062",
+    "died": "1110",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Huesca, in the former Kingdom of Aragon, 1062",
+      "read": "1062",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "paschasius",
+   "printed_forms": [],
+   "ccel_forms": {
+    "Paschasius (Matthew)": 1
+   },
+   "edition_table_name": "Paschasius Radbertus",
+   "kind": "later_writer",
+   "identified_as": "Paschasius Radbertus",
+   "identification_basis": "the Table: Paschasius Radbertus, Cent. IX; a later writer: the Catholic Encyclopedia, \"Fathers of the Church\" (vol. VI, 1909), says the Fathers include in the West Gregory the Great (d. 604) and in the East John Damascene (d. about 754), who \"closes the patristic period\"; this writer died after that; found as a head in CCEL's Matthew only",
+   "catholic_encyclopedia": {
+    "article": "Paschasius Radbertus, Saint",
+    "volume": 11,
+    "year": 1911,
+    "archive_org_item": "b33397491_0011",
+    "ocr_text_line": 94314,
+    "url": "https://archive.org/details/b33397491_0011"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0011/page/n575.jpg",
+    "born": "786",
+    "died": "c. 860",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Soissons, 786",
+      "read": "786",
+      "kind": "place or surrounding words left out"
+     },
+     {
+      "field": "died",
+      "ocr": "in the Monastery of Corbie, c",
+      "read": "c. 860",
+      "kind": "OCR text cut short by the extractor; completed from the page image"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "basil",
+   "printed_forms": [
+    {
+     "form": "BASIL",
+     "occurrences_both_copies_counted": 234,
+     "parts": [
+      "jn1",
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": "Basil",
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "the Table lists \"Basil\" under Cent. V, but the encyclopedia dates Basil the Great to 329-379 (Cent. IV); not resolved, served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss",
+   "candidates": [
+    {
+     "article": "Basil the Great, Saint",
+     "volume": 2,
+     "year": 1907,
+     "archive_org_item": "b33397491_0002",
+     "ocr_text_line": 62181,
+     "url": "https://archive.org/details/b33397491_0002"
+    }
+   ]
+  },
+  {
+   "key": "pseudo_basil",
+   "printed_forms": [
+    {
+     "form": "PSEUDO-BASIL",
+     "occurrences_both_copies_counted": 3,
+     "parts": [
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "pseudo",
+   "identified_as": null,
+   "identification_basis": "kept distinct from Basil",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "idem",
+   "printed_forms": [
+    {
+     "form": "ID",
+     "occurrences_both_copies_counted": 159,
+     "parts": [
+      "jn1",
+      "lk1",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "idem",
+   "identified_as": null,
+   "identification_basis": "ID. (idem) refers to the author of the excerpt before it; the build resolves it to that excerpt's printed author or holds it",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "eusebius",
+   "printed_forms": [
+    {
+     "form": "EUSEB",
+     "occurrences_both_copies_counted": 109,
+     "parts": [
+      "jn1",
+      "lk1",
+      "lk2",
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "EUSEBIUS",
+     "occurrences_both_copies_counted": 18,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Euseb. (Matthew)": 4
+   },
+   "edition_table_name": "Eusebius",
+   "kind": "father_age_writer",
+   "identified_as": "Eusebius of Caesarea",
+   "identification_basis": "the Table's Eusebius (Cent. IV); margins cite Euseb. Eccl. Hist.",
+   "catholic_encyclopedia": {
+    "article": "Eusebius of Caesarea",
+    "volume": 5,
+    "year": 1909,
+    "archive_org_item": "b33397491_0005",
+    "ocr_text_line": 115156,
+    "url": "https://archive.org/details/b33397491_0005"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0005/page/n700.jpg",
+    "born": "about 260",
+    "died": "before 341",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "titus_bostra",
+   "printed_forms": [
+    {
+     "form": "TIT. BOST",
+     "occurrences_both_copies_counted": 112,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "TITUS BOST",
+     "occurrences_both_copies_counted": 16,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "TITUS BOSTRENSIS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "father",
+   "identified_as": "Titus of Bostra",
+   "identification_basis": "the printed head names the see; not in the Table",
+   "catholic_encyclopedia": {
+    "article": "Titus, Bishop of Bostra",
+    "volume": 14,
+    "year": 1912,
+    "archive_org_item": "b33397491_0014",
+    "ocr_text_line": 136347,
+    "url": "https://archive.org/details/b33397491_0014"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0014/page/n825.jpg",
+    "born": "about 362–371",
+    "born_note": "as printed",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "about 362-371. Sozo- men (Hist. eccl., III, xiv) names Titus among the great men of the time of Constantius",
+      "read": "about 362–371",
+      "kind": "OCR misreading"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "titus",
+   "printed_forms": [
+    {
+     "form": "TITUS",
+     "occurrences_both_copies_counted": 7,
+     "parts": [
+      "lk1",
+      "lk2",
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "TIT",
+     "occurrences_both_copies_counted": 5,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Titus (Mark)": 1
+   },
+   "edition_table_name": null,
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "printed without the see; most likely Titus of Bostra, but not resolved: served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "athanasius",
+   "printed_forms": [
+    {
+     "form": "ATHAN",
+     "occurrences_both_copies_counted": 72,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "ATHANAS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "ATHANASIUS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": "Athanasius",
+   "kind": "father",
+   "identified_as": "Athanasius",
+   "identification_basis": "the Table's Athanasius (Cent. IV)",
+   "catholic_encyclopedia": {
+    "article": "Athanasius, Saint",
+    "volume": 2,
+    "year": 1907,
+    "archive_org_item": "b33397491_0002",
+    "ocr_text_line": 7717,
+    "url": "https://archive.org/details/b33397491_0002"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0002/page/n58.jpg",
+    "born": "c. 296",
+    "died": "2 May, 373",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "ec. 296",
+      "read": "c. 296",
+      "kind": "OCR misreading"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "pseudo_athanasius",
+   "printed_forms": [
+    {
+     "form": "PSEUDO-ATHAN",
+     "occurrences_both_copies_counted": 4,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Pseudo-Athan. (Matthew)": 2
+   },
+   "edition_table_name": null,
+   "kind": "pseudo",
+   "identified_as": null,
+   "identification_basis": "kept distinct from Athanasius",
+   "catholic_encyclopedia": {
+    "article": "Vigilius, Bishop of Thapsus",
+    "volume": 15,
+    "year": 1912,
+    "archive_org_item": "b33397491_0015",
+    "ocr_text_line": 78851,
+    "url": "https://archive.org/details/b33397491_0015"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0015/page/n490.jpg",
+    "left_out": "the article gives no birth or death; it names him among the bishops at the conference of 484",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null,
+   "editors_mark": "the margin of Matthew 1:1 reads \"Pseudo-Athan. Vigil. Tapsens.\" (Vigilius of Thapsus); the encyclopedia article cited is on Vigilius of Thapsus"
+  },
+  {
+   "key": "cyprian",
+   "printed_forms": [
+    {
+     "form": "CYPRIAN",
+     "occurrences_both_copies_counted": 39,
+     "parts": [
+      "lk1",
+      "lk2",
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Cyprian (Matthew)": 20
+   },
+   "edition_table_name": "Cyprian",
+   "kind": "father",
+   "identified_as": "Cyprian of Carthage",
+   "identification_basis": "the Table's Cyprian (Cent. III); margins cite his De Orat. Dom.",
+   "catholic_encyclopedia": {
+    "article": "Cyprian of Carthage, Saint",
+    "volume": 4,
+    "year": 1908,
+    "archive_org_item": "b33397491_0004",
+    "ocr_text_line": 107976,
+    "url": "https://archive.org/details/b33397491_0004"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0004/page/n662.jpg",
+    "left_out": "the article: of the date of his birth nothing is known; it narrates his martyrdom (August, 258; the morning of the 14th) but prints no single date of death, which is not assembled here",
+    "ocr_corrections": []
+   },
+   "language": "Latin",
+   "language_basis": {
+    "phrase": "his beauty of style has rarely been equalled among the Latin Fathers",
+    "page_image": "https://archive.org/download/b33397491_0004/page/n662.jpg"
+   }
+  },
+  {
+   "key": "leo",
+   "printed_forms": [
+    {
+     "form": "LEO",
+     "occurrences_both_copies_counted": 26,
+     "parts": [
+      "mk",
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Leo (Matthew)": 28,
+    "Leo (Mark)": 1
+   },
+   "edition_table_name": "Leo the Great",
+   "kind": "father",
+   "identified_as": "Leo the Great",
+   "identification_basis": "the Table's Leo the Great; margins cite Leo. Epist.",
+   "catholic_encyclopedia": {
+    "article": "Leo I (the Great), Saint, Pope",
+    "volume": 9,
+    "year": 1910,
+    "archive_org_item": "b33397491_0009",
+    "ocr_text_line": 29511,
+    "url": "https://archive.org/details/b33397491_0009"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0009/page/n181.jpg",
+    "died": "10 November, 461",
+    "born_left_out": "the article: place and date of birth unknown",
+    "office": {
+     "as": "pope",
+     "dates": "440–61"
+    },
+    "ocr_corrections": [
+     {
+      "field": "died",
+      "ocr": "10 November, 461 Leo’s pontificate, next to that of St",
+      "read": "10 November, 461",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "pseudo_augustine",
+   "printed_forms": [
+    {
+     "form": "PSEUDO-AUG",
+     "occurrences_both_copies_counted": 22,
+     "parts": [
+      "lk1",
+      "lk2",
+      "mk",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Pseudo-Aug. (Matthew)": 22,
+    "Pseudo-Aug. (Mark)": 2,
+    "Psuedo-Aug. (Matthew)": 1,
+    "Pseudo-Augustine (Mark)": 3
+   },
+   "edition_table_name": null,
+   "kind": "pseudo",
+   "identified_as": null,
+   "identification_basis": "kept distinct from Augustine",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "sever",
+   "printed_forms": [
+    {
+     "form": "SEVER",
+     "occurrences_both_copies_counted": 16,
+     "parts": [
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Severianus (Mark)": 9
+   },
+   "edition_table_name": null,
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "SEVER. abbreviates Severus (the Table: Severus, Bp. of Antioch) or Severianus; CCEL renders Mark's heads as Severianus; not resolved, served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss",
+   "candidates": [
+    {
+     "article": "Severian",
+     "volume": 13,
+     "year": 1912,
+     "archive_org_item": "b33397491_0013",
+     "ocr_text_line": 135503,
+     "url": "https://archive.org/details/b33397491_0013"
+    }
+   ]
+  },
+  {
+   "key": "severian",
+   "printed_forms": [
+    {
+     "form": "SEVERIANUS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mk"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "father",
+   "identified_as": "Severian of Gabala",
+   "identification_basis": "the full printed name; not in the Table",
+   "catholic_encyclopedia": {
+    "article": "Severian",
+    "volume": 13,
+    "year": 1912,
+    "archive_org_item": "b33397491_0013",
+    "ocr_text_line": 135503,
+    "url": "https://archive.org/details/b33397491_0013"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0013/page/n817.jpg",
+    "flourished": "in the fourth and fifth centuries",
+    "ocr_corrections": [
+     {
+      "field": "flourished",
+      "ocr": null,
+      "read": "in the fourth and fifth centuries",
+      "kind": "not found in the OCR by the extractor; read from the page image"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "didymus",
+   "printed_forms": [
+    {
+     "form": "DIDYMUS",
+     "occurrences_both_copies_counted": 16,
+     "parts": [
+      "jn2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "father",
+   "identified_as": "Didymus the Blind",
+   "identification_basis": "the printed name; not in the Table",
+   "catholic_encyclopedia": {
+    "article": "Didymus the Blind",
+    "volume": 4,
+    "year": 1908,
+    "archive_org_item": "b33397491_0004",
+    "ocr_text_line": 145511,
+    "url": "https://archive.org/details/b33397491_0004"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0004/page/n873.jpg",
+    "born": "about 310 or 313",
+    "died": "about 395 or 398",
+    "ocr_corrections": [
+     {
+      "field": "died",
+      "ocr": "about 395 or 398, at the age of eighty-five",
+      "read": "about 395 or 398",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "isidore",
+   "printed_forms": [
+    {
+     "form": "ISIDORE",
+     "occurrences_both_copies_counted": 13,
+     "parts": [
+      "lk1",
+      "lk2",
+      "mt1",
+      "mt2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "ISID",
+     "occurrences": 1,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": false
+    }
+   ],
+   "ccel_forms": {
+    "Isidore (Matthew)": 2,
+    "Isid. (Matthew)": 1
+   },
+   "edition_table_name": "Isidore of Pelusium; Isidore",
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "the Table lists Isidore of Pelusium (Cent. V) and Isidore (Cent. VI); the plain head does not say which; served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss",
+   "candidates": [
+    {
+     "article": "Isidore of Pelusium, Saint",
+     "volume": 8,
+     "year": 1910,
+     "archive_org_item": "07470918.8.emory.edu",
+     "ocr_text_line": 33898,
+     "url": "https://archive.org/details/07470918.8.emory.edu"
+    },
+    {
+     "article": "Isidore of Seville, Saint",
+     "volume": 8,
+     "year": 1910,
+     "archive_org_item": "07470918.8.emory.edu",
+     "ocr_text_line": 34055,
+     "url": "https://archive.org/details/07470918.8.emory.edu"
+    }
+   ]
+  },
+  {
+   "key": "isidore_pelusium",
+   "printed_forms": [
+    {
+     "form": "ISID. PELEUS",
+     "occurrences": 2,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": false
+    },
+    {
+     "form": "ISID. PEL",
+     "occurrences": 1,
+     "parts": [
+      "lk2"
+     ],
+     "read_alike_in_both_copies": false
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": "Isidore of Pelusium",
+   "kind": "father",
+   "identified_as": "Isidore of Pelusium",
+   "identification_basis": "the printed head names the see",
+   "catholic_encyclopedia": {
+    "article": "Isidore of Pelusium, Saint",
+    "volume": 8,
+    "year": 1910,
+    "archive_org_item": "07470918.8.emory.edu",
+    "ocr_text_line": 33898,
+    "url": "https://archive.org/details/07470918.8.emory.edu"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n221.jpg",
+    "born": "in the latter half of the fourth century",
+    "died": "not later than 449–50",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Alexandria in the latter half of the fourth century",
+      "read": "in the latter half of the fourth century",
+      "kind": "place or surrounding words left out"
+     },
+     {
+      "field": "died",
+      "ocr": "not later than 449-50",
+      "read": "not later than 449–50",
+      "kind": "OCR misreading"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "cassian",
+   "printed_forms": [
+    {
+     "form": "CASSIAN",
+     "occurrences_both_copies_counted": 9,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Cassian (Matthew)": 6
+   },
+   "edition_table_name": "Cassion",
+   "kind": "father",
+   "identified_as": "John Cassian",
+   "identification_basis": "the Table prints \"Cassion\" (sic) under Cent. V",
+   "catholic_encyclopedia": {
+    "article": "Cassian, John",
+    "volume": 3,
+    "year": 1908,
+    "archive_org_item": "b33397491_0003",
+    "ocr_text_line": 74565,
+    "url": "https://archive.org/details/b33397491_0003"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0003/page/n461.jpg",
+    "born": "probably about 360",
+    "died": "about 435",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "probably in Provence about 360",
+      "read": "probably about 360",
+      "kind": "place or surrounding words left out"
+     },
+     {
+      "field": "died",
+      "ocr": "about 435, probably near Marseilles",
+      "read": "about 435",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "chrysologus",
+   "printed_forms": [
+    {
+     "form": "CHRYSOLOGUS",
+     "occurrences_both_copies_counted": 9,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "CHRYSOLOG",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Chrysol. (Matthew)": 16,
+    "Chrysologus (Matthew)": 10,
+    "Chrysol (Matthew)": 1
+   },
+   "edition_table_name": "Chrysologus",
+   "kind": "father",
+   "identified_as": "Peter Chrysologus",
+   "identification_basis": "the Table's Chrysologus",
+   "catholic_encyclopedia": {
+    "article": "Peter Chrysologus, Saint",
+    "volume": 11,
+    "year": 1911,
+    "archive_org_item": "b33397491_0011",
+    "ocr_text_line": 138203,
+    "url": "https://archive.org/details/b33397491_0011"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0011/page/n837.jpg",
+    "born": "406",
+    "died": "450",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Imola, 406",
+      "read": "406",
+      "kind": "place or surrounding words left out"
+     },
+     {
+      "field": "died",
+      "ocr": "there, 450",
+      "read": "450",
+      "kind": "place or surrounding words left out"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "maximus",
+   "printed_forms": [
+    {
+     "form": "MAXIMUS",
+     "occurrences_both_copies_counted": 9,
+     "parts": [
+      "lk1",
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "MAXIM",
+     "occurrences_both_copies_counted": 10,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "MAX",
+     "occurrences_both_copies_counted": 4,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Maximus (Matthew)": 1
+   },
+   "edition_table_name": "Maximus of Turin; Maximus (? of Constantinople, 645.)",
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "the Table lists two writers named Maximus; served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss",
+   "candidates": [
+    {
+     "article": "Maximus of Turin, Saint",
+     "volume": 10,
+     "year": 1911,
+     "archive_org_item": "b33397491_0010",
+     "ocr_text_line": 16432,
+     "url": "https://archive.org/details/b33397491_0010"
+    },
+    {
+     "article": "Maximus of Constantinople, Saint",
+     "volume": 10,
+     "year": 1911,
+     "archive_org_item": "b33397491_0010",
+     "ocr_text_line": 16046,
+     "url": "https://archive.org/details/b33397491_0010"
+    }
+   ]
+  },
+  {
+   "key": "epiphanius",
+   "printed_forms": [
+    {
+     "form": "EPIPH",
+     "occurrences_both_copies_counted": 10,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "EPIPHAN",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "not in the Table, and no encyclopedia article on Epiphanius of Salamis was found in the OCR; served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "john_damascene",
+   "printed_forms": [
+    {
+     "form": "DAMASCENE",
+     "occurrences_both_copies_counted": 8,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "DAMAS",
+     "occurrences_both_copies_counted": 8,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "DAMASC",
+     "occurrences_both_copies_counted": 4,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "DAMASCENUS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Damascenus (Matthew)": 2,
+    "Damas. (Matthew)": 2,
+    "Damasc. (Matthew)": 1
+   },
+   "edition_table_name": "John Damascene",
+   "kind": "father",
+   "identified_as": "John Damascene",
+   "identification_basis": "the Table's John Damascene",
+   "catholic_encyclopedia": {
+    "article": "John Damascene, Saint",
+    "volume": 8,
+    "year": 1910,
+    "archive_org_item": "07470918.8.emory.edu",
+    "ocr_text_line": 83008,
+    "url": "https://archive.org/details/07470918.8.emory.edu"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n521.jpg",
+    "born": "about 676",
+    "died": "some time between 754 and 787",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Damascus, about wo",
+      "read": "about 676",
+      "kind": "OCR misreading"
+     }
+    ]
+   },
+   "language": "Greek",
+   "language_basis": {
+    "phrase": "John of Damascus was the last of the Greek Fathers",
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n522.jpg"
+   }
+  },
+  {
+   "key": "theod",
+   "printed_forms": [
+    {
+     "form": "THEOD",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Theod. non occ. (Matthew)": 1
+   },
+   "edition_table_name": null,
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "THEOD. abbreviates Theodotus of Ancyra (in the Table) or another Theod-; served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "theodotus",
+   "printed_forms": [
+    {
+     "form": "THEODOTUS",
+     "occurrences_both_copies_counted": 4,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Theodotus (Matthew)": 2
+   },
+   "edition_table_name": "Theodotus of Ancyra",
+   "kind": "father",
+   "identified_as": "Theodotus of Ancyra",
+   "identification_basis": "the Table's Theodotus of Ancyra (Cent. V); the encyclopedia article on Theodotus of Ancyra in the OCR is on a martyr of that name, not this bishop",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "council_ephesus",
+   "printed_forms": [
+    {
+     "form": "THE COUNCIL OF EPHESUS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": true
+    },
+    {
+     "form": "GESTIS CONC. EPH",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "jn1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "The Council of Ephesus (Matthew)": 1
+   },
+   "edition_table_name": "Council of Ephesus",
+   "kind": "council",
+   "identified_as": "the Council of Ephesus (431)",
+   "identification_basis": "the printed head",
+   "catholic_encyclopedia": {
+    "article": "Ephesus, Council of",
+    "volume": 5,
+    "year": 1909,
+    "archive_org_item": "b33397491_0005",
+    "ocr_text_line": 92318,
+    "url": "https://archive.org/details/b33397491_0005"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0005/page/n560.jpg",
+    "held": "431",
+    "ocr_corrections": [
+     {
+      "field": "held",
+      "ocr": null,
+      "read": "431",
+      "kind": "not found in the OCR by the extractor; read from the page image"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "council_constantinople",
+   "printed_forms": [
+    {
+     "form": "CONSTANTINOPLE",
+     "occurrences": 1,
+     "parts": [
+      "mt2"
+     ],
+     "read_alike_in_both_copies": false
+    }
+   ],
+   "ccel_forms": {
+    "Second Council of Constantinople (Matthew)": 1
+   },
+   "edition_table_name": null,
+   "kind": "council",
+   "identified_as": "the Second Council of Constantinople",
+   "identification_basis": "CCEL's head; the OCR flagged only CONSTANTINOPLE in one copy",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "greek_expositor",
+   "printed_forms": [
+    {
+     "form": "GREEK EX",
+     "occurrences": 72,
+     "parts": [
+      "lk1",
+      "lk2"
+     ],
+     "read_alike_in_both_copies": false
+    },
+    {
+     "form": "GREEK EXPOSITOR",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "lk1"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "anonymous",
+   "identified_as": null,
+   "identification_basis": "an unnamed Greek writer of the Catena on Luke; one margin names Metaphrastes; served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "clement_alexandria",
+   "printed_forms": [
+    {
+     "form": "CLEM. ALEX",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "father_age_writer",
+   "identified_as": "Clement of Alexandria",
+   "identification_basis": "the printed head names the see; not in the Table",
+   "catholic_encyclopedia": {
+    "article": "Clement of Alexandria",
+    "volume": 4,
+    "year": 1908,
+    "archive_org_item": "b33397491_0004",
+    "ocr_text_line": 9828,
+    "url": "https://archive.org/details/b33397491_0004"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0004/page/n68.jpg",
+    "died": "about the year 215",
+    "born_left_out": "the article: date of birth unknown",
+    "ocr_corrections": []
+   },
+   "language": "Greek",
+   "language_basis": {
+    "phrase": "an early Greek theologian",
+    "page_image": "https://archive.org/download/b33397491_0004/page/n68.jpg"
+   }
+  },
+  {
+   "key": "dionys",
+   "printed_forms": [
+    {
+     "form": "DIONYS",
+     "occurrences_both_copies_counted": 2,
+     "parts": [
+      "lk2"
+     ],
+     "read_alike_in_both_copies": true
+    }
+   ],
+   "ccel_forms": {
+    "Dionys. (Matthew)": 1,
+    "Dionysius (Matthew)": 1
+   },
+   "edition_table_name": "Dionysius Areopagita",
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "DIONYS. may be the Table's Dionysius Areopagita or Dionysius of Alexandria (printed DION. ALEX.); served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss",
+   "candidates": [
+    {
+     "article": "Dionysius the Pseudo-Areopagite",
+     "volume": 5,
+     "year": 1909,
+     "archive_org_item": "b33397491_0005",
+     "ocr_text_line": 3942,
+     "url": "https://archive.org/details/b33397491_0005"
+    },
+    {
+     "article": "Dionysius of Alexandria",
+     "volume": 5,
+     "year": 1909,
+     "archive_org_item": "b33397491_0005",
+     "ocr_text_line": 3523,
+     "url": "https://archive.org/details/b33397491_0005"
+    }
+   ]
+  },
+  {
+   "key": "pseudo_dionysius",
+   "printed_forms": [],
+   "ccel_forms": {
+    "Pseudo-Dionysius (Matthew)": 1
+   },
+   "edition_table_name": "Dionysius Areopagita",
+   "kind": "pseudo",
+   "identified_as": "the writer called Dionysius the Pseudo-Areopagite",
+   "identification_basis": "CCEL's head; kept distinct",
+   "catholic_encyclopedia": {
+    "article": "Dionysius the Pseudo-Areopagite",
+    "volume": 5,
+    "year": 1909,
+    "archive_org_item": "b33397491_0005",
+    "ocr_text_line": 3942,
+    "url": "https://archive.org/details/b33397491_0005"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0005/page/n15.jpg",
+    "left_out": "the article gives no birth or death; it concludes the author belongs at the very earliest to the latter half of the fifth century",
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "dionysius_alexandria",
+   "printed_forms": [
+    {
+     "form": "DION. ALEX",
+     "occurrences": 1,
+     "parts": [
+      "lk2"
+     ],
+     "read_alike_in_both_copies": false
+    }
+   ],
+   "ccel_forms": {},
+   "edition_table_name": null,
+   "kind": "father",
+   "identified_as": "Dionysius of Alexandria",
+   "identification_basis": "the printed head names the see",
+   "catholic_encyclopedia": {
+    "article": "Dionysius of Alexandria",
+    "volume": 5,
+    "year": 1909,
+    "archive_org_item": "b33397491_0005",
+    "ocr_text_line": 3523,
+    "url": "https://archive.org/details/b33397491_0005"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/b33397491_0005/page/n32.jpg",
+    "left_out": "the article gives no birth or death; it prints his episcopate",
+    "office": {
+     "as": "bishop",
+     "dates": "from 247–8 to 264–5"
+    },
+    "ocr_corrections": []
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "gennadius",
+   "printed_forms": [
+    {
+     "form": "GENNADIUS",
+     "occurrences": 1,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": false
+    }
+   ],
+   "ccel_forms": {
+    "Gennadius (Matthew)": 1
+   },
+   "edition_table_name": "Gennadius",
+   "kind": "unresolved",
+   "identified_as": null,
+   "identification_basis": "the Table lists Gennadius under Cent. V; two encyclopedia articles fit (Gennadius I of Constantinople; Gennadius of Marseilles); served as printed",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss",
+   "candidates": [
+    {
+     "article": "Gennadius I, Saint",
+     "volume": 6,
+     "year": 1909,
+     "archive_org_item": "b33397491_0006",
+     "ocr_text_line": 77809,
+     "url": "https://archive.org/details/b33397491_0006"
+    },
+    {
+     "article": "Gennadius of Marseilles",
+     "volume": 6,
+     "year": 1909,
+     "archive_org_item": "b33397491_0006",
+     "ocr_text_line": 78144,
+     "url": "https://archive.org/details/b33397491_0006"
+    }
+   ]
+  },
+  {
+   "key": "nemesius",
+   "printed_forms": [
+    {
+     "form": "NEMESIUS",
+     "occurrences": 1,
+     "parts": [
+      "mt1"
+     ],
+     "read_alike_in_both_copies": false
+    }
+   ],
+   "ccel_forms": {
+    "Nemesius (Matthew)": 1
+   },
+   "edition_table_name": "Nemesius",
+   "kind": "father_age_writer",
+   "identified_as": "Nemesius",
+   "identification_basis": "the Table's Nemesius (Cent. IV)",
+   "catholic_encyclopedia": null,
+   "dates": null,
+   "language": "not stated",
+   "language_basis": null,
+   "catholic_encyclopedia_missing": "no article found for this writer in the archive.org OCR text of the 1907-12 volumes searched; a miss stays a miss"
+  },
+  {
+   "key": "josephus",
+   "printed_forms": [
+    {
+     "form": "JOSEPH",
+     "occurrences": 0,
+     "note": "not found by the head census of the printing"
+    }
+   ],
+   "ccel_forms": {
+    "Josephus (Matthew)": 1
+   },
+   "edition_table_name": null,
+   "kind": "jewish_historian",
+   "identified_as": "Flavius Josephus",
+   "identification_basis": "the OCR of one copy splits the head as JOSEPH us; CCEL reads Josephus; not a Christian writer, so neither a Father nor a later writer",
+   "catholic_encyclopedia": {
+    "article": "Josephus, Flavius",
+    "volume": 8,
+    "year": 1910,
+    "archive_org_item": "07470918.8.emory.edu",
+    "ocr_text_line": 94136,
+    "url": "https://archive.org/details/07470918.8.emory.edu"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n592.jpg",
+    "born": "A. D. 37",
+    "died": "about 101",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "a. d. 37, at Jerusalem",
+      "read": "A. D. 37",
+      "kind": "OCR misreading"
+     }
+    ]
+   },
+   "language": "not stated",
+   "language_basis": null
+  },
+  {
+   "key": "isidore_seville",
+   "printed_forms": [],
+   "ccel_forms": {
+    "Isid. Hisp. Orig. 8. 4 (Matthew)": 1
+   },
+   "edition_table_name": "Isidore",
+   "kind": "father",
+   "identified_as": "Isidore of Seville",
+   "identification_basis": "CCEL's head \"Isid. Hisp.\" names Seville",
+   "catholic_encyclopedia": {
+    "article": "Isidore of Seville, Saint",
+    "volume": 8,
+    "year": 1910,
+    "archive_org_item": "07470918.8.emory.edu",
+    "ocr_text_line": 34055,
+    "url": "https://archive.org/details/07470918.8.emory.edu"
+   },
+   "dates": {
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n222.jpg",
+    "born": "about 560",
+    "died": "4 April, 636",
+    "ocr_corrections": [
+     {
+      "field": "born",
+      "ocr": "at Cartagena, Spain, about WiO",
+      "read": "about 560",
+      "kind": "OCR misreading"
+     }
+    ]
+   },
+   "language": "Latin",
+   "language_basis": {
+    "phrase": "he was the last of the great Latin Fathers",
+    "page_image": "https://archive.org/download/07470918.8.emory.edu/page/n223.jpg"
+   }
+  }
+ ]
+}
