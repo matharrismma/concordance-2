@@ -90,7 +90,10 @@ WRAPPER = ('case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) STUBS=$(cygpath -u "$STU
            'PATH="$STUBS:$PATH"; export PATH; PRELUDE'
            'if command -v dash >/dev/null; then exec dash "$0" ARGS; fi; exec sh "$0" ARGS')
 
-# The lines tools/deploy.sh gains after line 26, exactly: nothing else may run before its base lines do.
+# The lines tools/deploy.sh gains after line 26, exactly: nothing else may run before its base lines do. A DELIBERATE
+# CONTRACT CHANGE of run 2026-11-13-stick-ship, step path (its plan, ledger line 8): the block gains exactly the mint
+# path's nine lines after the build path's, in their place, and the length assertion follows; every other assertion is
+# unchanged. tests/test_mint_ship.py holds every line of f6a1d1d, the base with the build block, unchanged and in order.
 NEW_BLOCK = [
     "# THE BUILD PATH (run 2026-11-11-box-build): `--build <name>` and `--build-verify <name>` never reach the lines below.",
     "# They go whole to tools/build_ship.sh, handed the box in its environment so that no other file names it. A deploy",
@@ -100,6 +103,15 @@ NEW_BLOCK = [
     "        BUILD_HOST=$HOST BUILD_KEY=$KEY BUILD_DEST=$DEST",
     "        export BUILD_HOST BUILD_KEY BUILD_DEST",
     '        exec sh "$REPO/tools/build_ship.sh" "$@" ;;',
+    "esac",
+    "# THE MINT PATH (run 2026-11-13-stick-ship): `--mint <name>`, `--mint-check <name>` and `--mint-retract <name>` never",
+    "# reach the lines below. They go whole to tools/mint_ship.sh, handed the box in its environment so that no other file",
+    "# names it. A deploy without them runs exactly as before.",
+    'case "${1:-}" in',
+    "    --mint|--mint-check|--mint-retract)",
+    "        MINT_HOST=$HOST MINT_KEY=$KEY MINT_DEST=$DEST",
+    "        export MINT_HOST MINT_KEY MINT_DEST",
+    '        exec sh "$REPO/tools/mint_ship.sh" "$@" ;;',
     "esac",
 ]
 

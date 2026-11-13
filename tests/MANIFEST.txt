@@ -444,3 +444,5 @@ test_sticks_catalog.py
 test_syntax.py
 test_tool_dispatch_parity.py
 test_uptime.py
+test_stick_mint.py
+test_mint_ship.py

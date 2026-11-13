@@ -33,6 +33,15 @@ case "${1:-}" in
         export BUILD_HOST BUILD_KEY BUILD_DEST
         exec sh "$REPO/tools/build_ship.sh" "$@" ;;
 esac
+# THE MINT PATH (run 2026-11-13-stick-ship): `--mint <name>`, `--mint-check <name>` and `--mint-retract <name>` never
+# reach the lines below. They go whole to tools/mint_ship.sh, handed the box in its environment so that no other file
+# names it. A deploy without them runs exactly as before.
+case "${1:-}" in
+    --mint|--mint-check|--mint-retract)
+        MINT_HOST=$HOST MINT_KEY=$KEY MINT_DEST=$DEST
+        export MINT_HOST MINT_KEY MINT_DEST
+        exec sh "$REPO/tools/mint_ship.sh" "$@" ;;
+esac
 
 [ "$#" -ge 1 ] || { echo "usage: sh tools/deploy.sh <repo-relative file> [...]"; exit 2; }
 

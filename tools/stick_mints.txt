@@ -1,0 +1,19 @@
+# THE MINT LISTING: every catalog entry tools/stick_mint.py may mint into the box's keeping (run 2026-11-13-stick-ship).
+# One entry per line:
+#
+#   NAME ENTRY_SHA256 [KEY=HASH]... [expect=present|expect=refused]
+#
+# NAME is a DATA entry of the catalog, data/sticks/NAME.json, of the form [a-z0-9][a-z0-9_]* as the catalog's file
+# stems are, and the only thing `sh tools/deploy.sh --mint`, `--mint-check` and `--mint-retract` take; a handler entry
+# is refused, since its run is Python in tools/tick.py. ENTRY_SHA256 is the sha256 of that file's bytes with CR LF as
+# LF. Each KEY=HASH is one of the entry's seals, in the entry's order and every seal listed, with the content hash it
+# must mint, computed by running the entry in an isolated keeping in the environment tools/tick_golden.py uses (a fresh
+# temporary CONCORDANCE_DATA_DIR, CONCORDANCE_SEAL_INDEX=0, CONCORDANCE_VERIFY_TIMEOUT_S=1800,
+# CONCORDANCE_RIEMANN_MAX=1e9, WEB_FIND_DISABLED=1); the step that adds an entry computes them and its checker
+# reproduces them. An optional last token, expect=present or expect=refused, marks a canary, which is never retracted.
+# A comment line just before each entry says what it mints and why.
+
+# euler_e: a canary that mints nothing: the entry is already fully live (its three witness seals and its note), so the path reads it present at step 2 and writes only its result.
+euler_e c288f9e7c1f97906b5c2cff327f9df9b7be4b31cfc389958eb493053cce31bc0 e_as_factorial_series=a4344f49febb1017c27107694a767120db6d882f479f72edfc90fd69c0de01e6 e_as_compounding_limit=015e968f6f7fc97ba333f6ae47f32263c171fa925fa70cd0abfbec4ebcd920dc e_is_its_own_derivative=d93eea5ed5f139279749204e25934e979e5af1c7a659c5be279fd068d728fd00 expect=present
+# calculus: a canary that must refuse: the entry is already fully live, and power_rule_area's listed hash has its last hex digit changed on purpose (it mints ...dc2), so the rehearsal refuses naming that hash and the path writes only its result.
+calculus c30e953b36e23ee8560369ab00dd8f8fa350c88a1e4b3790d7ce8db6d88193a0 ftc_net_change=6c482b8b85ac16490dd0268ac4f8c06120e726d7f5ade2d8d3db3e7c24e7f42b power_rule_area=690af3ec6c6c3311aef8e10e55e399b5058f85544ad15dab030b16f57af88dc3 derivative_limiting_slope=8bfb04ad9da09dde332258089af0b3d0beecaf555a1a2e1e5514e4c62ea41487 expect=refused

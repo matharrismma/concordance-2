@@ -159,6 +159,45 @@ and its commit says so.
     are empty between builds; a build running at backup time puts its partial output and its staged inputs
     in that night's copy, and the next build removes them on the box. Old hash directories are never
     pruned; their growth on disk and in the nightly copy is a want (the canary adds one 74-byte file);
+  - **tick-stick marks** (run 2026-11-13-stick-ship) — **the entry first, then the mint.** The entry,
+    `data/sticks/<name>.json`, reaches the box only by the ordinary deploy, committed and on origin's default
+    branch; then `sh tools/deploy.sh --mint-check <name> && sh tools/deploy.sh --mint <name>` runs as one
+    fail-closed chain, handed by lines in `tools/deploy.sh` after those that name the box to `tools/mint_ship.sh`,
+    with the box in its environment. A name is a data entry listed in `tools/stick_mints.txt`, never a path or a
+    free argument (a handler entry is refused): the sha256 of its file with CR LF as LF, and each of its seals'
+    keys, in order, with the content hash it must mint, computed in the isolated environment `tools/tick_golden.py`
+    uses; `expect=present` or `expect=refused` marks a canary. Before any call the path refuses unless the
+    listing, `tools/stick_mint.py` and the entry are tracked and equal to HEAD, HEAD is contained in origin's
+    default branch as this laptop's remote-tracking ref records it, and the laptop's entry hashes as listed; every
+    switch then reads, by streaming the unit's standard-library `entry-check` to the box's python, that the box's
+    entry hashes the same, and refuses before anything is sent otherwise. `--mint-check` stops there. `--mint`
+    sends the listing and the unit, starts the unit on the box detached with a fresh run id, and polls for at most
+    15 minutes for `data/mints/.results/<run id>.json`, taking only a result that holds that run id and name. The
+    unit holds `data/mints/.lock`, a lock the kernel drops if it dies; refuses below its cap (512 MB) plus 256 MB
+    of available memory; runs at oom_score_adj 1000 under nice and ionice with the cap as its address-space limit,
+    with no inherited `CONCORDANCE_` variable and exactly the environment the listed hashes come from; and refuses
+    unless the engine's installed unit names `<root>/data` as its keeping and `.env` names no keeping location.
+    THE ORDER: the CHECK (the entry, its hash and seals, `ledger.verify_chain` read under the ledger's chain
+    lock); the REHEARSAL, the same `concordance.sticks.run` in a scratch keeping outside `data/` that holds a copy
+    of `data/sticks.jsonl`, in a child process of its own, so tick's own refusals reach every mark against the
+    box's sticks; WOULD ADD, every write a mint can make, read only (each listed seal's CAS object, its ledger
+    record by the ledger's own naming, the receipt card of an object not yet there and the receipt spine card where
+    the keeping lacks it, each stick and mark); the MINT,
+    run only when something would be added and begun within 10 minutes; and the READ BACK (each listed seal's CAS
+    object and ledger record, the receipt card of each object it created, every mark, the marks added equal to the
+    rehearsal's, the chain), failed and named item by item when anything is missing; what else arrives on the
+    entry's sticks meanwhile is recorded apart, never as this path's mark. A mint writes only
+    `data/cas/`, `data/ledger/`, `data/receipt_cards.jsonl`, `data/verified_cards.jsonl` where the seal path writes
+    a verified card, `data/sticks.jsonl` and `data/mints/`; a refused, present or early-failed mint writes only
+    `data/mints/` (and the ledger's lock file where there was none). A mint is append-only and restarts no engine:
+    GET /sticks folds the log on each request. Its revert, `sh tools/deploy.sh --mint-retract <name>`, withdraws
+    only the sealed marks a mint of that name recorded as new in its result (those its rehearsal appended, with a
+    seal it listed), never a canary's, and refuses when
+    another entry states the same stick and seal; a cited mark or a note has no withdrawal (a want). After a
+    retract the stick, with its cited marks and notes, and every CAS object, ledger record and receipt card stay
+    served (`/s/<hash>`, `/seals`). The public POST /stick, POST /tick and a sealing POST /verify are no ship
+    path. A mint's ship note names each new seal's content hash, so live-before-and-after can tell them from
+    traffic;
   - **the outside watch** — `deploy/install_watch.sh`, copied with the watch files into a private
     folder on the box and run there with sudo, since `deploy/` is not on the box; the folder is
     removed after. It snapshots what it replaces, installs the watch and each engine's

@@ -325,3 +325,27 @@ every pointer.
 > The schedule's clock uses done_problems from the records commit, so a later harness requirement
 > could make old runs read incomplete and silently drop the run count; fixing that needs a reviewed
 > bootstrap. A format change also refuses briefs for steps open across it, which is loud and safe.
+
+## mint-handler-entries
+- status: open
+- scope: concordance-2
+- source: ORIGIN 2026-11-13 lead
+> The mint path takes data entries only: a handler entry of the catalog runs as Python in tools/tick.py,
+> so tools/stick_mint.py refuses it, and minting handler entries through a gated path is a want. Named
+> in the plan of run 2026-11-13-stick-ship, line 8.
+
+## withdraw-cited-marks-and-notes
+- status: open
+- scope: concordance-2
+- source: ORIGIN 2026-11-13 lead
+> The keeping has no withdrawal for a cited mark or a note: a retract drops sealed marks by their seal
+> alone, so the mint path's retract withdraws sealed marks only, and an entry's cited marks and notes are
+> reviewed as tracked source before they mint. Named in the plan of run 2026-11-13-stick-ship, line 8.
+
+## public-stick-and-tick-doors
+- status: open
+- scope: concordance-2
+- source: ORIGIN 2026-11-13 lead
+> The public POST /stick and POST /tick doors let anyone add a stick, or a cited mark or a note, to the
+> live keeping. They are no ship path; whether they stay open is the owner's to decide. Named in the
+> plan of run 2026-11-13-stick-ship, line 8.
