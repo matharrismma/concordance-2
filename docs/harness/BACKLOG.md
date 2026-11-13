@@ -349,3 +349,13 @@ every pointer.
 > The public POST /stick and POST /tick doors let anyone add a stick, or a cited mark or a note, to the
 > live keeping. They are no ship path; whether they stay open is the owner's to decide. Named in the
 > plan of run 2026-11-13-stick-ship, line 8.
+
+## live-seals-older-than-the-seal-path
+- status: open
+- scope: concordance-2
+- source: ORIGIN 2026-11-13 lead
+> 63 of the catalog's 143 data entries with seals carry live marks whose seals are not the hashes
+> today's seal path mints (60 carry none of them; 3 carry some: black_holes, gravity, linear_algebra),
+> so listing one in tools/stick_mints.txt would add a second, newly sealed copy of each sealed mark
+> beside the old. A decision for the owner before any such entry is listed. Named in the plan of run
+> 2026-11-13-stick-ship, line 33.

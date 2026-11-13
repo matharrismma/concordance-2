@@ -352,7 +352,7 @@ def test_deploy_sh_keeps_every_line_of_f6a1d1d_unchanged_and_in_order_and_adds_o
 
 @pytest.mark.parametrize("args,extra", [(["--mint", "no_such_entry"], {}), (["--mint-check", "no_such_entry"], {}),
                                         (["--mint-retract", "no_such_entry"], {}),
-                                        (["--mint", "euler_e"], {"DEPLOY_NO_GATE": "1"})])
+                                        (["--mint", "agriculture"], {"DEPLOY_NO_GATE": "1"})])
 def test_deploy_sh_hands_mint_mint_check_and_mint_retract_to_mint_ship(tmp_path, args, extra):
     """The real deploy.sh, refused by mint_ship.sh before any call. The base (f6a1d1d) says 'not a file' instead."""
     laptop = Laptop(tmp_path, ROOT)

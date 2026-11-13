@@ -296,10 +296,14 @@ def has_mark(ticks: list, mark: dict, seal: str) -> bool:
 
 # ------------------------------------------------------------------------------------------------ the listing
 
-def test_the_listing_holds_the_two_canaries_each_after_its_comment(sm):
+def test_the_listing_holds_its_canaries_each_after_its_comment(sm):
+    # A DELIBERATE CONTRACT CHANGE of run 2026-11-13-stick-ship, step canary (its plan four, ledger line 33): euler_e's
+    # live marks carry seals minted 2026-10-07, not today's hashes, so it gave way to agriculture and condensed_matter,
+    # whose live seals are today's; calculus is unchanged.
     text = LISTING.read_text(encoding="utf-8")
     lines = sm.parse_listing(text)
-    assert {n: line.expect for n, line in lines.items() if line.expect} == {"euler_e": "present", "calculus": "refused"}
+    assert {n: line.expect for n, line in lines.items() if line.expect} == {
+        "agriculture": "present", "condensed_matter": "present", "calculus": "refused"}
     rows = text.splitlines()
     for line in lines.values():
         before = rows[line.line - 2]
