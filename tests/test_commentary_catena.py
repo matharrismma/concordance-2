@@ -15,6 +15,7 @@ import json
 import shutil
 import sys
 from pathlib import Path
+from urllib.parse import parse_qs, urlencode
 
 import pytest
 
@@ -24,6 +25,9 @@ sys.path.insert(0, str(ROOT / "src"))
 from concordance import builds, commentary, mcp  # noqa: E402
 from concordance.config import EngineConfig  # noqa: E402
 from concordance.web.api import dispatch  # noqa: E402
+
+sys.path.insert(0, str(ROOT))                 # so `from tools import live_assay` resolves (as test_live_assay does)
+from tools import live_assay  # noqa: E402
 
 FIX = ROOT / "tests" / "fixtures" / "catena_aurea"
 BASE = json.loads((FIX / "henry_at_base.json").read_text(encoding="utf-8"))
@@ -241,3 +245,40 @@ def test_mark_9_1_and_the_seven_chapters_read_none(shelf):
         assert (r["status"], r["commentary"]) == ("none", []), (gospel, chapter)
     r = _catena("Mark 9:1")
     assert (r["status"], r["commentary"]) == ("none", []) and "Mark 9:1" in r["detail"]
+
+
+# ------------------------------------------------------------------------------------------------ step probe
+
+OLD_SOURCES_PROBE = "commentary.sources.matthew.1.1.names.the.catena.beside.henry"
+SOURCES_PROBES = {
+    "commentary.sources.john.3.16.names.the.catena.beside.henry": {
+        "path": "/commentary", "query": {"ref": "John 3:16", "sources": "1"},
+        "expect": [{"at": "covering[*]", "has": "matthew-henry"}, {"at": "covering[*]", "has": CATENA}]},
+    "commentary.sources.matthew.1.1.names.the.catena": {
+        "path": "/commentary", "query": {"ref": "Matthew 1:1", "sources": "1"},
+        "expect": [{"at": "covering[*]", "has": CATENA}]},
+}
+
+
+def test_sources_probes_pass_the_live_assay_on_the_fixture_shelf(shelf):
+    """The two sources=1 probes as eval/live_probes.jsonl holds them, judged only by tools/live_assay.py's own
+    evaluate (its resolve, its check, the probe's expected status) on the answer the server's dispatch gives for the
+    probe's own request on the fixture shelf, where Henry and the Catena both cover John 3:16 and the Catena covers
+    Matthew 1:1. Written at 'covering', the same probe fails there: resolve gives one value, the whole list, so 'has'
+    never holds (live_assay.py:54-73, 99-100); at 'covering[*]' it gives each source."""
+    probes = {p["id"]: p for p in live_assay.load_probes(ROOT / "eval" / "live_probes.jsonl")}
+    assert OLD_SOURCES_PROBE not in probes
+    for pid, request in SOURCES_PROBES.items():
+        p = probes.get(pid)
+        assert p == dict(request, id=pid), pid        # exactly this request and these expectations, default face
+        # the request as the assay sends it (live_assay.fetch: the probe's face, its method, its query urlencoded)
+        # and as the server's handler reads it (parse_qs, each first value); the answer as JSON on the wire
+        face = p.get("face") or "secular"
+        query = {k: v[0] for k, v in parse_qs(urlencode(p["query"])).items()}
+        status, answer = dispatch(p.get("method") or "GET", p["path"], query, None, EngineConfig(face))
+        answer = json.loads(json.dumps(answer, ensure_ascii=False))
+        assert live_assay.evaluate(p, answer, status) == (True, []), pid
+        # the same probe written in the old form, at 'covering': every expectation fails
+        old = dict(p, expect=[dict(spec, at="covering") for spec in p["expect"]])
+        ok, fails = live_assay.evaluate(old, answer, status)
+        assert not ok and len(fails) == len(old["expect"]), (pid, fails)
