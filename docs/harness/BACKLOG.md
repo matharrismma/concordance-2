@@ -376,3 +376,14 @@ every pointer.
 > No gated path removes an entry from the box's catalog (the box's data/sticks/<name>.json): an
 > ordinary deploy only sends files. A gated path that removes one is a want, so that a revert of a
 > seal shape can follow a retract. Named in the plan of run 2026-11-13-ai-era-marks, line 8.
+
+## sun-position-mode-in-ephemeris
+- status: open
+- scope: concordance-2
+- source: ORIGIN 2026-11-14 lead
+> A sun position mode in ephemeris.EPH_VERIFY: the Sun's altitude and azimuth for a moment and place by
+> NOAA's equations, pinned to a published worked example, so a sun position can be sealed and checked
+> against NOAA. EPH_VERIFY checks orbital periods, Julian days, moon phases, equinox and solstice dates,
+> and sunrise and sunset hours (src/concordance/verifiers/ephemeris.py:389-396), and computes the Sun's
+> declination only inside sunrise, so the sky stream's noon height is sealed as arithmetic on the mean
+> obliquity instead. Named in the plan of run 2026-11-14-sky-stream, line 9.

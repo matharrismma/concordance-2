@@ -1,0 +1,160 @@
+{
+ "schema": 1,
+ "name": "sky_data_stream",
+ "aliases": [
+  "sky_data_stream",
+  "sky_stream"
+ ],
+ "doc": "THE SKY AS A DATA STREAM, run 2026-11-14-sky-stream. Star and Sun positions are a public stream of data anyone can recompute. Nine seals the engine re-derives through its mathematics verifier's numeric check, each arithmetic on constants a named source states: the aberration of starlight; the precession of the equinoxes per degree and per turn at the J2000.0 rate; the cosmic microwave background's dipole; the period and the wavelength of hydrogen's 21 cm line; the bits to name one Gaia DR3 source; the noon Sun's height at New York at the 2024 June solstice, and that height read backwards to a latitude. An instance mark on each seal, and two notes: what the stream carries, and why its digits belong to their units. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "aberration",
+   "nid": "sky_aberration",
+   "expr": "2*pi*149597870700/(299792458*365.256363004*86400*sqrt(1 - 0.0167086**2))*180/pi*3600",
+   "value": 20.4955137424811,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "precession_per_degree",
+   "nid": "sky_precession_per_degree",
+   "expr": "3600/(5028.796195/100)",
+   "value": 71.58770927283523,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "precession_turn",
+   "nid": "sky_precession_turn",
+   "expr": "1296000/(5028.796195/100)",
+   "value": 25771.575338220682,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "cmb_dipole",
+   "nid": "sky_cmb_dipole",
+   "expr": "2.72548*369.82/299792.458*1000",
+   "value": 3.3621159795821147,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "hydrogen_period",
+   "nid": "sky_hydrogen_period",
+   "expr": "1e9/1420405751.768",
+   "value": 0.7040241837624814,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "hydrogen_wavelength",
+   "nid": "sky_hydrogen_wavelength",
+   "expr": "299792458/1420405751.768*100",
+   "value": 21.106114054159804,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "gaia_bits",
+   "nid": "sky_gaia_bits",
+   "expr": "log(1811709771)/log(2)",
+   "value": 30.75470471363351,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "noon_height",
+   "nid": "sky_noon_height",
+   "expr": "90 - 40.7128 + (84381.406 - 46.836769*((2460482.36875 - 2451545)/36525) - 0.0001831*((2460482.36875 - 2451545)/36525)**2 + 0.00200340*((2460482.36875 - 2451545)/36525)**3)/3600",
+   "value": 72.72329595669648,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "noon_sight",
+   "nid": "sky_noon_sight",
+   "expr": "90 - 72.72 + (84381.406 - 46.836769*((2460482.36875 - 2451545)/36525) - 0.0001831*((2460482.36875 - 2451545)/36525)**2 + 0.00200340*((2460482.36875 - 2451545)/36525)**3)/3600",
+   "value": 40.71609595669648,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The sky as a data stream",
+   "statement": "Star and sun positions are a public stream of data anyone can recompute; what does it carry, and what can be read back from it?",
+   "field": "ephemeris",
+   "references": [
+    "J. Bradley, A letter to Dr. Edmond Halley giving an account of a new discovered motion of the fix'd stars, Phil. Trans. R. Soc. 35, no. 406, 637-661 (1728, the year Crossref gives), doi:10.1098/rstl.1727.0064; read at archive.org, philosophicaltra3517roya",
+    "G. B. Airy, On a supposed alteration in the amount of astronomical aberration of light, produced by the passage of the light through a considerable thickness of refracting medium, Proc. R. Soc. 20, 35-39 (1872, Crossref), doi:10.1098/rspl.1871.0011; read at archive.org, proceedingso20187172roya",
+    "IAU 2012 Resolution B2: the astronomical unit is 'a conventional unit of length equal to 149 597 870 700 m exactly' (iau.org's IAU2012_English.pdf, read at web.archive.org's copy); c = 299 792 458 m/s, a defining constant of the SI (BIPM, The International System of Units, 9th edition, 2019)",
+    "Wikipedia, Earth (infobox, epoch J2000): eccentricity 0.0167086, sidereal period 365.256363004 d; Wikipedia, Aberration (astronomy): constant of aberration 20.49552 arcsec at J2000; Wikipedia, Astronomical constant: kappa 20.49552 arcsec, a day of 86400 s. No source read states the seal's formula.",
+    "N. Capitaine, P. T. Wallace, J. Chapront, Expressions for IAU 2000 precession quantities, A&A 412, 567-586 (2003), doi:10.1051/0004-6361:20031539, P03, adopted by the IAU in 2006; read through ERFA's copy (github.com/liberfa/erfa): src/p06e.c, obl06.c and erfam.h, and apci13.c for note A",
+    "Ptolemy, Almagest VII.2, on Hipparchus and the precession, in G. J. Toomer's translation (1998), p. 328, as quoted on Wikipedia's Axial precession page, which also gives the rate accepted today as 'about 50\" per year or 1° in 72 years'",
+    "D. J. Fixsen, The Temperature of the Cosmic Microwave Background, ApJ 707, 916-920 (2009), arXiv:0911.1955; Planck Collaboration, Planck 2018 results. I. Overview and the cosmological legacy of Planck, A&A 641, A1 (2020), arXiv:1807.06205, read at ar5iv: Sect. 2.1, Tables 2 and 3",
+    "H. Hellwig, R. F. C. Vessot, M. W. Levine, P. W. Zitzewitz, D. W. Allan, D. J. Glaze, Measurement of the Unperturbed Hydrogen Hyperfine Transition Frequency, IEEE Trans. Instrum. Meas. IM-19 (4), 200-209 (1970), doi:10.1109/TIM.1970.4313902; read at NIST's copy, tf.nist.gov/general/pdf/13.pdf",
+    "Wikipedia, Pioneer plaque: the hydrogen transition's period, 0.704 ns, and wavelength, 21.106 cm, as the plaque's units of time and length, and its 14 pulsars' periods in that unit; NASA, Pioneer 10 (www.nasa.gov/missions/pioneer/pioneer-10/, served at science.nasa.gov/mission/pioneer-10/)",
+    "Gaia Collaboration, A. Vallenari et al., Gaia Data Release 3: Summary of the content and survey properties, A&A 674, A1 (2023), doi:10.1051/0004-6361/202243940; ESA, Gaia DR3 (cosmos.esa.int/web/gaia/dr3): 1,811,709,771 sources; the Gaia DR3 documentation, the gaia_source datamodel: source_id",
+    "USNO, Earth's seasons for 2024 (aa.usno.navy.mil/api/seasons?year=2024): the June solstice at 2024-06-20 20:51 UT; JPL Horizons (ssd.jpl.nasa.gov/api/horizons.api): the Sun (10), geocentric and from 40.7128 N, 74.006 W at sea level, on 2024-06-20, read 2026-11-14",
+    "The NANOGrav Collaboration, G. Agazie et al., The NANOGrav 15 yr Data Set: Evidence for a Gravitational-wave Background, ApJL 951, L8 (2023), doi:10.3847/2041-8213/acdac6, arXiv:2306.16213, read at arXiv and ar5iv"
+   ],
+   "by": "Narrow Highway - the sky as a data stream, 2026-11-14",
+   "marks": [
+    {
+     "kind": "instance",
+     "claim": "[the aberration of starlight, SEALED] The seal computes 2*pi*a/(c*P*sqrt(1 - e^2)) in arcseconds and finds 20.4955137 arcseconds (sealed). Its constants: a is taken as 1 au, 149 597 870 700 m, which IAU 2012 Resolution B2 makes 'a conventional unit of length', a defined unit and not Earth's semi-major axis; c = 299 792 458 m/s, a defining constant of the SI; P = 365.256363004 days of 86400 s, Earth's sidereal orbital period, and e = 0.0167086, its orbital eccentricity, both at epoch J2000 on Wikipedia's Earth page. That formula is the expression the seal computes, not a definition of the constant: no source read states it as one. Against it stands the IAU's constant of aberration: 'Its accepted value is 20.49552 arcseconds ... (at J2000)' (Wikipedia, Aberration (astronomy)), and Wikipedia's Astronomical constant page lists kappa at 20.49552 arcseconds at standard epoch 2000, citing the IAU's 1976 Resolution No. 1. The sealed 20.4955 sits 0.0000063 arcseconds below it. Bradley's letter to Halley (Phil. Trans. 35, 1728) conjectured that what he had observed in gamma Draconis and other stars 'proceeded from the progressive Motion of Light and the Earth's annual Motion in its Orbit' (the copy's long s modernised). Airy (Proc. R. Soc. Lond. 20, 1872) filled the whole tube of a vertical telescope with water and observed gamma Draconis, 'the same star by which the existence and laws of Aberration were first established'; his two mean latitudes, from the star's largest positive and largest negative aberration, 'agree within a fraction of a second', and he concluded 'that the hypothesis of Professor Klinkerfues is untenable', the hypothesis that the water would increase the aberration.",
+     "seal": "aberration"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the precession of the equinoxes, years per degree, SEALED] The seal computes 3600/(5028.796195/100), the 3600 arcseconds of a degree over the precession in arcseconds per Julian year, and finds 71.5877 years per degree (sealed). 5028.796195 arcseconds per Julian century is the linear term of the IAU 2006 (P03) general precession in longitude, p_A = 5028.796195 t + 1.1054348 t^2 + 0.00007964 t^3 - ... arcseconds, t in Julian centuries of TT from J2000.0 (Capitaine, Wallace and Chapront 2003, A&A 412, 567, read in ERFA's p06e.c). So it is the rate at J2000.0, and the rate grows, by the 1.1054348 t^2 term first: 71.588 years per degree holds at the J2000.0 rate, not at every epoch. Hipparchus, as Ptolemy reports him (Ptolemy, Almagest VII.2, in Toomer's translation, p. 328, as quoted on Wikipedia's Axial precession page): Ptolemy finds the fixed stars moving about one degree in a hundred years relative to the solstices and equinoxes, as 'Hipparchus too seems to have suspected', and he cites Hipparchus's own reckoning that if the solstices and equinoxes moved against the order of the signs by no less than a hundredth of a degree a year, they would have moved no less than three degrees over 300 years.",
+     "seal": "precession_per_degree"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the precession of the equinoxes, years per turn, SEALED] The seal computes 1296000/(5028.796195/100), the 1,296,000 arcseconds of a full turn over the precession in arcseconds per Julian year, and finds 25,771.575 years (sealed). The rate is the linear term of the IAU 2006 (P03) general precession, p_A = 5028.796195 t + 1.1054348 t^2 + ... arcseconds, t in Julian centuries of TT from J2000.0 (Capitaine, Wallace and Chapront 2003, read in ERFA's p06e.c): the rate at J2000.0, which grows, so 25,771.6 years is the turn at the J2000.0 rate and not a fixed period. Hipparchus's rate, as Ptolemy reports it in Almagest VII.2, was about 1 degree in 100 years: in the words of Wikipedia's Axial precession page, 'Hence, 1° per century or one full cycle in 36,000 years, that is, the precessional period of Hipparchus as reported by Ptolemy; cf. page 328 in Toomer's translation of Almagest, 1998 edition'.",
+     "seal": "precession_turn"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the cosmic microwave background's dipole, SEALED] The seal computes T0*v/c in millikelvin, 2.72548*369.82/299792.458*1000, and finds 3.3621160 mK (sealed). Its constants: T0 = 2.72548 K, the 'cosmic microwave background temperature of 2.72548 +/- 0.00057 K' (Fixsen 2009, ApJ 707, 916); v = 369.82 km/s, the Sun's speed against the CMB (Planck 2018 results I, A&A 641, A1, Table 3); and c = 299 792.458 km/s (the SI). Planck measured the Solar dipole's amplitude at 3362.08 +/- 0.99 microkelvin, towards galactic l = 264.021, b = 48.253 degrees (Planck 2018 results I, Table 2): the sealed 3362.116 microkelvin lies 0.04 microkelvin from it, inside the 0.99. Planck's speed is that arithmetic run backwards: 'The dipole amplitude corresponds to beta = v/c = (1.23357 +/- 0.00036) x 10^-3 or v = (369.82 +/- 0.11) km s^-1' (Sect. 2.1).",
+     "seal": "cmb_dipole"
+    },
+    {
+     "kind": "instance",
+     "claim": "[hydrogen's 21 cm line, its period, SEALED] The seal computes 1e9/f in nanoseconds, with f = 1 420 405 751.768 Hz, the unperturbed hydrogen hyperfine transition frequency (Hellwig, Vessot, Levine, Zitzewitz, Allan and Glaze, IEEE Trans. Instrum. Meas. IM-19, 200, 1970, read at NIST's copy), and finds 0.70402418 ns (sealed). The plaques Pioneer 10 and 11 carried use this period as their unit of time, as Wikipedia's Pioneer plaque page states: the spin-flip transition of a hydrogen atom's electron 'has a frequency of about 1420.405 MHz, which corresponds to a period of 0.704 ns', and the small vertical line below it 'specifies a unit of length (21 cm) as well as a unit of time (0.7 ns). Both units are used as measurements in the other symbols'. Its fourteen pulsar lines carry 'long binary numbers, which stand for the periods of pulsars, using the hydrogen spin-flip transition frequency as the unit'.",
+     "seal": "hydrogen_period"
+    },
+    {
+     "kind": "instance",
+     "claim": "[hydrogen's 21 cm line, its wavelength, SEALED] The seal computes c/f in centimetres, 299792458/1420405751.768*100, with c = 299 792 458 m/s (the SI) and f = 1 420 405 751.768 Hz (Hellwig et al. 1970), and finds 21.10611405 cm (sealed), the 21.106114054160(30) cm Wikipedia's Hydrogen line page gives. The plaques Pioneer 10 and 11 carried use it as their unit of length, as Wikipedia's Pioneer plaque page states: 'Light at this frequency has a vacuum wavelength of 21.106 centimetres', the small vertical line 'specifies a unit of length (21 cm)', and the binary 8 between the brackets that give the woman's height means, 'In units of the wavelength of the hyperfine transition of hydrogen', '8 × 21 cm = 1.68 meters'.",
+     "seal": "hydrogen_wavelength"
+    },
+    {
+     "kind": "instance",
+     "claim": "[naming one source of Gaia DR3, SEALED] The seal computes log2 of Gaia DR3's source count, log(1811709771)/log(2), with 1,811,709,771 the 'Total number of sources' on ESA's Gaia DR3 page, and finds 30.7547 bits (sealed): the information it takes to name one source among them. An index of fixed length needs a whole number of bits, so 31, since 2^30 = 1,073,741,824 is fewer than the sources and 2^31 = 2,147,483,648 more. Gaia's own name for a source is longer: 'The source ID consists of a 64-bit integer', whose bits 36 to 63 hold a HEALPix index, so that 'HEALPix index at level 12 = source_id / 34359738368' gives its sky pixel, 34,359,738,368 being 2^35 (the Gaia DR3 documentation, gaia_source).",
+     "seal": "gaia_bits"
+    },
+    {
+     "kind": "instance",
+     "claim": "[the noon Sun's height at New York at the 2024 June solstice, SEALED] The seal computes 90 - latitude + the mean obliquity, 90 - 40.7128 + EPS, with 40.7128 the ephemeris stick's own sun_nyc latitude and EPS = (84381.406 - 46.836769 T - 0.0001831 T^2 + 0.00200340 T^3)/3600 degrees, the IAU 2006 mean obliquity of the ecliptic as ERFA's obl06.c computes it, the obliquity its p06e.c returns among the P03 angles of Capitaine, Wallace and Chapront 2003, its polynomial taken to T^3 (the T^4 and T^5 terms are left out) and T = (2460482.36875 - 2451545)/36525 Julian centuries from J2000, reckoned from the UT moment of the solstice, 2024-06-20 20:51 UT (USNO), not from TT. It finds 72.7232960 degrees (sealed). The mean obliquity, 23.43610 degrees here, stands in for the Sun's declination at the solstice. JPL Horizons, for the Sun from 40.7128 N, 74.006 W at sea level on 2024-06-20, read at one-second steps, has the Sun's centre highest at 16:57:47 UT, as its azimuth crosses 180 degrees: New York's noon. There it stands at 72.72463 degrees airless, about 4.8 arcseconds above the sealed 72.7233, and at 72.72991 degrees refracted. What the sealed arithmetic leaves out, with its size from Horizons: the Sun's apparent declination, 23.438226 degrees at the solstice moment, about 7.7 arcseconds above the mean obliquity; the hours between New York's noon and the solstice moment, by which the declination at noon is about 0.3 arcseconds lower; parallax, which lowers it about 2.5 arcseconds more as seen from New York; and refraction, which lifts the Sun about 19 arcseconds at that height. A real noon sight corrects for each.",
+     "seal": "noon_height"
+    },
+    {
+     "kind": "instance",
+     "claim": "[that sky read backwards: a latitude from the noon height, SEALED] The seal computes latitude = 90 - noon height + the mean obliquity, 90 - 72.72 + EPS, with the same EPS as noon_height (the IAU 2006 mean obliquity, ERFA's obl06.c, its polynomial taken to T^3 and T reckoned from the UT moment of the solstice, 2024-06-20 20:51 UT, USNO), and finds 40.7160960 degrees (sealed). 72.72 is noon_height's sealed 72.7233 rounded to two decimals: a worked example, not an observation. Both seals add the same EPS, so its 0.0033 degree from 40.7128 is that rounding alone: about 0.37 km, a degree of latitude taken as a 360th of the 40,007.863 km meridional circumference Wikipedia's Earth page gives. JPL Horizons, for the Sun from 40.7128 N, 74.006 W at sea level on 2024-06-20, read at one-second steps, has the Sun's centre highest at 16:57:47 UT, as its azimuth crosses 180 degrees: New York's noon. There it stands at 72.72463 degrees airless, about 4.8 arcseconds above the sealed 72.7233, and at 72.72991 degrees refracted. What this arithmetic leaves out, with its size from Horizons: refraction, about 19 arcseconds at that height; the Sun's apparent declination, about 7.7 arcseconds above the mean obliquity at the solstice moment; the hours between New York's noon and the solstice moment, about 0.3 arcseconds of declination; and parallax, about 2.5 arcseconds. A real noon sight corrects for each before it is read back to a latitude.",
+     "seal": "noon_sight"
+    },
+    {
+     "kind": "note",
+     "claim": "[what the stream carries] The position a star or the Sun is seen at, at a given time and place, is computed from stored values and that time and place: a catalogue for a star (Gaia's, for one, whose third release holds 1,811,709,771 sources) and an ephemeris for the Sun. A star's apparent place needs Earth's own ephemeris too, its position and velocity, for parallax and aberration: in ERFA's eraApci13, for a terrestrial observer, 'ERFA models are used to predict the Earth ephemeris', and the parameters it prepares 'are required in the parallax, light deflection, aberration, and bias-precession-nutation parts of the astrometric transformation chain'. So anyone can recompute the position from the stored values and the time and place, and no one can write to the sky. Read backwards, a measured position gives back time and place: the noon sight's arithmetic turns a noon height back into a latitude, as its mark says; of the Pioneer plaque's pulsars, NASA writes that 'The expectation is that intelligent beings would be able to interpret the diagram to determine the position of the Sun ... at the time of launch relative to the pulsars' (NASA, Pioneer 10), and 'Since these periods will change over time, the epoch of the launch can be calculated from these values' (Wikipedia, Pioneer plaque). Pulsars are clocks: the NANOGrav 15-year report says that 'pulsars are such accurate clocks', and it is titled 'The NANOGrav 15 yr Data Set: Evidence for a Gravitational-wave Background' (ApJL 951, L8, 2023; arXiv:2306.16213), reporting 'multiple lines of evidence for a stochastic signal that is correlated among 67 pulsars'. The keeping files each seal by a content hash, an address computed from the data itself, while a star catalogue files a source by its position: a Gaia DR3 source_id holds its level-12 HEALPix index, its sky pixel, in its most significant bits."
+    },
+    {
+     "kind": "note",
+     "claim": "[the digits belong to the units] Precession is given as one degree in 72 years: Wikipedia's Axial precession page gives 'the rate accepted today' as 'about 50\" per year or 1° in 72 years'. The sealed figure is 71.588 years per degree at the J2000.0 rate. 369.82 km/s, the Sun's speed against the cosmic microwave background (Planck 2018 results I), begins with 369 only in kilometres per second. In other units the same turn is 25,771.6 years at the J2000.0 rate, and the same speed is 1,331,352 km/h. The keeping seals the arithmetic and reads no meaning into digits."
+    }
+   ]
+  }
+ ]
+}
