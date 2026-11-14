@@ -17,7 +17,9 @@ A DATA entry:
      "seals": [                                   # minted first, in order; each must HOLD or the run aborts (rc 1)
        {"key": "basel_zeta_2", "nid": "basel_zeta_2", "expr": "3.141592653589793**2 / 6",
         "value": 1.6449340668482264, "tol": 1e-12, "domain": "mathematics"},          # a numeric derivation
-       {"key": "compound", "domain": "economics", "artifact": "ECON_VERIFY", "spec": {...}}  # a domain verifier
+       {"key": "compound", "domain": "economics", "artifact": "ECON_VERIFY", "spec": {...}}, # a domain verifier
+       {"key": "det", "domain": "mathematics", "mode": "equality",                          # a math-mode claim
+        "params": {"expr_a": "-2", "expr_b": "...", "variables": ["x", "y", "z"]}}
      ],
      "sticks": [                                  # then each stick: create (idempotent), mint its marks in order
        {"question": "The zeta function", "statement": "...", "field": "meta", "references": ["..."],
@@ -34,6 +36,13 @@ A HANDLER entry:
      "params": [{"type": "float", "default": 100.0}], "why_python": "calls verify_derivation itself (1x)"}
 
 `handler` names a function in tools/tick.py; `params` are the CLI arguments main() parses for it, in order.
+
+THREE SEAL SHAPES, never mixed in one seal (validate_entry refuses expr with mode and artifact with mode): a
+numeric derivation (nid, expr, value, tol: the mathematics router's numeric mode); a domain verifier (artifact and
+spec); and a math-mode claim (run 2026-11-13-ai-era-marks), {key, domain: "mathematics", mode, params}, whose mode is
+a key of the mathematics router's own table, derivation._MATH_MODES (read from the router, never a second list), and
+whose params are a JSON object, minted exactly as the numeric shape is: verify_derivation([{id: key, domain:
+"mathematics", spec: {mode, params}}]) then receipts.attach.
 
 The seal path is exactly the verify door's (verify_derivation -> receipts.attach -> CAS + ledger), so every
 seal is a real, re-checkable entry in this node's keeping; a mark is minted through `mint_marks`, idempotent
@@ -118,7 +127,15 @@ def validate_entry(entry: Dict[str, Any], where: str = "entry") -> None:
         _require(s["key"] not in keys, w, f"seal key {s['key']!r} is repeated")
         keys.add(s["key"])
         _require(isinstance(s.get("domain"), str) and s["domain"], w, "needs a domain")
-        if "expr" in s:
+        if "mode" in s:
+            _require("expr" not in s and "artifact" not in s, w,
+                     "a math-mode seal carries no expr and no artifact: the shapes never mix")
+            _require(s["domain"] == "mathematics", w, "a math-mode seal's domain is mathematics")
+            from .derivation import _MATH_MODES                  # the router's own table, never a second list
+            _require(isinstance(s["mode"], str) and s["mode"] in _MATH_MODES, w,
+                     f"mode must be one of the mathematics router's modes {sorted(_MATH_MODES)}")
+            _require(isinstance(s.get("params"), dict), w, "params must be a JSON object")
+        elif "expr" in s:
             _require(isinstance(s.get("nid"), str) and s["nid"], w, "a numeric seal needs nid")
             _require(isinstance(s["expr"], str) and s["expr"], w, "expr must be a string")
             _require(isinstance(s.get("value"), (int, float)) and not isinstance(s["value"], bool), w,
@@ -204,8 +221,23 @@ def seal_verifier(domain: str, artifact_key: str, spec: Dict[str, Any]) -> Optio
     return (res.get("seal") or {}).get("content_hash")
 
 
+def seal_math_mode(key: str, mode: str, params: Dict[str, Any]) -> Optional[str]:
+    """Verify a claim through the mathematics router's {mode, params} and return its seal: the numeric shape's path,
+    verify_derivation on one step whose id is the seal's key, then receipts.attach."""
+    from . import receipts
+    from .derivation import verify_derivation
+    from .engine import EngineConfig
+    r = verify_derivation([{"id": key, "domain": "mathematics", "spec": {"mode": mode, "params": params}}])
+    if r.get("verdict") != "HOLDS":
+        print("  %s did not verify: %s" % (key, json.dumps(r)[:300])); return None
+    r = receipts.attach(r, config=EngineConfig(), domain="mathematics")
+    return (r.get("seal") or {}).get("content_hash")
+
+
 def seal(s: Dict[str, Any]) -> Optional[str]:
     """One catalog seal -> its content hash (None when it did not HOLD)."""
+    if "mode" in s:
+        return seal_math_mode(s["key"], s["mode"], s["params"])
     if "expr" in s:
         return seal_numeric(s["nid"], s["expr"], s["value"], s.get("domain", "mathematics"), s.get("tol", 1e-9))
     return seal_verifier(s["domain"], s["artifact"], s["spec"])

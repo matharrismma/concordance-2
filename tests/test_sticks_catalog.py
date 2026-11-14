@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -134,3 +135,102 @@ def test_a_data_entry_mints_byte_identical_to_the_function_it_replaced(name):
     want = json.loads((GOLDEN / f"{name}.json").read_text(encoding="utf-8"))
     got = G.run_entry(name, lambda: T.run_entry(entry))
     assert G._diff(name, want, got) == []
+
+
+# ── the math-mode seal shape (run 2026-11-13-ai-era-marks, step mode) ─────────────────────────────
+def _mode_seal(key="square", mode="equality", params=None, **over):
+    s = {"key": key, "domain": "mathematics", "mode": mode,
+         "params": {"expr_a": "(x + 1)**2", "expr_b": "x**2 + 2*x + 1", "variables": ["x"]} if params is None else params}
+    s.update(over)
+    return s
+
+
+def _mode_entry(seal=None, name="probe_mode", question="A math-mode probe question"):
+    return {"schema": 1, "name": name, "aliases": [name], "seals": [seal or _mode_seal()],
+            "sticks": [{"question": question, "by": "tests",
+                        "marks": [{"kind": "witness", "claim": "[probe] (x + 1)^2 = x^2 + 2x + 1 (sealed)",
+                                   "seal": (seal or _mode_seal())["key"]}]}]}
+
+
+def _isolated(monkeypatch, keeping: Path) -> None:
+    """A fresh keeping on the cold seal path, as tools/tick_golden.py runs an entry, its cold caches empty."""
+    from concordance import cas, science_cards
+    for k in [k for k in os.environ if k.upper().startswith("CONCORDANCE_")]:
+        monkeypatch.delenv(k)
+    monkeypatch.setenv("CONCORDANCE_DATA_DIR", str(keeping))
+    monkeypatch.setenv("CONCORDANCE_SEAL_INDEX", "0")
+    monkeypatch.setattr(cas, "_COLD_CARDS_WRITTEN", set())
+    monkeypatch.setattr(cas, "_COLD_SPINE_WRITTEN", False)
+    monkeypatch.setattr(science_cards, "_MINTED", None)
+
+
+def _files(folder: Path) -> dict:
+    return {p.relative_to(folder).as_posix(): p.read_bytes() for p in sorted(folder.rglob("*")) if p.is_file()} \
+        if folder.exists() else {}
+
+
+def test_a_math_mode_seal_mints_its_seal_and_mark_and_a_second_run_adds_nothing(tmp_path, monkeypatch):
+    from concordance import cas, ledger, receipts, tickstick
+    from concordance.derivation import verify_derivation
+    keeping = tmp_path / "keeping"
+    _isolated(monkeypatch, keeping)
+    entry = _mode_entry()
+    sticks.validate_entry(entry)
+    assert sticks.run(entry) == 0
+    # the numeric shape's seal path: verify_derivation on {id: key, domain: mathematics, spec: {mode, params}}, then
+    # receipts.attach, whose CAS object is the record of that derivation
+    r = verify_derivation([{"id": "square", "domain": "mathematics", "spec": {
+        "mode": "equality", "params": {"expr_a": "(x + 1)**2", "expr_b": "x**2 + 2*x + 1", "variables": ["x"]}}}])
+    assert r["verdict"] == "HOLDS"
+    h = cas.content_hash_of(receipts.record_from_derivation(r, domain="mathematics").to_dict())
+    assert cas.list_hashes(base_dir=keeping / "cas") == [h]
+    assert cas.verify(h, base_dir=keeping / "cas") == (True, "ok")
+    record = json.loads((keeping / "ledger" / f"mathematics-{h[:16]}.json").read_text(encoding="utf-8"))
+    assert record["record_hash"] == h
+    st = tickstick.fold(keeping)["stick_a_math_mode_probe_question"]
+    assert [(t["kind"], t["seal"], t["claim"]) for t in st["ticks"]] == [
+        ("witness", h, "[probe] (x + 1)^2 = x^2 + 2x + 1 (sealed)")]
+    assert ledger.verify_chain(keeping / "ledger", cas_base=keeping / "cas")["ok"]
+    before = _files(keeping)
+    assert sticks.run(entry) == 0                              # a second run adds nothing
+    assert _files(keeping) == before
+
+
+def test_a_math_mode_seal_whose_claim_is_false_makes_the_run_return_1_and_write_nothing(tmp_path, monkeypatch):
+    from concordance import cas, tickstick
+    keeping = tmp_path / "keeping"
+    _isolated(monkeypatch, keeping)
+    false = _mode_entry(_mode_seal(params={"expr_a": "(x + 1)**2", "expr_b": "x**2 + 2*x + 2", "variables": ["x"]}))
+    sticks.validate_entry(false)                               # the shape is sound; the claim is false
+    assert len(false["seals"]) == 1
+    assert sticks.run(false) == 1
+    assert tickstick.fold() == {}                              # nothing opened, nothing marked
+    assert cas.list_hashes() == [] and _files(keeping) == {}   # no CAS object, nothing written at all
+
+
+@pytest.mark.parametrize("seal,why", [
+    (_mode_seal(mode="equalty"), "mode must be one of the mathematics router's modes"),
+    (_mode_seal(mode="Equality"), "mode must be one of the mathematics router's modes"),
+    (_mode_seal(mode=3), "mode must be one of the mathematics router's modes"),
+    ({k: v for k, v in _mode_seal().items() if k != "params"}, "params must be a JSON object"),
+    (_mode_seal(params=["(x + 1)**2", "x**2 + 2*x + 1"]), "params must be a JSON object"),
+    (_mode_seal(params="(x + 1)**2 = x**2 + 2*x + 1"), "params must be a JSON object"),
+    ({**_mode_seal(), "params": None}, "params must be a JSON object"),
+    (_mode_seal(expr="(x + 1)**2", nid="square", value=1, tol=1e-9), "the shapes never mix"),
+    (_mode_seal(artifact="MATH_VERIFY", spec={"expr_a": "1", "expr_b": "1"}), "the shapes never mix"),
+    (_mode_seal(domain="physics"), "a math-mode seal's domain is mathematics"),
+])
+def test_validate_entry_refuses_an_unknown_mode_a_missing_or_non_object_params_and_each_mixed_shape(seal, why):
+    with pytest.raises(sticks.StickError, match=re.escape(why)):
+        sticks.validate_entry(_mode_entry(seal))
+
+
+def test_the_math_mode_seal_takes_its_modes_from_the_mathematics_routers_own_table(monkeypatch):
+    from concordance import derivation
+    for mode in derivation._MATH_MODES:                        # every mode the router serves, and no other
+        sticks.validate_entry(_mode_entry(_mode_seal(mode=mode)))
+    monkeypatch.setitem(derivation._MATH_MODES, "probe_only_mode", derivation._MATH_MODES["equality"])
+    sticks.validate_entry(_mode_entry(_mode_seal(mode="probe_only_mode")))      # read from the router itself
+    monkeypatch.delitem(derivation._MATH_MODES, "equality")
+    with pytest.raises(sticks.StickError, match="mode must be one of the mathematics router's modes"):
+        sticks.validate_entry(_mode_entry())
