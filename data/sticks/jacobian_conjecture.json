@@ -1,0 +1,97 @@
+{
+ "schema": 1,
+ "name": "jacobian_conjecture",
+ "aliases": [
+  "jacobian_conjecture",
+  "jacobian",
+  "keller"
+ ],
+ "doc": "THE JACOBIAN CONJECTURE (Keller 1939), run 2026-11-13-ai-era-marks. A counterexample in dimension three, as printed in Gao, arXiv:2608.00222v2, Section 3.4, Theorem 3.3: four seals the engine re-derives through its own mathematics verifier (the Jacobian determinant is -2; three distinct points share one image), two notes on what they settle and where the map comes from. New stick; idempotent.",
+ "seals": [
+  {
+   "key": "det",
+   "domain": "mathematics",
+   "mode": "equality",
+   "params": {
+    "expr_a": "-2",
+    "expr_b": "diff((1+x*y)**3*z + y**2*(1+x*y)*(4+3*x*y), x)*(diff(y + 3*x*(1+x*y)**2*z + 3*x*y**2*(4+3*x*y), y)*diff(2*x - 3*x**2*y - x**3*z, z) - diff(y + 3*x*(1+x*y)**2*z + 3*x*y**2*(4+3*x*y), z)*diff(2*x - 3*x**2*y - x**3*z, y)) - diff((1+x*y)**3*z + y**2*(1+x*y)*(4+3*x*y), y)*(diff(y + 3*x*(1+x*y)**2*z + 3*x*y**2*(4+3*x*y), x)*diff(2*x - 3*x**2*y - x**3*z, z) - diff(y + 3*x*(1+x*y)**2*z + 3*x*y**2*(4+3*x*y), z)*diff(2*x - 3*x**2*y - x**3*z, x)) + diff((1+x*y)**3*z + y**2*(1+x*y)*(4+3*x*y), z)*(diff(y + 3*x*(1+x*y)**2*z + 3*x*y**2*(4+3*x*y), x)*diff(2*x - 3*x**2*y - x**3*z, y) - diff(y + 3*x*(1+x*y)**2*z + 3*x*y**2*(4+3*x*y), y)*diff(2*x - 3*x**2*y - x**3*z, x))",
+    "variables": [
+     "x",
+     "y",
+     "z"
+    ]
+   }
+  },
+  {
+   "key": "p1",
+   "domain": "mathematics",
+   "mode": "equality",
+   "params": {
+    "expr_a": "((1+(0)*(0))**3*(-1/4) + (0)**2*(1+(0)*(0))*(4+3*(0)*(0)) - (-1/4))**2 + ((0) + 3*(0)*(1+(0)*(0))**2*(-1/4) + 3*(0)*(0)**2*(4+3*(0)*(0)) - (0))**2 + (2*(0) - 3*(0)**2*(0) - (0)**3*(-1/4) - (0))**2",
+    "expr_b": "0"
+   }
+  },
+  {
+   "key": "p2",
+   "domain": "mathematics",
+   "mode": "equality",
+   "params": {
+    "expr_a": "((1+(1)*(-3/2))**3*(13/2) + (-3/2)**2*(1+(1)*(-3/2))*(4+3*(1)*(-3/2)) - (-1/4))**2 + ((-3/2) + 3*(1)*(1+(1)*(-3/2))**2*(13/2) + 3*(1)*(-3/2)**2*(4+3*(1)*(-3/2)) - (0))**2 + (2*(1) - 3*(1)**2*(-3/2) - (1)**3*(13/2) - (0))**2",
+    "expr_b": "0"
+   }
+  },
+  {
+   "key": "p3",
+   "domain": "mathematics",
+   "mode": "equality",
+   "params": {
+    "expr_a": "((1+(-1)*(3/2))**3*(13/2) + (3/2)**2*(1+(-1)*(3/2))*(4+3*(-1)*(3/2)) - (-1/4))**2 + ((3/2) + 3*(-1)*(1+(-1)*(3/2))**2*(13/2) + 3*(-1)*(3/2)**2*(4+3*(-1)*(3/2)) - (0))**2 + (2*(-1) - 3*(-1)**2*(3/2) - (-1)**3*(13/2) - (0))**2",
+    "expr_b": "0"
+   }
+  }
+ ],
+ "sticks": [
+  {
+   "question": "The Jacobian conjecture",
+   "statement": "Keller's question (1939): for every n >= 2, must a polynomial map F: C^n -> C^n whose Jacobian determinant is a nonzero constant have a polynomial inverse?",
+   "field": "mathematics",
+   "references": [
+    "Ott-Heinrich Keller, Ganze Cremona-Transformationen, Monatshefte für Mathematik und Physik 47 (1939), 299-306, doi:10.1007/bf01695502",
+    "S. Gao, Counterexamples to the Jacobian conjecture in dimensions greater than two, arXiv:2608.00222v2 (v1 31 Jul 2026, v2 4 Nov 2026), Section 3.4, Theorem 3.3",
+    "L. Alpöge, announcement on X, https://x.com/__alpoge__/status/2079028340955197566 (dated July 19, 2026 by Gao)",
+    "T. Tao, A digestion of the Jacobian conjecture counterexample, What's new, 21 July 2026, https://terrytao.wordpress.com/2026/07/21/a-digestion-of-the-jacobian-conjecture-counterexample/"
+   ],
+   "by": "Narrow Highway - the Jacobian conjecture, 2026-11-13",
+   "marks": [
+    {
+     "kind": "witness",
+     "seal": "det",
+     "claim": "[the Jacobian determinant is the constant -2] F(x, y, z) = ((1+xy)^3 z + y^2 (1+xy)(4+3xy), y + 3x(1+xy)^2 z + 3xy^2 (4+3xy), 2x - 3x^2 y - x^3 z), as printed in S. Gao, Counterexamples to the Jacobian conjecture in dimensions greater than two, arXiv:2608.00222v2, Section 3.4 (Theorem 3.3). The engine took the nine partial derivatives of F's three components in x, y and z itself, expanded the 3x3 Jacobian determinant by cofactors along its first row, and found it equal to the constant -2 (sealed): the determinant never vanishes."
+    },
+    {
+     "kind": "witness",
+     "seal": "p1",
+     "claim": "[a point of the common fiber] F(0, 0, -1/4) = (-1/4, 0, 0): the engine put the point into F's three components and found the sum of the squared differences from (-1/4, 0, 0) to be exactly 0, in exact rational arithmetic (sealed)."
+    },
+    {
+     "kind": "witness",
+     "seal": "p2",
+     "claim": "[a point of the common fiber] F(1, -3/2, 13/2) = (-1/4, 0, 0): the engine put the point into F's three components and found the sum of the squared differences from (-1/4, 0, 0) to be exactly 0, in exact rational arithmetic (sealed)."
+    },
+    {
+     "kind": "witness",
+     "seal": "p3",
+     "claim": "[a point of the common fiber] F(-1, 3/2, 13/2) = (-1/4, 0, 0): the engine put the point into F's three components and found the sum of the squared differences from (-1/4, 0, 0) to be exactly 0, in exact rational arithmetic (sealed)."
+    },
+    {
+     "kind": "note",
+     "claim": "[what the four seals settle] The three points (0, 0, -1/4), (1, -3/2, 13/2) and (-1, 3/2, 13/2) are distinct, and F sends each of them to (-1/4, 0, 0), while F's Jacobian determinant is the constant -2 and never vanishes. A map that sends three points to one has no inverse, so F is a polynomial map of C^3 with a nonzero constant Jacobian determinant and no polynomial inverse: the Jacobian conjecture is false in dimension three. Adjoining identity coordinates carries such a map to every dimension n > 3: Gao embeds the counterexamples of Alpöge and Gallagher in C^n 'by adjoining identity coordinates', and his construction 'produces counterexamples in every dimension greater than two' (arXiv:2608.00222v2). Dimension two remains open: Gao writes that 'the two-dimensional case remains open', and Tao that 'The conjecture remains open in two dimensions'."
+    },
+    {
+     "kind": "note",
+     "claim": "[where the map comes from, and its review] The map is a found source, re-derived here and not authored here. L. Alpöge (on X, levent, @__alpoge__) announced it in a post at https://x.com/__alpoge__/status/2079028340955197566, which Gao dates July 19, 2026 and which is timestamped 2026-07-20 02:19 UTC. The post reads: 'hello there the jacobian conjecture is false thanx to my close friend akhil for asking about it and my other close friend fable for working during the world cup final', then gives the map, that it 'has jacobian determinant -2', and its three points. Terence Tao wrote on his blog, 21 July 2026 (A digestion of the Jacobian conjecture counterexample): 'It was recently shown (using the Fable AI) that the conjecture is false in three dimensions'. Gao's arXiv preprint (v1 31 Jul 2026, v2 4 Nov 2026) writes that 'the conjecture was refuted in dimension three by an explicit counterexample announced by L. Alpöge' and prints the map as its Theorem 3.3. Review, as these sources state it: they are an announcement, a blog exposition and a preprint, and none of them reports a journal's peer review. What the engine stands behind is only its own re-derivation in the four seals."
+    }
+   ]
+  }
+ ]
+}

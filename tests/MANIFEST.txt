@@ -446,3 +446,4 @@ test_tool_dispatch_parity.py
 test_uptime.py
 test_stick_mint.py
 test_mint_ship.py
+test_jacobian_entry.py

@@ -359,3 +359,20 @@ every pointer.
 > so listing one in tools/stick_mints.txt would add a second, newly sealed copy of each sealed mark
 > beside the old. A decision for the owner before any such entry is listed. Named in the plan of run
 > 2026-11-13-stick-ship, line 33.
+
+## spine-card-named-whenever-a-mint-creates-an-object
+- status: open
+- scope: concordance-2
+- source: ORIGIN 2026-11-13 lead
+> tools/stick_mint.py's WOULD ADD names the receipt spine card only when data/receipt_cards.jsonl
+> lacks it, while the cold seal path writes it again in each process that creates an object, so a
+> mint that creates one adds a spine line WOULD ADD did not name; it should name it whenever the mint
+> will create an object. Named in the plan of run 2026-11-13-ai-era-marks, line 8.
+
+## remove-an-entry-from-the-box-catalog
+- status: open
+- scope: concordance-2
+- source: ORIGIN 2026-11-13 lead
+> No gated path removes an entry from the box's catalog (the box's data/sticks/<name>.json): an
+> ordinary deploy only sends files. A gated path that removes one is a want, so that a revert of a
+> seal shape can follow a retract. Named in the plan of run 2026-11-13-ai-era-marks, line 8.

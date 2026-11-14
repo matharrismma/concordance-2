@@ -1,0 +1,28 @@
+{
+ "schema": 1,
+ "name": "zeta_critical_line_proportion",
+ "aliases": [
+  "zeta_critical_line_proportion",
+  "critical_line_proportion"
+ ],
+ "doc": "AN AI-ERA CLAIM ON THE RIEMANN STICK, run 2026-11-13-ai-era-marks: a note, never a seal. Anthropic's report of a lower bound on the proportion of the zeta function's zeros on the critical line, kept in its own words and not re-derived here. The stick is the existing Riemann hypothesis stick, which create() finds and leaves as it is.",
+ "seals": [],
+ "sticks": [
+  {
+   "question": "Riemann hypothesis",
+   "statement": "Every non-trivial zero of the Riemann zeta function has real part 1/2.",
+   "field": "number_theory",
+   "references": [
+    "Riemann, Ueber die Anzahl der Primzahlen unter einer gegebenen Grösse (1859)",
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "by": "Narrow Highway - an AI-era claim on the Riemann stick, 2026-11-13",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[AI-era claim, NOT sealed, NOT peer-reviewed] Anthropic reported, in a post published Aug 10, 2026 and updated on August 13, 2026 (https://www.anthropic.com/research/riemann-zeta), that 'An unreleased research version of Claude has improved on a longstanding lower bound for the fraction of zeros of the Riemann zeta function that satisfy the Riemann hypothesis', 'from 41.6% to 67.2%': a lower bound on the proportion of the nontrivial zeros on the critical line. The report names a Lean formalization of the result, 'which passes the standard validation tool comparator', two mathematicians at Anthropic who 'studied and validated Claude’s paper', and Brian Conrey and Dan Goldston, 'who generously examined the paper on short notice'; it reports no journal or peer review. The engine has not re-derived this bound and seals nothing for it. A lower bound on that proportion, even one of one hundred percent, is not the Riemann hypothesis, which asks that every nontrivial zero lie on the line; the Riemann hypothesis remains open."
+    }
+   ]
+  }
+ ]
+}
