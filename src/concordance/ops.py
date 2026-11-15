@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, Optional
@@ -59,19 +60,31 @@ def substance(cards: Mapping[str, dict]) -> Dict[str, Any]:
     stubs = 0
     frozen = 0
     for c in cards.values():
-        if c.get("kind") == "connection":
-            continue
-        total += 1
-        # A FROZEN card's body lives on its SQLite shard; in memory it is deliberately stripped
-        # to a stub so the graph stays resident and the weight stays on disk. Measuring its
-        # in-memory body length would report a full card as a stub — which is exactly what the
-        # first deploy of this function did on the live box: 91% "stubs" against G1's measured
-        # 46%, because most shelves there are frozen. Our load strategy is not the keeping's
-        # substance. Frozen cards are counted as their own bucket, judged by nobody.
-        if c.get("frozen"):
-            frozen += 1
-        elif len(str(c.get("body") or "")) < STUB_BODY_CHARS:
-            stubs += 1
+        t, s, f = _share(c)
+        total += t
+        stubs += s
+        frozen += f
+    return _split(total, stubs, frozen)
+
+
+def _share(c: Mapping[str, Any]) -> tuple:
+    """ONE card's part of substance() — (total, stubs, frozen), each 0 or 1 — so the walk and a live add
+    (substance_note) count a card by the one definition."""
+    if c.get("kind") == "connection":
+        return (0, 0, 0)
+    # A FROZEN card's body lives on its SQLite shard; in memory it is deliberately stripped
+    # to a stub so the graph stays resident and the weight stays on disk. Measuring its
+    # in-memory body length would report a full card as a stub — which is exactly what the
+    # first deploy of this function did on the live box: 91% "stubs" against G1's measured
+    # 46%, because most shelves there are frozen. Our load strategy is not the keeping's
+    # substance. Frozen cards are counted as their own bucket, judged by nobody.
+    if c.get("frozen"):
+        return (1, 0, 1)
+    return (1, 1 if len(str(c.get("body") or "")) < STUB_BODY_CHARS else 0, 0)
+
+
+def _split(total: int, stubs: int, frozen: int) -> Dict[str, Any]:
+    """The two-number count from its three tallies, with its own definitions attached."""
     measured = total - frozen
     sub = measured - stubs
     return {
@@ -96,28 +109,82 @@ def substance(cards: Mapping[str, dict]) -> Dict[str, Any]:
 
 
 _SUBSTANCE_CACHE: Optional[Dict[str, Any]] = None
+# The adds that land while the walk runs — (old dict or None, new dict) — applied when it ends; None when no
+# walk is running. Written only under the default corpus's add lock.
+_SUBSTANCE_PENDING: Optional[List[tuple]] = None
+_SUBSTANCE_WALK = threading.Lock()          # one walk at a time; a second caller waits for its memo
+_EMPTY = "EMPTY — no corpus loaded in this process; these are not counts of the keeping"
+
+
+def _settled(s: Mapping[str, Any], notes: Iterable[tuple]) -> Dict[str, Any]:
+    """The split `s` with each (old, new) add applied — the replaced dict's share taken out (old is None for a
+    new id) and the new one's put in — as a fresh dict, so a reader of the old memo never sees it half-moved."""
+    total, stubs, frozen = s["total"], s["stub_cards"], s["frozen_cards"]
+    for old, new in notes:
+        if old is not None:
+            t, st, f = _share(old)
+            total, stubs, frozen = total - t, stubs - st, frozen - f
+        t, st, f = _share(new)
+        total, stubs, frozen = total + t, stubs + st, frozen + f
+    out = _split(total, stubs, frozen)
+    if out["total"] == 0:
+        out["coverage"] = _EMPTY
+    return out
+
+
+def substance_note(notes: Iterable[tuple]) -> None:
+    """A live add to the DEFAULT corpus (corpus.Corpus.add_cards), told here under that corpus's add lock: the
+    memo, while it exists, moves by exactly those cards, with no walk; while the walk runs, they wait for it."""
+    global _SUBSTANCE_CACHE
+    if _SUBSTANCE_CACHE is not None:
+        _SUBSTANCE_CACHE = _settled(_SUBSTANCE_CACHE, notes)
+    elif _SUBSTANCE_PENDING is not None:
+        _SUBSTANCE_PENDING.extend(notes)
 
 
 def substance_of_the_keeping() -> Dict[str, Any]:
     """substance() over the live corpus singleton, memoized per process.
 
     Walking 548k bodies costs real time, and a public endpoint must not pay it per request —
-    reading must not knock out proving. The corpus is immutable under a running service, so one
-    walk is honest for the process lifetime. If the corpus is empty or unloadable this REPORTS
-    that as coverage rather than returning zeros dressed as a measurement.
+    reading must not knock out proving. The corpus is NOT immutable under a running service: a live
+    add (corpus.Corpus.add_cards — a warm seal, an acquisition, a release) grows it. So one walk stays
+    honest for the process lifetime only because every add to the default corpus moves the memo under
+    the corpus's add lock (substance_note: the replaced dict's old share out, the new one's in), and
+    the walk takes its snapshot of the cards under that lock and, when it ends, applies under it every
+    add that landed meanwhile before it sets the memo — so no add is lost however the threads
+    interleave, and substance_if_cached() equals substance(default_corpus().cards). If the corpus is
+    empty or unloadable this REPORTS that as coverage rather than returning zeros dressed as a
+    measurement.
     """
-    global _SUBSTANCE_CACHE
-    if _SUBSTANCE_CACHE is None:
+    global _SUBSTANCE_CACHE, _SUBSTANCE_PENDING
+    if _SUBSTANCE_CACHE is not None:
+        return _SUBSTANCE_CACHE
+    with _SUBSTANCE_WALK:
+        if _SUBSTANCE_CACHE is not None:
+            return _SUBSTANCE_CACHE
         try:
             from . import corpus
-            cards = corpus.default_corpus().cards
+            cp = corpus.default_corpus()
         except Exception:                                     # noqa: BLE001 — degrade honestly
-            cards = {}
-        s = substance(cards)
-        if s["total"] == 0:
-            s["coverage"] = "EMPTY — no corpus loaded in this process; these are not counts of the keeping"
-        _SUBSTANCE_CACHE = s
-    return _SUBSTANCE_CACHE
+            cp = None
+        if cp is None:
+            s = substance({})
+            s["coverage"] = _EMPTY
+            _SUBSTANCE_CACHE = s
+            return _SUBSTANCE_CACHE
+        with cp._add_lock:
+            cards = dict(cp.cards)        # the snapshot: a replaced value is set in place on the live dict
+            _SUBSTANCE_PENDING = []
+        try:
+            s = substance(cards)
+        except BaseException:
+            with cp._add_lock:
+                _SUBSTANCE_PENDING = None
+            raise
+        with cp._add_lock:
+            pending, _SUBSTANCE_PENDING = _SUBSTANCE_PENDING, None
+            _SUBSTANCE_CACHE = _settled(s, pending or ())
+        return _SUBSTANCE_CACHE
 
 
 def substance_if_cached() -> Optional[Dict[str, Any]]:

@@ -219,6 +219,7 @@ test_linear_algebra.py
 test_linguistics.py
 test_linkdrop.py
 test_live_assay.py
+test_live_card_count.py
 test_logic_front_door.py
 test_lookup.py
 test_manufacture.py

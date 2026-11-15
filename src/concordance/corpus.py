@@ -11,6 +11,8 @@ from the secular core — it is witness-surface ranking and belongs with the .or
 """
 from __future__ import annotations
 
+import bisect
+import itertools
 import json
 import logging
 import math
@@ -418,6 +420,35 @@ def rehydrate(card: Optional[dict]) -> Optional[dict]:
     return full
 
 
+# THE WALK THAT RESTARTS (2026-11-15). A live add (Corpus.add_cards) gives _by_token and _cids_by_call their new
+# keys IN PLACE — a copy of either per add would cost more than the add itself at the box's size (924,260 calls:
+# a _cids_by_call copy 47.6-53.3 ms and the old dict's release 39.9-50.2 ms, builder-37) — and a dict raises when
+# its size changes under an iterator. So every loop over either outside __init__ walks the dict directly, as it
+# always did (a plain walk yields the GIL as it runs, and costs exactly what it did when no add lands in it); on
+# the size change it starts again from nothing, at most _WALK_RESTARTS times, and only then walks a snapshot of
+# the keys made in one call that allocates no tuple (list(d)), reading each value by key. Only that error is
+# caught, matched by its message: any other RuntimeError (a RecursionError among them) propagates.
+_SIZE_CHANGED = "dictionary changed size during iteration"
+_WALK_RESTARTS = 3
+
+
+def _walk_whole(d: Dict[str, Any], walk, view: str = "items"):
+    """walk(view of d) — d.items(), d.values() or d — restarted from nothing on a size change, and over a snapshot
+    of the keys after _WALK_RESTARTS restarts. `walk` builds its result afresh on every call."""
+    for _ in range(1 + _WALK_RESTARTS):
+        try:
+            return walk(d.items() if view == "items" else d.values() if view == "values" else d)
+        except RuntimeError as e:
+            if type(e) is not RuntimeError or str(e) != _SIZE_CHANGED:
+                raise
+    keys = list(d)                       # one call, no tuple allocated: no other thread interleaves it
+    if view == "items":
+        return walk((k, d[k]) for k in keys)
+    if view == "values":
+        return walk(d[k] for k in keys)
+    return walk(keys)
+
+
 class Corpus:
     """An indexed, searchable set of cards (id -> card dict)."""
 
@@ -451,11 +482,17 @@ class Corpus:
         # limit search. Cleared on any add_card (the keeping changed). Fresh copies out, so it is read-only.
         self._search_cache: Dict[Any, tuple] = {}
         self._search_lock = threading.Lock()
+        # THE ADD LOCK (2026-11-15): every live add (add_cards) holds it, so writers are serialized; the
+        # build holds it from the moment this corpus becomes the default until its cache save ends, and the
+        # substance walk (ops.substance_of_the_keeping) takes its snapshot and settles under it.
+        self._add_lock = threading.Lock()
         self._by_token: Dict[str, List[str]] = {}
         self._df_extra: Dict[str, int] = dict(df_extra) if df_extra else {}
+        n_public = 0
         for cid, c in cards.items():
             if not is_public(c):
                 continue
+            n_public += 1
             for t in set(_tokens(_card_text(c))):
                 self._by_token.setdefault(t, []).append(cid)
         # CANONICAL POSTINGS — sorted once at load so ranking is a function of the cards + query, not
@@ -463,8 +500,17 @@ class Corpus:
         for v in self._by_token.values():
             v.sort()
         # N = the whole public keeping: resident public cards + the frozen index (all public), so IDF
-        # is unchanged by freezing.
-        self._n = max(1, sum(1 for c in cards.values() if is_public(c)) + len(self._frozen))
+        # is unchanged by freezing. The public resident count is KEPT (a live add moves it by one), so
+        # _n never needs a walk over every card again.
+        self._n_public = n_public
+        self._n = max(1, self._n_public + len(self._frozen))
+        # Ids still listed whose resident dict a live add replaced with a withheld one (a public card
+        # turning non-public: no in-tree caller; it stays counted and listed until a restart).
+        self._withheld_listed: set = set()
+        # The (call, title) a listed id was PLACED with in _public_sorted, kept only for an id a live add replaced
+        # with a dict whose call or title differs (it keeps its old place until a restart, by name): _sort_key reads
+        # it, so the list stays sorted under the key bisect compares by and every later card gets its own place.
+        self._placed_keys: Dict[str, tuple] = {}
 
         # THE CALL-NUMBER INDEX — an instant walk over the whole keeping, built from resident public
         # cards AND the frozen index (each frozen id carries its (call, title)). `_call_tree` is nested
@@ -502,12 +548,17 @@ class Corpus:
         self._public_sorted: List[str] = sorted(
             (cid for cids in self._cids_by_call.values() for cid in cids),
             key=lambda cid: (self._call_of(cid), self._title_of(cid)))
+        # THE CARD OF THE DAY picks over the public ids AS LOADED — one copy, taken here (and in _restore),
+        # never the live _public_sorted a live add inserts into — so the day's pick changes only at a restart,
+        # and two processes that loaded the same files pick the same card.
+        self._daily_ids: List[str] = list(self._public_sorted)
 
     # THE PERSISTED SHAPE (issue #10, corpus_cache.py). `_state` is the one list of what __init__ derives;
     # `_restore` builds a Corpus from it without running __init__ — the same objects a fresh build would
-    # hold, with the runtime-only parts (the search cache, its lock) made fresh. Add a derived attribute to
-    # __init__ -> add it here, or a cache-loaded corpus silently lacks it (corpus_cache keys on this file's
-    # content, so the old files miss — but a missing field would not).
+    # hold, with the runtime-only parts (the search cache, its lock, the add lock, the kept public count, the
+    # card of the day's loaded ids) made fresh. Add a derived attribute to __init__ -> add it here, or a
+    # cache-loaded corpus silently lacks it (corpus_cache keys on this file's content, so the old files miss —
+    # but a missing field would not).
     _STATE_FIELDS = (("cards", "cards"), ("min_idf", "min_idf"), ("n", "_n"), ("froze", "_froze"),
                      ("by_token", "_by_token"), ("df_extra", "_df_extra"), ("frozen", "_frozen"),
                      ("frozen_shelf_counts", "_frozen_shelf_counts"), ("call_tree", "_call_tree"),
@@ -526,7 +577,24 @@ class Corpus:
             setattr(c, attr, state[k])
         c._search_cache = {}
         c._search_lock = threading.Lock()
+        c._add_lock = threading.Lock()
+        # The public order holds every public resident id and every frozen id, once each (corpus_cache.save
+        # refuses an id that is both), and a saved corpus took no live add (the build holds the add lock until
+        # its save ends) — so the kept public resident count is exactly their difference, with no walk.
+        c._n_public = len(c._public_sorted) - len(c._frozen)
+        c._withheld_listed = set()
+        c._placed_keys = {}
+        c._daily_ids = list(c._public_sorted)
         return c
+
+    def _sort_key(self, cid: str) -> tuple:
+        """An id's place in _public_sorted: (call, title, id), the load's order (each bucket is in id order, so
+        a (call, title) tie is broken by id) — for an id whose replaced dict changed its call or title, the
+        (call, title) it was placed with, since it keeps that place until a restart."""
+        placed = self._placed_keys.get(cid)
+        if placed is not None:
+            return (placed[0], placed[1], cid)
+        return (self._call_of(cid), self._title_of(cid), cid)
 
     def _call_of(self, cid: str) -> str:
         c = self.cards.get(cid)
@@ -619,10 +687,15 @@ class Corpus:
         """Card ids at or under a call prefix, in stable order — gathered from the grouped index
         (bounded by the number of distinct call numbers, not the size of the keeping)."""
         p = (prefix or "").strip().lower().rstrip(".")
-        out: List[str] = []
-        for call, cids in self._cids_by_call.items():
-            if call == p or call.startswith(p + "."):
-                out.extend(cids)
+
+        def _gather(items) -> List[str]:
+            out: List[str] = []
+            for call, cids in items:
+                if call == p or call.startswith(p + "."):
+                    out.extend(cids)
+            return out
+
+        out = _walk_whole(self._cids_by_call, _gather)   # a live add may give it a new call: the walk restarts
         out.sort(key=lambda cid: (self._call_of(cid), self._title_of(cid)))
         return out
 
@@ -668,11 +741,12 @@ class Corpus:
         cards_bytes = int(per_card * n_cards)
 
         # The inverted index: token -> [card_id, ...]. The POSTINGS are the thing to count — every
-        # one is a pointer in a list, and the lists themselves carry per-object overhead.
-        postings = sum(len(v) for v in self._by_token.values())
+        # one is a pointer in a list, and the lists themselves carry per-object overhead. A live add may give
+        # _by_token a new key between two steps, so each walk is _walk_whole's (restarted on the size change).
+        postings = _walk_whole(self._by_token, lambda vals: sum(len(v) for v in vals), "values")
         idx_bytes = _sys.getsizeof(self._by_token)
-        idx_bytes += sum(_sys.getsizeof(t) + _sys.getsizeof(v) for t, v in
-                         list(self._by_token.items())[:sample])
+        idx_bytes += _walk_whole(self._by_token, lambda items: sum(
+            _sys.getsizeof(t) + _sys.getsizeof(v) for t, v in itertools.islice(items, sample)))
         if len(self._by_token) > sample:
             idx_bytes = int(idx_bytes / max(1, min(sample, len(self._by_token)))
                             * len(self._by_token))
@@ -696,33 +770,140 @@ class Corpus:
         }
 
     def add_card(self, card: dict) -> None:
-        """Insert one card into the live corpus AND its token index — so a just-minted
-        verification is searchable immediately, no restart. Idempotent by id."""
-        cid = card.get("id")
-        if not cid:
-            return
-        shelve(card)  # a live-minted card is shelved like any other (walkable on next reload)
-        self.cards[cid] = card
-        if is_public(card):
-            for t in set(_tokens(_card_text(card))):
-                self._by_token.setdefault(t, [])
-                if cid not in self._by_token[t]:
-                    self._by_token[t].append(cid)
-            self._n = max(1, sum(1 for c in self.cards.values() if is_public(c)) + len(self._frozen))
-            # a live-minted card is also walkable: place it in the call-tree now (frozen ids already
-            # entered it at load). Idempotent-ish — a re-mint of the same id re-adds; acceptable for
-            # the rare live mint, and a reload rebuilds the tree cleanly.
-            call = card.get("call") or deep_call(card)
-            card["call"] = call
-            if cid not in self._cids_by_call.get(call, ()):
-                self._cids_by_call.setdefault(call, []).append(cid)
-        self._search_cache.clear()        # the keeping changed — drop any cached scorings
+        """Insert one card into the live corpus — a batch of one of add_cards, the one rule — so a just-minted
+        verification is searchable, browsable and counted immediately, no restart."""
+        self.add_cards([card])
+
+    def add_cards(self, cards: List[dict]) -> int:
+        """THE LIVE ADD (2026-11-15): after any adds, this corpus is what a fresh load of the same files holds
+        with each added card's line appended to an extra card source — in card_count(), _public_sorted, every
+        bucket, every _call_tree count, _n, each added card's dict and its tokens' postings — and the default
+        corpus's substance memo stays equal to a recount. One rule, for a batch of one or many:
+
+          * an id in the frozen index and not resident is SKIPPED: nothing changes;
+          * a NEW id is shelved and deduped as the load's gate gives it (shelve, _dedupe_connections) and joins
+            the cards; if public it enters _public_sorted at its (call, title, id) place, its bucket and each of
+            its tokens' postings at its id place, and every _call_tree count along its call, and _n stays
+            max(1, public resident + frozen index) from the kept count, never a walk. A withheld new card is
+            held as the load holds one: resident, in no public structure;
+          * an id ALREADY RESIDENT has its dict replaced (find._set_stage relies on it to release a held card);
+            if it was withheld and is now public it enters every structure above at the load's places; if its
+            publicness is unchanged nothing moves. Left alone until a restart, by name: a public card turning
+            withheld (no in-tree caller: it stays counted and listed), and a replaced public card whose call,
+            title or text changed (it keeps its old place and its old tokens' postings). Either is compared
+            under the (call, title) it was placed with (_placed_keys), so every later card gets its own place.
+
+        Within one batch a later card for the same id replaces an earlier one before anything is placed, as a
+        load's later line does. READERS STAY SAFE: only a dict raises when it changes size under a reader, so
+        no dict that request threads iterate directly changes size in place — a new id gets a new cards dict
+        (one copy per batch) and a new segment a new copy of that _call_tree level, each swapped in under the
+        add lock; a value replaced under an existing key is set in place. _by_token and _cids_by_call gain
+        their new keys in place instead (a copy of either per add costs more than the add), and every loop
+        over them in this module is _walk_whole's: restarted on the size change, then a key snapshot.
+        Lists take bisect inserts in place (a copy of _public_sorted would stall every request thread); a
+        reader walking one while an insert lands may see one id twice or miss one, in that walk only.
+        Returns the number of cards placed (new or replaced)."""
+        batch: Dict[str, dict] = {}
+        for c in cards or ():
+            if isinstance(c, dict) and c.get("id"):
+                batch[c["id"]] = c                     # a later card for the same id wins, as at a load
+        if not batch:
+            return 0
+        with self._add_lock:
+            live = self.cards
+            work = live                                # becomes this batch's copy at its first new id
+            entering: List[dict] = []                  # cards that enter the public structures
+            notes: List[tuple] = []                    # (old dict or None, new dict) for the substance memo
+            for cid, card in batch.items():
+                old = work.get(cid)
+                if old is None and cid in self._frozen:
+                    continue                           # (i) the frozen index holds it: skipped
+                shelve(card)                           # the load's gate (load_cards._keep) ...
+                _dedupe_connections(card)              # ... exact duplicate edges dropped, first kept
+                card["call"] = card.get("call") or deep_call(card)   # as __init__ places a public card
+                pub = is_public(card)
+                if old is None:                        # (ii) a new id
+                    if work is live:
+                        work = live.copy()
+                    work[cid] = card
+                    if pub:
+                        entering.append(card)
+                else:                                  # (iii) already resident: the dict is replaced
+                    work[cid] = card                   # an existing key — never a size change
+                    if is_public(old) or cid in self._withheld_listed:
+                        # listed: it keeps its place, so if the new dict moves its key, keep the key it was
+                        # placed with (the first such replacement's old dict still holds it)
+                        if cid not in self._placed_keys:
+                            placed = (old.get("call") or "", old.get("title") or cid)
+                            if (card.get("call") or "", card.get("title") or cid) != placed:
+                                self._placed_keys[cid] = placed
+                        if pub:
+                            self._withheld_listed.discard(cid)
+                        else:
+                            self._withheld_listed.add(cid)   # left listed until a restart, by name
+                    elif pub:
+                        entering.append(card)
+                notes.append((old, card))
+            if not notes:
+                return 0
+            if work is not live:
+                self.cards = work                      # the swap: a reader of the old dict finishes on it
+            for card in entering:
+                cid, call = card["id"], card["call"]
+                for t in set(_tokens(_card_text(card))):
+                    lst = self._by_token.get(t)
+                    if lst is None:
+                        self._by_token[t] = [cid]       # a new key, in place: its walks restart (_walk_whole)
+                    else:
+                        bisect.insort(lst, cid)
+                bucket = self._cids_by_call.get(call)
+                if bucket is None:
+                    self._cids_by_call[call] = [cid]   # a new call, in place: its walks restart (_walk_whole)
+                else:
+                    bisect.insort(bucket, cid)
+                self._count_call(call)
+                bisect.insort(self._public_sorted, cid, key=self._sort_key)
+                self._n_public += 1
+            self._n = max(1, self._n_public + len(self._frozen))
+            self._search_cache.clear()        # the keeping changed — drop any cached scorings
+            if self is _DEFAULT:
+                from . import ops as _ops
+                _ops.substance_note(notes)    # the memo follows the default corpus, under this lock
+            return len(notes)
+
+    def _count_call(self, call: str) -> None:
+        """One more public card along `call` in the _call_tree, as __init__'s _add counts one. An existing
+        level is never grown in place: a new segment is a new copy of its level, with the whole new branch
+        built before it is swapped in (under the add lock, which the caller holds)."""
+        segs = call.split(".")
+        node, parent = self._call_tree, None
+        for i, seg in enumerate(segs):
+            entry = node.get(seg)
+            if entry is None:
+                branch = {"n": 1, "kids": {}}
+                tip = branch
+                for rest in segs[i + 1:]:
+                    nxt = {"n": 1, "kids": {}}
+                    tip["kids"][rest] = nxt
+                    tip = nxt
+                level = node.copy()
+                level[seg] = branch
+                if parent is None:
+                    self._call_tree = level
+                else:
+                    parent["kids"] = level
+                return
+            entry["n"] += 1
+            node, parent = entry["kids"], entry
 
     def _index_card_ids(self) -> set:
-        ids: set = set()
-        for cids in self._by_token.values():
-            ids.update(cids)
-        return ids
+        def _ids(vals) -> set:
+            ids: set = set()
+            for cids in vals:
+                ids.update(cids)
+            return ids
+
+        return _walk_whole(self._by_token, _ids, "values")   # a live add may add a token key: the walk restarts
 
     def _idf(self, query_tokens: set) -> Dict[str, float]:
         return {t: max(0.0, math.log(self._n / (len(self._by_token.get(t, ()))
@@ -1797,18 +1978,22 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                             cached_names = big
                             cached_skip = sorted(n for n, o in offs.items() if not o)
                     cache_save_ms = (_pc() - _ts) * 1000.0
-                _DEFAULT = Corpus(cards, df_extra=df, frozen_idx=fz, frozen_edges=fe)
+                built = Corpus(cards, df_extra=df, frozen_idx=fz, frozen_edges=fe)
                 _t2 = _pc()
                 _r3 = _rss()
-                if cc_key is not None and cc_path is not None:
-                    # SAVE for the next boot — after the build, outside total_ms, so the phases above still
-                    # describe the build itself. A failed write is "no cache", logged, never a failed boot.
-                    _ts = _pc()
-                    cc_saved = _cc.save(cc_path, cc_key, _DEFAULT._state())
-                    cc_pruned = _cc.prune(cc_path) if cc_saved else 0
-                    cc_save_ms = (_pc() - _ts) * 1000.0
-                    if not cc_saved:
-                        _log.warning("corpus cache: could not write %s (the next boot rebuilds)", cc_path)
+                # THE BUILD HOLDS THE ADD LOCK from the moment the corpus is the default until its cache save
+                # ends, so no live add (add_to_default on another thread) lands inside the save's walk of it.
+                with built._add_lock:
+                    _DEFAULT = built
+                    if cc_key is not None and cc_path is not None:
+                        # SAVE for the next boot — after the build, outside total_ms, so the phases above still
+                        # describe the build itself. A failed write is "no cache", logged, never a failed boot.
+                        _ts = _pc()
+                        cc_saved = _cc.save(cc_path, cc_key, _DEFAULT._state())
+                        cc_pruned = _cc.prune(cc_path) if cc_saved else 0
+                        cc_save_ms = (_pc() - _ts) * 1000.0
+                        if not cc_saved:
+                            _log.warning("corpus cache: could not write %s (the next boot rebuilds)", cc_path)
 
                 def _delta(a, b):
                     return (b - a) if (a is not None and b is not None) else None
@@ -2210,11 +2395,14 @@ def stats() -> Dict[str, Any]:
 
 def daily(seed: Optional[str] = None) -> Optional[dict]:
     """A deterministic 'card of the day' — same card all day, different each day. Stable: the
-    seed (default today's UTC date) hashes to an index over the WHOLE keeping (resident + frozen)."""
+    seed (default today's UTC date) hashes to an index over the WHOLE keeping (resident + frozen),
+    AS LOADED: the pick reads the one copy of the public ids taken at the load or the cache restore,
+    never the live list a live add inserts into, so it changes only at a restart and every process
+    that loaded the same files picks the same card."""
     import hashlib
     import time as _time
     cp = default_corpus()
-    ids = cp._public_sorted
+    ids = cp._daily_ids
     if not ids:
         return None
     if seed is None:
@@ -2317,7 +2505,8 @@ def gauges() -> Dict[str, Any]:
     """
     import math as _math
     c = default_corpus()
-    dfs = sorted((len(v) + c._df_extra.get(k, 0) for k, v in c._by_token.items()),
+    # a live add may give the index a new key between two steps of this walk: _walk_whole restarts it
+    dfs = sorted(_walk_whole(c._by_token, lambda items: [len(v) + c._df_extra.get(k, 0) for k, v in items]),
                  reverse=True)
     n_tokens = len(dfs)
     n_cards = c._n
