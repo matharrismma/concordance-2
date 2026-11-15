@@ -13,6 +13,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from fractions import Fraction
 from pathlib import Path
 
@@ -71,18 +72,35 @@ def floor():
 
 def run_with_a_kill(load: str, power: str) -> tuple:
     """What became of one power in a fresh process, and how long it took. The bound starts when sympy
-    has loaded, so a slow import on a loaded machine never reads as a stuck power."""
+    has loaded, so a slow import on a loaded machine never reads as a stuck power.
+
+    The rest is read from child.stdout, the object that read LOADED, once the child has exited: that
+    readline can take the answer into the object's buffer along with LOADED, and communicate on POSIX
+    reads the pipe beneath it, so it is never called. Waiting before reading holds only because the
+    child prints one short line after LOADED, far less than a pipe holds; a child that printed more
+    would block on the full pipe and read as still running at the kill. Its stderr goes to a temporary
+    file, so no amount of it can block the child."""
     code = CHILD.format(load=load, power=power)
-    with subprocess.Popen([sys.executable, "-c", code], env={**os.environ, "PYTHONPATH": str(SRC)},
-                          stdout=subprocess.PIPE, text=True) as child:
-        try:
-            assert child.stdout.readline().strip() == "LOADED"
-            out, _ = child.communicate(timeout=KILL_S)
-        except subprocess.TimeoutExpired:
-            pytest.fail(f"{power} was still running at the {KILL_S} s kill")
-        finally:
-            child.kill()
-    outcome, elapsed = out.split()
+    with tempfile.TemporaryFile() as stderr:
+        with subprocess.Popen([sys.executable, "-c", code], env={**os.environ, "PYTHONPATH": str(SRC)},
+                              stdout=subprocess.PIPE, stderr=stderr, text=True) as child:
+            try:
+                first = child.stdout.readline()
+                if first.strip() == "LOADED":
+                    child.wait(timeout=KILL_S)
+            except subprocess.TimeoutExpired:
+                pytest.fail(f"{power} was still running at the {KILL_S} s kill")
+            finally:
+                child.kill()
+            exit_code = child.wait()
+            rest = child.stdout.read()
+        stderr.seek(0)
+        tail = stderr.read()[-2000:].decode("utf-8", errors="replace")
+    fields = rest.split()
+    if first.strip() != "LOADED" or len(fields) != 2:
+        pytest.fail(f"the child running {power} exited with code {exit_code}; its stdout was {first + rest!r}; "
+                    f"its stderr ended {tail!r}")
+    outcome, elapsed = fields
     return outcome, float(elapsed)
 
 
@@ -129,6 +147,44 @@ def test_the_modules_that_load_sympy_are_the_ones_named_here():
 @pytest.mark.parametrize("module", sorted(LOADERS))
 def test_every_module_that_loads_sympy_gets_the_floor_on_its_own(module):
     outcome, _elapsed = run_with_a_kill(LOADERS[module], STUCK_POWERS[0])
+    assert outcome == "PowerFloorRefused"
+
+
+def test_the_late_reader_still_reads_the_answer(monkeypatch):
+    """Both lines are in the pipe before the first read, as on a busy machine: the child's readline waits,
+    at most a minute, for the child to exit before it reads, so it takes the answer into child.stdout's
+    buffer with LOADED. A floor taken away still reads red, at the helper's kill."""
+    popen, polls = subprocess.Popen, []
+
+    def late(*args, **kwargs):
+        child = popen(*args, **kwargs)
+        readline = child.stdout.readline
+
+        def after_the_exit(*read_args):
+            try:
+                child.wait(timeout=60)
+            except subprocess.TimeoutExpired:
+                pass
+            polls.append(child.poll())
+            return readline(*read_args)
+
+        child.stdout.readline = after_the_exit
+        return child
+
+    monkeypatch.setattr(subprocess, "Popen", late)
+    outcome, _elapsed = run_with_a_kill(LOAD_MATHEMATICS, STUCK_POWERS[0])
+    assert polls, "the wrapped readline was never called, so nothing was forced"
+    assert polls[0] is not None, "the child had not exited at the first read, so the race was not forced"
+    assert outcome == "PowerFloorRefused"
+
+
+def test_the_helper_never_calls_communicate(monkeypatch):
+    """communicate on POSIX reads the pipe beneath child.stdout, so it never sees what readline buffered."""
+    def communicate(*_args, **_kwargs):
+        pytest.fail("run_with_a_kill called Popen.communicate, which on POSIX never reads what readline buffered")
+
+    monkeypatch.setattr(subprocess.Popen, "communicate", communicate)
+    outcome, _elapsed = run_with_a_kill(LOAD_MATHEMATICS, STUCK_POWERS[0])
     assert outcome == "PowerFloorRefused"
 
 
