@@ -387,3 +387,34 @@ every pointer.
 > and sunrise and sunset hours (src/concordance/verifiers/ephemeris.py:389-396), and computes the Sun's
 > declination only inside sunrise, so the sky stream's noon height is sealed as arithmetic on the mean
 > obliquity instead. Named in the plan of run 2026-11-14-sky-stream, line 9.
+
+## live-card-count-move-not-yet-seen
+- status: open
+- scope: concordance-2
+- source: LEDGER concordance-2 2026-11-15-live-card-count 97
+> The follower shipped in run 2026-11-15-live-card-count, but its move is not yet seen on the box: no
+> card was written to the followed files in the two hours after the deploy, so no count rose without a
+> restart. The next run that writes to the keeping (a mint, or a seal that adds a receipt card) grades
+> the move in its live-after by the same reads. With neither engine's MainPID changed, it names the ids
+> new to receipt_cards.jsonl, verified_cards.jsonl and acquired_cards.jsonl since its live-before. At
+> least 60 s later, the cards count on narrowhighway.com and on the MCP host is up by at least that
+> many, and each id answers the card read on both.
+
+## follower-re-read-drops-bridge-edges
+- status: open
+- scope: concordance-2
+- source: LEDGER concordance-2 2026-11-15-live-card-count 71
+> A line the follower reads again replaces the resident card with that line's own parse. That is a line
+> written between the start reading and the end of the load, or the receipt spine a cold mint writes
+> again. An edge a bridge overlay attached to that card at the load is then gone from the live graph
+> until a restart. No overlay on the box names a followed card today. If one ever does, the follower
+> carries the overlay's edges over on a re-read.
+
+## follower-holds-files-open-on-windows
+- status: open
+- scope: concordance-2
+- source: LEDGER concordance-2 2026-11-15-live-card-count 71
+> On Windows, a follower poll holds each followed file open for about 10 ms every 30 s. There,
+> os.replace onto a file another handle holds open raises PermissionError. So a one-shot tool's
+> os.replace onto a followed file (classify_keeping --apply) can fail in that window and leave the old
+> file whole. The box is Linux, where it cannot happen.
