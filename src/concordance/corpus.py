@@ -12,6 +12,7 @@ from the secular core — it is witness-surface ranking and belongs with the .or
 from __future__ import annotations
 
 import bisect
+import hashlib
 import itertools
 import json
 import logging
@@ -511,6 +512,9 @@ class Corpus:
         # with a dict whose call or title differs (it keeps its old place until a restart, by name): _sort_key reads
         # it, so the list stays sorted under the key bisect compares by and every later card gets its own place.
         self._placed_keys: Dict[str, tuple] = {}
+        # THE FOLLOWER's state for this corpus (follow_start / poll_followed): set by default_corpus at a build or
+        # a restore, None on a corpus built any other way — which no poll ever touches.
+        self._follow: Optional[Dict[str, Any]] = None
 
         # THE CALL-NUMBER INDEX — an instant walk over the whole keeping, built from resident public
         # cards AND the frozen index (each frozen id carries its (call, title)). `_call_tree` is nested
@@ -556,7 +560,7 @@ class Corpus:
     # THE PERSISTED SHAPE (issue #10, corpus_cache.py). `_state` is the one list of what __init__ derives;
     # `_restore` builds a Corpus from it without running __init__ — the same objects a fresh build would
     # hold, with the runtime-only parts (the search cache, its lock, the add lock, the kept public count, the
-    # card of the day's loaded ids) made fresh. Add a derived attribute to __init__ -> add it here, or a
+    # card of the day's loaded ids, the follower's state) made fresh. Add a derived attribute to __init__ -> add it here, or a
     # cache-loaded corpus silently lacks it (corpus_cache keys on this file's content, so the old files miss —
     # but a missing field would not).
     _STATE_FIELDS = (("cards", "cards"), ("min_idf", "min_idf"), ("n", "_n"), ("froze", "_froze"),
@@ -584,6 +588,7 @@ class Corpus:
         c._n_public = len(c._public_sorted) - len(c._frozen)
         c._withheld_listed = set()
         c._placed_keys = {}
+        c._follow = None                 # default_corpus sets the follower's state after the restore
         c._daily_ids = list(c._public_sorted)
         return c
 
@@ -1834,6 +1839,194 @@ def add_to_default(card: dict) -> None:
         _DEFAULT.add_card(card)
 
 
+# ── THE FOLLOWER (2026-11-15): the keeping's append-only card logs, counted while the engine runs ─────────────────
+# Owner, 2026-11-15: "it should be set to update automatically". A card another process writes (a cold mint, the
+# other engine's warm seal, shepherd_rounds --choose) used to reach this process only at its next restart. The
+# follower reads exactly the three append-only card logs beside the main cards file as the load resolves them, from
+# where the build's own reading of them stopped, and hands each new line to add_cards — step one's rule, so a line
+# the load already took changes no count. web_cache.jsonl is NOT followed, by name: find._set_stage rewrites it
+# whole at every steward promote or refuse, and each engine counts its own acquisitions at once (add_to_default)
+# and the other engine's at its next restart; every other extra source is seeded, and a seed is followed by a
+# restart. A followed file that is REWRITTEN rather than appended (tools/graft_shelf_spines.py, tools/
+# classify_keeping.py --apply: one-shot tools, each followed by a restart) is seen, left to the next restart, and
+# said so in the capability statement's cards entry while it is.
+FOLLOWED_CARD_SOURCES = ("receipt_cards.jsonl", "acquired_cards.jsonl", "verified_cards.jsonl")  # the load's order
+FOLLOW_INTERVAL_S = 30.0
+FOLLOW_MAX_GROWTH = 16 * 1024 * 1024        # more in one poll is not an append this process takes: a restart does
+_FOLLOW_CHUNK = 1 << 20
+_FOLLOW_POLL_LOCK = threading.Lock()        # one poll at a time; a request waits on a poll only for the add lock
+_FOLLOWER: Optional[threading.Thread] = None
+_FOLLOWER_STOP: Optional[threading.Event] = None
+_FOLLOWER_LOCK = threading.Lock()
+
+
+def follow_start(path: Optional[Path] = None) -> Dict[str, Any]:
+    """THE START READING, at the top of a build: for each followed file, its offset is the last line boundary at
+    or before its size now, and the sha256 of its bytes [0, offset) is taken from the same read. A file absent now
+    starts at offset 0 and is followed once it appears. With an explicit path the load reads no extra source, so
+    nothing is followed. Never raises: a file it cannot read is left to the next restart."""
+    follow: Dict[str, Any] = {"files": [], "left": {}}
+    if path is not None:
+        return follow
+    base = _cards_path().parent
+    for name in FOLLOWED_CARD_SOURCES:
+        st = {"name": name, "path": base / name, "offset": 0, "sha": hashlib.sha256(), "seen": False}
+        follow["files"].append(st)
+        try:
+            with open(st["path"], "rb") as f:
+                st["seen"] = True
+                pending = b""
+                while True:
+                    chunk = f.read(_FOLLOW_CHUNK)
+                    if not chunk:
+                        break
+                    buf = pending + chunk
+                    i = buf.rfind(b"\n")
+                    if i < 0:
+                        pending = buf
+                        continue
+                    st["sha"].update(buf[:i + 1])
+                    st["offset"] += i + 1
+                    pending = buf[i + 1:]
+        except FileNotFoundError:
+            pass
+        except OSError as e:
+            _follow_leave(follow, name, f"could not be read at the start ({type(e).__name__})")
+    return follow
+
+
+def _follow_leave(follow: Dict[str, Any], name: str, why: str) -> None:
+    left = dict(follow["left"])            # a new dict, swapped: a reader of the note never sees it change size
+    left[name] = why
+    follow["left"] = left
+    _log.warning("card follower: %s %s; it is no longer followed in this process, and its changes are counted at "
+                 "the next restart", name, why)
+
+
+def _follow_read(st: Dict[str, Any]):
+    """One file, through ONE open descriptor: hash [0, offset) again whatever its size or mtime say (a same-size
+    rewrite in one timestamp tick leaves both unchanged), then read on past the offset from the same descriptor, so
+    no os.replace lands between the two. Returns the complete lines past the offset (bytes, ending at a newline),
+    None for nothing new, or a reason string when the file is no longer the one this process read."""
+    try:
+        f = open(st["path"], "rb")
+    except FileNotFoundError:
+        return "is gone" if st["seen"] else None
+    with f:
+        st["seen"] = True
+        h = hashlib.sha256()
+        todo = st["offset"]
+        while todo:
+            chunk = f.read(min(_FOLLOW_CHUNK, todo))
+            if not chunk:
+                return "is shorter than the bytes already read"
+            h.update(chunk)
+            todo -= len(chunk)
+        if h.digest() != st["sha"].digest():
+            return "was rewritten (the bytes already read changed)"
+        tail = f.read(FOLLOW_MAX_GROWTH + 1)
+    if len(tail) > FOLLOW_MAX_GROWTH:
+        return "grew by more than 16 MiB in one poll"
+    i = tail.rfind(b"\n")
+    return tail[:i + 1] if i >= 0 else None
+
+
+def _follow_cards(lines: bytes) -> List[dict]:
+    """The cards in complete lines, parsed as load_cards' _line parses a line: blank and unparseable lines are
+    skipped, and only a dict with an id is a card."""
+    out: List[dict] = []
+    for raw in lines.split(b"\n"):
+        line = raw.strip()
+        if not line:
+            continue
+        try:
+            c = json.loads(line)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            continue
+        if isinstance(c, dict) and c.get("id"):
+            out.append(c)
+    return out
+
+
+def poll_followed() -> int:
+    """ONE POLL of the followed files: every complete line past each offset, in one add_cards batch (step one's
+    rule: a frozen-index id is skipped, a resident one replaced, a new one counted), then each offset moved past
+    the last newline taken and its hash extended by exactly those bytes. Nothing until the default corpus is
+    loaded, never a build, never in a cell. A file shorter than its offset, gone, whose read bytes no longer hash
+    the same, or grown by more than FOLLOW_MAX_GROWTH is left to the next restart (follow_note). Returns the number
+    of cards handed to add_cards."""
+    if _cells.in_a_cell():
+        return 0
+    cp = _DEFAULT
+    follow = getattr(cp, "_follow", None) if cp is not None else None
+    if not follow:
+        return 0
+    with _FOLLOW_POLL_LOCK:
+        cards: List[dict] = []
+        moves: List[tuple] = []
+        for st in follow["files"]:
+            if st["name"] in follow["left"]:
+                continue
+            got = _follow_read(st)
+            if isinstance(got, str):
+                _follow_leave(follow, st["name"], got)
+            elif got:
+                cards.extend(_follow_cards(got))
+                moves.append((st, got))
+        if cards:
+            cp.add_cards(cards)                # one batch; a failure leaves every offset where it was
+        for st, got in moves:
+            st["sha"].update(got)
+            st["offset"] += len(got)
+        return len(cards)
+
+
+def follow_note() -> Optional[str]:
+    """While any followed file is left to the next restart: the note the capability statement's cards entry
+    carries, naming each and saying its changes are counted at the next restart. Otherwise None."""
+    cp = _DEFAULT
+    follow = getattr(cp, "_follow", None) if cp is not None else None
+    left = (follow or {}).get("left") or {}
+    if not left:
+        return None
+    named = "; ".join(f"{name} {why}" for name, why in sorted(left.items()))
+    return (named + (" — it is" if len(left) == 1 else " — they are") + " no longer followed in this process, and "
+            + ("its" if len(left) == 1 else "their") + " changes are counted at the next restart")
+
+
+def start_follower(interval: float = FOLLOW_INTERVAL_S) -> bool:
+    """Start the one daemon thread that polls every `interval` seconds (the serve path, after the corpus warm;
+    no CLI or one-shot process). A second start while it runs is a no-op (False)."""
+    global _FOLLOWER, _FOLLOWER_STOP
+    with _FOLLOWER_LOCK:
+        if _FOLLOWER is not None and _FOLLOWER.is_alive():
+            return False
+        stop = threading.Event()
+        t = threading.Thread(target=_follow_loop, args=(stop, interval), name="nh-follow-cards", daemon=True)
+        _FOLLOWER, _FOLLOWER_STOP = t, stop
+        t.start()
+        return True
+
+
+def stop_follower(timeout: Optional[float] = None) -> bool:
+    """End the follower: it stops at its next wake, within one poll. True once no follower thread runs."""
+    with _FOLLOWER_LOCK:
+        t, stop = _FOLLOWER, _FOLLOWER_STOP
+    if t is None:
+        return True
+    stop.set()
+    t.join(timeout)
+    return not t.is_alive()
+
+
+def _follow_loop(stop: threading.Event, interval: float) -> None:
+    while not stop.wait(interval):
+        try:
+            poll_followed()
+        except Exception:  # noqa: BLE001 — a poll's failure is logged and never stops the thread
+            _log.exception("card follower: a poll failed; the next poll tries again")
+
+
 def _the_keeping_is_in_the_front() -> None:
     """A cell holds no keeping, and a read there must not take that for a shelf without the word: a check that
     declines in a cell and confirms in a loaded front would change a verdict. So the read goes back to the front."""
@@ -1864,6 +2057,9 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                 LOAD_PHASES.clear()
                 _t0 = _pc()
                 _r0 = _rss()
+                # THE FOLLOWER'S START READING, before the cache key is made and before load_cards: a line written
+                # after it is past the offset, so a poll takes it once whichever of the two the load went by.
+                follow = follow_start(path)
                 # THE CORPUS CACHE (issue #10, corpus_cache.py): the whole built index, keyed on every file the
                 # load would read + the freeze set + this module's own source. A hit RESTORES the corpus — no
                 # parsing, no tokenizing, no sorting — and returns here; a miss builds exactly as before and
@@ -1885,7 +2081,9 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                         got = _cc.load(cc_path, cc_key)
                         cc_load_ms = (_pc() - _tc) * 1000.0
                         if got is not None:
-                            _DEFAULT = Corpus._restore(got)
+                            restored = Corpus._restore(got)
+                            restored._follow = follow
+                            _DEFAULT = restored
                             del got
                             _r3 = _rss()
                             LOAD_PHASES.update({
@@ -1979,6 +2177,7 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                             cached_skip = sorted(n for n, o in offs.items() if not o)
                     cache_save_ms = (_pc() - _ts) * 1000.0
                 built = Corpus(cards, df_extra=df, frozen_idx=fz, frozen_edges=fe)
+                built._follow = follow
                 _t2 = _pc()
                 _r3 = _rss()
                 # THE BUILD HOLDS THE ADD LOCK from the moment the corpus is the default until its cache save

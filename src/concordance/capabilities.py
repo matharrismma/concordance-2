@@ -169,6 +169,12 @@ def _substrate() -> Dict[str, Any]:
             # must never ride this orientation call.
             out["cards"] = {"count": corpus.card_count(),
                             "means": "cards in the keeping (the shared corpus, both surfaces)"}
+            # THE FOLLOWER (corpus.poll_followed): the count follows the keeping's append-only card logs while
+            # the engine runs; a followed file rewritten rather than appended is left to the next restart, and
+            # said so here while it is. With none left the entry keeps exactly its two keys.
+            follow_note = corpus.follow_note()
+            if follow_note:
+                out["cards"]["note"] = follow_note
             # G1 (docs/GAPS.md): a count never travels without its substance split — but only when the split
             # is already computed (the boot warms it in the background). Never walk 548k bodies on this call.
             from . import ops

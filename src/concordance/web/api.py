@@ -4311,6 +4311,13 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             _threading.Thread(target=_warm_substance, name="nh-warm-substance", daemon=True).start()
         except Exception:
             pass
+        # THE FOLLOWER (corpus.start_follower), after the corpus warm: one daemon thread per serving process
+        # (nh-engine and nh-mcp alike run this serve path) polls the keeping's append-only card logs every 30 s,
+        # so a card another process appends is counted without a restart. A second start is a no-op.
+        try:
+            corpus.start_follower()
+        except Exception:
+            pass
 
     return _QuietServer((host, port), Handler)
 
