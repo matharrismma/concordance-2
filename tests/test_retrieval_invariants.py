@@ -129,6 +129,15 @@ def test_VI_a_theory_outranks_an_incidental_mention():
     The boost is applied INSIDE the already-scoring branch, so it can only reorder cards the
     subject partition already admitted — it can never smuggle in an off-subject hit. That is the
     property this test pins, in both directions.
+
+    PADDED WITH DECOYS 2026-11-17, and the padding is the point. On three cards df == n, so
+    `_idf` returns 0 for every token and BOTH subject-holders score a base of exactly 0 — this
+    test then passed for a reason that had nothing to do with the theories shelf: the only number
+    separating them was THEORY_WEIGHT multiplying the tier constant, which is the defect invariant
+    X now forbids. test_VII's own docstring had already named this fixture as degenerate. With the
+    decoys, idf(cell) is positive, the two cards have real and DIFFERENT base scores (the diary
+    repeats "cell" twice as often), and the theory still leads — which is what Matt asked for and
+    what this test always meant to check.
     """
     cards = {
         "t": {"id": "t", "title": "Cell theory", "shelf": "theories",
@@ -139,7 +148,12 @@ def test_VI_a_theory_outranks_an_incidental_mention():
         "x": {"id": "x", "title": "Unrelated", "shelf": "gutenberg",
               "body": "harvesting barley", "lifecycle_stage": "public"},
     }
+    for i in range(20):                     # no "cell" at all — so idf(cell) is not flat zero
+        cards[f"d{i}"] = {"id": f"d{i}", "title": f"Decoy volume {i}", "shelf": "gutenberg",
+                          "body": f"an unrelated passage about decoy subject {i}",
+                          "lifecycle_stage": "public"}
     fix = corpus.Corpus(cards, min_idf=0.0)
+    assert fix._idf({"cell"})["cell"] > 0, "the fixture is degenerate again — pad it"
     hits = fix.search("cell", limit=5)
     assert hits and hits[0]["id"] == "t", (
         "a book that merely repeats the word outranked the theory: "
@@ -339,3 +353,102 @@ def test_IX_the_gate_refuses_only_what_the_keeping_calls_a_non_noun():
         _cdb.noun_senses = _real
 
 
+# ── X. THE TIER IS A PARTITION, AND THE BOOSTS ORDER WITHIN IT ────────────────────────────────
+# Measured over the 68 real questions 2026-11-17, with the engine's own scorer. `_score` ADDS
+# SUBJECT_TIER (1000.0) and search()'s `_finalize` then MULTIPLIED the sum, so the shelf boost
+# scaled the tier constant instead of ordering cards inside it. Twenty-six of the sixty-eight
+# questions were led by a `theories` card whose term frequency of the subject was ONE OR TWO:
+#
+#   "i want to end my life"                   Agricultural science (base 2.94) led
+#                                             17.2 End-of-Life Care (base 24.35)
+#   "how do I keep a wound from bleeding"     The double helix (base 11.8) led
+#                                             8.3 Wound Management (base 58.2)
+#   "a man who built his house on the rock"   Hydrologic cycle (base 9.9) led
+#                                             John Gill on Deuteronomy 32:4 (base 21.6)
+#
+# In every case the demoted card had the HIGHER base score, so the order contradicted the engine's
+# own measure of relevance — and it did so most loudly for the readers who can least afford it.
+# Three aboutness gates on tier ENTRY were measured first and all three refused: requiring the
+# subject in the card's own prose, and requiring it outside the source label, each changed NOTHING
+# on 68 of 68 (vacuous); the one with teeth dropped "7.3 Prepare Financial Budgets" for a Greek
+# lexicon entry and Newton's law of universal gravitation for "1.4 Inverse Functions". The defect
+# was never which cards the tier admits. It was the arithmetic.
+
+
+def _tier_cards(n_decoys: int = 24):
+    """A theories card that MENTIONS the subject once, and a card that is plainly ABOUT it."""
+    cards = {
+        "th": {"id": "th", "title": "Plasma physics (the fourth state of matter)",
+               "shelf": "theories", "lifecycle_stage": "public",
+               "body": ("A plasma is an ionised gas whose free charges make it respond to fields "
+                        "collectively; it carries current, supports waves, and in a pinch can be "
+                        "wound into a torus by the magnets that confine it, which is the whole "
+                        "difficulty of fusion engineering.")},
+        "ab": {"id": "ab", "title": "Wound management", "shelf": "medicine",
+               "lifecycle_stage": "public",
+               "body": ("Clean the wound with running water. A wound that keeps bleeding needs "
+                        "direct pressure held on the wound for ten minutes without lifting it to "
+                        "look. Dress the wound, raise the wound above the heart, and watch the "
+                        "wound for the spreading redness that means the wound is infected.")},
+    }
+    for i in range(n_decoys):
+        cards[f"d{i}"] = {"id": f"d{i}", "title": f"Decoy volume {i}", "shelf": "gutenberg",
+                          "body": f"an unrelated passage about decoy subject {i}",
+                          "lifecycle_stage": "public"}
+    return cards
+
+
+def test_X_a_shelf_boost_never_outranks_relevance_inside_the_tier():
+    """THE LIVE SHAPE: both cards hold the subject, so both are in the tier; one is about it.
+
+    Red before the fix, by a factor of four: (base + 1000) x THEORY_WEIGHT put the plasma card at
+    ~4000 against the wound card's ~1000, so a reader asking how to stop a wound bleeding was
+    handed a card about confining fusion plasma. The boosts must order cards WITHIN the tier —
+    which is what every comment in `_finalize` already claimed — so they are applied to the BASE
+    score and the tier is added afterwards, as a flag that nothing multiplies.
+    """
+    fix = corpus.Corpus(_tier_cards(), min_idf=0.0)
+    hits = fix.search("wound", limit=5)
+    ids = [h["id"] for h in hits]
+    assert ids and ids[0] == "ab", (
+        "a shelf boost outranked the card that is actually about the subject: " + ", ".join(ids))
+    # the theory is DEMOTED, never suppressed — invariant VI's law still holds on its own shelf
+    assert "th" in ids, "the theories card must still be admitted, just ranked below the answer"
+    assert corpus.THEORY_WEIGHT > 1.0 and corpus.SUBSTANCE_WEIGHT > 1.0
+
+
+def test_X_no_boost_however_large_crosses_the_partition():
+    """AND THE PARTITION WAS BREACHABLE FROM BELOW — the half nobody had tested.
+
+    SUBJECT_TIER is documented as "larger than any reachable TF-IDF score", but the boosts
+    multiplied it, and they multiply an OFF-SUBJECT card's score just as happily: 9x for an exact
+    title, 4x for a full-phrase title, 4x for the theories shelf, 2x for substance. A card that
+    does not hold the subject at all, with a repeated rare word and an exact verse title, reaches
+    several thousand and passes a tier-holder whose own base is near zero. Constructed, not
+    observed — but reachable live, and "a partition, not a weight" has to mean it.
+    """
+    from concordance import growth as _growth
+    assert "John 3:16" in _growth.refs_in_text("zorlaxian John 3:16"), \
+        "the fixture depends on the verse canonicalizer recognising the ref"
+    cards = {
+        # off subject (no "zorlaxian"), but an exact verse title (9x) over a huge repeated-token base
+        "verse": {"id": "verse", "title": "John 3:16", "shelf": "scripture",
+                  "lifecycle_stage": "public", "body": "john " * 1000},
+        # holds the subject, and almost nothing else: a short note, no boost of any kind
+        "z": {"id": "z", "title": "A zorlaxian note", "shelf": "gutenberg",
+              "lifecycle_stage": "public", "body": "zorlaxian"},
+        "j": {"id": "j", "title": "Another john", "shelf": "gutenberg",      # so john loses the seat
+              "lifecycle_stage": "public", "body": "john was here"},
+    }
+    for i in range(300):
+        cards[f"d{i}"] = {"id": f"d{i}", "title": f"Decoy volume {i}", "shelf": "gutenberg",
+                          "body": f"an unrelated passage about decoy subject {i}",
+                          "lifecycle_stage": "public"}
+    fix = corpus.Corpus(cards, min_idf=0.0)
+    asked = {"zorlaxian", "john"}
+    assert fix._subject_of(asked, fix._idf(asked)) == "zorlaxian", "the fixture lost its seat"
+    hits = fix.search("zorlaxian John 3:16", limit=5)
+    ids = [h["id"] for h in hits]
+    assert ids and ids[0] == "z", (
+        "a boosted off-subject card crossed the subject partition: " + ", ".join(ids))
+    assert "verse" not in ids, "and the tier filter must still serve only subject-holders"

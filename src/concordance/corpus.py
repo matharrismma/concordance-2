@@ -1272,8 +1272,30 @@ class Corpus:
         def _finalize(c: dict, s: float) -> float:
             """The exact-title / survival / theory boosts — applied IDENTICALLY to a resident
             candidate and to a frozen hit pulled from the shard, so the two sources rank on one
-            scale. Boosts multiply the base score, so they only reorder WITHIN the tier a card
-            already earned; they can never smuggle an off-subject hit into the subject tier.
+            scale. `s` IS THE BASE SCORE, with the subject tier already taken off it (`_rank_key`
+            below): these boosts order cards WITHIN their tier and do nothing else.
+
+            THEY USED TO MULTIPLY THE TIER CONSTANT, AND THAT IS WHAT DECIDED THE ANSWER. `_score`
+            adds SUBJECT_TIER (1000.0) and this ran on the sum, so a `theories` card scored
+            (base + 1000) x 4 = ~4000 while a card plainly about the subject scored ~1000-2000:
+            inside the tier the ranking WAS THE SHELF, and relevance was rounding error. Measured
+            over 68 real questions 2026-11-17, every number from the engine's own scorer:
+
+                "i want to end my life"                 Agricultural science (base 2.94)
+                                                  over  17.2 End-of-Life Care (base 24.35)
+                "how do I keep a wound from bleeding"   The double helix (base 11.8)
+                                                  over  8.3 Wound Management (base 58.2)
+                "a man who built his house on the rock" Hydrologic cycle (base 9.9)
+                                                  over  John Gill on Deuteronomy 32:4 (base 21.6)
+
+            26 of the 68 were led by a theories card whose term frequency of the subject was ONE
+            OR TWO — a passing mention. In every case the demoted card had the HIGHER base score,
+            so this is not a question of taste: the order contradicted the engine's own measure of
+            relevance. No constant changed; the arithmetic was in the wrong order.
+
+            The same correction makes three other comments in this file true, which they were not:
+            the stigmergy boost, the repellent damp and the alignment damp all say they act WITHIN
+            a tier, and all three were multiplying the tier constant too.
 
             The pronunciation guard: a pron card's title IS its headword for all ~125k of them, so
             an exact-title match is an INDEX COLLISION, not evidence of definitiveness (without it
@@ -1310,6 +1332,22 @@ class Corpus:
             s *= _rep.damp_factor(c.get("id"))
             return s
 
+        def _rank_key(c: dict, s: float, damp: float = 1.0):
+            """THE PARTITION IS A SORT KEY, NOT A MAGIC NUMBER: (holds the subject, boosted score).
+
+            SUBJECT_TIER was a float chosen "larger than any reachable TF-IDF score", and the
+            boosts then multiplied it — which inverted the order inside the tier (see `_finalize`)
+            and left the partition breachable from BELOW as well: a card that does NOT hold the
+            subject, at base 20 with the exact-title (9x) and full-phrase (4x) boosts, reaches 720,
+            and nothing in the arithmetic kept it under a tier-holder whose own base was near zero.
+            A tuple cannot be out-shouted by any multiplier, however large, which is what "a
+            partition, not a weight" claimed from the start. `_score` keeps adding the constant —
+            its contract is pinned by the invariants and read by /systems — and the constant is now
+            only ever a FLAG here, never a quantity anything multiplies."""
+            tiered = s >= SUBJECT_TIER
+            return (1 if tiered else 0,
+                    _finalize(c, s - SUBJECT_TIER if tiered else s) * damp)
+
         for cid in self._candidates(
                 query_tokens, seat_family=(self.subject_family(seat) if seat else None)):
             c = self.cards.get(cid)
@@ -1323,7 +1361,7 @@ class Corpus:
             if s > 0:
                 keep, damp = _align.verdict(c, align_ctx)   # gate by agreement (no-op when off)
                 if keep:
-                    scored.append((_finalize(c, s) * damp, c))
+                    scored.append((_rank_key(c, s, damp), c))
 
         # FROZEN FREIGHT RIDES THE SHARD, SCORED ON ONE SCALE. Frozen shelves are no longer in the
         # resident index, so their hits come from the shard FTS (which indexes the full text) and are
@@ -1355,11 +1393,11 @@ class Corpus:
                 keep, damp = _align.verdict(hit, align_ctx)   # gate by agreement (no-op when off)
                 if not keep:
                     continue
-                scored.append((_finalize(hit, s) * damp, hit))
+                scored.append((_rank_key(hit, s, damp), hit))
                 have.add(hit.get("id"))
         # a TOTAL order: equal scores tie-break on id, so the ranking is a function of the
         # cards and the query alone — never of construction order (invariant I)
-        scored.sort(key=lambda x: (-x[0], str(x[1].get("id") or "")))
+        scored.sort(key=lambda x: (-x[0][0], -x[0][1], str(x[1].get("id") or "")))
 
         # NEVER PAD THE TAIL WITH CARDS THAT MISS THE SUBJECT. The partition put subject-holders
         # in the upper tier, but ranking alone still let the leftovers fill the limit: live,
@@ -1372,8 +1410,8 @@ class Corpus:
         # eight with two lies, and the count then means what it says. (The shard merge already
         # excludes rather than demotes; this makes both halves of the rule behave alike, which
         # they did not, and that inconsistency is what reached the reader.)
-        if scored and scored[0][0] >= SUBJECT_TIER:
-            scored = [(s, c) for s, c in scored if s >= SUBJECT_TIER]
+        if scored and scored[0][0][0]:
+            scored = [(k, c) for k, c in scored if k[0]]
         out = [c for _s, c in scored[:max(1, int(limit))]]
         # STIGMERGY DEPOSIT (gated OFF → no-op): the cards this search returned proved retrieval-worthy,
         # so lay a little pheromone on them — aggregate, no identity, no query. Trails that serve
