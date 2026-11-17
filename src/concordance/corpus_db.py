@@ -428,6 +428,38 @@ than so such about into over under again more most other some any all each own s
 should would will shall may might must have has had not no nor only just also too both few
 """.split())
 
+# THE CLITIC IS NOT A SUBJECT — the stop list's own rule, one step further, measured 2026-11-16.
+#
+# `_STOP` holds `i`, `am`, `can`, `not`, `that`, `is` — and not one CONTRACTION of them. In a
+# public-domain keeping, which spells them out, that gap inverts the ranking it was built to
+# protect: `i'm` appears in ~22 of 923,965 cards, so it earns the highest IDF in the whole
+# keeping (10.645, above `doctor` 7.647 and `grief` 7.286), takes the subject seat, and hands
+# every card holding it a +1000 tier. Five pastoral questions — marriage, grief, money, sickness,
+# doubt — came back with the SAME six cards: Dorothy Parker's "Men I'm Not Married To" and a
+# pronunciation card titled `i'm`. The engine failed hardest exactly where a person speaks
+# naturally about their own trouble.
+#
+# This needs no list of contractions. Every clitic spells out to a word the stop list ALREADY
+# holds — 'm→am, 're→are, 've→have, 'll→will, 'd→would, n't→not — so a token wearing one carries
+# no subject of its own. `'s` is the one ambiguous ending, because it is also the POSSESSIVE,
+# whose subject is the possessor ("the shepherd's rod" is about the shepherd): it carries a
+# subject unless its head is itself a stopword ("that's", "he's", "what's").
+_CLITICS = frozenset({"m", "s", "t", "d", "re", "ve", "ll"})
+
+
+def carries_subject(token: str) -> bool:
+    """False iff this token is a contraction of function words — a stopword wearing an apostrophe.
+
+    A possessive is kept (its head is the subject); so is any apostrophe that is not a clitic at
+    all (`o'clock`, `d'Artagnan`). The judgement is about the TOKEN, never about the question: a
+    refused token is simply not a candidate to BE the subject."""
+    if "'" not in token:
+        return True
+    head, _, tail = token.rpartition("'")
+    if not head or tail not in _CLITICS:
+        return True
+    return tail == "s" and head not in _STOP
+
 
 def _match(query: str, mode: str = "all") -> str:
     """Build the FTS expression. `mode="all"` requires every content word; `"any"` is the fallback.
@@ -453,11 +485,98 @@ def _match(query: str, mode: str = "all") -> str:
     matching everything is not an answer.
     """
     terms = [t.lower() for t in _WORD.findall(query or "")]
-    content = [t for t in terms if t not in _STOP]
+    # ONE RULE, BOTH MATCHERS. A contraction is a stopword wearing an apostrophe, so it is dropped
+    # here for the same reason the stop list is: nothing may be retrieved on its strength. It helps
+    # in both modes — an AND match no longer demands a word the keeping spells out (which returned
+    # nothing and forced the loose fallback), and an OR match no longer offers it as a hook.
+    content = [t for t in terms if t not in _STOP and carries_subject(t)]
     if not content:
         return ""
     join = " AND " if mode == "all" else " OR "
     return join.join(f'"{t}"' for t in content)
+
+
+_SENSES_MEMO: Dict[tuple, Dict[str, bool]] = {}
+
+
+def noun_senses(shelf: str = "dictionary") -> Dict[str, bool]:
+    """Each single-word headword on the dictionary shelf -> does the keeping give it a NOUN sense?
+
+    THE KEEPING ALREADY KNOWS WHAT WORD CLASS A WORD IS, and says so in every one of the 149,490
+    dictionary cards' own bodies, sense by sense:
+
+        afford: (verb) be able to spare or give up · (verb) have the financial means to ...
+        grief:  (noun) intense sorrow caused by loss of a loved one ...
+
+    Measured 2026-11-16 on the live keeping: 82,999 single-word headwords, every one marked,
+    57,583 with a noun sense and 25,416 known only as a verb, adjective or adverb — read in 1.2s.
+    That is the one thing that separated every right subject seat from every wrong one, where no
+    statistic over titles, bodies or document frequency could (`taoism` and `afford` are
+    indistinguishable by all three). Read here because the dictionary shelf may be FROZEN, in
+    which case no body is resident to read it from; `Corpus` reads the resident half itself and
+    merges, so the table is complete either way.
+
+    Empty when no shard is present — the caller's gate then admits every word, which is exactly
+    the behaviour before this existed. Never raises."""
+    out: Dict[str, bool] = {}
+    if not available():
+        return out
+    try:
+        thaw_for(shelf)
+        _ensure_core()
+        # MEMOIZED PER SET OF THAWED FILES. The shelf has no index in the shard, so each call is a
+        # full scan of the freight; within one process the answer cannot change unless the files
+        # behind it do, and the key is those files — so a shard re-registered at a new path (the
+        # failure `_conn` documents) gets a fresh read rather than a stale table.
+        key = (shelf, tuple(sorted(_OPEN.items())))
+        with _LOCK:
+            memo = _SENSES_MEMO.get(key)
+        if memo is not None:
+            return dict(memo)
+        # EVERY THAWED SHARD IS ASKED, exactly as `search` asks them. Routing by name alone
+        # (`_conn(shard_of(shelf))`) returns nothing in SINGLE mode, where one file answers for
+        # every shelf and registers under the name "all" — measured empty on the live corpus.db
+        # before this was written this way, which would have left the gate silently standing down
+        # on any node whose dictionary shelf is frozen (the box's own shape).
+        for name, conn in _conns():
+            try:
+                rows = conn.execute("select title, json from cards where shelf = ?", (shelf,))
+            except sqlite3.Error:
+                continue
+            got = 0
+            for title, blob in rows:
+                t = (title or "").strip().lower()
+                if not t or " " in t:
+                    continue                   # a phrase headword names no single word
+                try:
+                    body = str((json.loads(blob) or {}).get("body") or "")
+                except ValueError:
+                    continue
+                has = senses_of(body)
+                if has is not None:
+                    out[t] = has
+                    got += 1
+            if got:
+                _touch(name)
+        with _LOCK:
+            _SENSES_MEMO[key] = dict(out)
+    except (sqlite3.Error, ValueError, TypeError):
+        return out
+    return out
+
+
+def senses_of(body: Any) -> Optional[bool]:
+    """Does this dictionary body mark a NOUN sense? None when it marks no word class at all.
+
+    Substring tests, not a parse: the markers are written by the minter in one fixed form. None
+    (rather than False) for an unmarked body is the whole safety of the gate above — a card that
+    says nothing about word class must never be read as saying "not a noun"."""
+    s = body if isinstance(body, str) else ""
+    if "(noun)" in s:
+        return True
+    if "(verb)" in s or "(adjective)" in s or "(adverb)" in s:
+        return False
+    return None
 
 
 def search(query: str, limit: int = 25, include_witness: bool = True) -> List[dict]:

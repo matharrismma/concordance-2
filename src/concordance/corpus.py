@@ -483,6 +483,11 @@ class Corpus:
         # limit search. Cleared on any add_card (the keeping changed). Fresh copies out, so it is read-only.
         self._search_cache: Dict[Any, tuple] = {}
         self._search_lock = threading.Lock()
+        # THE WORD-CLASS TABLE behind the subject seat (`_senses`) — built once per corpus, on first
+        # use or warmed at boot, never persisted: it is read off the keeping's own dictionary shelf,
+        # so a restored corpus rebuilds it from the same cards in a second or two.
+        self._senses_memo: Optional[Dict[str, bool]] = None
+        self._senses_lock = threading.Lock()
         # THE ADD LOCK (2026-11-15): every live add (add_cards) holds it, so writers are serialized; the
         # build holds it from the moment this corpus becomes the default until its cache save ends, and the
         # substance walk (ops.substance_of_the_keeping) takes its snapshot and settles under it.
@@ -582,6 +587,8 @@ class Corpus:
         c._search_cache = {}
         c._search_lock = threading.Lock()
         c._add_lock = threading.Lock()
+        c._senses_memo = None            # rebuilt from the dictionary shelf, never persisted
+        c._senses_lock = threading.Lock()
         # The public order holds every public resident id and every frozen id, once each (corpus_cache.save
         # refuses an id that is both), and a saved corpus took no live add (the build holds the add lock until
         # its save ends) — so the kept public resident count is exactly their difference, with no walk.
@@ -1010,17 +1017,132 @@ class Corpus:
             fam.add(subject[:-1])
         return fam
 
+    def _senses(self) -> Dict[str, bool]:
+        """Headword -> does the keeping's own dictionary give it a NOUN sense. Built once, lazily.
+
+        Resident dictionary cards are read here; a FROZEN dictionary shelf is read from the shard
+        (`corpus_db.noun_senses`), so the table is the same however the shelf is held. A keeping
+        with no dictionary shelf — every fixture — gets an EMPTY table, and `_seatable` then
+        admits every word, which is exactly the behaviour before the gate existed. Fail-open
+        everywhere: an unreadable shelf is "no table", never a failed search.
+
+        Not persisted with the rest of the index: it is read off cards the corpus already holds,
+        so a restored corpus rebuilds it in a second or two, and a change to the dictionary shelf
+        can never be contradicted by a stale copy in a cache file."""
+        memo = self._senses_memo
+        if memo is not None:
+            return memo
+        with self._senses_lock:
+            if self._senses_memo is not None:
+                return self._senses_memo
+            from . import corpus_db
+            table: Dict[str, bool] = {}
+
+            def _walk(values) -> None:
+                for card in values:
+                    if card.get("shelf") != "dictionary":
+                        continue
+                    t = str(card.get("title") or "").strip().lower()
+                    if not t or " " in t:
+                        continue              # a phrase headword names no single word
+                    has = corpus_db.senses_of(card.get("body"))
+                    if has is not None:
+                        table[t] = has
+
+            try:
+                _walk_whole(self.cards, _walk, "values")
+            except Exception:  # noqa: BLE001
+                pass
+            # THE SHARD IS ONLY READ WHEN THE SHELF IS NOT HELD. Reading it unconditionally cost
+            # seconds at every boot for a table already in RAM — and the shard has no index on
+            # `shelf`, so asking it is a full scan of the freight. Resident first, disk only if
+            # the dictionary shelf is frozen (the two cannot both hold it: freezing is per shelf).
+            if not table:
+                try:
+                    table.update(corpus_db.noun_senses())
+                except Exception:  # noqa: BLE001
+                    pass
+            self._senses_memo = table
+            return table
+
+    @staticmethod
+    def _lemma_guesses(token: str) -> tuple:
+        """Forms of this token to LOOK UP — never a rewrite of what was asked.
+
+        `overwhelmed` and `losing` are not dictionary headwords, so a lookup on the token alone
+        says "unknown" and the gate below rightly lets an unknown word through. Their lemmas ARE
+        headwords, and verbs. This is the same naive step `_present_form` already takes for
+        trailing s/es, kept just as naive: only the forms a reader would recognise, and the asked
+        token is always tried FIRST, so a word the dictionary knows in its own right (`building`,
+        `wedding`, `feeling`) is never judged by its stem."""
+        out = [token]
+        if token.endswith("es") and len(token) > 4:
+            out.append(token[:-2])
+        if token.endswith("s") and len(token) > 3:
+            out.append(token[:-1])
+        if token.endswith("ing") and len(token) > 5:
+            out.extend((token[:-3], token[:-3] + "e"))
+        if token.endswith("ed") and len(token) > 4:
+            out.extend((token[:-2], token[:-2] + "e"))
+        return tuple(out)
+
+    def _seatable(self, token: str) -> bool:
+        """May this word hold the subject seat — can the keeping be ABOUT it?
+
+        THE SEAT IS DECISIVE BY CONSTRUCTION (`SUBJECT_TIER` is larger than any reachable TF-IDF
+        score), so who holds it decides the answer. `_subject_of` gave it to the rarest asked word,
+        and measured on the live keeping 2026-11-16 that is not the same thing as the subject:
+
+            "I'm sick and I can't afford to see a doctor"   seat: `i'm`     (idf 10.645)
+            ... with contractions stopped                   seat: `afford`  (idf 8.21)
+
+        and `afford` is a word the keeping holds exactly one card about — a 207-byte dictionary
+        gloss. Both failures are the same failure: RARITY IS NOT SUBJECTHOOD. The keeping is not
+        about affording, or struggling, or coping, or being overwhelmed; it is about doctors,
+        grief, marriage, a budget.
+
+        Two refusals, each read off what the keeping ALREADY records, never a statistic invented
+        here — title counts, body lengths and document frequency were all measured first and all
+        failed, because `taoism` (no multi-word title, 549-byte body) and `afford` (none, 251) are
+        indistinguishable by every one of them:
+
+          * a CONTRACTION carries no subject (`corpus_db.carries_subject`) — the stop list's own
+            rule, since every clitic spells out to a word that list already holds;
+          * a word the keeping's DICTIONARY knows only as a verb, adjective or adverb is not what
+            a question is about. Nominal is what "about" means. 25,416 of the 82,999 single-word
+            headwords are refused this way, and the gate is a DENYLIST with a safe default: a word
+            the dictionary never held — a proper noun, a foreign word, `baofeng`, `zoroaster` — is
+            admitted, so the gate can never refuse the seat to a subject it simply does not know.
+        """
+        from .corpus_db import carries_subject
+        if not carries_subject(token):
+            return False
+        senses = self._senses()
+        if not senses:
+            return True                       # no dictionary shelf: the gate stands down entirely
+        for form in self._lemma_guesses(token):
+            has = senses.get(form)
+            if has is not None:
+                return has
+        return True
+
     def _subject_of(self, query_tokens: set, idf: Dict[str, float]) -> Optional[str]:
-        """The rarest query word — what the question is ACTUALLY about.
+        """The rarest query word THE KEEPING CAN BE ABOUT — what the question is actually about.
 
         "Wesleyan Church" is about Wesleyans. "Church" is in half the library. And the seat must
         be held by a form the corpus CONTAINS: an absent token has df=0, which _idf reads as
         maximal rarity, so without the present-form step a typo or a plural would always win the
         seat and then partition out everything (the Southern Baptists failure).
+
+        Rarity alone, though, is not subjecthood — see `_seatable` for the measured proof and the
+        two refusals. The gate only ever MOVES the seat between words that were asked: when it
+        refuses every one of them it stands aside and the rarest takes the seat as before, because
+        a gate that cannot name a better subject has no business abolishing the partition.
         """
         if not query_tokens:
             return None
-        chosen = max(query_tokens, key=lambda t: idf.get(t, 0.0))
+        seatable = {t for t in query_tokens if self._seatable(t)}
+        chosen = max(seatable or query_tokens, key=lambda t: idf.get(t, 0.0))
         return self._present_form(chosen)
 
     def _score(self, card: dict, query_tokens: set, idf: Dict[str, float],
@@ -2211,6 +2333,20 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                                     "corpus_cache_file": (str(cc_path) if cc_path is not None else None),
                                     "rss_kb_cache_delta": _delta(_r0, _r1), "rss_kb_load_delta": _delta(_r1, _r2),
                                     "rss_kb_index_delta": _delta(_r2, _r3), "rss_kb_total_delta": _delta(_r0, _r3)})
+    # THE WORD-CLASS TABLE behind the subject seat, warmed HERE so no reader ever pays for it and a
+    # frozen dictionary shelf is read once at boot rather than inside a search. Memoized, so every
+    # later call through this function is one attribute read. Timed into the boot phases like the
+    # rest ("one number cannot be optimized; its parts can"). A failure leaves the table empty and
+    # the gate standing down, which is the behaviour before it existed.
+    if _DEFAULT._senses_memo is None:
+        from time import perf_counter as _pcw
+        _tw = _pcw()
+        try:
+            n_senses = len(_DEFAULT._senses())
+        except Exception:  # noqa: BLE001
+            n_senses = -1
+        LOAD_PHASES["word_class_ms"] = round((_pcw() - _tw) * 1000.0, 1)
+        LOAD_PHASES["word_class_headwords"] = n_senses
     return _DEFAULT
 
 

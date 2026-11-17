@@ -228,3 +228,114 @@ def test_VIII_a_pronunciation_card_never_leads_a_bare_subject_lookup():
     only_pron = corpus.Corpus({k: v for k, v in cards.items() if k != "defn"}, min_idf=0.0)
     solo = only_pron.search("gravity", limit=3)
     assert solo and solo[0]["id"] == "pron", "with nothing else held, the pronunciation card must still lead"
+
+
+# ── IX. THE SEAT IS A SUBJECT ─────────────────────────────────────────────────────────────────
+# Measured live on 923,965 cards, 2026-11-16: `i'm` is the RAREST token in a natural first-person
+# sentence (idf 10.645, above `doctor` 7.647 and `grief` 7.286) because a public-domain keeping
+# spells contractions out, so it took the subject seat — and its +1000 tier — for all five
+# pastoral questions at once. Marriage, grief, money, sickness and doubt each came back with the
+# same six cards: Dorothy Parker's "Men I'm Not Married To" and a pronunciation card titled `i'm`.
+# Stopping contractions moved the seat to `afford`, which the keeping holds one 207-byte gloss
+# about, and the answers were still wrong. Rarity is not subjecthood, and this fixture is that
+# failure in miniature: the engine's own dictionary shelf says which words it can be ABOUT.
+
+def _seat_cards():
+    cards = {}
+    for i in range(25):                      # decoys: `see` is common here, as it is in the keeping
+        cards[f"d{i}"] = {"id": f"d{i}", "title": f"Decoy volume {i}", "shelf": "gutenberg",
+                          "body": f"an unrelated passage about decoy subject {i}; you can see it",
+                          "lifecycle_stage": "public"}
+    cards["parker"] = {"id": "parker", "title": "Men I'm Not Married To", "shelf": "gutenberg",
+                       "body": "I'm not married to any of them, and I'm quite sure of it.",
+                       "lifecycle_stage": "public"}
+    for i in range(2):
+        cards[f"aff{i}"] = {"id": f"aff{i}", "title": f"A Thin Purse {i}", "shelf": "gutenberg",
+                            "body": "they could not afford the fare, and could not afford to wait.",
+                            "lifecycle_stage": "public"}
+    for i in range(4):
+        cards[f"doc{i}"] = {"id": f"doc{i}", "title": f"The Country Doctor {i}", "shelf": "gutenberg",
+                            "body": "the doctor came at once to the sick man and would take no fee.",
+                            "lifecycle_stage": "public"}
+    cards["sick5"] = {"id": "sick5", "title": "A Long Convalescence", "shelf": "gutenberg",
+                      "body": "the sick man recovered slowly through the winter.", "lifecycle_stage": "public"}
+    cards["zorl"] = {"id": "zorl", "title": "Zorlaxia and its people", "shelf": "gutenberg",
+                     "body": "zorlaxia is a fictional land invented for this test.",
+                     "lifecycle_stage": "public"}
+    # the keeping's own lexicography — the ONE thing that separates a subject from a verb
+    for w, body in (("afford", "afford: (verb) have the financial means to do something"),
+                    ("doctor", "doctor: (noun) a licensed medical practitioner"),
+                    ("sick", "sick: (adjective) not in good health - (noun) people who are sick"),
+                    ("overwhelm", "overwhelm: (verb) overcome by superior force"),
+                    ("build", "build: (verb) make or form by combining materials"),
+                    ("building", "building: (noun) a structure that has a roof and walls")):
+        cards[w] = {"id": w, "title": w, "shelf": "dictionary", "body": body,
+                    "lifecycle_stage": "public"}
+    return cards
+
+
+def test_IX_the_seat_is_a_subject_never_a_contraction_or_a_verb():
+    fix = corpus.Corpus(_seat_cards(), min_idf=0.0)
+    asked = {"i'm", "sick", "can't", "afford", "see", "doctor"}
+    idf = fix._idf(asked)
+
+    # the trap, stated: ungated, the seat goes to a contraction — in the fixture as in the keeping
+    ungated = max(asked, key=lambda t: idf.get(t, 0.0))
+    assert ungated in ("can't", "i'm"), f"the fixture no longer reproduces the trap (rarest: {ungated!r})"
+
+    assert fix._subject_of(asked, idf) == "doctor", (
+        "the seat left the subject: " + repr(fix._subject_of(asked, idf)))
+
+    # and the whole answer follows the seat: the Parker card is not merely demoted, the subject
+    # partition excludes it, because nothing in it is about a doctor
+    hits = fix.search("I'm sick and I can't afford to see a doctor", limit=5)
+    assert hits, "a question the keeping can answer returned nothing"
+    assert hits[0]["id"].startswith("doc"), (
+        "top hit is not about the subject: " + ", ".join(h["id"] for h in hits))
+    assert all(h["id"] != "parker" for h in hits), (
+        "a card held only by a contraction reached the answer: " + ", ".join(h["id"] for h in hits))
+
+
+def test_IX_the_gate_refuses_only_what_the_keeping_calls_a_non_noun():
+    from concordance.corpus_db import carries_subject
+    fix = corpus.Corpus(_seat_cards(), min_idf=0.0)
+
+    # a clitic spells out to a word the stop list already holds — no list of contractions needed
+    for t in ("i'm", "can't", "don't", "that's", "he's", "i've", "we're", "i'd", "i'll", "isn't"):
+        assert not carries_subject(t), f"{t!r} carries no subject of its own"
+    # a POSSESSIVE does (its head is the subject), and an apostrophe that is not a clitic is untouched
+    for t in ("shepherd's", "god's", "o'clock", "doctor", "grief"):
+        assert carries_subject(t), f"{t!r} names something"
+
+    assert fix._seatable("doctor") and not fix._seatable("afford")
+    assert not fix._seatable("i'm")
+    # an INFLECTED form is judged by its lemma — looked up, never rewritten — and the token's own
+    # entry is always tried first, so a word the dictionary knows in its own right is safe
+    assert not fix._seatable("overwhelmed"), "a participle of a verb is not a subject"
+    assert fix._seatable("building"), "its own noun sense must outrank its stem's verb sense"
+    # THE SAFE DEFAULT: a word the dictionary never held is admitted, so the gate can never refuse
+    # the seat to a subject it simply does not know (`taoism`, `carburetor`, `baofeng`, `zoroaster`
+    # are all measured cases — one-word titles, short bodies, unknown to no fault of their own)
+    assert fix._seatable("zorlaxia")
+    assert fix._subject_of({"zorlaxia", "doctor"}, fix._idf({"zorlaxia", "doctor"})) == "zorlaxia"
+
+    # AND IT STANDS ASIDE RATHER THAN ABOLISH THE PARTITION: when every asked word is refused, the
+    # rarest takes the seat exactly as before — a gate that cannot name a better subject has no
+    # business removing the one protection the ranking has.
+    both_refused = {"afford", "can't"}
+    assert fix._subject_of(both_refused, fix._idf(both_refused)) is not None
+
+    # a keeping with no dictionary shelf (every other fixture in this file) gates nothing. The shard
+    # half is stubbed out explicitly: whether a built corpus.db sits beside this checkout is an
+    # accident of the machine, and an invariant may not depend on one.
+    from concordance import corpus_db as _cdb
+    _real = _cdb.noun_senses
+    _cdb.noun_senses = lambda shelf="dictionary": {}
+    try:
+        bare = corpus.Corpus(_fixture_cards(), min_idf=0.0)
+        assert bare._senses() == {}
+        assert bare._seatable("afford"), "with no lexicography held, the gate must stand down"
+    finally:
+        _cdb.noun_senses = _real
+
+

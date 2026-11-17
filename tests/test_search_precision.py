@@ -114,6 +114,26 @@ def test_stopwords_never_reach_the_match_expression(shards):
     assert "rigveda" in expr
 
 
+def test_a_contraction_never_reaches_the_match_expression(shards):
+    """A CONTRACTION IS A STOPWORD WEARING AN APOSTROPHE, and the list held not one of them.
+
+    Measured on the live keeping 2026-11-16: because a public-domain corpus spells contractions
+    out, `i'm` sits in ~22 of 923,965 cards and so earns the HIGHEST idf in the whole keeping —
+    above `doctor` and `grief`. On this door that made an AND match demand a word the keeping does
+    not use (nothing returned, falling back to the loose OR) and offered it as a hook in the OR
+    pass. On the resident door it took the subject seat and its +1000 tier. One rule, both doors,
+    and no list of contractions to maintain: every clitic spells out to a word `_STOP` already
+    holds ('m→am, n't→not, 're→are, 've→have, 'll→will, 'd→would).
+    """
+    expr = shards._match("I'm sick and I can't afford a doctor")
+    assert "i'm" not in expr and "can't" not in expr, expr
+    assert '"sick"' in expr and '"doctor"' in expr, expr
+    # A POSSESSIVE is not a contraction — "the shepherd's rod" is about the shepherd — so it stays.
+    assert "shepherd's" in shards._match("the shepherd's rod")
+    # and a question made only of contractions asks about nothing, like one made only of stopwords
+    assert shards._match("I'm, I can't, don't") == ""
+
+
 def test_both_doors_share_one_stopword_list():
     """THE RESIDENT CORPUS HAD THE SAME BUG, and fixing only the shard side did not fix the site.
 
