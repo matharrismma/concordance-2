@@ -103,5 +103,44 @@ def test_language_maps_to_the_right_cube():
     assert readwith.subjects_for_language("Klingon") == "en"     # unknown -> the anchor cube
 
 
+# ── the SPEAKING side must reach the sentence that carries the caller's terms ──────────────────────
+# Measured 2026-11-15 over 68 real questions: all 12 honest gaps were "clauses came back, none carried
+# a query word". The reader returns the SHORTEST sentences first and cuts at `limit` — right for the
+# learner (short = most decodable), wrong for the speaker, who needs the sentence ON THE SUBJECT. A card
+# whose first dozen short sentences are generic hides its one real answer behind the cut.
+
+_BUDGET_BODY = (
+    "The sun was warm. The road was long. He walked on. A dog barked twice. "
+    "The gate stood open. Rain fell at noon. The fire burned low. She said nothing. "
+    "A bell rang once. The bread was fresh. Night came early. The lamp went out. "
+    "A budget is simply a plan that tells your money where to go each month."
+)
+
+
+def test_the_reader_reaches_the_term_carrying_sentence_past_the_shortest_first_cut():
+    plain = readwith.sentences_in(_BUDGET_BODY, require_anchor=False)
+    assert not any("budget" in f["text"].lower() for f in plain)      # today: hidden behind the cut
+    aimed = readwith.sentences_in(_BUDGET_BODY, require_anchor=False, terms={"budget", "money"})
+    assert "budget" in aimed[0]["text"].lower()                       # the carrier comes FIRST
+    assert aimed[0]["carries"] is True and plain[0].get("carries") in (False, None)
+
+
+def test_terms_prefer_and_never_filter_so_a_miss_stays_the_selectors_call():
+    # no sentence carries the term: the reader does not invent and does not go silent — it hands back
+    # what it has, and the APTNESS rung upstream is what turns an empty overlap into an honest gap
+    aimed = readwith.sentences_in(_BUDGET_BODY, require_anchor=False, terms={"carburetor"})
+    plain = readwith.sentences_in(_BUDGET_BODY, require_anchor=False)
+    assert [f["text"] for f in aimed] == [f["text"] for f in plain]
+    assert all(f["carries"] is False for f in aimed)
+
+
+def test_terms_leave_the_teaching_side_exactly_as_it_was():
+    # the learner's side is unchanged: anchors only, shortest first, no terms in play
+    text = "There is a road below. There is a longer road that runs beside the river to the mill."
+    taught = readwith.sentences_in(text, require_anchor=True)
+    assert [f["words"] for f in taught] == sorted(f["words"] for f in taught)
+    assert all("carries" not in f for f in taught)                    # nothing new leaks into teaching
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-q"]))

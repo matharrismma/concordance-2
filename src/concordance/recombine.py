@@ -298,6 +298,26 @@ def resolve_refs(pieces: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 # ── live wiring — speak from the keeping ────────────────────────────────────────────────────────────
 
+def body_reader(subject: str = "en", terms: Optional[set] = None) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+    """REACH (rung 2) as a callable: the verbatim clean sentences of a card's RESIDENT BODY — no ark
+    needed, so a serving node speaks by the cube over the ~substance cards.
+
+    SPEAKING draws from ALL clean sentences (the anchor tags the frame role but is not required), AIMED
+    at the query's own content words so the card's sentence ON THE SUBJECT is reached instead of its
+    dozen shortest. Exposed (not a closure) so a measurement harness reads with the SAME reader
+    production uses — a harness that drifts from the path it measures reports nothing.
+    An ark-equipped node can inject `lambda c: readwith.decodable(c, subject)` to also read whole works."""
+    from . import readwith
+
+    def read(card: Dict[str, Any]) -> Dict[str, Any]:
+        body = str(card.get("body") or "")
+        if not body:
+            return {"found": []}
+        return {"found": readwith.sentences_in(body, subject, require_anchor=False, terms=terms)}
+
+    return read
+
+
 def answer(query: str, *, subject: str = "en", limit: int = 4, top_cards: int = 6,
            search_fn: Optional[Callable[[str], List[Dict[str, Any]]]] = None,
            decodable_fn: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None) -> Dict[str, Any]:
@@ -308,15 +328,9 @@ def answer(query: str, *, subject: str = "en", limit: int = 4, top_cards: int = 
         from . import corpus
         search_fn = lambda q: corpus.search(q, limit=top_cards)          # noqa: E731
     if decodable_fn is None:
-        from . import readwith
-        # REACH (rung 2): read anchor-carrying sentences from the card's RESIDENT BODY — no ark needed, so
-        # a serving node speaks by the cube over the ~substance cards. An ark-equipped node can inject
-        # `lambda c: readwith.decodable(c, subject)` to also read whole works.
-        def decodable_fn(card: Dict[str, Any]) -> Dict[str, Any]:       # noqa: E306
-            body = str(card.get("body") or "")
-            # SPEAKING draws from ALL clean sentences (anchor tags the frame role but is not required),
-            # so the engine reaches far more of the keeping than the teaching (anchor-only) side does.
-            return {"found": readwith.sentences_in(body, subject, require_anchor=False) if body else []}
+        # the reader is aimed with the SAME tokens aptness will score, so a sentence it reaches for is a
+        # sentence the selector can actually use
+        decodable_fn = body_reader(subject, _toks(query) - _STOP)
     cards = search_fn(query) or []
     instances: List[Dict[str, Any]] = []
     for c in cards[:max(1, int(top_cards))]:

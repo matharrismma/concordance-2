@@ -49,6 +49,11 @@ LANG_TO_SUBJECT = {
 }
 
 _ROMAN = {"en", "fr", "de", "la", "es", "pt"}
+# The learner's ceiling is 16 words: past that a sentence stops being decodable by the cube. An AIMED
+# read (the speaking side, `terms=`) is not bounded by what a learner can decode — the sentence that
+# actually answers a question is usually a long one, and the clause splitter downstream quotes a SPAN of
+# it, not the whole sentence. 40 words is where English prose gives way to OCR run-on and list debris.
+AIMED_MAX_WORDS = 40
 _SENT = re.compile(r"[^.!?]*[.!?]")
 _WS = re.compile(r"\s+")
 # OCR wraps a word across a line as "impor- tant" (hyphen + line break -> hyphen + space). Rejoin only
@@ -85,13 +90,23 @@ def _fold(s: str) -> str:
 
 def sentences_in(text: str, subject: str = "en", *, limit: int = 12, min_words: int = 3,
                  max_words: int = 16, scan_chars: int = 500_000,
-                 require_anchor: bool = True) -> List[Dict[str, Any]]:
+                 require_anchor: bool = True, terms: Any = None) -> List[Dict[str, Any]]:
     """The cube's scanner over ANY text: verbatim sentences, each `{text, anchor, words}`, shortest first.
 
     `require_anchor=True` (the TEACHING side) keeps only sentences that carry one of the five embodied
     anchors — the ones a learner can decode by the cube. `require_anchor=False` (the SPEAKING side —
     recombination) keeps every clean sentence, tagging the anchor when present (so the frame can still
-    ORDER them) but not requiring one — which lets the engine speak from far more of the keeping."""
+    ORDER them) but not requiring one — which lets the engine speak from far more of the keeping.
+
+    `terms` AIMS the speaking side. Shortest-first is right for a learner (short = most decodable) and
+    wrong for a speaker: measured 2026-11-15 over 68 real questions, every one of the 12 honest gaps was
+    a card that HAD been retrieved, handing back a dozen short generic sentences while its one sentence
+    on the subject sat behind the cut. Given the caller's content words, each sentence is tagged
+    `carries`, and the carriers are PARTITIONED to the front — shortest-first still ranks inside each
+    part. It prefers, it never filters: when nothing carries a term the same sentences come back, so an
+    honest gap stays the APTNESS rung's call upstream and this reader never decides to go silent.
+    (`max_words` is also widened for an aimed read: the sentence that answers a question is usually a
+    long one, and the learner's 16-word ceiling was never meant to bound what the engine may quote.)"""
     subject = (subject or "en").strip().lower()
     markers = ANCHORS.get(subject) or ANCHORS["en"]
     roman = subject in _ROMAN
@@ -100,6 +115,10 @@ def sentences_in(text: str, subject: str = "en", *, limit: int = 12, min_words: 
         pats = [(m, re.compile(r"\b" + re.escape(_fold(m)) + r"\b")) for m in markers]
     else:
         pats = [(m, _fold(m)) for m in markers]
+    aim = {_fold(t) for t in (terms or ()) if t}
+    tpats = [re.compile(r"\b" + re.escape(t) + r"\b") for t in sorted(aim)] if aim else []
+    if aim:
+        max_words = max(max_words, AIMED_MAX_WORDS)
     found: List[Dict[str, Any]] = []
     seen = set()
     for raw in _SENT.findall(text):
@@ -121,8 +140,15 @@ def sentences_in(text: str, subject: str = "en", *, limit: int = 12, min_words: 
         if require_anchor and not anchor:
             continue
         seen.add(key)
-        found.append({"text": s, "anchor": anchor, "words": n})
-    found.sort(key=lambda x: x["words"])       # shortest first — the most decodable
+        item: Dict[str, Any] = {"text": s, "anchor": anchor, "words": n}
+        if tpats:
+            item["carries"] = any(p.search(fs) for p in tpats)
+        found.append(item)
+    if tpats:
+        # PARTITION, then rank inside: a total order on length cannot put "on the subject" above "short"
+        found.sort(key=lambda x: (0 if x["carries"] else 1, x["words"]))
+    else:
+        found.sort(key=lambda x: x["words"])   # shortest first — the most decodable
     return found[:limit]
 
 
@@ -151,4 +177,5 @@ def decodable(card: Dict[str, Any], subject: str = "en", *, limit: int = 12,
                      "or choose another text.")}
 
 
-__all__ = ["decodable", "sentences_in", "subjects_for_language", "ANCHORS", "LANG_TO_SUBJECT"]
+__all__ = ["decodable", "sentences_in", "subjects_for_language", "ANCHORS", "LANG_TO_SUBJECT",
+           "AIMED_MAX_WORDS"]

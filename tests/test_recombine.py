@@ -213,5 +213,29 @@ def test_answer_reads_from_resident_body_no_ark():
     assert "A Field Manual" in r["sources"]                             # spoke from the resident body, no ark
 
 
+def test_answer_reaches_the_cards_on_subject_sentence_not_its_shortest():
+    # Measured 2026-11-15: all 12 honest gaps over 68 real questions were cards that HAD been retrieved
+    # and whose on-subject sentence sat behind the reader's shortest-first cut. answer() now aims the
+    # reader with the same tokens aptness scores, so what it reaches for is what the selector can use.
+    card = {"title": "A Steward's Handbook", "id": "c1",
+            "body": ("The sun was warm. The road was long. He walked on. A dog barked twice. "
+                     "The gate stood open. Rain fell at noon. The fire burned low. She said nothing. "
+                     "A bell rang once. The bread was fresh. Night came early. The lamp went out. "
+                     "This is a budget: a plan that tells your money where to go before the month begins.")}
+    r = recombine.answer("how do I budget", search_fn=lambda q: [card])
+    assert r["found"] is True
+    assert "budget" in r["passage"].lower()                             # the sentence ON THE SUBJECT
+    assert "dog barked" not in r["passage"]                             # not the dozen shortest
+
+
+def test_an_aimed_read_still_leaves_a_real_miss_a_miss():
+    # aiming must widen REACH, never manufacture an answer: a card with nothing on the subject still
+    # produces an honest gap, because APTNESS — not the reader — is what decides to stay silent
+    card = {"title": "A Steward's Handbook", "id": "c1",
+            "body": "The sun was warm. The road was long. He walked on. A dog barked twice."}
+    r = recombine.answer("how do I fix a carburetor", search_fn=lambda q: [card])
+    assert r["found"] is False and r["instances"] >= 1                  # it read, and it still said no
+
+
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))
