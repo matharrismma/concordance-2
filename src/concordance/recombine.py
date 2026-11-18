@@ -326,7 +326,22 @@ def answer(query: str, *, subject: str = "en", limit: int = 4, top_cards: int = 
     Dependencies are injected for tests; production defaults are the live corpus + reader."""
     if search_fn is None:
         from . import corpus
-        search_fn = lambda q: corpus.search(q, limit=top_cards)          # noqa: E731
+        from . import faces as _faces
+
+        def search_fn(q):                                                # noqa: E306
+            # THE REGION, WHEN IT IS CLEAR. Measured 2026-11-18: a reader's own words and a
+            # librarian's domain terms reach DISJOINT parts of this keeping — 8 of 12 failing
+            # questions shared 0 of 5 cards — so the reader's phrasing, ranked over everything,
+            # lands on whatever is most ABOUT its words (a headword gloss, a Victorian novel)
+            # instead of what answers it. The faces already carry the owner's curated region per
+            # life-domain and `compose` has always gathered inside it; this door did not, so the
+            # prose a family actually reads was the one composed from the unscoped keeping.
+            # A confident route (faces.confident_route: fitness >= 2, no tie) scopes the search to
+            # that region; anything less falls through to the unscoped search, unchanged.
+            fid = _faces.confident_route(q)
+            if fid is None:
+                return corpus.search(q, limit=top_cards)
+            return _faces.gather(fid, q, limit=top_cards)
     if decodable_fn is None:
         # the reader is aimed with the SAME tokens aptness will score, so a sentence it reaches for is a
         # sentence the selector can actually use

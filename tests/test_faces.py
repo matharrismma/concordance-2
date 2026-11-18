@@ -452,6 +452,81 @@ def test_physician_catches_sick_and_doctor():
     assert faces.route("I'm sick and I can't afford to see a doctor") == "face_physician"
 
 
+def test_confident_route_refuses_a_one_word_fit():
+    """`route` always answers; `confident_route` answers only when the fit is unmistakable.
+
+    Every wrong route measured over 112 real questions (2026-11-18) sat at fitness 1, tripped by one
+    common scope word. A caller that RESTRICTS retrieval to the region must not act on those, because
+    there a wrong route costs the reader the answer and not merely the manner."""
+    # fitness 1 — `believe` (Shepherd), `water` (Social Worker), `what is` (Tutor): all declined
+    assert faces.confident_route("what did the stoics believe") is None
+    assert faces.confident_route("how much does a gallon of water weigh") is None
+    assert faces.confident_route("the current price of Apple stock") is None
+    assert faces.confident_route("the weather is nice") is None          # no fit at all
+    assert faces.confident_route("") is None                            # nothing to route
+    # and it still answers the clear ones
+    assert faces.confident_route(
+        "how do I build a shed — the framing, the foundation, and the wiring") == "face_builder"
+    assert faces.confident_route(
+        "how do I grow a garden — the soil, the compost, and when to plant") == "face_gardener"
+    assert faces.confident_route(
+        "my marriage is in conflict and I'm overwhelmed with grief — how do I cope") == "face_counselor"
+    assert faces.confident_route("why does the inverse square law hold, derive it") == "face_theorist"
+
+
+def test_confident_route_declines_a_tie():
+    """A tie asks rather than guesses — the rule domain_resolver.resolve_domain already follows."""
+    scores = {"face_a": 3, "face_b": 3}
+    monkey = dict(faces._FACES)
+    try:
+        faces._FACES.clear()
+        faces._FACES.update({"face_a": {"scope": ["alpha", "beta", "gamma"], "shelves": set()},
+                             "face_b": {"scope": ["alpha", "beta", "gamma"], "shelves": set()}})
+        assert faces._scores("alpha beta gamma") == scores              # a genuine tie
+        assert faces.confident_route("alpha beta gamma") is None
+    finally:
+        faces._FACES.clear()
+        faces._FACES.update(monkey)
+
+
+def test_gather_asks_the_region_first_and_the_keeping_only_if_it_is_empty():
+    """The ONE scoped gather, shared by compose and the weave so they cannot drift."""
+    calls = []
+
+    def empty_region(q, shelves=None, limit=6):
+        calls.append(shelves)
+        return [] if shelves else [{"id": "whole-keeping"}]
+
+    got = faces.gather("face_gardener", "grow a garden", empty_region)
+    assert [c["id"] for c in got] == ["whole-keeping"]                   # fell back
+    assert calls == [set(faces._FACES["face_gardener"]["shelves"]), None]
+
+    calls.clear()
+
+    def answering_region(q, shelves=None, limit=6):
+        calls.append(shelves)
+        return [{"id": "in-region"}]
+
+    got = faces.gather("face_gardener", "grow a garden", answering_region)
+    assert [c["id"] for c in got] == ["in-region"]
+    assert calls == [set(faces._FACES["face_gardener"]["shelves"])]      # the keeping was NOT asked
+    assert faces.gather("face_nonesuch", "x", answering_region) == []    # unknown face: no bluff
+
+
+def test_compose_gathers_through_the_shared_gather():
+    """compose must not carry its own copy of the scoping rule: the region is asked, then the keeping."""
+    calls = []
+
+    def search(q, shelves=None, limit=6):
+        calls.append(shelves)
+        return [] if shelves else [{"id": "f", "title": "From the keeping"}]
+
+    got = faces.compose("face_gardener", "grow a garden", crisis_fn=lambda t: False,
+                        search_fn=search, discern_fn=lambda t: None)
+    assert calls == [set(faces._FACES["face_gardener"]["shelves"]), None]
+    assert [g.get("title") for g in got["gathered"]] == ["From the keeping"]
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(int(pytest.main([__file__, "-q"])))

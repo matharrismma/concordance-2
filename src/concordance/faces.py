@@ -78,7 +78,7 @@ _FACES: Dict[str, Dict[str, Any]] = {
         "name": "the Theorist",
         "scope": ["theory", "why", "principle", "model", "prove", "derive", "equation", "law",
                   "mechanism", "how come", "explain why"],
-        "shelves": {"mathematics", "physics", "chemistry", "forms", "calculations"},
+        "shelves": {"mathematics", "physics", "chemistry", "forms", "calculations", "theories"},
         "verifiers": ["mathematics", "physics", "chemistry"],
         "discernment": False,
         # DEEPENED (2026-10-30, from the operator's O(1)-vs-O(n^2) / "solve it at the floor, the axis
@@ -143,7 +143,7 @@ _FACES: Dict[str, Dict[str, Any]] = {
         "scope": ["parable", "story", "tell me a story", "fable", "figure", "a tale", "analogy",
                   "in a parable", "which parable", "put it in a story", "teach by parable", "proverb",
                   "a saying", "retell", "the story of", "prodigal", "good samaritan", "sower"],
-        "shelves": {"scripture", "narratives", "archetypes", "topical", "voices"},
+        "shelves": {"scripture", "narratives", "archetypes", "topical", "voices", "gutenberg"},
         "verifiers": [],
         "discernment": True,
         "faculty": "parable",
@@ -239,7 +239,7 @@ _FACES: Dict[str, Dict[str, Any]] = {
         "name": "the Builder",
         "scope": ["build", "how do i build", "repair", "install", "construct", "carpentry", "plumbing",
                   "wiring", "framing", "foundation", "renovate", "weld", "the trades"],
-        "shelves": {"construction", "fieldkit", "manufacturing", "labor"},
+        "shelves": {"construction", "fieldkit", "manufacturing", "labor", "physics"},
         "verifiers": [],
         "discernment": False,
         # DEEPENED (2026-10-30, from The Way's construction discipline): built to be repaired; buy what is
@@ -254,7 +254,7 @@ _FACES: Dict[str, Dict[str, Any]] = {
         "scope": ["garden", "gardening", "grow", "plant", "soil", "compost", "harvest", "crop", "seed",
                   "seeds", "orchard", "homestead", "when to plant", "how to grow", "fertilizer",
                   "irrigation", "greenhouse"],
-        "shelves": {"agriculture", "soil_science", "foods", "almanac"},
+        "shelves": {"agriculture", "soil_science", "foods", "almanac", "survival"},
         "verifiers": [],
         "discernment": False,
         # DEEPENED (2026-10-30, from The Way's food utility): start with the staple near its true cost, add
@@ -331,7 +331,7 @@ _FACES: Dict[str, Dict[str, Any]] = {
         "scope": ["relationship", "marriage", "conflict", "argument", "grief", "grieving", "loss",
                   "lonely", "anxious", "anxiety", "stress", "overwhelmed", "angry", "resentment",
                   "my spouse", "my kids", "my family", "how do i cope"],
-        "shelves": {"narratives", "voices", "topical", "philosophy"},
+        "shelves": {"narratives", "voices", "topical", "philosophy", "medicine"},
         "verifiers": [],
         "discernment": True,
         # DEEPENED (2026-10-30, from The Way "belonging"/narrow_highway "meets you where you are"): a
@@ -465,6 +465,61 @@ def route(text: str) -> Optional[str]:
     return best if best_score > 0 else None
 
 
+CONFIDENT_FITNESS = 2
+
+
+def confident_route(text: str) -> Optional[str]:
+    """Which face this request calls for when the answer is UNMISTAKABLE; None when it is not.
+
+    `route` always answers, and for choosing a MANNER that is right — a near-miss costs tone. This one
+    is for a caller that will RESTRICT RETRIEVAL to the face's region, where a wrong route costs the
+    reader the answer itself, so it declines unless the fit is clear: fitness >= CONFIDENT_FITNESS and
+    strictly above the runner-up.
+
+    THE THRESHOLD IS MEASURED (2026-11-18, out/probe_scoped.txt), not chosen. `route` fires on 48 of 68
+    real questions, and every wrong route sits at fitness 1, tripped by one common scope word: "what did
+    the stoics believe" -> the Shepherd on `believe`; "how much does a gallon of water weigh" -> the
+    Social Worker on `water`; "the current price of Apple stock" -> the Tutor on `what is`. At fitness
+    >= 2 no wrong route was found across 112 questions (the weave 68 plus both eval batteries).
+
+    Nor is it a new idea: `domain_resolver.resolve_domain` already answers `decision=None, ask=True` on
+    "a near-tie or weak signal" rather than guessing. This is that same rule, at the region. A declined
+    route leaves the caller's unscoped behaviour untouched, so the failure mode is INERT — never a
+    suppression (feedback: a miss must stay a miss). Unlike `route` this never consults the allocation
+    lever: which region holds the answer is a question of FIT, and capacity cannot change it."""
+    if not _WORD.findall((text or "").lower()):
+        return None
+    ranked = sorted(_scores(text).items(), key=lambda kv: -kv[1])
+    if not ranked or ranked[0][1] < CONFIDENT_FITNESS:
+        return None
+    if len(ranked) > 1 and ranked[1][1] >= ranked[0][1]:
+        return None                              # a tie asks rather than guesses
+    return ranked[0][0]
+
+
+def gather(face_id: str, text: str, search_fn: Optional[Callable[..., List[dict]]] = None,
+           *, limit: int = 6) -> List[dict]:
+    """THE ONE SCOPED GATHER: the face's own region first, the whole keeping only if that finds nothing.
+
+    Shared, because two copies of this rule would be two engines for one face. `compose` has always
+    gathered this way; the weave (recombine.answer) did not, and that divergence was the whole defect
+    measured on 2026-11-18 — the prose a family actually reads was composed from the unscoped keeping
+    while the curated region sat unused. Returns the cards; the caller renders."""
+    face = _FACES.get(face_id)
+    if face is None:
+        return []
+    if search_fn is None:
+        from . import corpus as _corpus
+
+        def search_fn(q, shelves=None, limit=6):  # noqa: E306
+            return _corpus.search(q, limit=limit, shelves=shelves)
+
+    hits = search_fn(text, shelves=set(face["shelves"]), limit=limit) or []
+    if not hits:
+        hits = search_fn(text, shelves=None, limit=limit) or []   # fall back to the whole keeping
+    return hits
+
+
 def compose(face_id: str, text: str, config: Any = None, *,
             crisis_fn: Optional[Callable[[str], bool]] = None,
             search_fn: Optional[Callable[..., List[dict]]] = None,
@@ -496,13 +551,9 @@ def compose(face_id: str, text: str, config: Any = None, *,
         physiology.note(face_id)
 
     # 2. GATHER — scoped to the face's shelves first (the servant's own substance), then the keeping.
-    if search_fn is None:
-        from . import corpus as _corpus
-        def search_fn(q, shelves=None, limit=6):  # noqa: E306
-            return _corpus.search(q, limit=limit, shelves=shelves)
-    hits = search_fn(text, shelves=set(face["shelves"]), limit=6) or []
-    if not hits:
-        hits = search_fn(text, shelves=None, limit=6) or []   # fall back to the whole keeping
+    # The rule lives in `gather` so this door and the weave cannot drift apart; the face is already
+    # chosen here (the caller routed, or the visitor named it), so no routing happens at this step.
+    hits = gather(face_id, text, search_fn, limit=6)
     gathered = [_brief(h) for h in hits[:6]]
 
     # 3. DISCERN — the front-door proposal. It does two jobs: it names the checkable CLAIM (which the

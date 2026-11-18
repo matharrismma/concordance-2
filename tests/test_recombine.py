@@ -237,5 +237,55 @@ def test_an_aimed_read_still_leaves_a_real_miss_a_miss():
     assert r["found"] is False and r["instances"] >= 1                  # it read, and it still said no
 
 
+def test_answer_scopes_retrieval_to_the_region_when_the_route_is_confident(monkeypatch):
+    """THE WIRE. `answer`'s PRODUCTION default — nothing injected, as web/api.py calls it — asks inside
+    the region the face carries when the route is unmistakable, and over the whole keeping when it is not.
+
+    Measured 2026-11-18: a reader's own words and a librarian's domain terms reach disjoint parts of the
+    keeping (8 of 12 failing questions shared 0 of 5 cards), and this door was the one composing the
+    prose a family actually reads — from the unscoped keeping, while the curated region sat unused."""
+    from concordance import corpus, faces
+
+    asked = []
+
+    def fake_search(q, limit=6, shelves=None):
+        asked.append(shelves)
+        return [{"id": "c1", "title": "On grief", "shelf": "medicine",
+                 "body": "Grief is the response to a loss. It keeps its own time, and it is not a fault."}]
+
+    monkeypatch.setattr(corpus, "search", fake_search)
+
+    q = "my marriage is in conflict and I'm overwhelmed with grief — how do I cope"
+    assert faces.confident_route(q) == "face_counselor"
+    recombine.answer(q)
+    assert asked == [set(faces._FACES["face_counselor"]["shelves"])]
+
+    asked.clear()
+    recombine.answer("what did the stoics believe")      # fitness 1 → declined → unchanged behaviour
+    assert asked == [None]
+
+
+def test_answer_falls_back_to_the_whole_keeping_when_the_region_is_empty(monkeypatch):
+    """A confident route into a thin region must not go silent — it reaches past it, once."""
+    from concordance import corpus, faces
+
+    asked = []
+
+    def fake_search(q, limit=6, shelves=None):
+        asked.append(shelves)
+        if shelves:
+            return []
+        return [{"id": "c1", "title": "A shed", "shelf": "physics",
+                 "body": "Set the posts on piers. Frame the walls, then sheath them before the roof."}]
+
+    monkeypatch.setattr(corpus, "search", fake_search)
+
+    q = "how do I build a shed — the framing, the foundation, and the wiring"
+    assert faces.confident_route(q) == "face_builder"
+    r = recombine.answer(q)
+    assert asked == [set(faces._FACES["face_builder"]["shelves"]), None]
+    assert r["instances"] >= 1                                           # it still had something to read
+
+
 if __name__ == "__main__":
     sys.exit(int(pytest.main([__file__, "-q"])))
