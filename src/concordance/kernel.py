@@ -73,6 +73,58 @@ AGENT_COVENANT = (
 )
 
 
+# ── the TRUST LADDER — where the authority to ACT comes from ────────────────────────────────────
+# AUTHORITY above governs what a CLAIM may become. This governs what a CALLER may do, and it is the
+# same law one layer down: authority comes from what ACTUALLY HAPPENED, never from what was said
+# about it. Written down 2026-11-19 from Matt's own Node Hardware Playbook v2 (2026-01-08), whose
+# five lines — microSD root, then USB-C, then NFC intent, then physical buttons, and "software only
+# (never sufficient alone)" — plus its canonical lock, "physical truth > software truth; lower
+# layers cannot be overridden by upper layers", the web tier had been enforcing for months with no
+# name for it. Naming it is the point: an unnamed rule is one nobody can be held to.
+#
+# LOW index = STRONG, the way the hardware ladder reads: the lower the rung, the harder it is to
+# forge, and a HIGHER rung may never override a LOWER one. This module adds no enforcement (see the
+# docstring) — each rung names the arm that already holds it, and test_kernel pins that the arm is
+# real, so the doctrine cannot quietly drift away from the code that enforces it.
+TRUST_LADDER = (
+    {"rung": 1, "basis": "the socket peer",
+     "arm": "concordance.web.keep",
+     "holds": "what the network actually did — the address the connection really came from. "
+              "X-Forwarded-For is never consulted, because the caller writes it."},
+    {"rung": 2, "basis": "a secret the caller holds",
+     "arm": "concordance.web.keep",
+     "holds": "a token presented and compared in constant time, never echoed back."},
+    {"rung": 3, "basis": "a signature over a challenge we issued",
+     "arm": "concordance.mesh",
+     "holds": "proof of possession of a key we had already pinned, inside the replay window — "
+              "the key stays on the holder's device and we keep only the public half."},
+    {"rung": 4, "basis": "a human act",
+     "arm": "concordance.consent",
+     "holds": "a person authorising a write on their own behalf, before it happens."},
+    {"rung": 5, "basis": "an assertion",
+     "arm": "concordance.kernel",
+     "holds": "a header, a flag, a self-declared tier, an agent's confidence, a repetition. "
+              "NEVER SUFFICIENT ALONE — see NON_UPGRADING, and ask.gate_signal, where the gate "
+              "opens on what was actually asked and never on a flag the caller sets."},
+)
+TRUST_LADDER_LAW = (
+    "authority comes from what happened, never from what was claimed about it; a higher rung never "
+    "overrides a lower one, and rung 5 alone is never enough"
+)
+ASSERTION_RUNG = 5
+
+
+def outranks(a: int, b: int) -> bool:
+    """True when rung `a` outranks rung `b` — the lower number wins, and an assertion never wins.
+
+    The one question the ladder exists to answer: a caller arrives carrying two things that
+    disagree (a header says one address, the socket says another; a flag claims the gate is open,
+    the classifier says it is not). Take the stronger, and never take an assertion over anything.
+    """
+    if a == ASSERTION_RUNG:
+        return False
+    return a < b
+
 # ── the nine-field gate record ──────────────────────────────────────────────────────────────────
 @dataclass(frozen=True)
 class GateRecord:
@@ -323,6 +375,8 @@ def doctrine() -> Dict[str, Any]:
         "verdicts": list(VERDICTS),
         "born_quarantined": sorted(BORN_QUARANTINED),
         "never_upgrades": sorted(NON_UPGRADING),
+        "trust_ladder": [dict(r) for r in TRUST_LADDER],
+        "trust_ladder_law": TRUST_LADDER_LAW,
         "moral_constraints": moral,
         "gate_record_fields": ["entered", "kind", "authority_in", "passed", "failed",
                                "assumptions", "changed", "preserved", "safe_next"],

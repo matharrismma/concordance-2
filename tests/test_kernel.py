@@ -101,3 +101,37 @@ def test_doctrine_publishes_the_five_moves_and_the_covenant():
     assert len(d["five_moves"]) == 5 and len(d["agent_covenant"]) == 8
     assert set(d["kinds"]) == set(kernel.KINDS)
     assert d["authority_lattice"] == list(kernel.AUTHORITY)
+
+
+# ── the trust ladder ────────────────────────────────────────────────────────────────────────────
+def test_the_ladder_is_ordered_strongest_first_and_complete():
+    rungs = [r["rung"] for r in kernel.TRUST_LADDER]
+    assert rungs == list(range(1, len(rungs) + 1)), "rungs must run 1..n with none missing"
+    assert len({r["basis"] for r in kernel.TRUST_LADDER}) == len(rungs), "each rung is a distinct basis"
+
+
+def test_every_rung_names_an_arm_that_really_exists():
+    """The doctrine must not drift from the code that enforces it. kernel.py deliberately holds no
+    enforcement of its own, so a rung whose arm has been renamed or deleted is a LIE in the law —
+    and this is the only place that can catch it."""
+    import importlib
+    for r in kernel.TRUST_LADDER:
+        importlib.import_module(r["arm"])          # raises if the arm is gone
+
+
+def test_an_assertion_never_outranks_anything():
+    """Rung 5 is the whole point of the ladder: a header, a flag or a self-declared tier is never
+    sufficient alone, so it never wins a disagreement — not even against another assertion."""
+    for other in range(1, 6):
+        assert kernel.outranks(kernel.ASSERTION_RUNG, other) is False
+    assert kernel.outranks(1, 5) is True            # the socket beats the claim about it
+    assert kernel.outranks(2, 3) is True            # lower number = stronger
+
+
+def test_the_ladder_is_served_in_the_doctrine():
+    """Agents read the law (llms.txt / identity / the MCP instructions). A rule only they can
+    discover by reading our source is not a rule we have published."""
+    d = kernel.doctrine()
+    assert [r["rung"] for r in d["trust_ladder"]] == [1, 2, 3, 4, 5]
+    assert "never from what was claimed" in d["trust_ladder_law"]
+    assert d["trust_ladder"][4]["basis"] == "an assertion"
