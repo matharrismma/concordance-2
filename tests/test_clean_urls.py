@@ -51,14 +51,24 @@ def test_agent_endpoints_and_ambiguous_pages_do_not_move():
 
 # ---- the bare homepage: SORTED BY SURFACE (Matt, 2026-09-01) ----
 
-def test_both_surfaces_land_in_the_console_hero():
-    # THE UNIFIED HERO (Matt, 2026-10-11: "the User experience is unified and we land immediately into our
-    # hero."): both faces now land in THE CONSOLE — the one augmented-Bible surface. The prior secular
-    # front door (concordance.html) and the witness desk (index.html) are the fallbacks (see below).
-    assert home_for("secular", SITE, "/") == "/console.html"
-    assert home_for("secular", SITE, "/index.html") == "/console.html"
+def test_the_reach_face_lands_on_the_verifier_and_the_witness_in_the_console():
+    # THE MVP FRONT DOOR (Matt, 2026-11-19: "the verifier core needs to be all that we have on the
+    # landing"). The REACH face lands on the verifier, because the agent builder is the buyer who
+    # actually arrived — measured 2026-11-18: 77,981 /mcp calls from 2,950 distinct clients in 30
+    # days, against TWENTY /ask requests. The WITNESS face is untouched and still lands in THE
+    # UNIFIED HERO (Matt, 2026-10-11), so the family library keeps its front door.
+    assert home_for("secular", SITE, "/") == "/verifier.html"
+    assert home_for("secular", SITE, "/index.html") == "/verifier.html"
     assert home_for("witness", SITE, "/") == "/console.html"
     assert home_for("witness", SITE, "/index.html") == "/console.html"
+
+
+def test_the_reach_face_falls_back_to_the_console_without_the_verifier(tmp_path):
+    # The rollback path, pinned: with no verifier.html the secular face returns to EXACTLY the prior
+    # behaviour, so deleting one file is a complete revert and can never leave a 500 behind.
+    (tmp_path / "console.html").write_text("x", encoding="utf-8")
+    assert home_for("secular", tmp_path, "/") == "/console.html"
+    assert home_for("witness", tmp_path, "/") == "/console.html"
 
 
 def test_home_leaves_every_other_path_untouched():

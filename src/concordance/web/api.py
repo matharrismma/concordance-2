@@ -4120,8 +4120,20 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                         text = (json.loads(raw or b"{}") or {}).get("text", text)
                     except (ValueError, TypeError):
                         pass
-                from ..voice import speak as _speak
-                res = _speak(text)
+                # THE PAID DOOR (2026-11-19). A cache hit costs nothing, so it stays public — every
+                # line already paid for replays free, forever. A cache MISS is money, so it asks for
+                # the operator by the same rule The Bridge uses: the REAL socket peer + token, never
+                # the spoofable X-Forwarded-For. A stranger meets the ordinary 503, which
+                # site/speak.js already answers by speaking in the browser's own free voice — so the
+                # page gains no new failure mode, only a plainer voice for an unwarmed line.
+                from .. import voice as _voice
+                from .keep import request_is_operator
+                _peer = self.client_address[0] if self.client_address else ""
+                _q = {k: v[0] for k, v in parse_qs(u.query).items()}
+                if not _voice.may_synthesize(text, request_is_operator(_peer, self.headers, _q)):
+                    return self._json(503, {"audio": False,
+                                            "reason": "voice ceiling unavailable — use the browser floor"})
+                res = _voice.speak(text)
                 if not res:
                     return self._json(503, {"audio": False,
                                             "reason": "voice ceiling unavailable — use the browser floor"})
@@ -4363,6 +4375,17 @@ def home_for(surface: str, site, path: str) -> str:
     # file; falls back to the prior secular front door, then the desk (index.html), never a 500. Reversible:
     # drop the console branch to restore the two-home behaviour.
     if path in ("/", "/index.html"):
+        # THE MVP FRONT DOOR (Matt, 2026-11-19: "the verifier core needs to be all that we have on
+        # the landing. Everything else has no navigation. We keep it behind closed doors."). The
+        # REACH face lands on the verifier and nothing else. Measured 2026-11-18, the buyer who
+        # actually arrived is the agent builder: 77,981 /mcp calls from 2,950 distinct clients in
+        # 30 days, against TWENTY /ask requests — so the landing speaks to them, in their terms,
+        # with the endpoint on the page. The WITNESS face is untouched and still lands in the
+        # Console; the family library is not moved, only unsignposted on .com. Guarded on the file
+        # existing, so a missing verifier.html falls through to exactly the old behaviour.
+        # Reversible: drop this branch and .com returns to the Console.
+        if surface == "secular" and resolve_site_file(site, "/verifier.html"):
+            return "/verifier.html"
         if resolve_site_file(site, "/console.html"):
             return "/console.html"
         if surface == "secular":

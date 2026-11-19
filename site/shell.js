@@ -172,6 +172,16 @@
       'text-transform:uppercase;color:var(--b-accent);margin:.7rem 0 .1rem}' +
   '}';
 
+  /* THE CLOSED DOORS (Matt, 2026-11-19: "Everything else has no navigation. We keep it behind
+     closed doors."). On the REACH face the landing is the verifier core and nothing else is
+     signposted: the spine renders no section nav, no face switcher and no menu, and a page's own
+     header nav is suppressed. EVERY URL STILL RESOLVES — this takes down the signposts, not the
+     roads, so anyone holding a link still arrives. In-page tab strips (nav.tabs) are CONTROLS, not
+     routes, and are deliberately left alone. The witness and museum faces keep their full spine.
+     Reversible: delete CLOSED_STYLE and the `closed` branch in build(). */
+  var CLOSED_STYLE =
+    'nav.site,nav.top,nav#desk,header nav:not(.tabs):not(.nhs-nav){display:none!important}';
+
   function el(tag, cls, attrs) {
     var n = document.createElement(tag);
     if (cls) n.className = cls;
@@ -195,24 +205,35 @@
     brand.appendChild(document.createTextNode("Narrow Highway"));
     inner.appendChild(brand);
 
-    var nav = el("nav", "nhs-nav", { "aria-label": "Primary" });
-    NAV.forEach(function (item) {
-      var a = el("a", "nhs-link", { href: item.href });
-      if (item.k === sec) a.setAttribute("aria-current", "page");
-      a.textContent = item.label;
-      nav.appendChild(a);
-    });
-    inner.appendChild(nav);
+    var closed = (face === "reach");   /* see CLOSED_STYLE */
+    if (closed) {
+      var shut = el("style", null, { id: "nhs-closed" });
+      shut.textContent = CLOSED_STYLE;
+      document.head.appendChild(shut);
+    }
+
+    if (!closed) {
+      var nav = el("nav", "nhs-nav", { "aria-label": "Primary" });
+      NAV.forEach(function (item) {
+        var a = el("a", "nhs-link", { href: item.href });
+        if (item.k === sec) a.setAttribute("aria-current", "page");
+        a.textContent = item.label;
+        nav.appendChild(a);
+      });
+      inner.appendChild(nav);
+    }
 
     var right = el("div", "nhs-right");
-    var faces = el("div", "nhs-faces", { "aria-label": "Three faces, one engine" });
-    FACES.forEach(function (f) {
-      var a = el("a", "nhs-face", { href: f.href, "data-f": f.k, title: f.href.replace("https://", "") });
-      if (f.k === face) a.setAttribute("aria-current", "true");
-      a.textContent = f.label;
-      faces.appendChild(a);
-    });
-    right.appendChild(faces);
+    if (!closed) {
+      var faces = el("div", "nhs-faces", { "aria-label": "Three faces, one engine" });
+      FACES.forEach(function (f) {
+        var a = el("a", "nhs-face", { href: f.href, "data-f": f.k, title: f.href.replace("https://", "") });
+        if (f.k === face) a.setAttribute("aria-current", "true");
+        a.textContent = f.label;
+        faces.appendChild(a);
+      });
+      right.appendChild(faces);
+    }
 
     var toggle = el("button", "nhs-btn", { type: "button", "aria-label": "Toggle light or dark" });
     toggle.innerHTML = "&#9680;";
@@ -226,32 +247,36 @@
     });
     right.appendChild(toggle);
 
-    var menu = el("button", "nhs-btn nhs-menu", { type: "button", "aria-label": "Menu", "aria-expanded": "false" });
-    menu.innerHTML = "&#9776;";
-    menu.addEventListener("click", function () {
-      var open = bar.classList.toggle("open");
-      menu.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    right.appendChild(menu);
+    if (!closed) {
+      var menu = el("button", "nhs-btn nhs-menu", { type: "button", "aria-label": "Menu", "aria-expanded": "false" });
+      menu.innerHTML = "&#9776;";
+      menu.addEventListener("click", function () {
+        var open = bar.classList.toggle("open");
+        menu.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      right.appendChild(menu);
+    }
     inner.appendChild(right);
     bar.appendChild(inner);
 
-    /* mobile panel — same links, stacked */
-    var panel = el("div", "nhs-panel");
-    NAV.forEach(function (item) {
-      var a = el("a", null, { href: item.href });
-      if (item.k === sec) a.setAttribute("aria-current", "page");
-      a.textContent = item.label;
-      panel.appendChild(a);
-    });
-    var pl = el("div", "nhs-plabel"); pl.textContent = "three faces"; panel.appendChild(pl);
-    FACES.forEach(function (f) {
-      var a = el("a", null, { href: f.href, "data-f": f.k });
-      if (f.k === face) a.setAttribute("aria-current", "true");
-      a.textContent = f.label + "  —  " + f.href.replace("https://", "");
-      panel.appendChild(a);
-    });
-    bar.appendChild(panel);
+    /* mobile panel — same links, stacked. A closed face has no links to stack. */
+    if (!closed) {
+      var panel = el("div", "nhs-panel");
+      NAV.forEach(function (item) {
+        var a = el("a", null, { href: item.href });
+        if (item.k === sec) a.setAttribute("aria-current", "page");
+        a.textContent = item.label;
+        panel.appendChild(a);
+      });
+      var pl = el("div", "nhs-plabel"); pl.textContent = "three faces"; panel.appendChild(pl);
+      FACES.forEach(function (f) {
+        var a = el("a", null, { href: f.href, "data-f": f.k });
+        if (f.k === face) a.setAttribute("aria-current", "true");
+        a.textContent = f.label + "  —  " + f.href.replace("https://", "");
+        panel.appendChild(a);
+      });
+      bar.appendChild(panel);
+    }
 
     document.body.insertBefore(bar, document.body.firstChild);
 
