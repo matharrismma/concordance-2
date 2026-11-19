@@ -68,18 +68,49 @@ def _digest(text: str) -> str:
     return h.hexdigest()
 
 
+def _normalized(text: str) -> str:
+    """The exact text that WOULD be sent upstream. One place, so the cache predicate below and the
+    synthesizer can never disagree about what "this utterance" is — a disagreement would let a caller
+    be told a line is free and then be billed for it."""
+    text = (text or "").strip()
+    return text[:_MAX_CHARS] if len(text) > _MAX_CHARS else text
+
+
+def cached(text: str) -> bool:
+    """True when this exact utterance is already on disk, so serving it touches no paid API at all."""
+    text = _normalized(text)
+    if not text or not configured():
+        return False
+    return (_cache_dir() / (_digest(text) + ".mp3")).is_file()
+
+
+def may_synthesize(text: str, is_operator: bool) -> bool:
+    """THE PAID-DOOR POLICY, in one place. A cache hit costs nothing, so anyone may have it — every
+    line the operator has already paid for replays for the public, free, forever. A cache MISS is a
+    paid call to the upstream API, so it is the operator's alone.
+
+    Measured 2026-11-19 (Matt asked whether a vibe-coded-app horror story applied to us): /speak was
+    public and unauthenticated. The rate limiter allowed 600 GET/min per IP, which at _MAX_CHARS a
+    call is 720,000 paid characters a minute from ONE address — the limiter bounds the request rate,
+    it never bounded the bill. Four POSTs had ever arrived, so the exposure was real and simply
+    unfound. A hard cap at the provider is the other half of this and lives outside the code.
+    """
+    return bool(is_operator or cached(text))
+
+
 def speak(text: str):
     """Return (mp3_bytes, "hit"|"miss") in the operator's voice, or None.
 
     None means 'ceiling unavailable — use the browser floor': unconfigured env, empty text, or a failed
     upstream call. Never raises. Caches the audio content-addressed so the paid API is touched at most
     once per distinct utterance.
+
+    This spends money on a miss. The public door gates it with may_synthesize() above; a new caller
+    must decide the same question rather than call this directly.
     """
-    text = (text or "").strip()
+    text = _normalized(text)
     if not text or not configured():
         return None
-    if len(text) > _MAX_CHARS:
-        text = text[:_MAX_CHARS]
     cache = _cache_dir() / (_digest(text) + ".mp3")
     if cache.is_file():
         try:

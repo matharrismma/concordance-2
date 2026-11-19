@@ -94,6 +94,78 @@ def test_upstream_failure_returns_none():
         voice.urllib.request.urlopen = orig
 
 
+def _stub_upstream():
+    """Stand in for the paid API: returns audio, counts calls. Returns (restore, calls)."""
+    calls = {"n": 0}
+    orig = voice.urllib.request.urlopen
+
+    def fake(req, timeout=0):
+        calls["n"] += 1
+        return _FakeResp(b"ID3-fake-mp3-bytes")
+    voice.urllib.request.urlopen = fake
+
+    def restore():
+        voice.urllib.request.urlopen = orig
+    return restore, calls
+
+
+def test_cached_knows_whether_an_utterance_is_already_paid_for():
+    d = tempfile.mkdtemp(prefix="nh-voice-")
+    _env(monkey_ok=True, audio_dir=d)
+    line = "The LORD is my shepherd"
+    assert voice.cached(line) is False          # nothing paid for yet
+    restore, _ = _stub_upstream()
+    try:
+        assert voice.speak(line)[1] == "miss"
+    finally:
+        restore()
+    assert voice.cached(line) is True           # now it costs nothing to serve
+
+
+def test_cached_is_false_when_the_ceiling_is_unwired():
+    _env(monkey_ok=False)
+    assert voice.cached("anything") is False
+
+
+def test_the_predicate_and_the_synthesizer_agree_about_a_long_line():
+    """If cached() and speak() normalized differently, a caller could be told a line is free and
+    then be billed for it. Both go through _normalized, so the truncated form is the utterance."""
+    d = tempfile.mkdtemp(prefix="nh-voice-")
+    _env(monkey_ok=True, audio_dir=d)
+    long_line = "x" * (voice._MAX_CHARS + 50)
+    restore, calls = _stub_upstream()
+    try:
+        voice.speak(long_line)
+    finally:
+        restore()
+    assert voice.cached(long_line) is True
+    assert voice.cached("x" * voice._MAX_CHARS) is True   # the same utterance by another spelling
+    assert calls["n"] == 1
+
+
+def test_a_stranger_cannot_spend_but_may_replay_what_was_already_bought():
+    """The paid door: a MISS is the operator's alone; a HIT belongs to everyone."""
+    d = tempfile.mkdtemp(prefix="nh-voice-")
+    _env(monkey_ok=True, audio_dir=d)
+    line = "Come unto me, all ye that labour"
+    assert voice.may_synthesize(line, is_operator=False) is False   # money, and not theirs to spend
+    assert voice.may_synthesize(line, is_operator=True) is True     # the operator may
+    restore, _ = _stub_upstream()
+    try:
+        voice.speak(line)
+    finally:
+        restore()
+    assert voice.may_synthesize(line, is_operator=False) is True    # paid for once, free ever after
+
+
+def test_the_gate_asks_about_money_not_about_whether_the_ceiling_is_up():
+    """With no key the operator still passes the gate — and speak() still returns None, so the door
+    falls to the floor exactly as it did before the gate existed. The two questions stay separate."""
+    _env(monkey_ok=False)
+    assert voice.may_synthesize("anything", is_operator=True) is True   # the gate is about spending
+    assert voice.speak("anything") is None                              # the ceiling is still down
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

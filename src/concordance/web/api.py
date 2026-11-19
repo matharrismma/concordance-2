@@ -4120,8 +4120,20 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                         text = (json.loads(raw or b"{}") or {}).get("text", text)
                     except (ValueError, TypeError):
                         pass
-                from ..voice import speak as _speak
-                res = _speak(text)
+                # THE PAID DOOR (2026-11-19). A cache hit costs nothing, so it stays public — every
+                # line already paid for replays free, forever. A cache MISS is money, so it asks for
+                # the operator by the same rule The Bridge uses: the REAL socket peer + token, never
+                # the spoofable X-Forwarded-For. A stranger meets the ordinary 503, which
+                # site/speak.js already answers by speaking in the browser's own free voice — so the
+                # page gains no new failure mode, only a plainer voice for an unwarmed line.
+                from .. import voice as _voice
+                from .keep import request_is_operator
+                _peer = self.client_address[0] if self.client_address else ""
+                _q = {k: v[0] for k, v in parse_qs(u.query).items()}
+                if not _voice.may_synthesize(text, request_is_operator(_peer, self.headers, _q)):
+                    return self._json(503, {"audio": False,
+                                            "reason": "voice ceiling unavailable — use the browser floor"})
+                res = _voice.speak(text)
                 if not res:
                     return self._json(503, {"audio": False,
                                             "reason": "voice ceiling unavailable — use the browser floor"})
