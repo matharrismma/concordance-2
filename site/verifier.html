@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en" data-nh-section="check">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="/shell.js"></script>
+<meta name="theme-color" content="#0a0b10">
+<title>Narrow Highway — deterministic verification for agents</title>
+<meta name="description" content="Your model asserts; this checks. Hand it a claim and get a verdict, the worked trail, and a receipt anyone can re-check. No model in the loop, no key, no account.">
+<meta property="og:title" content="Deterministic verification for agents — Narrow Highway">
+<meta property="og:description" content="Verdict, worked trail, and a permanent receipt a stranger can re-check. 80 verifier modules, 0 false positives on the published benchmark. One URL, no SDK, no key.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://narrowhighway.com/">
+<style>
+  :root{
+    --void:#0a0b10; --panel:rgba(201,162,74,.045); --ink:#e9e3d4; --dim:#8f8a7c; --faint:#6a665c;
+    --gold:#c9a24a; --goldsoft:#a98a3f; --line:rgba(201,162,74,.16); --line2:rgba(201,162,74,.28);
+    --pass:#8bbf8f; --broken:#c98a8a; --idle:#7f8794;
+    --serif:Georgia,"Palatino Linotype",Palatino,"Times New Roman",serif;
+    --mono:ui-monospace,Consolas,"Cascadia Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:radial-gradient(60% 42% at 50% -8%, rgba(201,162,74,.13), rgba(201,162,74,0) 70%), var(--void);
+    background-attachment:fixed; color:var(--ink); font:17px/1.7 var(--serif); -webkit-font-smoothing:antialiased;
+    -webkit-text-size-adjust:100%}
+  a{color:var(--gold); text-decoration:none} a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible,textarea:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+  .wrap{max-width:840px; margin:0 auto; padding:0 1.3rem}
+
+  /* ── hero ───────────────────────────────────────────────────────────────── */
+  .hero{padding:4.2rem 0 1rem}
+  .kicker{color:var(--gold); letter-spacing:.34em; text-transform:uppercase; font-size:.66rem;
+    font-family:var(--mono); margin:0 0 1rem}
+  h1{font-weight:400; letter-spacing:.01em; font-size:clamp(2rem,6vw,2.9rem); line-height:1.12; margin:0 0 .9rem}
+  h1 em{font-style:normal; color:var(--gold)}
+  .lede{color:var(--dim); font-size:1.07rem; max-width:48ch; margin:0 0 1.6rem}
+  .lede strong{color:var(--ink); font-weight:400}
+
+  /* ── the live check ─────────────────────────────────────────────────────── */
+  .tool{border:1px solid var(--line); border-radius:10px; background:var(--panel); padding:1rem}
+  textarea{width:100%; min-height:92px; resize:vertical; background:rgba(10,11,16,.55); color:var(--ink);
+    border:1px solid var(--line); border-radius:7px; padding:.75rem .85rem; font:.9rem/1.6 var(--mono)}
+  textarea::placeholder{color:var(--faint)}
+  .bar{display:flex; gap:.8rem; align-items:center; flex-wrap:wrap; margin-top:.75rem}
+  .btn{font:500 .9rem/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--void);
+    background:var(--gold); border:none; border-radius:7px; padding:.75rem 1.3rem; cursor:pointer}
+  .btn:hover{background:#d8b25c} .btn:disabled{opacity:.45; cursor:default}
+  .egs{display:flex; gap:.5rem; flex-wrap:wrap; margin-left:auto}
+  .eg{font:.72rem/1 var(--mono); color:var(--dim); background:transparent; border:1px solid var(--line);
+    border-radius:999px; padding:.42rem .7rem; cursor:pointer}
+  .eg:hover{color:var(--ink); border-color:var(--line2)}
+  .out{margin-top:.9rem; display:none}
+  .out.on{display:block}
+  .verdict{display:flex; align-items:baseline; gap:.7rem; flex-wrap:wrap; font-family:var(--mono)}
+  .verdict b{font-size:1.05rem; font-weight:500; letter-spacing:.04em}
+  .verdict .n{font-size:.74rem; color:var(--faint)}
+  .chk{border-left:2px solid var(--line); padding:.55rem 0 .55rem .9rem; margin:.7rem 0}
+  .chk.ok{border-left-color:var(--pass)} .chk.no{border-left-color:var(--broken)}
+  .chk.idle{border-left-color:var(--idle)}
+  .chk .c{font:.84rem/1.55 var(--mono); color:var(--ink)}
+  .chk .d{font-size:.86rem; color:var(--dim); margin-top:.3rem}
+  .chk .dom{font:.64rem/1 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin-top:.35rem}
+  .receipt{margin-top:.8rem; padding:.7rem .9rem; border:1px solid var(--line2); border-radius:7px;
+    background:rgba(201,162,74,.07); font-size:.9rem}
+  .muted{color:var(--dim); font-size:.84rem; margin-top:.7rem}
+  .err{color:var(--broken); font-size:.9rem; margin-top:.6rem}
+
+  /* ── sections ───────────────────────────────────────────────────────────── */
+  section{border-top:1px solid var(--line); margin-top:3.4rem; padding-top:1.7rem}
+  h2{font-weight:400; font-size:1.35rem; margin:0 0 .3rem}
+  .sub{color:var(--dim); font-size:.95rem; margin:0 0 1.2rem; max-width:52ch}
+  pre{background:rgba(201,162,74,.06); border:1px solid var(--line); border-radius:7px;
+    padding:.85rem .95rem; overflow-x:auto; font:.8rem/1.65 var(--mono); color:var(--ink); margin:.5rem 0 0}
+  pre .k{color:var(--gold)}
+  code{font-family:var(--mono); font-size:.88em; color:var(--gold)}
+  .step{margin:1.3rem 0}
+  .step .h{font:.66rem/1 var(--mono); letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:.45rem}
+  .step p{margin:.1rem 0; color:var(--dim); font-size:.92rem}
+
+  .nums{display:grid; grid-template-columns:repeat(4,1fr); gap:.8rem; margin-top:.4rem}
+  .num{border:1px solid var(--line); border-radius:9px; padding:.9rem .95rem; background:var(--panel)}
+  .num b{display:block; font:400 1.5rem/1.1 var(--serif); color:var(--gold)}
+  .num span{display:block; font:.66rem/1.4 var(--mono); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--faint); margin-top:.4rem}
+
+  .limits{list-style:none; padding:0; margin:0}
+  .limits li{border-left:2px solid var(--line); padding:.1rem 0 .1rem .9rem; margin:1rem 0}
+  .limits b{font-weight:400; color:var(--ink)}
+  .limits p{margin:.2rem 0 0; color:var(--dim); font-size:.92rem}
+
+  footer{border-top:1px solid var(--line); margin-top:3.6rem; padding:1.6rem 0 4rem;
+    color:var(--faint); font-size:.86rem}
+  footer p{margin:.3rem 0}
+
+  @media(max-width:700px){
+    .hero{padding-top:2.6rem}
+    .nums{grid-template-columns:1fr 1fr}
+    .egs{margin-left:0; width:100%}
+  }
+</style>
+</head>
+<body>
+<!-- the spine (brand + theme) is injected by /shell.js -->
+
+<main class="wrap">
+
+  <div class="hero">
+    <p class="kicker">Deterministic verification</p>
+    <h1>Your model asserts.<br><em>This checks.</em></h1>
+    <p class="lede">Hand it a claim. Get a <strong>verdict</strong>, the <strong>worked trail</strong>,
+      and a <strong>receipt</strong> anyone can re-check without trusting you — or us.
+      Arithmetic, constants, units, formulas, dosages, rates, statutes. No model in the loop.
+      No key. No account.</p>
+
+    <div class="tool">
+      <textarea id="src" spellcheck="false"
+        placeholder="Paste a claim your agent produced.&#10;e.g.  a 70 kg adult at 15 mg/kg takes 1050 mg">the speed of light is 299792458 m/s</textarea>
+      <div class="bar">
+        <button class="btn" id="go">Check it</button>
+        <div class="egs">
+          <button class="eg" data-eg="a 70 kg adult dosed at 15 mg/kg receives 1050 mg">dosage</button>
+          <button class="eg" data-eg="$2,400 at 6% simple interest for 3 years is $432">finance</button>
+          <button class="eg" data-eg="a 10 kg mass at 9.8 m/s^2 exerts 98 N">physics</button>
+          <button class="eg" data-eg="the speed of light is 299792459 m/s">a wrong one</button>
+        </div>
+      </div>
+      <div class="out" id="out" aria-live="polite"></div>
+    </div>
+    <p class="muted">Your claim is de-identified in an airlock before the verifier sees it. Framing and
+      personal details stay on your side, and the receipt carries no personal data.</p>
+  </div>
+
+  <section>
+    <h2>Add it to your agent</h2>
+    <p class="sub">The engine speaks MCP over Streamable&nbsp;HTTP. One URL — no SDK, no key, no auth.</p>
+
+    <div class="step">
+      <div class="h">Claude Code</div>
+      <pre>claude mcp add --transport http narrow-highway https://narrowhighway.com/mcp</pre>
+    </div>
+
+    <div class="step">
+      <div class="h">Any MCP client</div>
+      <pre>{ "mcpServers": { "narrow-highway": {
+    "type": "http",
+    "url": "https://narrowhighway.com/mcp"
+} } }</pre>
+      <p>Claude desktop and claude.ai: Settings → Connectors → Add custom connector → paste the URL.</p>
+    </div>
+
+    <div class="step">
+      <div class="h">Or raw HTTP, one call</div>
+      <pre>curl -X POST https://narrowhighway.com/verify \
+  -H "Content-Type: application/json" \
+  -d '{"claim":"the speed of light is 299792458 m/s"}'</pre>
+      <pre>{ <span class="k">"verdict"</span>: "HOLDS",
+  <span class="k">"checks"</span>: [{ "verdict": "CONFIRMED",
+              "domain": "physical_constants",
+              "detail": "speed_of_light = 299792458.0 m/s — matches to the
+                         9 significant figures stated (exact)" }],
+  <span class="k">"receipt"</span>: "/s/&lt;content_hash&gt;",
+  <span class="k">"generated"</span>: false }</pre>
+      <p>Re-fetch the receipt and the bytes must match, or it is not that record.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>What your agent gains</h2>
+    <p class="sub">Counts are read live from the running engine, so a number here can never
+      drift from the thing it describes.</p>
+    <div class="nums">
+      <div class="num"><b data-nh-count="verifiers.distinct_modules_total.count">80</b><span>verifier modules</span></div>
+      <div class="num"><b data-nh-count="verifiers.domain_names_accepted.count">197</b><span>domains accepted</span></div>
+      <div class="num"><b data-nh-count="tools.count">102</b><span>tools over MCP</span></div>
+      <div class="num"><b>0</b><span>false positives</span></div>
+    </div>
+    <p class="muted">Zero false positives is the <em>published benchmark's</em> bound, re-run on every
+      build — not a promise that the engine can never err. The
+      <a href="/proof.html">proof page</a> holds the ledger, the cases, and the independent checker:
+      about sixty lines of standard-library Python with none of our code in it, so you can re-check us
+      without trusting us.</p>
+  </section>
+
+  <section>
+    <h2>What it will not do</h2>
+    <ul class="limits">
+      <li><b>It does not generate answers.</b>
+        <p>It verifies a claim you bring, eliminating what is not the answer. The trail is the reasoning,
+          and <code>"generated": false</code> is in every response.</p></li>
+      <li><b>It cannot be talked into a pass.</b>
+        <p>Tolerances are clamped: a caller may tighten a check, never loosen it. No prompt reaches a
+          verifier, because there is no model to prompt.</p></li>
+      <li><b>It does not keep your data.</b>
+        <p>Claim text is de-identified before anything is sealed, and receipts carry no personal context.</p></li>
+      <li><b>It says so when it cannot check.</b>
+        <p>An unverifiable claim comes back <code>unchecked</code> with a reason. A miss stays a miss —
+          it will not bluff the rest.</p></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer><div class="wrap">
+  <p>Rate limits keep the door open for everyone. If your agent needs volume,
+    <a href="https://github.com/matharrismma/concordance-2">run the engine yourself</a> — it is
+    stdlib-first Python and serves the same API offline, with no network and no dependence on us.</p>
+  <p>A conduit, not the source.</p>
+</div></footer>
+
+<script>
+"use strict";
+(function () {
+  var src = document.getElementById("src"), go = document.getElementById("go"), out = document.getElementById("out");
+
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  function cls(v){ return v === "CONFIRMED" ? "ok" : v === "MISMATCH" ? "no" : "idle"; }
+  function word(v){ return v === "CONFIRMED" ? "holds" : v === "MISMATCH" ? "does not hold" : "not checked"; }
+
+  function render(d) {
+    var checks = d.checks || [];
+    if (!checks.length) {
+      out.innerHTML = '<div class="muted">' + esc(d.note ||
+        "No checkable claim was found. State it as a number with its unit — it would rather miss a claim than check the wrong one.") + "</div>";
+      out.className = "out on"; return;
+    }
+    var broken = d.broken || 0;
+    var head = broken > 0 ? "DOES NOT HOLD" : (d.unchecked && !d.held) ? "NOT CHECKED" : "HOLDS";
+    var tint = broken > 0 ? "var(--broken)" : (d.unchecked && !d.held) ? "var(--idle)" : "var(--pass)";
+    var h = '<div class="verdict"><b style="color:' + tint + '">' + head + "</b>" +
+            '<span class="n">' + (d.held || 0) + " held · " + broken + " broken · " +
+            (d.unchecked || 0) + " unchecked</span></div>";
+    h += checks.map(function (c) {
+      return '<div class="chk ' + cls(c.verdict) + '"><div class="c">' + esc(c.claim) +
+             "  — " + word(c.verdict) + "</div>" +
+             (c.detail ? '<div class="d">' + esc(c.detail) + "</div>" : "") +
+             (c.domain ? '<div class="dom">' + esc(c.domain) + "</div>" : "") + "</div>";
+    }).join("");
+    var r = d.receipt || d.cite_url;
+    if (r) h += '<div class="receipt">Sealed. Every claim, every check, one permanent link: ' +
+                '<a href="' + esc(r) + '" target="_blank" rel="noopener">the receipt →</a></div>';
+    out.innerHTML = h; out.className = "out on";
+  }
+
+  function check() {
+    var text = (src.value || "").trim();
+    if (!text) { src.focus(); return; }
+    go.disabled = true; var was = go.textContent; go.textContent = "Checking…";
+    out.innerHTML = '<div class="muted">Checking…</div>'; out.className = "out on";
+    fetch("/verify", { method: "POST", headers: { "content-type": "application/json" },
+                       body: JSON.stringify({ claim: text }) })
+      .then(function (r) { if (!r.ok) throw new Error("the engine answered " + r.status); return r.json(); })
+      .then(render)
+      .catch(function (e) { out.innerHTML = '<div class="err">' + esc(e.message) + "</div>"; out.className = "out on"; })
+      .then(function () { go.disabled = false; go.textContent = was; });
+  }
+
+  go.addEventListener("click", check);
+  src.addEventListener("keydown", function (e) { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") check(); });
+  Array.prototype.forEach.call(document.querySelectorAll(".eg"), function (b) {
+    b.addEventListener("click", function () { src.value = b.getAttribute("data-eg"); check(); });
+  });
+})();
+</script>
+</body>
+</html>

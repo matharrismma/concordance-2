@@ -190,6 +190,10 @@ UNLISTED_PAGES = {
     # served for /keep* and /bridge* by api._keep (no keep.html file since 2026-10-16, issue #20).
     # Neither is a nav <a href>, same limit as com.html.
     "console.html", "bridge.html",
+    # THE MVP FRONT DOOR (2026-11-19): verifier.html is served at / on the REACH face by home_for().
+    # A human reaches it as the domain root, never a /verifier.html <a href>, so the static
+    # link-checker cannot see it — the same surface-routing limit as com.html and console.html.
+    "verifier.html",
 }
 
 

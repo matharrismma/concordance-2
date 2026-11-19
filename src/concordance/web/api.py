@@ -4375,6 +4375,17 @@ def home_for(surface: str, site, path: str) -> str:
     # file; falls back to the prior secular front door, then the desk (index.html), never a 500. Reversible:
     # drop the console branch to restore the two-home behaviour.
     if path in ("/", "/index.html"):
+        # THE MVP FRONT DOOR (Matt, 2026-11-19: "the verifier core needs to be all that we have on
+        # the landing. Everything else has no navigation. We keep it behind closed doors."). The
+        # REACH face lands on the verifier and nothing else. Measured 2026-11-18, the buyer who
+        # actually arrived is the agent builder: 77,981 /mcp calls from 2,950 distinct clients in
+        # 30 days, against TWENTY /ask requests — so the landing speaks to them, in their terms,
+        # with the endpoint on the page. The WITNESS face is untouched and still lands in the
+        # Console; the family library is not moved, only unsignposted on .com. Guarded on the file
+        # existing, so a missing verifier.html falls through to exactly the old behaviour.
+        # Reversible: drop this branch and .com returns to the Console.
+        if surface == "secular" and resolve_site_file(site, "/verifier.html"):
+            return "/verifier.html"
         if resolve_site_file(site, "/console.html"):
             return "/console.html"
         if surface == "secular":

@@ -97,7 +97,11 @@ def test_every_page_offers_a_way_home():
     # tool, no shared nav by design, per the Domain Sort), the offline instrument apps (golf/grappling),
     # and the operator/sovereign/pastoral surfaces (playbook/plow/profile/situations). Declared here
     # rather than each carrying nh-home.js — the same treatment mesh.html/live.html already get.
-    hidden = {"live.html", "checkit.html", "about.html", "halls.html", "golf.html",
+    # verifier.html is the .com MVP LANDING (Matt, 2026-11-19), served at / on the reach face. It IS
+    # home, and the spine deliberately gives the reach face no nav at all, so it carries no shared
+    # home control by design — the same standing com.html has.
+    hidden = {"verifier.html",
+              "live.html", "checkit.html", "about.html", "halls.html", "golf.html",
               "grappling.html", "music.html", "provision.html", "wisdom.html", "workshop.html",
               "coach.html", "tv.html", "playbook.html", "plow.html", "profile.html", "situations.html",
               "steward.html",
@@ -218,7 +222,11 @@ def test_the_palette_reaches_every_public_page():
                "concordance.html",
                # console.html — THE UNIFIED HERO, served at / by home_for() on both faces (2026-10-11);
                # bridge.html — the operator console. Reached by surface routing / redirect, not the palette.
-               "console.html", "bridge.html"}
+               "console.html", "bridge.html",
+               # verifier.html — the .com MVP landing, served at / on the reach face by home_for()
+               # (2026-11-19). Reached as the domain root, never a /verifier.html <a href>: the same
+               # surface-routing excuse as com.html and console.html.
+               "verifier.html"}
     dead = sorted(n for n in excused if not (SITE / n).exists())
     assert not dead, f"excused names pages that no longer ship — drop them: {dead}"
     unreachable = sorted(
