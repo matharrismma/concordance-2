@@ -1306,6 +1306,7 @@ EXTRA_CARD_SOURCES = (
     "sanitation_cards.jsonl",     # the sanitation shelf — hygiene/waste/disease prevention (WHO/CDC/Army PD): the disciplines that stop post-disaster illness
     "water_cards.jsonl",          # the water shelf — the household water SYSTEM (EPA/CDC/FEMA PD): storage, rainwater, wells, filter types (beside survival's find/purify)
     "food_cards.jsonl",           # the food-growing shelf — garden/soil/seed/season (USDA PD): raising food, beside survival's preserving
+    "domestic_cards.jsonl",       # the domestic shelf — household health + cottage economy, VERBATIM from Buchan's Domestic Medicine (1791) and Cobbett's Cottage Economy (1833), both PD. Regimen only: Buchan's treatment chapters are excluded by the seed's own hazard gate. Minted by tools/card_domestic.py
     # The trades — a CARD CATALOGUE of the public-domain practical arts (mechanics,
     # carpentry, masonry, blacksmithing, agriculture), pre-1929 Internet Archive
     # scans verified PD, multilingual. The HARE: light cards; the full texts stay on
