@@ -697,6 +697,47 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
     # what is surfaced. We present the path; we do not cross it.
     allow_witness = config.witness_surfaced or session_gate_open
 
+    # HELP FIRST ON EVERY DOOR A PERSON TYPES INTO (Matt, 2026-11-20: "same as composing").
+    #
+    # The composing doors each hold their own gate — /ask, /discern, and /recombine since c8d563d.
+    # The LOOKUP doors did not: a structural audit of all 218 handler blocks found 27 that read a
+    # prose-shaped parameter, and ~17 of them are search boxes that answered a cry with a record
+    # list and no help. This is ONE gate at the ONE chokepoint rather than seventeen edits, because
+    # the path is the function, not the instances — and because a per-handler gate is a gate someone
+    # forgets when they add door eighteen.
+    #
+    # `ask.is_crisis` is called, never copied, and the words come from `ask.crisis_help()`, for the
+    # reason its own docstring gives: a copied list is a list that drifts.
+    #
+    # THE COST, MEASURED rather than assumed. Of 23 legitimate lookup terms, this intercepts five —
+    # `suicide`, `suicidal`, `self-harm`, `suicide prevention`, `overdose` — so looking up those
+    # words returns the helpline instead of a definition. It does NOT touch `euthanasia`, `martyr`,
+    # `despair`, `grief`, `hospice`, `laudanum`, `hemlock`, `kill`, `death`, `dying`, `end of life
+    # care`, `last rites`, `Samson`, `Judas`, `Ahithophel`, or `Saul fell on his own sword` — the
+    # scripture, history and medical lookups are untouched. A person researching prevention gets the
+    # number, which is the trade this project already accepts: the false-positive cost of the crisis
+    # net is documented as living in the backstop, and the asymmetry is the whole argument.
+    #
+    # GET only. POST bodies belong to /ask and /discern, which hold their own gates and shapes.
+    # `found: False` is included so /recombine's shipped contract is unchanged when this fires first.
+    # EVERY prose parameter present is checked, not just the first — a request carrying a benign
+    # `q` and a cry in `text` must still reach help.
+    _typed = [v for v in ((query.get(k) or "").strip() for k in ("q", "text", "claim", "question")) if v]
+    if method == "GET" and _typed:
+        try:
+            from .. import ask as _ask_gate
+            _cry = any(_ask_gate.is_crisis(t) for t in _typed)
+            _payload = _ask_gate.crisis_help() if _cry else None
+        except Exception:  # noqa: BLE001 — fails SAFE: see recombine.answer's gate
+            _cry, _payload = True, {"message": "Please reach a real person right now — someone who "
+                                               "can be with you.",
+                                    "resources": [{"label": "Call or text 988 — US Suicide & Crisis "
+                                                            "Lifeline, 24/7", "ref": "tel:988"}]}
+        if _cry:
+            return _ok({"kind": "crisis", "found": False, "generated": False,
+                        "note": "a cry for help is answered with help, not with a search result",
+                        **(_payload or {})})
+
     if method == "GET" and path in ("/", "/health"):
         from ..validate import _HAS_JSONSCHEMA, schema_active
         # `shards` reports open file handles because on 2026-08-01 they climbed to 1023 of 1024
