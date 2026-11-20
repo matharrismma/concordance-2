@@ -306,7 +306,28 @@ def answer(query: str, *, subject: str = "en", limit: int = 4, top_cards: int = 
     Dependencies are injected for tests; production defaults are the live corpus + reader."""
     if search_fn is None:
         from . import corpus
-        search_fn = lambda q: corpus.search(q, limit=top_cards)          # noqa: E731
+
+        def search_fn(q):                                                # noqa: E306
+            """THE WEAVE USES THE SAME DOOR AS THE REST OF THE ENGINE (2026-11-20).
+
+            This default was `corpus.search(q, limit=top_cards)` alone, so the weave bypassed every
+            lane respond() has — the layering defect named 2026-11-18. Measured live, that is what
+            answered a child bleeding "a lot" with `Clerodendrum thomsoniae — bleeding glory-bower`
+            and "the linen of someone with a fever" with the `etymology` entry for `linen`.
+
+            `ask.practical_lane` returns None for anything that is not a practical asking (a word
+            question, a verse lookup, a doctrinal question), and then NOTHING changes here — the
+            plain search below is still the default. It only ever REORDERS candidates the same
+            search already returned, so no card can be withheld by it.
+            """
+            try:
+                from . import ask as _ask
+                lane = _ask.practical_lane(q, limit=top_cards)
+                if lane:
+                    return lane
+            except Exception:  # noqa: BLE001 — the weave must answer even if a lane is broken
+                pass
+            return corpus.search(q, limit=top_cards)
     if decodable_fn is None:
         from . import readwith
         # REACH (rung 2): read anchor-carrying sentences from the card's RESIDENT BODY — no ark needed, so

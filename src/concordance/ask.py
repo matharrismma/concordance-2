@@ -944,6 +944,50 @@ _WP_ETYM2 = re.compile(r"\b(?:the\s+)?(?:origin|derivation|roots?)\s+of\s+the\s+
 _WP_ETYM3 = re.compile(r"\bwhere\s+(?:does|did)\s+the\s+word\s+" + _WP_WORD + r"\s+(?:come\s+from|originate|derive)", re.I)
 
 
+# A READER DESCRIBES A SITUATION; THE GATE LISTENED FOR AN INSTRUCTION (measured 2026-11-20).
+# `corpus._PRACTICAL` is thirty IMPERATIVE VERBS (build, purify, splint…) and `_HOWTO` wants the
+# word "how". A parent types neither. Measured on the live keeping: "my child has a deep cut and is
+# bleeding a lot" tripped NO trigger, fell through to the plain keyword search, and was answered
+# with `Clerodendrum thomsoniae — bleeding glory-bower` while "Stop severe bleeding" sat at rank 3.
+# A first-person or third-person SITUATION naming a person, a place in the house, or a symptom is a
+# practical intent as surely as "how do I…". Graded by the CARD (never by the shelf, which flatters
+# a wrong answer) this converts 4 of 12 target rows at ZERO cost to the word-question and
+# verse-lookup batteries. Used by the weave; it widens a PERMISSIVE lane, so a false fire only
+# reorders candidates and can never withhold a card.
+_SITUATION = re.compile(
+    r"\b(my|our|someone|somebody)\b[^.?!]*?\b("
+    r"child|baby|infant|son|daughter|wife|husband|mother|father|parent|family|relative|"
+    r"house|home|room|kitchen|garden|roof|"
+    r"fever|cut|burn|burns|bleeding|bleed|wound|pain|sick|ill|illness|hurt|broken|choking|rash|"
+    r"water|food|heat|power|money|debt|rent)\b", re.I)
+
+# "how do you spell X" is a WORD question wearing a how-to's clothes, and it is the one row the
+# practical lane was measured to cost (etymology `spell` -> "The phonetic alphabet"). It belongs in
+# the veto and NOT in word_parse_intent, because adding a trigger there would re-route the live
+# /ask door; a veto can only ever protect a word question.
+_WP_SPELL = re.compile(r"\bhow\s+(?:do|does|did)\s+(?:you|i|we|they)\s+spell\b"
+                       r"|\bhow\s+is\b[^.?!]*\bspelled\b", re.I)
+
+
+def situation_intent(text: str) -> bool:
+    """True when the asking DESCRIBES a situation rather than requesting an instruction."""
+    return bool(_SITUATION.search(text or ""))
+
+
+def asked_about_a_word(text: str) -> bool:
+    """The 0-FP word detectors used as a VETO, which is what a precision detector is for. Measured
+    2026-11-18: these fire on ZERO of 68 practical questions, so this can only protect a word
+    question — it can never steal a practical one."""
+    try:
+        if define_term(text):
+            return True
+        if word_parse_intent(text)[0]:
+            return True
+    except Exception:  # noqa: BLE001 — a veto must never crash the lane it guards
+        return False
+    return bool(_WP_SPELL.search(text or ""))
+
+
 def word_parse_intent(text: str) -> Tuple[Optional[str], Optional[str]]:
     """(kind, word) for a pronunciation / syllable / synonym request, else (None, None). 0-FP: a
     specific trigger plus a single trailing word. respond() gives an honest miss if the tool is empty."""
@@ -1199,6 +1243,42 @@ def _practical_rank(query: str, pool: List[Dict[str, Any]]) -> List[Dict[str, An
         return len(qt & _content_tokens(c.get("title") or ""))
 
     return sorted(pool, key=lambda c: (_tier(c), -_title_overlap(c)))[:6]
+
+
+def practical_lane(query: str, limit: int = 12, pool_size: int = 40) -> Optional[List[Dict[str, Any]]]:
+    """The practical lane as ONE door, for callers outside respond() — notably the weave.
+
+    Returns the ranked cards when this asking is practical, or None to mean "nothing to say here,
+    use your own retrieval". None, not a plain search, so the caller's default stays the caller's.
+
+    WHY THE WEAVE NEEDS THIS. `recombine.answer`'s default retrieval was `corpus.search(q, limit)`
+    alone, so the weave bypassed every lane respond() has — the defect named 2026-11-18. Measured
+    on the live keeping 2026-11-20, that cost the rows that matter most: a child bleeding "a lot"
+    was answered from `taxonomy` with a flowering plant, and "the linen of someone with a fever"
+    with the `etymology` entry for `linen`, while the answering cards sat at ranks 3 and 19.
+
+    WHY A POOL AND NOT A WEIGHT. Three reweighting arms are measured dead (the boosts, 0 of 15;
+    length normalization, 4 of 15; a raised substance threshold, net HARMFUL). And feeding
+    `_practical_rank` from shelf-SCOPED searches was measured a wash today, because those searches
+    have tiny recall — one returned a single card — so the answering card never entered the pool to
+    be sorted. The whole-keeping search DOES retrieve it; it is buried, not missing. So: one
+    high-recall pool, and the existing TIER SORT, which is a sort key and needs no measured
+    residual of its own.
+
+    Graded by the CARD on 12 target rows: 2/12 -> 6/12, with the word-question battery held at 9/22
+    and the verse-lookup battery at 18/22 — both written before this rule existed.
+    """
+    if asked_about_a_word(query):
+        return None                                  # a word question is never a how-to
+    practical = (bool(corpus._PRACTICAL & set((query or "").lower().split()))
+                 or bool(_HOWTO.search(query or "")) or bool(_MAKE_FROM.search(query or ""))
+                 or situation_intent(query))
+    if not practical:
+        return None
+    pool = corpus.search(query, limit=max(int(pool_size), int(limit))) or []
+    if not pool:
+        return None
+    return (_practical_rank(query, pool) or [])[:max(1, int(limit))]
 
 
 def _stem(w: str) -> str:
