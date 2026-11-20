@@ -304,6 +304,41 @@ def answer(query: str, *, subject: str = "en", limit: int = 4, top_cards: int = 
     """Speak from the LIVE keeping: search for relevant cards, read the verbatim anchor-carrying sentences
     out of each (`readwith.decodable`), weave them by the frame, and resolve references found-for-found.
     Dependencies are injected for tests; production defaults are the live corpus + reader."""
+    # A CRY FOR HELP ENDS WITH HELP FIRST — on THIS door too (closed 2026-11-20).
+    #
+    # /ask has carried the crisis backstop for months. This door never did: `recombine.py` contained
+    # ZERO mentions of crisis, `ask.is_crisis` was never consulted, and GET /recombine is public and
+    # unauthenticated (HTTP 200 from narrowhighway.com, listed in /capabilities). Measured live on
+    # master AND after the practical lane shipped, "I want to end my life" was answered, in composed
+    # prose, with "Blueberries want pH 4" — the agricultural soil-pH card, because `want` and `life`
+    # match it lexically. The keeping even HOLDS `16.3 Self-Harm and Suicide`; the reader was handed
+    # blueberries. A door that composes prose for a person in distress must be able to refuse.
+    #
+    # `ask.is_crisis` is "the one crisis test" by its own docstring — substring net plus the semantic
+    # backstop, pinned by nine tests — so it is CALLED, never copied: a copied list is a list that
+    # drifts. The words we answer with come from `ask.crisis_help()` for the same reason.
+    #
+    # IT FAILS SAFE, NOT OPEN. If the crisis test itself cannot be evaluated, we return the help
+    # rather than compose an answer. The asymmetry is the whole point: a false positive shows 988 to
+    # someone asking about gardening, which is a nuisance; a false negative hands a composed answer
+    # to someone who said they want to die. This project already accepts that trade — the crisis
+    # false-positive cost is documented as living in the semantic backstop.
+    try:
+        from . import ask as _ask
+        _cry = _ask.is_crisis(query)
+        _help = _ask.crisis_help() if _cry else None
+    except Exception:  # noqa: BLE001 — see "fails safe" above
+        _cry, _help = True, {"message": "Please reach a real person right now — someone who can be "
+                                        "with you.",
+                             "resources": [{"label": "Call or text 988 — US Suicide & Crisis "
+                                                     "Lifeline, 24/7", "ref": "tel:988"}]}
+    if _cry:
+        # found=False is the honest shape: nothing was woven and nothing is claimed. "A miss must
+        # stay a miss" — this is a refusal that carries help, not an answer.
+        return {"found": False, "kind": "crisis", "generated": False, "passage": "",
+                "resolved_passage": "", "pieces": [], "instances": 0, "covered": None,
+                "sources": [], "means": "the weave does not compose an answer to a cry for help",
+                **(_help or {})}
     if search_fn is None:
         from . import corpus
 

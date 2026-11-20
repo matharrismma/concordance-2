@@ -25,6 +25,17 @@ _CRISIS_RESOURCES = [
     {"label": "findahelpline.com — a free, confidential helpline in your country", "ref": "https://findahelpline.com"},
     {"label": "Reach a real person today — a friend, a pastor, a doctor", "ref": None},
 ]
+# THE WORDS, ONCE. `is_crisis` already says why: "a copied list is a list that drifts". The same is
+# true of what we SAY once it fires, so the message and the resources live here and every door that
+# must help first returns crisis_help() rather than its own wording. Added 2026-11-20, when a second
+# door was found that needed it (the weave) and the only copy was inline inside respond().
+CRISIS_MESSAGE = ("You matter, and you don't have to carry this alone. Please "
+                  "reach a real person right now — someone who can be with you.")
+
+
+def crisis_help() -> Dict[str, Any]:
+    """Help first, for any surface. Never gated, never enriched, never Scripture-as-fix."""
+    return {"message": CRISIS_MESSAGE, "resources": _CRISIS_RESOURCES}
 # Written WITHOUT apostrophes: the text is normalized the same way before matching, so a phone
 # that types don’t (U+2019) cannot walk past a phrase this list already contains. That exact
 # miss was live — "i don't want to be here" reached crisis, "i don’t want to be here" did not.
@@ -1912,9 +1923,7 @@ def _respond_core(text: str, config: EngineConfig, *, gate_open: bool = False,
         # Always help-first — never gated, never enriched, never Scripture-as-fix. The door is NEVER
         # attached here: a person in crisis needs real people, not a quest (it is added below, after
         # this return, so crisis stays byte-identical).
-        return {**base, "message": "You matter, and you don't have to carry this alone. Please "
-                "reach a real person right now — someone who can be with you.",
-                "resources": _CRISIS_RESOURCES}
+        return {**base, **crisis_help()}
 
     # SAFETY (red team 2026-08-06): a request to grade, rank, or label the user's OWN child is a
     # child-protection matter however it would otherwise route. "is my kid behind for his age"
