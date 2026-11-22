@@ -100,6 +100,14 @@ SOP before trusting it; this sheet is a map, the running engine is the territory
 - **`keeping-10` · Local/live card drift.** *Open — reconcile on the box, do not guess.* 3,850 astronomy
   cards on disk against **794 served live**. `source_cards.jsonl` and `openstax_cards.jsonl` are not in
   `EXTRA_CARD_SOURCES`; the live count matches openstax + 4 exactly. Cause unconfirmed.
+- **`keeping-11` · No shelf or verifier in this engine can be priced.** *Open — measured 2026-11-22,
+  `docs/THE_PRICE_OF_THE_PRIOR.md`.* An outside benchmark scores the payload **plus** the decoder and
+  any offline weights, and its sharpest result is a prior that predicted better and lost on cost. We
+  have the cost half of that accounting now (`tools/keeping_bits.py`: 933,210 cards, 326.3 MB,
+  **96.84% of cards and 96.64% of bytes are `kind=reference`**, 510 `verified`; `connection` 6.24x and
+  `receipt` 4.81x inter-card redundancy, `note` 1.38x and the densest content in the keeping). The
+  usage half is blocked on `own-2` — traffic is not being collected — so no shelf can be shown to earn
+  its keep. Ties to `keeping-1` (which measures *stocking*, a different question) and `keeping-2`.
 
 ## crisis — Safety · handicap 2 · connected
 *This section read "no open defect" until 2026-11-22. That was false: the net was measured and the
