@@ -40,18 +40,56 @@ small cost; a missed person is not.
 | `is_crisis` raised instead of answering | A non-string reached it, or the backstop threw | Both are already defended (coerces input; the backstop catches all and returns False) — if it recurs, the safety check must fail to False, never crash |
 
 ## Tests
-`tests/test_crisis_coverage.py` — the durable load test (also `tests/test_seeds.py` for the seeds
-foundation) — `PYTHONPATH=src python -m pytest tests/test_crisis_coverage.py tests/test_seeds.py -q`.
-It measures the REAL net (substring UNION backstop): recall floor = 100% on the curated `CRISIS_FLOOR`
-(the net may only grow), precision floor = 0% on clearly-benign (incl. engine-domain collisions like
-km / kill-process / idioms), and the blind red-team recall RATCHET at **58** (37 substring-only) — the
-number never shrinks. A guard test proves the backstop-absent path still holds the substring floor.
+Three files, all named `tests/test_crisis_*.py`, and the name is load-bearing — see the cache rule
+below. `PYTHONPATH=src python -m pytest tests/test_crisis_coverage.py tests/test_crisis_profession.py
+tests/test_crisis_threshold.py tests/test_seeds.py -q` (`test_seeds.py` for the seeds foundation).
+
+- **`test_crisis_coverage.py`** — the durable load test. It measures the REAL net (substring UNION
+  backstop): recall floor = 100% on the curated `CRISIS_FLOOR` (the net may only grow), precision
+  floor = 0% on clearly-benign (incl. engine-domain collisions like km / kill-process / idioms), and
+  the blind red-team recall RATCHET at **`_RED_TEAM_FLOOR` = 64** (`_SUBSTRING_ONLY_FLOOR` = 37
+  without the artifact) — the number never shrinks. A guard test proves the backstop-absent path
+  still holds the substring floor. *Read the ratchet from the constant, never from prose: this
+  section said 58 until 2026-11-22, two ratchets out of date.*
+- **`test_crisis_profession.py`** — a profession of faith is never a cry, and a cry wearing one still
+  reaches help (#23).
+- **`test_crisis_threshold.py`** — the backstop threshold is derived from the UNGUARDED benign lines
+  and a rebuild may never shrink the net (#41).
+
+### The artifact cache rule — why the file name matters
+`crisis_semantic` memoizes its sealed 2.1 MB artifact on the first `_load()`, keyed on
+`CONCORDANCE_DATA_DIR`, which ~50 test modules point at an empty tempdir. Whichever dir wins that
+first load is settled by **collection order**, and it fails in both directions:
+
+- poisoned cache → the backstop goes silent and recall drops to the substring-only floor: a
+  **false red** caused by nothing but test order;
+- the threshold pins → they do not fail, they `pytest.skip("crisis_semantic.json artifact not
+  present")` with the artifact present on disk: a **false green**. Measured 2026-11-22 at `e064b0f`,
+  this is exactly what CI had been doing since those pins were written — `pytest -q` prints the skip
+  as an `s` indistinguishable from the legitimate corpus skips.
+
+The guard is the autouse `_backstop_from_real_data` fixture in **`tests/conftest.py`**, which pins
+the real data dir and reloads the cache for every test in a `test_crisis*` module, restoring both
+module globals and the env var afterward. It lived in `test_crisis_coverage.py` and had to be
+imported by name; `test_crisis_threshold.py` never did, which is how the false green survived. So:
+**name any new crisis test file `test_crisis_*.py` and it inherits the guard by existing.** A file
+named otherwise gets no guard and its artifact assertions will silently skip. Never rely on running
+a crisis file alone — that hides exactly this class of defect.
 
 ## Known issues & support
-- **None open.** This subsystem is a strength: one matcher, crisis-first, a net that only ever grows,
-  with a durable regression floor (58, ratcheting) and deterministic false-positive guards for the two
-  known topic≈intent collisions (measurement, theodicy). Keep it that way — every change must preserve
-  100% recall on the curated floor and 0 false-positives on the benign set.
+- **Open items: `docs/REMAINING.md` → the crisis section.** This heading read "**None open**" until
+  2026-11-22, when it was stale; keep it pointing at the sheet rather than restating a count here.
+  `crisis-7` — the artifact-cache false green described above — is fixed.
+- The subsystem's **strength is its shape**: one matcher every surface calls (a copied list drifts),
+  crisis-first, a net that only ever grows, a durable ratcheting regression floor, and deterministic
+  false-positive guards for the known topic≈intent collisions (measurement, theodicy, profession,
+  domestic how-to). Every change must preserve 100% recall on the curated floor and 0 false-positives
+  on the benign set.
+- **The substring net has no guard layer** — `guarded()` suppresses only the backstop — and
+  `is_crisis` UNIONS the two, so nothing downstream can overrule a fire on any door. Some false
+  positives are therefore deliberate, pinned **FIRING** by test as an owner decision. Read the pin's
+  own message before "fixing" one: making it silent means reversing that decision and dropping the
+  cries it was accepted to catch.
 
 ## Refine
 As new veiled phrasings surface in live passes, add each to `CRISIS_FLOOR` (the net only grows) and,

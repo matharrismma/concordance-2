@@ -271,3 +271,69 @@ def corpus_left_as_found():
     finally:
         corpus._DEFAULT = prior_corpus
         graph._GRAPH = prior_graph
+
+
+# ---------------------------------------------------------------------------
+# THE CRISIS BACKSTOP'S ARTIFACT IS A SECOND MEMOIZED GLOBAL with exactly the race real_cards()
+# documents above for the corpus singleton -- and it had the same outcome. crisis_semantic caches its
+# sealed artifact on the first _load(), keyed on CONCORDANCE_DATA_DIR -- which many test modules point
+# at an empty tempdir (real_cards() above puts it at 53; a narrow grep on 2026-11-22 finds 50
+# assigning a mkdtemp, of 150 modules that touch the variable at all). test_ask is one of them, and it
+# assigns in its MODULE BODY, so merely COLLECTING that file is enough. Whichever dir wins the first
+# load is settled by collection order.
+#
+# WHY THIS LIVES HERE AND NOT IN A TEST FILE. It was an autouse fixture inside
+# test_crisis_coverage.py, imported by name into test_crisis_profession.py. test_crisis_threshold.py
+# never imported it -- so under the FULL suite CI runs, its four artifact-backed pins did not fail,
+# they SKIPPED on `pytest.skip("crisis_semantic.json artifact not present")`, with the artifact
+# present and 2.1 MB on disk. MEASURED 2026-11-22 at e064b0f:
+#
+#     pytest tests/test_crisis_threshold.py                     ->  6 passed
+#     pytest tests/test_ask.py tests/test_crisis_threshold.py   ->  2 passed, 4 SKIPPED
+#     ask + coverage + profession + threshold (real order)      ->  4 SKIPPED
+#
+# `pytest -q` prints those as an `s` indistinguishable from the 76 legitimate corpus skips, so the
+# issue #41 pins had been inert in CI since they were written and CI was green the whole time. Note
+# the second line: every test_ask test was itself skipped for want of a corpus, and it STILL poisoned
+# the variable -- pytest_collection_modifyitems adds the skip marker AFTER collection has imported
+# the module and run its env assignment.
+#
+# A guard each file must remember to import is a guard the next file forgets. Autouse here, gated to
+# the crisis modules so only they pay the reload, means a NEW crisis file inherits it by existing.
+_CRISIS_MODULE_PREFIX = "test_crisis"
+
+
+@pytest.fixture(autouse=True)
+def _backstop_from_real_data(request):
+    """Measure the crisis floor against the REAL net -- the substring list UNION the deterministic
+    semantic backstop -- exactly as production runs it.
+
+    Co-collected with test_ask, the cache is poisoned with "artifact absent" and blind-red-team
+    recall silently drops to the substring-only floor -- `_SUBSTRING_ONLY_FLOOR` against
+    `_RED_TEAM_FLOOR` for the union, 37 against 64 today: a crisis safety gate reporting false-red on
+    nothing but test order. (Named as the constants on purpose; the figure here read "37 vs 58" after
+    the union floor had already ratcheted past 58.) The threshold file's pins went the other way and
+    reported a false GREEN. Both failure directions come from the one cache.
+
+    Pin the honest state for every crisis check: point at the real data dir, drop the cache, reload
+    -- so `is_crisis` sees the backstop no matter what else was collected. Restore both globals and
+    the env var on the way out (the same private-global-restore pattern used for corpus._DEFAULT).
+    """
+    node = getattr(request.node, "path", None) or request.node.fspath
+    if not Path(str(node)).stem.startswith(_CRISIS_MODULE_PREFIX):
+        yield
+        return
+    from concordance import crisis_semantic
+    prior_dir = os.environ.get("CONCORDANCE_DATA_DIR")
+    prior_art, prior_loaded = crisis_semantic._ART, crisis_semantic._LOADED
+    os.environ["CONCORDANCE_DATA_DIR"] = str(DATA)
+    crisis_semantic._ART, crisis_semantic._LOADED = None, False
+    crisis_semantic._load()
+    try:
+        yield
+    finally:
+        crisis_semantic._ART, crisis_semantic._LOADED = prior_art, prior_loaded
+        if prior_dir is None:
+            os.environ.pop("CONCORDANCE_DATA_DIR", None)
+        else:
+            os.environ["CONCORDANCE_DATA_DIR"] = prior_dir

@@ -130,17 +130,35 @@ measurements are below. The net still catches everything it is pinned to catch �
 - **`crisis-6` · 80 tests unverified.** *Open.* `test_ask.py` and `test_lead.py` skip for want of the
   corpus; only the three crisis files actually ran. The gate has never been exercised end-to-end here.
 
-- **`crisis-7` · `test_crisis_threshold.py` is not covered by the race guard.** *Open — found
-  2026-11-22 while checking whether CI violates the law below. It does not; this file does.* The
-  autouse `_backstop_from_real_data` fixture lives in `test_crisis_coverage.py`.
-  `test_crisis_profession.py` pulls it in the pytest way — `from test_crisis_coverage import (...)`
-  with `# noqa: F401`, which **registers** the fixture for that module. `test_crisis_threshold.py`
-  instead does `import test_crisis_coverage as T`, a **module-alias import, which does not register
-  another module's autouse fixture**. That file imports `crisis_semantic` and is *about* the
-  threshold, which lives in the artifact — so its assertions are exposed to the same poisoned cache,
-  decided by collection order. CI is currently green, so either the order is favourable or the
-  assertions do not reach the artifact; **verify which, then either import the fixture name or move
-  it to a conftest** so no crisis file can miss it again.
+- **`crisis-7` · `test_crisis_threshold.py` was not covered by the race guard — the issue #41 pins
+  had been inert in CI since they were written.** *FIXED 2026-11-22: the autouse fixture moved to
+  `tests/conftest.py`, gated to `test_crisis*`.* Found while checking whether CI violates the law
+  below. It does not; this file did. The autouse `_backstop_from_real_data` fixture lived in
+  `test_crisis_coverage.py`; `test_crisis_profession.py` pulled it in the pytest way
+  (`from test_crisis_coverage import (...)` with `# noqa: F401`, which **registers** it), while
+  `test_crisis_threshold.py` **never referenced it at all** — it does only
+  `import test_crisis_coverage as T`, a module-alias import, which cannot register another module's
+  autouse fixture.
+  **It did not fail. It SKIPPED, and CI was green.** Of the asked question — favourable order, or
+  assertions that never reach the artifact — the answer was the second, and worse than either
+  phrasing: four of the six tests sit behind `pytest.skip("crisis_semantic.json artifact not
+  present")` with the artifact present and 2.1 MB on disk. Measured at `e064b0f`:
+
+      pytest tests/test_crisis_threshold.py                     ->  6 passed
+      pytest tests/test_ask.py tests/test_crisis_threshold.py   ->  2 passed, 4 SKIPPED
+      ask + coverage + profession + threshold (real order)      ->  4 SKIPPED
+
+  `pytest -q` — what CI runs — prints those as an `s` indistinguishable from the 76 legitimate
+  corpus skips, which is why nobody saw it. Two further findings fell out. **A skipped file still
+  poisons:** every `test_ask` test was itself skipped for want of a corpus and the variable was
+  still set, because `pytest_collection_modifyitems` adds the skip marker *after* collection has
+  imported the module and run its env assignment. And **`test_crisis_coverage.py` carries four of
+  the same `available()` skip guards**, safe today only because that file has the fixture — the
+  reason the guard belongs in the conftest and not in a file each sibling must remember to import.
+  After the move, verified order-independent: threshold alone, with `test_ask` first, and in the
+  real collection order all give **6 passed / 24 passed** with no artifact skip. Whole-tree
+  before/after on a 115-file slice (1,416 executed tests): **+4 passed, −4 skipped, same 15
+  pre-existing failures and 8 errors**, and collection identical at 5,934 items.
 
 **The "run them ALONE" law was STALE — struck 2026-11-22.** It read as standing operational law here
 and the SOP it pointed at (`crisis.md`) never documented it at all; the only real account of the race

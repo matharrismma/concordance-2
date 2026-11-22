@@ -27,9 +27,10 @@ next rebuild and silently shrink the backstop.
 import pytest
 
 from concordance import ask, crisis_semantic
-from test_crisis_coverage import (  # noqa: F401  — the autouse fixture pins the REAL artifact for every check here
-    CRISIS_FLOOR, RED_TEAM_BLIND, _backstop_from_real_data,
-)
+from test_crisis_coverage import CRISIS_FLOOR, RED_TEAM_BLIND
+
+# The autouse fixture that pins the REAL artifact is in tests/conftest.py and applies to every
+# `test_crisis*` module, so it no longer has to be imported by name here.
 
 THE_SENTENCE = "i want to bear witness to my profession of faith"
 
