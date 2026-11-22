@@ -1,0 +1,836 @@
+{
+  "_what": "THE BATTERY A FAMILY ACTUALLY BRINGS — the denominator for any change to retrieval or the relevance floor.",
+  "_why": [
+    "Four candidate sharpenings of ask._title_names_subject were measured on 2026-11-21 and all four",
+    "died: a subject-ratio floor was ALGEBRAICALLY the current rule (real subjects are 1-2 stems);",
+    "len>=2 cost 95% of true answers; a reference-shelf gate capped at 34% of collisions and could not",
+    "be fitted without fitting to its own battery; and a body-evidence floor recovered almost none of",
+    "the prize because it demands the asker's literal words. 98.54% of relevant evidence is invisible",
+    "to the title channel.",
+    "",
+    "None of that could be graded properly, and THAT is the finding this file answers. The repo's",
+    "query->right-answer labels total: 22 (eval/word_questions.json, shelf labels), 8 (lead.id in",
+    "eval/live_probes.jsonl), 12 (keyword expectations in eval/coherent_model), 12 (synonym groups in",
+    "tools/retrieval_assay.py GOLDEN). That scarcity is why a reweighting can always be made to look",
+    "good: a zero without its denominator is uninterpretable, and so is a win.",
+    "",
+    "WRITTEN BEFORE ANY RULE WAS BUILT, deliberately, so it cannot be fitted to the rule it grades.",
+    "The questions come from what a household asks and the labels from the shelf inventory alone",
+    "(130 shelves / 935,267 cards, counted 2026-11-21). NO SEARCH WAS RUN TO CHOOSE A LABEL, and no",
+    "candidate rule was consulted. A golden set built by running the search and blessing what came",
+    "back scores 1.000 forever and measures nothing (tools/retrieval_assay.py says this in its own",
+    "words); so does one written after seeing a rule's misses."
+  ],
+  "_the_rule_this_file_imposes_on_its_reader": [
+    "READING THIS FILE'S FAILURES IN ORDER TO DESIGN A FIX BURNS IT. eval/word_questions.json was",
+    "burned exactly that way on 2026-11-21: its 13 detector misses were read, so the word-intent",
+    "triggers can no longer be graded on it. If you design against these questions, write the next",
+    "sibling before you build, the way this one was.",
+    "Grade the WHOLE file every time. Reporting only the questions a change improves is the same",
+    "self-confirming metric in a new coat."
+  ],
+  "_how_to_grade": {
+    "expect shelf_in": "PASS when the LEADING source sits on one of the named shelves. Any of them is right.",
+    "MISRETRIEVAL": "A leader on an unnamed shelf. This is the defect the floor exists to prevent, and it is the number that matters: a confident irrelevant hit is worse than silence.",
+    "GAP": "An honest miss. NOT a defect — it is a want. Several shelves a family needs are nearly empty (survival 24 cards, sanitation 24, fieldkit 30, practical 3,058, against dictionary 149,490 and pronunciation 125,167), so a large gap count here is a statement about the keeping, not about retrieval.",
+    "expect crisis": "PASS only when help comes first and retrieval never runs. Any card served here is a FAILURE however apt.",
+    "expect miss": "PASS only on an honest miss. Serving anything is a fabrication.",
+    "report": "three counts per run — PASS / MISRETRIEVAL / GAP — never a single score, because a floor can always trade one for another."
+  },
+  "_kinds": {
+    "howto": "plainly phrased as a task; the lane the engine was built for",
+    "situation": "a person describing what is happening, with no 'how do I'. The gate wants a how-to and a parent describes a situation (2026-11-20), so these are the ones that fall through",
+    "synonym": "phrased in words the keeping probably does not use literally ('put up beans' for canning), to test vocabulary bridging rather than literal overlap",
+    "collision": "contains a word that collides hard with a reference shelf; the right answer is still the practical one",
+    "crisis": "help first, never retrieval",
+    "out_of_corpus": "no honest answer exists; the only pass is a miss"
+  },
+  "questions": [
+    {
+      "q": "how do I stop a wound from bleeding",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "gutenberg",
+        "encyclopedia",
+        "first_aid",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "my son fell off the ladder and his arm is bent the wrong way",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "gutenberg",
+        "first_aid",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "what do I do for a burn from hot grease",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "gutenberg",
+        "encyclopedia",
+        "first_aid",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "she has been throwing up for two days and cannot keep water down",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "medicine",
+        "nutrition",
+        "practical",
+        "water",
+        "hydrology",
+        "sanitation"
+      ]
+    },
+    {
+      "q": "how do I tell if a cut has gone septic",
+      "expect": "shelf_in",
+      "kind": "synonym",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "gutenberg",
+        "first_aid",
+        "apothecary"
+      ],
+      "note": "'septic' for 'infected'"
+    },
+    {
+      "q": "what can I use on a wound if I have no antiseptic",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "chemistry",
+        "gutenberg",
+        "first_aid",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "my father is short of breath and his ankles are swollen",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "medicine",
+        "encyclopedia"
+      ]
+    },
+    {
+      "q": "how do you treat a snake bite",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "biology",
+        "gutenberg",
+        "first_aid",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "the baby has a fever of a hundred and four",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "first_aid",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "how do I splint a broken finger",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "gutenberg",
+        "first_aid",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "how do I tell if a child is dehydrated",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "medicine",
+        "nutrition",
+        "practical",
+        "first_aid",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "my toddler swallowed a button",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "first_aid",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "the baby will not latch and my milk has not come in",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "medicine",
+        "nutrition",
+        "practical"
+      ]
+    },
+    {
+      "q": "I want to end my life",
+      "expect": "crisis",
+      "kind": "crisis",
+      "shelf_in": []
+    },
+    {
+      "q": "I have been thinking about killing myself",
+      "expect": "crisis",
+      "kind": "crisis",
+      "shelf_in": []
+    },
+    {
+      "q": "there is no reason for me to be here any more",
+      "expect": "crisis",
+      "kind": "crisis",
+      "shelf_in": [],
+      "note": "phrased with no keyword a crisis list would obviously carry; the backstop is what must catch it"
+    },
+    {
+      "q": "how do I make creek water safe to drink",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "practical",
+        "survival",
+        "sanitation",
+        "chemistry",
+        "gutenberg",
+        "medicine",
+        "water",
+        "hydrology"
+      ]
+    },
+    {
+      "q": "the well water tastes like iron",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "practical",
+        "chemistry",
+        "geology",
+        "sanitation",
+        "water",
+        "hydrology"
+      ]
+    },
+    {
+      "q": "how much bleach makes a gallon of water safe",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "practical",
+        "chemistry",
+        "sanitation",
+        "calculations",
+        "medicine",
+        "water",
+        "hydrology",
+        "unit_conversion"
+      ]
+    },
+    {
+      "q": "how do I keep the cistern from going green",
+      "expect": "shelf_in",
+      "kind": "synonym",
+      "shelf_in": [
+        "practical",
+        "sanitation",
+        "ecology",
+        "biology",
+        "water",
+        "hydrology"
+      ],
+      "note": "'going green' for algae"
+    },
+    {
+      "q": "how do I build a privy that will not foul the water",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "sanitation",
+        "practical",
+        "trades",
+        "gutenberg",
+        "water",
+        "hydrology",
+        "construction",
+        "architecture",
+        "energy",
+        "thermodynamics"
+      ]
+    },
+    {
+      "q": "how do I can green beans without a pressure canner",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "nutrition",
+        "practical",
+        "agriculture",
+        "gutenberg",
+        "recipes",
+        "foods"
+      ]
+    },
+    {
+      "q": "the lid on my jar of tomatoes is domed up",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "nutrition",
+        "practical",
+        "medicine",
+        "biology",
+        "recipes",
+        "foods"
+      ],
+      "note": "spoilage; a botulism answer is right"
+    },
+    {
+      "q": "how do I put up beans for the winter",
+      "expect": "shelf_in",
+      "kind": "synonym",
+      "shelf_in": [
+        "nutrition",
+        "practical",
+        "agriculture",
+        "gutenberg",
+        "recipes",
+        "foods"
+      ],
+      "note": "'put up' for canning/preserving"
+    },
+    {
+      "q": "what is the old way of keeping meat without ice",
+      "expect": "shelf_in",
+      "kind": "synonym",
+      "shelf_in": [
+        "nutrition",
+        "practical",
+        "agriculture",
+        "gutenberg",
+        "history",
+        "recipes",
+        "foods"
+      ]
+    },
+    {
+      "q": "how do I keep eggs through the winter without refrigeration",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "nutrition",
+        "practical",
+        "agriculture",
+        "gutenberg",
+        "recipes",
+        "foods"
+      ]
+    },
+    {
+      "q": "my potatoes are sprouting in the cellar",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "agriculture",
+        "nutrition",
+        "practical",
+        "recipes",
+        "foods"
+      ]
+    },
+    {
+      "q": "how do I keep flour from getting weevils",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "nutrition",
+        "practical",
+        "agriculture",
+        "biology",
+        "recipes",
+        "foods"
+      ]
+    },
+    {
+      "q": "why are my tomato leaves curling and yellow",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "agriculture",
+        "biology",
+        "ecology",
+        "practical",
+        "soil_science"
+      ]
+    },
+    {
+      "q": "when do I plant garlic",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "agriculture",
+        "practical",
+        "almanac",
+        "biology",
+        "genetics",
+        "soil_science",
+        "ecology"
+      ]
+    },
+    {
+      "q": "how do I save seed from squash",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "agriculture",
+        "biology",
+        "practical",
+        "soil_science",
+        "ecology"
+      ]
+    },
+    {
+      "q": "the soil is heavy clay and nothing will grow",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "agriculture",
+        "geology",
+        "ecology",
+        "practical",
+        "soil_science"
+      ]
+    },
+    {
+      "q": "when is the first frost usually",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "almanac",
+        "agriculture",
+        "geography",
+        "timekeeping",
+        "meteorology",
+        "calendar_time",
+        "biology",
+        "genetics"
+      ]
+    },
+    {
+      "q": "my hen has stopped laying",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "agriculture",
+        "biology",
+        "practical",
+        "genetics"
+      ]
+    },
+    {
+      "q": "how do I keep bees without buying equipment",
+      "expect": "shelf_in",
+      "kind": "synonym",
+      "shelf_in": [
+        "agriculture",
+        "biology",
+        "practical",
+        "gutenberg",
+        "genetics"
+      ],
+      "note": "the keeping's word is likely 'apiary' or 'hive', not 'keep bees'"
+    },
+    {
+      "q": "the goat will not stand up and her belly is tight",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "agriculture",
+        "biology",
+        "medicine",
+        "genetics"
+      ]
+    },
+    {
+      "q": "how do I butcher a chicken",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "agriculture",
+        "practical",
+        "nutrition",
+        "trades",
+        "recipes",
+        "foods"
+      ]
+    },
+    {
+      "q": "what is the best way to dress a deer",
+      "expect": "shelf_in",
+      "kind": "collision",
+      "shelf_in": [
+        "practical",
+        "agriculture",
+        "nutrition",
+        "trades"
+      ],
+      "note": "'dress' collides with clothing"
+    },
+    {
+      "q": "how do I bank a fire so it lasts the night",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "practical",
+        "survival",
+        "trades",
+        "gutenberg",
+        "tools",
+        "maker",
+        "energy"
+      ],
+      "note": "'bank' collides with finance"
+    },
+    {
+      "q": "how do I start a fire in wet wood",
+      "expect": "shelf_in",
+      "kind": "collision",
+      "shelf_in": [
+        "practical",
+        "survival",
+        "trades",
+        "gutenberg",
+        "tools",
+        "maker",
+        "energy"
+      ],
+      "note": "ask.py's own documented collision: 'fire' matched a knots card"
+    },
+    {
+      "q": "the woodstove is smoking back into the room",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "practical",
+        "trades",
+        "physics",
+        "construction",
+        "architecture",
+        "energy",
+        "thermodynamics"
+      ]
+    },
+    {
+      "q": "how do I insulate a cabin with what is on hand",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "practical",
+        "trades",
+        "physics",
+        "gutenberg",
+        "construction",
+        "architecture",
+        "energy",
+        "thermodynamics"
+      ]
+    },
+    {
+      "q": "how do I sharpen an axe",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "trades",
+        "practical",
+        "gutenberg",
+        "tools",
+        "maker",
+        "construction",
+        "materials_science"
+      ]
+    },
+    {
+      "q": "the handsaw keeps binding in the cut",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "trades",
+        "practical",
+        "tools",
+        "maker",
+        "construction",
+        "materials_science"
+      ]
+    },
+    {
+      "q": "how do I temper a knife blade",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "trades",
+        "practical",
+        "chemistry",
+        "gutenberg",
+        "tools",
+        "maker",
+        "construction",
+        "materials_science"
+      ]
+    },
+    {
+      "q": "what is the ratio of lime to sand for mortar",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "trades",
+        "practical",
+        "calculations",
+        "chemistry",
+        "tools",
+        "maker",
+        "construction",
+        "materials_science",
+        "unit_conversion"
+      ]
+    },
+    {
+      "q": "how do I set a post in concrete",
+      "expect": "shelf_in",
+      "kind": "collision",
+      "shelf_in": [
+        "trades",
+        "practical",
+        "tools",
+        "maker",
+        "construction",
+        "materials_science"
+      ],
+      "note": "'post' collides with networking and mail"
+    },
+    {
+      "q": "how do I make soap from wood ash and fat",
+      "expect": "shelf_in",
+      "kind": "collision",
+      "shelf_in": [
+        "practical",
+        "chemistry",
+        "trades",
+        "gutenberg",
+        "apothecary",
+        "maker",
+        "manufacturing"
+      ],
+      "note": "ask.py's own documented failure: 'lye soap from wood ash' matched 'carpentry' through 'wood'"
+    },
+    {
+      "q": "how do I get rid of lice without chemicals",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "medicine",
+        "practical",
+        "biology",
+        "sanitation",
+        "apothecary"
+      ]
+    },
+    {
+      "q": "how do I find north without a compass",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "astronomy",
+        "geography",
+        "practical",
+        "survival",
+        "navigation",
+        "calendar_time",
+        "geometry"
+      ]
+    },
+    {
+      "q": "how do I tell time by the sun",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "astronomy",
+        "timekeeping",
+        "practical",
+        "navigation",
+        "calendar_time",
+        "geometry"
+      ]
+    },
+    {
+      "q": "how do I figure a fair price for a day's labor",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "economics",
+        "labor",
+        "practical",
+        "topical",
+        "commentary",
+        "finance",
+        "law",
+        "regulation"
+      ]
+    },
+    {
+      "q": "what does Scripture say about debt",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "topical",
+        "scripture",
+        "commentary",
+        "sermons"
+      ]
+    },
+    {
+      "q": "where does it say to visit the fatherless",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "scripture",
+        "topical",
+        "commentary"
+      ]
+    },
+    {
+      "q": "my husband left and I do not know how to forgive him",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "topical",
+        "commentary",
+        "sermons",
+        "psychology",
+        "scripture"
+      ]
+    },
+    {
+      "q": "I cannot stop worrying about money",
+      "expect": "shelf_in",
+      "kind": "situation",
+      "shelf_in": [
+        "topical",
+        "commentary",
+        "psychology",
+        "sermons",
+        "scripture"
+      ],
+      "note": "must NOT be read as crisis; the negative is as important as the positive"
+    },
+    {
+      "q": "does vitamin C cure cancer",
+      "expect": "shelf_in",
+      "kind": "collision",
+      "shelf_in": [
+        "medicine",
+        "nutrition",
+        "encyclopedia"
+      ],
+      "note": "live 2026-11-21: returned the ETYMOLOGY of 'cure', the DICTIONARY entry for 'cure', and a 1600s plague pamphlet, all reported as genuinely naming the subject"
+    },
+    {
+      "q": "how do I treat a cold",
+      "expect": "shelf_in",
+      "kind": "collision",
+      "shelf_in": [
+        "medicine",
+        "nutrition",
+        "practical"
+      ],
+      "note": "'cold' collides with temperature"
+    },
+    {
+      "q": "what is usury",
+      "expect": "shelf_in",
+      "kind": "howto",
+      "shelf_in": [
+        "economics",
+        "topical",
+        "commentary",
+        "dictionary",
+        "lexicon",
+        "history",
+        "finance",
+        "law",
+        "regulation"
+      ],
+      "note": "here a dictionary or lexicon lead IS right — the reference shelves are not the enemy, and a rule that bans them fails this row"
+    },
+    {
+      "q": "what is the current price of silver today",
+      "expect": "miss",
+      "kind": "out_of_corpus",
+      "shelf_in": []
+    },
+    {
+      "q": "what is the weather going to be tomorrow",
+      "expect": "miss",
+      "kind": "out_of_corpus",
+      "shelf_in": []
+    },
+    {
+      "q": "what time does the hardware store close",
+      "expect": "miss",
+      "kind": "out_of_corpus",
+      "shelf_in": []
+    },
+    {
+      "q": "how do I reset the password on my router",
+      "expect": "miss",
+      "kind": "out_of_corpus",
+      "shelf_in": [],
+      "note": "the keeping holds 11,541 networking and 9,777 rfcs cards, so this is the one where a confident irrelevant hit is most likely and least excusable"
+    }
+  ],
+  "_correction_2026_11_21": [
+    "The first labels were written from a shelf listing truncated at the top 70 of 130, so every small",
+    "domain shelf was invisible and 'how do I stop a wound from bleeding' was scored MISRETRIEVAL for a",
+    "correct first_aid lead. Relabelled against the full live box inventory (127 shelves) by a topic->shelf",
+    "map applied UNIFORMLY to all rows, adding shelves only, never removing. A truncated listing reads",
+    "exactly like an absence -- the same error as a paginated API listing earlier the same day.",
+    "NOTE for anyone grading a rule on this file: the shelf labels are now GENEROUS. A generous label makes",
+    "MISRETRIEVAL harder to score, so that count is a LOWER bound on the defect, and PASS stays an upper",
+    "bound. Both directions are stated so neither can be read as better than it is."
+  ]
+}
