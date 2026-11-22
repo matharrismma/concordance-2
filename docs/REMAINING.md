@@ -267,16 +267,13 @@ dropping the three matching `CRISIS_FLOOR` cries in the same change.
 
 ## On the bench right now (2026-11-22) — uncommitted, and the owner's calls
 
-**Nothing below is committed.** `master` at `b61c87a`, working tree carrying six modified and five
-untracked files across four unrelated pieces of work. The first item is not a task, it is a risk:
-this much uncommitted change is one bad command from gone.
-
-- **`bench-1` · Commit or shelve the working tree.** Four separable changes sharing one tree:
-  (a) the crisis gate — `ask.py`, `crisis_semantic.py`, `tests/test_crisis_coverage.py`, all contracts
-  verified both ways; (b) the Riemann/FFT work — `verifiers/riemann_accel.py`, `verifiers/number_theory.py`,
-  `capabilities.py`, `tests/test_riemann_fft.py`; (c) the family battery — `eval/family_questions.json`,
-  `eval/RESULTS_FAMILY.md`, `tools/family_battery.py`; (d) the design docs — `docs/THE_REVERSAL.md`,
-  this sheet. They want **separate commits**, not one. Secrets scan was clean on (a) and (d).
+- **`bench-1` · Commit or shelve the working tree.** *~~Open~~ **DONE 2026-11-22.*** Four unrelated
+  changes had been sharing one tree. Committed as four, staged by explicit path, never `git add -A`:
+  `3cc7f98` the crisis gate · `0d21443` the blocked NUFFT main sum · `533359d` the family battery ·
+  `884ae93` these two documents. Tree clean. **Not pushed — `master` is 4 ahead of `origin/master`,
+  and the box deploys from `master`, so pushing is a release decision, not a cleanup.**
+  Verified before committing: crisis tests alone 24 passed / 1 xfailed (the standing law), FFT 7/7,
+  secrets and confidential-IP scan clean across all eleven files.
 
 **Owner's call, not engineering** — carried forward and still open:
 
