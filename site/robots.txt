@@ -4,9 +4,13 @@
 # and the card permalink is the most-used thing we serve — that is the intended use, not a leak.
 User-agent: *
 Allow: /
-# The operator console is not a public surface:
+# The operator panel (The Helm) is not a public surface:
+Disallow: /helm
+Disallow: /helm.html
 Disallow: /keep
 Disallow: /keep.html
+Disallow: /bridge
+Disallow: /bridge.html
 # The operator's improvement-filing desk (The Workshop) — operator-only, not for crawlers:
 Disallow: /improve
 Disallow: /improve.html

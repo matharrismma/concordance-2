@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="/shell.js"></script>
 <meta name="robots" content="noindex, nofollow">
-<title>The Bridge — Narrow Highway</title>
+<title>The Helm — Narrow Highway</title>
 <style>
-  /* THE BRIDGE — the operator's console: the engine as a vacuum-tube computer, read live and on trend.
+  /* THE HELM — the operator's console: the engine as a vacuum-tube computer, read live and on trend.
      Steampunk: brass + glass on dark, glowing tubes, needle gauges, copper runs. (Matt, 2026-10-06) */
   :root{
     --bg:#15110c; --panel:#1e1812; --panel2:#241c14; --hair:#3a2e20; --copper:#b87333;
@@ -101,13 +101,13 @@
 </head>
 <body>
 <main class="wrap">
-  <h1><span class="dot" id="live"></span>THE&nbsp;BRIDGE<span class="rivet"> ⚙</span></h1>
+  <h1><span class="dot" id="live"></span>THE&nbsp;HELM<span class="rivet"> ⚙</span></h1>
   <p class="lede">The operator's console. We read the engine the way you'd read a vacuum-tube computer — every part visible, measurable, no black box — live and on trend.
     <span class="meta" id="updated"></span></p>
 
   <div id="closed" class="card" hidden>
     <strong>Operator sign-in</strong>
-    <p class="meta" style="margin:.5rem 0 .7rem">The Bridge serves only the operator. Your token stays in
+    <p class="meta" style="margin:.5rem 0 .7rem">The Helm serves only the operator. Your token stays in
     this browser and is sent as a header — never in the URL.</p>
     <form id="signin" style="display:flex;gap:.5rem">
       <input id="tok" type="password" placeholder="operator token" autocomplete="current-password" aria-label="operator token">
@@ -154,8 +154,10 @@
 
 <script>
 var TOKEN=(function(){try{var u=new URLSearchParams(location.search).get("token");
-  if(u){localStorage.setItem("nh_keep_token",u);history.replaceState(null,"",location.pathname);return u;}
-  return localStorage.getItem("nh_keep_token")||"";}catch(e){return "";}})();
+  if(u){localStorage.setItem("nh_helm_token",u);history.replaceState(null,"",location.pathname);return u;}
+  var v=localStorage.getItem("nh_helm_token");
+  if(!v){v=localStorage.getItem("nh_keep_token")||"";if(v){localStorage.setItem("nh_helm_token",v);}}   /* migrate the old key, stay signed in */
+  return v||"";}catch(e){return "";}})();
 function esc(s){var d=document.createElement("div");d.textContent=(s==null?"":String(s));return d.innerHTML;}
 function num(x){return x==null?"—":Number(x).toLocaleString();}
 function fmtTime(t){if(!t)return"";var d=new Date(t*1000);return d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
@@ -301,17 +303,17 @@ function closed(){
 }
 
 function refresh(){
-  return fetch("/bridge.json?t="+Date.now(),{headers:TOKEN?{"X-Keep-Token":TOKEN}:{},cache:"no-store"})
+  return fetch("/helm.json?t="+Date.now(),{headers:TOKEN?{"X-Helm-Token":TOKEN}:{},cache:"no-store"})
     .then(function(r){if(r.status===404){closed();return null;}if(!r.ok)return null;return r.json();})
     .then(function(d){if(d)render(d);})
     .catch(function(){/* keep the last good view */});
 }
 document.getElementById("signin").addEventListener("submit",function(e){
   e.preventDefault();var v=document.getElementById("tok").value.trim();if(!v)return;
-  TOKEN=v;try{localStorage.setItem("nh_keep_token",v);}catch(_){}
+  TOKEN=v;try{localStorage.setItem("nh_helm_token",v);}catch(_){}
   document.getElementById("err").textContent="checking…";
   refresh().then(function(){var c=document.getElementById("dash").hidden;
-    document.getElementById("err").textContent=c?"That token didn't open the Bridge.":"";});
+    document.getElementById("err").textContent=c?"That token didn't open the Helm.":"";});
 });
 refresh();setInterval(refresh,15000);
 </script>

@@ -168,7 +168,7 @@ AGENT_ONLY = {
 UNLISTED_PAGES = {
     "coach.html",         # Coach (the audio-native desk; internal codename console) — reached by voice / direct URL / home-screen install, an E-Ink-first tool, not a page on the public witness nav
     "tv.html",            # narrowhighway.tv (the museum/broadcast shell) — reached by direct URL / the .tv domain, curated to what the viewer seeks, not a page on the witness nav
-    "bridge.html",        # THE BRIDGE — the operator's console (the vacuum-tube computer, live + on trend), noindex; the renamed keep, reached by direct URL, token-gated
+    "helm.html",          # THE HELM — the operator's panel (the vacuum-tube computer, live + on trend), noindex; renamed from bridge.html 2026-11-22 because "bridge" already meant a thing that joins two things in four other places; reached by direct URL, token-gated, and /keep* + /bridge* still open it
     "steward.html",       # the Steward's instrument (budget, rounds, cost-destroyed) — plumbing in the five-doors map (2026-10-02); documented on connect.html, never a reader's door
     "crossrefs.html",     # a cross-reference reference surface — reached by direct URL, not on the public nav (pre-existing orphan, declared 2026-10-15)
     "profile.html",       # the opt-in sovereign keeping (ez-login) — reached by direct URL / the keeping flow, not the public nav
@@ -186,10 +186,11 @@ UNLISTED_PAGES = {
     "playbook.html",      # the Playbook surface — operator/agent authoring, not the public nav
     "plow.html",          # the Plow surface — an operator instrument, not the public nav
     # THE UNIFIED HERO (2026-10-11): console.html is served at / by home_for() on BOTH faces (the domain
-    # root — surface routing the static link-checker cannot see); bridge.html is the operator console,
-    # served for /keep* and /bridge* by api._keep (no keep.html file since 2026-10-16, issue #20).
-    # Neither is a nav <a href>, same limit as com.html.
-    "console.html", "bridge.html",
+    # root — surface routing the static link-checker cannot see). helm.html is the same case and is
+    # declared above: api._helm serves it for /helm*, /keep* and /bridge* (no keep.html or bridge.html
+    # file — see test_retired_pages), so it is never a nav <a href> either, same limit as com.html.
+    # (It was listed twice until 2026-11-22; a set hid the duplicate.)
+    "console.html",
     # THE MVP FRONT DOOR (2026-11-19): verifier.html is served at / on the REACH face by home_for().
     # A human reaches it as the domain root, never a /verifier.html <a href>, so the static
     # link-checker cannot see it — the same surface-routing limit as com.html and console.html.

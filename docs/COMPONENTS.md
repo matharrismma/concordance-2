@@ -122,9 +122,10 @@ discipline); each has a live reading the Bridge will show.
 
 ---
 
-## 6. The Bridge (the console)
+## 6. The Helm (the operator's panel)
 
-The Bridge (`site/keep.html` → renamed, route `/bridge`, token-gated) is the front panel of this machine:
+The Helm (`site/helm.html`, route `/helm`, token-gated; `/bridge*` and `/keep*` still open it)
+is the front panel of this machine:
 a row of **component** lights (primitive · layer · plane · status, from `components.py` over `systems.py`)
 and a row of **regulator** meters (§5, live readings), each read **live and on trend**. Steampunk — brass
 and glass, tubes that glow when a part is Verified and live, needle gauges for the regulators, the

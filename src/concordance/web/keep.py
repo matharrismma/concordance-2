@@ -1,4 +1,8 @@
-"""The keep — the operator's window into the live engine.
+"""THE HELM — the operator's panel on the live engine.
+
+Named the Helm 2026-11-22 (it was "the keep", then "the Bridge"): a bridge is where you
+watch, a helm is where you act, and "bridge" was already four other things here. The module
+file keeps its name for now because kernel.py carries it as an arm.
 
 This is how the operator SEES what the engine is doing: health, the keeping's size, the
 seal/ledger counts, and a live feed of recent activity (verifications, searches, seals).
@@ -11,12 +15,14 @@ labels them so an operator never reads an activity count as sealed truth.
 Operator-gated, like 1.0's keep: it serves only to the operator and returns 404 to
 everyone else (hide-existence — the keep is not a public surface). Operator =
   - localhost on the box (the box itself is always trusted), OR
-  - a request carrying the right token (env CONCORDANCE_KEEP_TOKEN), passed as
-    ?token=… or the X-Keep-Token header, OR
-  - a request from an allow-listed IP (env CONCORDANCE_KEEP_IPS, comma-separated). Behind our
+  - a request carrying the right token (env CONCORDANCE_HELM_TOKEN, or the legacy
+    CONCORDANCE_KEEP_TOKEN which is live on the box), passed as ?token=… or the
+    X-Helm-Token header (X-Keep-Token still accepted), OR
+  - a request from an allow-listed IP (env CONCORDANCE_HELM_IPS or CONCORDANCE_KEEP_IPS,
+    comma-separated). Behind our
     own proxy the real client IP is the LAST hop Caddy appends to X-Forwarded-For — trusted
     ONLY because the socket peer is our loopback proxy (an outside attacker can never be that).
-No credential set + non-localhost  →  the keep is closed (404 to all). Sovereign: stdlib only.
+No credential set + non-localhost  →  the Helm is closed (404 to all). Sovereign: stdlib only.
 
 CAVEAT for the IP tie: a residential IP can rotate (you re-set it), and if your ISP uses CGNAT
 your public IP is SHARED with strangers who would then reach the keep — so an IP allowlist is a
@@ -37,7 +43,8 @@ _LOOPBACK = {"127.0.0.1", "::1"}
 
 
 def _allowed_ips() -> set:
-    raw = os.environ.get("CONCORDANCE_KEEP_IPS", "")
+    raw = (os.environ.get("CONCORDANCE_HELM_IPS", "")
+           + "," + os.environ.get("CONCORDANCE_KEEP_IPS", ""))
     return {ip.strip() for ip in raw.replace(";", ",").split(",") if ip.strip()}
 
 
@@ -53,34 +60,36 @@ def _client_ip(peer_ip: Optional[str], headers: Any) -> Optional[str]:
 
 
 def is_operator(token: Optional[str], peer_ip: Optional[str]) -> bool:
-    """True if this request may see the keep. FAIL CLOSED.
+    """True if this request may see the Helm. FAIL CLOSED.
 
-    SECURITY: access requires a matching CONCORDANCE_KEEP_TOKEN (constant-time compare).
+    SECURITY: access requires a matching CONCORDANCE_HELM_TOKEN or the legacy
+    CONCORDANCE_KEEP_TOKEN (constant-time compare against each that is set).
     Loopback is trusted ONLY when CONCORDANCE_KEEP_TRUST_LOCAL is set — which it is NOT in
     production, because behind a proxy every request's socket peer is the proxy (loopback),
     so trusting loopback would expose the keep to the world. The empty/unknown IP is never
     trusted. The caller passes the REAL socket peer, never X-Forwarded-For (spoofable)."""
-    want = os.environ.get("CONCORDANCE_KEEP_TOKEN", "").strip()
-    if want and token and hmac.compare_digest(str(token).strip(), want):
-        return True
-    if os.environ.get("CONCORDANCE_KEEP_TRUST_LOCAL", "").strip().lower() in _TRUE \
-            and peer_ip in _LOOPBACK:
-        return True
+    for env in ("CONCORDANCE_HELM_TOKEN", "CONCORDANCE_KEEP_TOKEN"):
+        want = os.environ.get(env, "").strip()
+        if want and token and hmac.compare_digest(str(token).strip(), want):
+            return True
+    for env in ("CONCORDANCE_HELM_TRUST_LOCAL", "CONCORDANCE_KEEP_TRUST_LOCAL"):
+        if os.environ.get(env, "").strip().lower() in _TRUE and peer_ip in _LOOPBACK:
+            return True
     return False
 
 
 def request_is_operator(peer_ip: Optional[str], headers: Any, query: Optional[dict]) -> bool:
-    """Operator decision for a keep request. The token may come from ?token= or the
-    X-Keep-Token header. X-Forwarded-For is deliberately NOT consulted — it is client-
+    """Operator decision for a Helm request. The token may come from ?token= or the
+    X-Helm-Token header (X-Keep-Token is still read, for the live box). X-Forwarded-For is deliberately NOT consulted — it is client-
     spoofable, so the gate trusts only the real socket peer + the token."""
     token = None
     if query:
         token = query.get("token")
     if not token and headers is not None:
-        token = headers.get("x-keep-token")
+        token = headers.get("x-helm-token") or headers.get("x-keep-token")
     if is_operator(token, peer_ip):
         return True
-    # the IP tie — additive, and inert unless CONCORDANCE_KEEP_IPS is set. The client IP is resolved
+    # the IP tie — additive, and inert unless CONCORDANCE_HELM_IPS/KEEP_IPS is set. The client IP is resolved
     # from the trusted proxy hop (never the spoofable first X-Forwarded-For entry).
     ips = _allowed_ips()
     if ips:
@@ -284,7 +293,7 @@ def dashboard(config: EngineConfig) -> Dict[str, Any]:
             "recent": list(reversed(telemetry.recent(50))),  # newest first for the feed
         },
     }
-    # THE BRIDGE: the live component/regulator map (the vacuum-tube computer) + the trend. Both
+    # THE HELM: the live component/regulator map (the vacuum-tube computer) + the trend. Both
     # best-effort — a reporting layer must never sink the operator's window.
     try:
         from .. import components

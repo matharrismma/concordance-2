@@ -331,7 +331,7 @@ dropping the three matching `CRISIS_FLOOR` cries in the same change.
   side is closed — the `/speak` door is gated (`0a51b59`) and mints nothing without the operator — so
   this is an account action, not a code change. **Highest consequence on this sheet: it is money, and
   it lives outside the repo.**
-- **`own-2` · `nh-traffic.timer` is DISABLED**, so `data/traffic.json` is stale and **The Bridge is
+- **`own-2` · `nh-traffic.timer` is DISABLED**, so `data/traffic.json` is stale and **The Helm is
   showing numbers that are not true**. Either re-enable the timer or make the panel say the data is stale.
 - **`own-3` · 63 stick entries carry older seals.** Matt decides before any listing.
 - **`own-4` · `stick_mint.py` refuses handler entries, and `riemann` is one** — so no new Riemann mark

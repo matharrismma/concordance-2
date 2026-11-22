@@ -64,7 +64,7 @@ deeply anchored member (§2). This is the balance wheel of the watch — it sets
 
 ## 5. The console — the Bridge
 
-`site/bridge.html` (operator-gated): the authority chain as the backplane, component tubes that glow when
+`site/helm.html` (operator-gated): the authority chain as the backplane, component tubes that glow when
 Verified+wired, regulator gauges, and vitals with daily-trend sparklines — every part read **live and on
 trend**. *"One place to check what's real and what is still open."*
 

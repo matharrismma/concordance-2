@@ -174,7 +174,7 @@ seal, one next step). Transports: stdio (`python -m concordance mcp`) and Stream
   (`build_server`). The main ones: the five door pages above; `console.html`; `parable.html`;
   `books.html` and `reader.html` (the Reading Room); `connect.html` (the one page for agents);
   `about.html` and `proof.html`. `keep.html` and `steward.html` are operator surfaces
-  (`docs/FIVE_DOORS_MAP.md`); `bridge.html` is the Bridge (`docs/COMPONENTS.md` §6).
+  (`docs/FIVE_DOORS_MAP.md`); `helm.html` is The Helm (`docs/COMPONENTS.md` §6).
 - `ROUTES` is the route registry: 231 entries, of which 170 are API GET paths; `RATELIMITED`,
   `READ_LIMITED` and `_API_GET_PATHS` derive from it. `/s/<hash>` is the server-rendered, citable
   receipt page; `/seal?hash=` is the raw JSON.

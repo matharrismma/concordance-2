@@ -40,8 +40,8 @@ python -m concordance serve --surface witness --port 8001   # names the foundati
 The keep shows what the engine is doing (verifications, seals, integrity). It is gated — set a
 token and open it from your browser:
 ```bash
-export CONCORDANCE_KEEP_TOKEN=$(openssl rand -hex 16)
-# then: http://your-host/keep.html?token=<that token>
+export CONCORDANCE_HELM_TOKEN=$(openssl rand -hex 16)
+# then: http://your-host/helm.html?token=<that token>
 # on your own laptop only, you can instead: export CONCORDANCE_KEEP_TRUST_LOCAL=1
 ```
 
@@ -80,7 +80,7 @@ Schedule both (cron/systemd-timer). For TLS + a public domain + always-on servic
 | var | what |
 |-----|------|
 | `CONCORDANCE_DATA_DIR` | where seals/ledger/corpus live (default `./data`) |
-| `CONCORDANCE_KEEP_TOKEN` | the operator token for the keep |
+| `CONCORDANCE_HELM_TOKEN` | the operator token for The Helm (legacy `CONCORDANCE_KEEP_TOKEN` still read) |
 | `CONCORDANCE_KEEP_TRUST_LOCAL` | `1` = trust loopback for the keep (local dev only) |
 | `CONCORDANCE_PUBLIC_BASE` | base URL used in receipt `cite_url`s |
 | `CONCORDANCE_ALERT_WEBHOOK` | POST target for integrity-check failures |

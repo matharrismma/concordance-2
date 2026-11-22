@@ -12,7 +12,7 @@ and an honest `pending` where a meter needs more plumbing. Never a faked needle.
 
 Vocabulary is Matt's own hardware design system (one vocabulary across the robot, the watch and the
 engine). Stdlib + cheap disk/import resolution only — safe on every request, like systems.py; it loads no
-corpus. The Bridge (site/bridge.html, GET /components) renders this.
+corpus. The Helm (site/helm.html, GET /components) renders this.
 """
 from __future__ import annotations
 
@@ -189,7 +189,7 @@ def _reading(slug: str) -> Dict[str, Any]:
             return {"wired": _resolvable(["airlock"])["wired"], "rule": "one-way; the reverse is refused by shape"}
         if slug == "pd":
             return {"rule": "public-domain only; fail-closed",
-                    "pending": True, "detail": "withheld-by-license count is on the Bridge via /keep.json composition"}
+                    "pending": True, "detail": "withheld-by-license count is on the Helm via /helm.json composition"}
         if slug == "gauges":
             return {"pending": True, "detail": "survey via tools/gauge_panel.py --json (AST over the source; not loaded per-request)"}
     except Exception as e:  # noqa: BLE001

@@ -165,19 +165,27 @@ def test_no_retired_page_still_404s(server):
         assert status in (301, 302), f"{path} answers {status} — a retired page is not a 404"
 
 
-def test_keep_html_is_the_servers_door_to_the_bridge_not_a_file(server):
-    """site/keep.html was a one-line JS redirect to bridge.html that never reached the wire: GET /keep*
-    is answered by api._keep BEFORE _RETIRED and before static serving, with the Bridge sign-in shell
-    itself (a 200, not a redirect). Deleted 2026-10-16 (issue #20); pinned so the door stays open
-    without the file — the shell byte for byte, the token still riding the URL, the DATA still gated."""
-    assert not (SITE / "keep.html").exists(), "keep.html shipped again — the server already owns /keep*"
-    bridge = (SITE / "bridge.html").read_bytes()
-    for path in ("/keep", "/keep.html", "/keep.html?token=not-the-token"):
+def test_the_helm_is_served_and_every_old_door_still_opens_it(server):
+    """THE HELM is the operator's panel (renamed from "the Bridge" 2026-11-22, which was renamed from
+    "the keep"). Three generations of URL now open ONE page, because a rename must not break the
+    operator's own bookmark: GET /helm*, /keep* and /bridge* are all answered by api._helm BEFORE
+    _RETIRED and before static serving, with the sign-in SHELL itself (a 200, not a redirect), while
+    every .json stays gated. site/keep.html and site/bridge.html are not files — the server owns
+    those paths (keep.html's JS redirect was deleted 2026-10-16, issue #20).
+
+    This is the pin that makes the rename safe. If someone drops a legacy door, it fails here."""
+    for gone in ("keep.html", "bridge.html"):
+        assert not (SITE / gone).exists(), f"{gone} shipped again — the server already owns that path"
+    helm = (SITE / "helm.html").read_bytes()
+    for path in ("/helm", "/helm.html", "/helm.html?token=not-the-token",
+                 "/keep", "/keep.html", "/keep.html?token=not-the-token",
+                 "/bridge", "/bridge.html"):
         status, hdrs, body = _raw_get_body(server, path)
-        assert status == 200 and body == bridge, (path, status)
+        assert status == 200 and body == helm, (path, status)
         assert hdrs.get("content-type", "").startswith("text/html"), path
-    status, _ = _raw_get(server, "/keep.json")
-    assert status == 404                                   # the data stays gated without a token
+    for data in ("/helm.json", "/keep.json", "/bridge.json"):
+        status, _ = _raw_get(server, data)
+        assert status == 404, data                         # the data stays gated without a token
 
 
 # --- the guard that matters: a destination must honour what it was sent ------------------------

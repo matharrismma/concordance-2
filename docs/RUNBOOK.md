@@ -185,9 +185,11 @@ live traffic, and nothing runs by itself.
 6. **Caddy.** `sudo cp deploy/Caddyfile /etc/caddy/Caddyfile` (or merge its blocks into the existing
    file), `sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile`, `sudo systemctl reload caddy`.
    Confirm the `/mcp` route (§4) is in the `api.` block.
-7. **The keep** (operator dashboard, `keep.html`) is operator-gated: served only to localhost or a request
-   carrying the operator token, 404 to everyone else. Set `CONCORDANCE_KEEP_TOKEN` in `.env` (or a systemd
-   drop-in), restart, open `https://narrowhighway.org/keep.html?token=…`. Rotate by changing it.
+7. **The Helm** (the operator's panel, `helm.html`; `/keep*` and `/bridge*` still open it)
+   is operator-gated: served only to localhost or a request
+   carrying the operator token, 404 to everyone else. Set `CONCORDANCE_HELM_TOKEN` in `.env` (the legacy `CONCORDANCE_KEEP_TOKEN` is still read,
+   and is what the live box has today — do not remove it there until it is replaced) (or a systemd
+   drop-in), restart, open `https://narrowhighway.org/helm.html?token=…`. Rotate by changing it.
 8. **Verify** (§5), then run `python tools/verify_deploy.py` from the workstation: a fresh box must report
    no HARD drift.
 

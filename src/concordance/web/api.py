@@ -3108,7 +3108,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # so .org is where "what we are doing" belongs — a live feed of the work. Every seal is
         # ALREADY public at /s/<hash>, so a stream of recent seals leaks nothing new. Whitelist
         # the fields explicitly — hash/short/domain/verdict/kind/when — and NEVER dump a record
-        # (no bodies, no claim text, no operator data; keep.json stays gated). Both surfaces:
+        # (no bodies, no claim text, no operator data; helm.json stays gated). Both surfaces:
         # the record of the work is not witness-only content.
         from .. import cas as _cas, capabilities as _caps
         import os as _os, time as _time
@@ -3211,7 +3211,7 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         # THE COMPONENTS — the engine as a vacuum-tube computer (docs/COMPONENTS.md): every part by
         # primitive, on the one authority chain (Main→Steward→Conductor→Reflex→Scribe→witness), with
         # layer, earned evidence status, and the regulators' live readings. UNGATED like /systems —
-        # knowing the machine's parts is not witness content. Feeds The Bridge.
+        # knowing the machine's parts is not witness content. Feeds The Helm.
         from .. import components as _components
         return _ok(_components.report())
 
@@ -3610,7 +3610,7 @@ ROUTES = [
     {"path": "/study_find", "methods": ("GET",), "api": True},
     {"path": "/capabilities", "methods": ("GET",), "api": True},
     {"path": "/systems", "methods": ("GET",), "api": True, "rl": "read"},
-    {"path": "/components", "methods": ("GET",), "api": True, "rl": "read"},   # the vacuum-tube map → The Bridge
+    {"path": "/components", "methods": ("GET",), "api": True, "rl": "read"},   # the vacuum-tube map → The Helm
     {"path": "/kernel", "methods": ("GET",), "api": True},
     {"path": "/kernel/gate", "methods": ("POST",), "api": True, "rl": True},
     {"path": "/playbook", "methods": ("GET",), "api": True},
@@ -3972,26 +3972,29 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                     return parts[-1]
             return peer or "?"
 
-        def _keep(self, u) -> None:
-            """The operator's window. The DATA (/keep.json) is operator-gated; the sign-in SHELL
-            (/keep.html) is served publicly so the operator can sign in from any device — no operator
-            data is exposed until /keep.json authenticates. (Trades the old hide-existence for a real
+        def _helm(self, u) -> None:
+            """THE HELM — the operator's panel. The DATA (/helm.json) is operator-gated; the
+            sign-in SHELL (/helm.html) is served publicly so the operator can sign in from any
+            device — no operator data is exposed until /helm.json authenticates. (Trades the old hide-existence for a real
             sign-in, per operator decision 2026-07-25.) SECURITY: the operator decision uses the REAL
-            socket peer + token (?token= or the X-Keep-Token header) only; the spoofable
+            socket peer + token (?token= or the X-Helm-Token header) only; the spoofable
             X-Forwarded-For is never consulted for access (see keep.is_operator)."""
             from .keep import dashboard as _keep_dash
             from .keep import request_is_operator
             q = {k: v[0] for k, v in parse_qs(u.query).items()}
             peer_ip = self.client_address[0] if self.client_address else ""
-            if u.path in ("/keep.json", "/bridge.json"):
+            if u.path in ("/helm.json", "/bridge.json", "/keep.json"):
                 if not request_is_operator(peer_ip, self.headers, q):
                     return self._json(404, {"error": "not found"})   # the DATA stays gated
                 return self._json(200, _keep_dash(config), {"cache-control": "no-store"})
-            # the SHELL — only a sign-in prompt; reveals no operator data. THE BRIDGE is the renamed
-            # operator console (Matt, 2026-10-06); the /keep* URLs stay as its door. (site/keep.html, a
-            # JS redirect this handler always pre-empted, was deleted 2026-10-16 — issue #20.)
+            # the SHELL — only a sign-in prompt; reveals no operator data. THE HELM is this panel's
+            # name (Matt, 2026-11-22): "bridge" already meant a thing that joins two things in four
+            # other places (verifiers/bridges.py, kind=bridge cards, meshtastic_bridge, engine_bridge),
+            # and /bridge sat one character from the PUBLIC /bridges.html. The /keep* and /bridge* URLs
+            # stay as doors so no bookmark breaks. (site/keep.html, a JS redirect this handler always
+            # pre-empted, was deleted 2026-10-16 — issue #20.)
             if site is not None:
-                return self._static("bridge.html")
+                return self._static("helm.html")
             return self._json(404, {"error": "not found"})
 
         def _do(self, method: str) -> None:
@@ -4055,7 +4058,8 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                     b = ("# Narrow Highway — a public verification engine.\n"
                          "# Agents: read /llms.txt, then use /search and /card. No login, and\n"
                          "# nothing here records who read what.\n"
-                         "User-agent: *\nAllow: /\nDisallow: /keep\nDisallow: /keep.html\n"
+                         "User-agent: *\nAllow: /\nDisallow: /helm\nDisallow: /helm.html\n"
+                         "Disallow: /keep\nDisallow: /keep.html\n"
                          "Disallow: /bridge\nDisallow: /bridge.html\n"
                          "Disallow: /improve\nDisallow: /improve.html\n\n"
                          "# SEO backlink crawlers — this capacity belongs to readers.\n"
@@ -4072,9 +4076,10 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 self.end_headers()
                 self.wfile.write(b)
                 return
-            if method == "GET" and u.path in ("/keep", "/keep.html", "/keep.json",
+            if method == "GET" and u.path in ("/helm", "/helm.html", "/helm.json",
+                                               "/keep", "/keep.html", "/keep.json",
                                                "/bridge", "/bridge.html", "/bridge.json"):
-                return self._keep(u)  # operator-gated dashboard — The Bridge
+                return self._helm(u)  # operator-gated panel — THE HELM
             if method == "GET" and u.path.startswith("/s/"):  # server-rendered citable receipt
                 h = u.path[3:].split("/")[0].strip()
                 status, html = render_seal_html(h, cas.fetch_anywhere(h))
@@ -4163,7 +4168,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                         pass
                 # THE PAID DOOR (2026-11-19). A cache hit costs nothing, so it stays public — every
                 # line already paid for replays free, forever. A cache MISS is money, so it asks for
-                # the operator by the same rule The Bridge uses: the REAL socket peer + token, never
+                # the operator by the same rule The Helm uses: the REAL socket peer + token, never
                 # the spoofable X-Forwarded-For. A stranger meets the ordinary 503, which
                 # site/speak.js already answers by speaking in the browser's own free voice — so the
                 # page gains no new failure mode, only a plainer voice for an unwarmed line.
@@ -4327,7 +4332,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
     if warm:
         # THE LAUNCH ROLL-CALL (2026-10-08): each warm step is timed with its resident-memory delta, then every
         # subsystem checks in (systems.checkin: ms + KB per piece, edges priced by what they pull in), one
-        # journal line each, written to data/boot_checkin.json and served at /systems and on The Bridge.
+        # journal line each, written to data/boot_checkin.json and served at /systems and on The Helm.
         # Each step is best-effort exactly as before — the boot never fails on a measurement.
         try:
             from .. import systems as _systems

@@ -134,10 +134,10 @@ def test_every_page_offers_a_way_home():
               # (2026-09-21), reached as the domain root, not via nh-home.js.
               "reader.html", "concordance.html",
               # THE UNIFIED HERO (2026-10-11): console.html carries its own brand-home link (href="/"),
-              # not the shared nh-home.js; it is served at / by home_for() on both faces. bridge.html is
+              # not the shared nh-home.js; it is served at / by home_for() on both faces. helm.html is
               # the operator console with its own home control. (keep.html, once listed here, is gone:
               # /keep* is answered by api._keep with the Bridge shell — issue #20, 2026-10-16.)
-              "console.html", "bridge.html"}
+              "console.html", "helm.html"}
     dead = sorted(n for n in hidden if not (SITE / n).exists())
     assert not dead, f"hidden names pages that no longer ship — drop them: {dead}"
     missing = [f.name for f in SITE.glob("*.html")
@@ -221,8 +221,9 @@ def test_the_palette_reaches_every_public_page():
                # root, never a /concordance.html <a href> — the same surface-routing excuse as com.html.
                "concordance.html",
                # console.html — THE UNIFIED HERO, served at / by home_for() on both faces (2026-10-11);
-               # bridge.html — the operator console. Reached by surface routing / redirect, not the palette.
-               "console.html", "bridge.html",
+               # helm.html — THE HELM, the operator's panel. Reached by surface routing /
+               # redirect (and by /keep* and /bridge*, its older doors), never by the palette.
+               "console.html", "helm.html",
                # verifier.html — the .com MVP landing, served at / on the reach face by home_for()
                # (2026-11-19). Reached as the domain root, never a /verifier.html <a href>: the same
                # surface-routing excuse as com.html and console.html.

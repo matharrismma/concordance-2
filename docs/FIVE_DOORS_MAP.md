@@ -81,7 +81,7 @@ This is the map, not the change: every page, agent tool and route assigned to ON
 | `plow.html` | **FOLD** | the Plow (the training loop / wants) → the contributor side of Keep |
 | `workshop.html` | **FOLD** | 'help build it' → the contributor door inside Keep (shared keeping) |
 | `improve.html` | **RETIRE** | a second Workshop page with the same title — one of the two goes |
-| `keep.html` | **PLUMBING** | the operator's own surface (noindex) — not a reader door |
+| `helm.html` | **PLUMBING** | The Helm, the operator's own panel (noindex) — not a reader door |
 | `steward.html` | **PLUMBING** | operator instrument |
 
 ### WORD
@@ -172,7 +172,7 @@ A door is what a new agent is shown first (the `core` profile). An internal stay
 
 ## What stays off the five on purpose
 
-Operator and node surfaces (`keep.html`, `steward.html`, `/health*`, `/build.json`, `/capabilities`, `/mcp/*` mounts, the mesh's door/invite/tend, the steward's budget, the training loop's `/wants`/`/unchecked`) are plumbing: they must exist, be documented on `connect.html` and `llms.txt`, and never be a reader's third click.
+Operator and node surfaces (`helm.html`, `steward.html`, `/health*`, `/build.json`, `/capabilities`, `/mcp/*` mounts, the mesh's door/invite/tend, the steward's budget, the training loop's `/wants`/`/unchecked`) are plumbing: they must exist, be documented on `connect.html` and `llms.txt`, and never be a reader's third click.
 
 ## Counts
 

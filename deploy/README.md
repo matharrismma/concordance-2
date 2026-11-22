@@ -37,7 +37,7 @@ corpus (4,397/4,398 crawled card ids resolve on 2.0); `api.` was repointed `:800
 
 Both 2.0 services read `EnvironmentFile=-/home/nh/concordance-2/.env` (chmod 600, gitignored):
 `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID` (the cloned voice for `/speak`), and
-`CONCORDANCE_KEEP_TOKEN` (the operator keep link). Secrets never live in source.
+`CONCORDANCE_HELM_TOKEN`, or the legacy `CONCORDANCE_KEEP_TOKEN`, (the operator's Helm link). Secrets never live in source.
 
 ## Rollback
 
