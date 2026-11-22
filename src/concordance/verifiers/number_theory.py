@@ -474,8 +474,13 @@ def _count_above_np(start: float, b: float, h: float, carry_t, carry_v, block: i
     done = 0
     while done < n_total:
         k = min(block, n_total - done)
-        ts = np.minimum(start + (done + np.arange(k)) * h, b)
-        vs = np.asarray(riemann_accel.z_array(ts), float)
+        t_lo = start + done * h
+        if t_lo + (k - 1) * h <= b:          # a FULL uniform chunk — the blocked main sum can take it
+            ts = riemann_accel.uniform_grid(t_lo, h, k)
+            vs = np.asarray(riemann_accel.z_uniform(t_lo, h, k), float)
+        else:                                 # the last chunk is clamped at b, so it is not uniform
+            ts = np.minimum(start + (done + np.arange(k)) * h, b)
+            vs = np.asarray(riemann_accel.z_array(ts), float)
         if carry_t is not None:
             ts = np.concatenate(([carry_t], ts))
             vs = np.concatenate(([carry_v], vs))

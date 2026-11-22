@@ -56,6 +56,14 @@ def _rs_backend() -> str:
         return "python"
 
 
+def _rs_main_sum() -> str:
+    try:
+        from .verifiers import riemann_accel as _ra
+        return _ra.bulk_path()
+    except Exception:  # noqa: BLE001
+        return "python"
+
+
 def _verifiers() -> Dict[str, Any]:
     from . import verifiers as V
 
@@ -235,6 +243,13 @@ def statement(surface: str = "secular") -> Dict[str, Any]:
             "parity": ("every study surface a human reads as a page is a tool an agent can call over "
                        "the same data, under the same gate, with the same refusals"),
             "riemann_backend": _rs_backend(),
+            "riemann_main_sum": _rs_main_sum(),
+            "riemann_main_sum_means": ("'fft' when the blocked main sum is live: the same first-order "
+                      "Riemann-Siegel formula over a long uniform block, summed by a type-1 NUFFT rather "
+                      "than point by point. It is as close to exact mpmath as the point-by-point path at "
+                      "every height measured, and the scan still recounts exactly near every candidate "
+                      "zero with Backlund's strip count as the independent authority — a speed, never a "
+                      "verdict. This is reported BESIDE riemann_backend, which keeps its own meaning"),
             "riemann_backend_means": ("the bulk Riemann-Siegel sweep (the Riemann stick): 'c' when _rs.c is "
                       "compiled on this node, else 'numpy', else 'python' — all compute the same formula and "
                       "defer to exact mpmath near every zero, so the zero count is identical whichever is live; "

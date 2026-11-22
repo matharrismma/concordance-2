@@ -124,15 +124,22 @@ def _py_z(ts: Sequence[float]) -> List[float]:
     return [nt._rs_z(float(t)) for t in ts]
 
 
-def _np_z(ts):
+def _theta_and_correction(ts):
+    """theta(t), m = floor(sqrt(t/2pi)), and the first Riemann-Siegel correction, for a grid of t.
+    ONE definition, shared by every backend: the numpy path and the FFT path must not drift apart."""
     np = _numpy()
-    ts = np.ascontiguousarray(ts, dtype=float)
     a = np.sqrt(ts / _TWO_PI)
     m = np.floor(a).astype(np.int64)
     th = ts / 2 * np.log(ts / _TWO_PI) - ts / 2 - math.pi / 8 + 1.0 / (48 * ts) + 7.0 / (5760 * ts ** 3)
     p = a - m
     c0 = np.cos(_TWO_PI * (p * p - p - 1.0 / 16.0)) / np.cos(_TWO_PI * p)
-    corr = np.where(m % 2 == 1, 1.0, -1.0) * a ** -0.5 * c0
+    return th, m, np.where(m % 2 == 1, 1.0, -1.0) * a ** -0.5 * c0
+
+
+def _np_z(ts):
+    np = _numpy()
+    ts = np.ascontiguousarray(ts, dtype=float)
+    th, m, corr = _theta_and_correction(ts)
     out = np.empty_like(ts)
     mmax = int(m.max()) if ts.size else 0
     logn = np.log(np.arange(1, mmax + 1, dtype=float)) if mmax else np.empty(0)
@@ -195,7 +202,106 @@ def backend() -> str:
 
 
 def describe() -> dict:
-    return {"backend": backend(), "build_note": _BUILD_NOTE or "(not built)", "source": str(_C_SRC.name),
+    return {"backend": backend(), "main_sum": bulk_path(), "build_note": _BUILD_NOTE or "(not built)",
+            "main_sum_note": ("'fft' when the blocked main sum is live for a long uniform block: the same "
+                              "first-order formula, summed by a type-1 NUFFT instead of point by point. It is "
+                              "as close to exact mpmath as the point-by-point path at every height measured, "
+                              "and the scan still recounts exactly near every zero. A speed, never a verdict."),
+            "source": str(_C_SRC.name),
             "note": ("the Riemann-Siegel sweep is accelerated when a C compiler or numpy is present; all backends "
                      "compute the same formula and the scan defers to exact mpmath near every zero, so the count "
                      "is identical whichever ran. The compiled library is a per-node artifact, never synced.")}
+
+
+# ── the blocked main sum ────────────────────────────────────────────────────────────────────────
+# The scan grid is UNIFORM (t_j = t0 + j*h) and m = floor(sqrt(t/2pi)) is constant across a block, so
+# the block origin pulls straight out of the k-sum:
+#
+#     Z(t_j) = 2*Re[ e^{i theta_j} F_j ] + corr_j,   F_j = sum_k a_k e^{-i j w_k}
+#     a_k = k^{-1/2} e^{-i t_mid log k},             w_k = h log k
+#
+# which is a type-1 NUFFT: m nonuniform frequencies, n uniform outputs. O(n*m) becomes O(M log M + m*q).
+# The grid is already ~24x oversampled against the highest frequency present (h*log m ~ 0.13 rad/sample
+# at T=1e7), so the transform introduces no aliasing of its own.
+#
+# EXPAND ABOUT THE BLOCK MIDPOINT, NOT ITS EDGE. The deconvolution multiplies by exp(tau*(2*pi*j/M)^2);
+# about the edge, j runs to the band limit and the result overflows (measured: ~1e34). About the midpoint
+# the exponent is capped at tau*(pi/sigma)^2.
+#
+# This path is a SPEED, never a verdict: it computes the same first-order formula, it is as close to exact
+# mpmath as the point-by-point path at every height measured, and the caller still recounts exactly near
+# every candidate zero while Backlund's strip count remains the independent authority.
+_FFT_MIN_N = 1 << 12          # below this the transform's fixed cost is not repaid
+_FFT_MIN_M = 64               # below this the direct sum is already cheap
+_FFT_Q = 24                   # gridding width, in grid points
+_FFT_SIGMA = 2                # FFT oversampling
+_FFT_TAU = 1.25               # Gaussian width; (q, tau) calibrated against the direct sum, not asserted
+
+
+def uniform_grid(t0: float, h: float, n: int):
+    """The one construction of a uniform scan grid. A caller that wants the blocked main sum builds its t
+    values HERE, so the grid the sum models and the grid the span logic reads are the same bits."""
+    np = _numpy()
+    return float(t0) + float(h) * np.arange(int(n), dtype=float)
+
+
+def m_run(t0: float, h: float, nmax: int) -> int:
+    """How many uniform steps from t0 keep m constant, capped at nmax. m is constant on
+    [2pi*m^2, 2pi*(m+1)^2) — a run ~12.57*m wide in t, wider than a block at the heights that matter but
+    not always, so the caller asks. The FFT path needs m BEFORE it starts; the others group by m after."""
+    m0 = int(math.floor(math.sqrt(max(float(t0), 1.0) / _TWO_PI)))
+    span = _TWO_PI * (m0 + 1) ** 2 - float(t0)
+    return max(1, min(int(nmax), int(span / float(h))))
+
+
+def _fft_z(ts, h: float):
+    """Z on one m-group of a uniform grid, main sum by NUFFT. `ts` is the caller's own array."""
+    np = _numpy()
+    n = int(ts.size)
+    th, m, corr = _theta_and_correction(ts)
+    mv = int(m[0])
+    M = _FFT_SIGMA * (1 << max(1, int(math.ceil(math.log2(max(n, 2))))))
+    ks = np.arange(1, mv + 1, dtype=float)
+    logk = np.log(ks)
+    a = (1.0 / np.sqrt(ks)) * np.exp(-1j * (float(ts[n // 2]) * logk))   # phase origin: the block's middle
+    x = (float(h) * logk) * M / _TWO_PI                                 # source positions, grid units
+    half = _FFT_Q // 2
+    G = np.zeros(M, dtype=complex)
+    base = np.floor(x).astype(np.int64)
+    for d in range(-half + 1, half + 1):
+        nn = base + d
+        np.add.at(G, np.mod(nn, M), a * np.exp(-((nn - x) ** 2) / (4.0 * _FFT_TAU)))
+    jp = np.arange(-(n // 2), n - (n // 2))                             # centred modes, increasing t order
+    F = np.fft.fft(G)[np.mod(jp, M)] * np.exp(_FFT_TAU * (_TWO_PI * jp / M) ** 2)
+    return 2.0 * np.real(np.exp(1j * th) * (F / math.sqrt(4.0 * math.pi * _FFT_TAU))) + corr
+
+
+def z_uniform(t0: float, h: float, n: int):
+    """Z on the uniform grid t0 + j*h, j = 0..n-1 — the blocked main sum where it pays, else z_array.
+    Splits at m boundaries, which only the FFT path requires."""
+    np = _numpy()
+    n = int(n)
+    if np is False:
+        return _py_z([float(t0) + i * float(h) for i in range(n)])
+    ts = uniform_grid(t0, h, n)
+    if float(h) <= 0.0 or n < _FFT_MIN_N:
+        return np.asarray(z_array(ts), float)
+    out = np.empty(n, dtype=float)
+    done = 0
+    while done < n:
+        seg = m_run(float(ts[done]), h, n - done)
+        hi = done + seg
+        sub = ts[done:hi]
+        mv = int(math.floor(math.sqrt(max(float(sub[0]), 1.0) / _TWO_PI)))
+        if seg >= _FFT_MIN_N and mv >= _FFT_MIN_M:
+            out[done:hi] = _fft_z(sub, h)
+        else:
+            out[done:hi] = np.asarray(z_array(sub), float)
+        done = hi
+    return out
+
+
+def bulk_path() -> str:
+    """'fft' when the blocked main sum is available on this node, else the point-by-point backend.
+    Reported BESIDE backend(), never instead of it: backend() keeps its old meaning."""
+    return "fft" if _numpy() is not False else backend()
