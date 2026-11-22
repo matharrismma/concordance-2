@@ -36,6 +36,13 @@ SOP before trusting it; this sheet is a map, the running engine is the territory
   keeps a shared-word mis-select from leading confidently (it falls to an honest gap), but selection
   *quality* is the work. → SOP `find.md`; `find.py`, `field_canon.py`, `expand.py`, `providers.py`.
   Legacy: `HANDOFF #2`.
+- **`find-2` · A named-entity query returns nothing of the entity.** *Open — measured 2026-11-22.*
+  "harmony of the spheres Kepler music of the planets" returns the **honeycomb conjecture at rank 1**
+  and no Kepler card at all. "Harmonices Mundi … musical consonance" returns six OpenStax sections on
+  simple **harmonic motion** — a stem match on "harmonic", not the concept — including a merry-go-round
+  photo credit. "Ptolemy Harmonics Almagest" puts **five John Gill biblical commentaries** in the top
+  ten. This is `find-1` with a proper name attached, and it is the same word-sense hole: no rule picks
+  the sense. → SOP `find.md`; `find.py`, `corpus.py`.
 
 ## verify — the Moat · handicap 3
 - **`verify-1` · Domain verifier coverage ~52%.** *Open.* About half the registered domains have a
@@ -62,11 +69,86 @@ SOP before trusting it; this sheet is a map, the running engine is the territory
   on every stub (~-449 MB). Both are careful retrieval-/graph-path changes, well-tested before deploy.
   → `corpus.py` (`_by_token`, `_candidates`, `_STUB_KEEPS`), `corpus_db.py`, `graph.py`. Legacy: box
   RAM cleanup + freeze-config fix, ops log 2026-09-05.
+- **`keeping-3` · The card graph is a filing cabinet, not a graph.** *Open — measured 2026-11-22.*
+  **1,053,914 edges, 39 relationship types.** `member_of` is **86.2%**; with the citation plumbing
+  (`comments_on`, `speaks_to`, `see_also`, `cites`, `same_section`, `shares_scripture`, `part_of`,
+  `proof_text`) it is **99.6% filing**. Edges that assert how two ideas relate: **0.40%**. Edges that
+  can carry a limit or a refutation (`counterexample_of` 82, `limits` 34, `bounded_by` 1,
+  `falsified_by` 1): **118, or 0.011%** — about one per 8,900 cards. Ties to `bound-1`.
+- **`keeping-4` · Zero edges between music and astronomy.** *Open — measured 2026-11-22.* Across
+  946,739 cards, **not one edge** joins the music shelves to astronomy. The single edge in the whole
+  keeping joining anything musical to anything celestial is
+  `acoustic_wave_theory --same_form--> celestial_mechanics` — the **wave-physics bridge, not the ratio
+  bridge** that actually produced Kepler's third law. `music_theory` itself has no path to anything
+  celestial. There is **no `Harmonice Mundi` card**. This is the best-documented cross-domain link in
+  the history of science, and the keeping has none of it.
+- **`keeping-5` · Ptolemy is filed as half a man.** *Open.* `card_builder_claudius_ptolemy` credits the
+  *Almagest* only; the *Harmonics* — the founding text of Western music theory — is absent. He is the
+  single strongest piece of evidence for `keeping-4` and we hold half of him.
+- **`keeping-6` · Music is 13 cards, 9 of them verifier stubs.** *Open.* The only content card is
+  "C → G = 7 semitones (a perfect fifth) · MIDI 69 = A4 = 440 Hz". Shelves: `music_theory` 6,
+  `acoustics` 4. Source acquisition is part of the fix: *Harmonice Mundi* is public domain in **Latin**
+  but the standard English translations are in copyright, same for Ptolemy's *Harmonics*.
+- **`keeping-7` · 13 of 848 principle cards are translation apparatus.** *Open (1.5%, small and real).*
+  Lionel Giles's 1910 footnotes arguing with rival translators, filed as `kind: "principle"`,
+  `authority_tier: "primary"`, with evidence falsely reading "a principle stated by Sun Tzu"; one body
+  ends in a dangling `]` from a slice inside a bracket. → `data/principle_cards.jsonl`.
+- **`keeping-8` · All 848 principle cards share ONE call address.** *Open.* Every one resolves to the
+  literal string `strategy.principle`, while a pronunciation card gets `pronunciation.g.gr.greene`.
+  The address space for that shelf has collapsed to a point.
+- **`keeping-9` · 715 of 848 principle cards are `labelled: false`.** *Open (84% never checked).*
+- **`keeping-10` · Local/live card drift.** *Open — reconcile on the box, do not guess.* 3,850 astronomy
+  cards on disk against **794 served live**. `source_cards.jsonl` and `openstax_cards.jsonl` are not in
+  `EXTRA_CARD_SOURCES`; the live count matches openstax + 4 exactly. Cause unconfirmed.
 
 ## crisis — Safety · handicap 2 · connected
-- *No open defect.* The handicap is coverage/SOP strokes on a deliberately hardened net, not a gap.
-  **Standing operational law, not a task:** crisis tests run ALONE (a documented global-cache
-  ordering race). → SOP `crisis.md`.
+*This section read "no open defect" until 2026-11-22. That was false: the net was measured and the
+measurements are below. The net still catches everything it is pinned to catch — CRISIS_FLOOR
+108/108, CLEARLY_BENIGN 0 false fires — but its reach beyond the pinned phrases is poor.*
+
+- **`crisis-1` · The semantic backstop is near-random on unseen phrasings.** *Open — measured
+  2026-11-21.* On 12 benign homestead questions against 12 hand-built veiled cries: benign median
+  **0.5500** vs cry median **0.5284**, and the benign line out-scores the cry in **75 of 144 pairs
+  (52%)**. The orderings are inverted, so **no threshold admits the cries and excludes the benign.**
+  Its own docstring example ("how peaceful it would be to just stop", 0.5945) is missed. It cannot
+  simply be deleted: it uniquely carries **21** pinned catches. And `is_crisis` *unions* it, so a
+  backstop false positive has **no veto** on any of the nine doors. → SOP `crisis.md`;
+  `crisis_semantic.py`, `data/crisis_semantic.json`.
+- **`crisis-2` · 34 of 98 blind red-team cries are caught by nothing.** *Open.* The ratchet floor is
+  64. → `tests/test_crisis_coverage.py` (`RED_TEAM_BLIND`).
+- **`crisis-3` · Veiled-cry recall does not generalise.** *Open — the important one.* The 11-21/22
+  additions moved the ratchet 59→64, but catch **0 of 8 fresh cries written afterwards, before and
+  after**. A deterministic phrase net only ever measures what it already names. **Do not read a
+  ratchet move as improved recall**, and do not read a flat ratchet as an inert change.
+- **`crisis-4` · The sick-child row reaches the wrong help.** *Open (deliberate fire, wrong target).*
+  "throwing up for two days and cannot keep water down" fires on purpose — a vomiting child may be an
+  overdose, and the asymmetry favours an unnecessary helpline — but it answers with **988**, which is
+  not the help for dehydration. Needs a second help target, not a gate change.
+- **`crisis-5` · Two pre-existing backstop sweeps remain.** *Open.* Verified against a clean `git
+  archive HEAD` tree: "wouldn't mind if I didn't wake up before the alarm" (0.6970) and "no reason for
+  me to be here at this meeting" (0.6613). Neither was introduced by the 11-21/22 work.
+- **`crisis-6` · 80 tests unverified.** *Open.* `test_ask.py` and `test_lead.py` skip for want of the
+  corpus; only the three crisis files actually ran. The gate has never been exercised end-to-end here.
+
+**Standing operational law, not a task:** crisis tests run ALONE (a documented global-cache ordering
+race). Re-confirmed 2026-11-22 — run alone: 24 passed, 1 xfailed, identical to the mixed run.
+
+**Standing owner decision, not a defect (2026-11-22):** the ambiguous presence branch
+("no reason for me to be here") is caught, and the five ordinary sentences it sweeps are pinned
+**FIRING** in `test_the_accepted_false_positives_are_a_decision`. Matt was asked and chose the false
+positive over the missed person. Silencing one of them means reversing that decision explicitly and
+dropping the three matching `CRISIS_FLOOR` cries in the same change.
+
+## ask — the Walk door · reviewed live 2026-11-21
+- **`ask-1` · `house.next_step` contradicts crisis-first on a cry.** *Open.* The envelope's next step
+  says "ask it" on a suicide cry, which is the opposite of help-first. → SOP `ask.md`; `discern.py`.
+- **`ask-2` · The envelope re-emits raw PII.** *Open.* The discern envelope echoes the submitted text
+  un-redacted. The Gateway strips PII in the browser (`surface-1`); this door does not. → `discern.py`.
+- **`ask-3` · "Genuinely names the subject" is an overclaim.** *Open.* The test behind the phrase is
+  **one shared stem** (`ask._title_names_subject` is `bool(subj & title)`). Either weaken the claim or
+  strengthen the test. → `ask.py`.
+- **`ask-4` · `voice.gathered` is 0, and `_off_domain_shift` is unused on the discern path.** *Open —
+  dead wiring, verify before removing.* → `discern.py`.
 
 ## scripture — the Word · handicap 1 · connected
 - **`scripture-1` · Cross-references need the xrefs DB built.** *Operational.* If a "meaning" ask
@@ -149,6 +231,73 @@ SOP before trusting it; this sheet is a map, the running engine is the territory
 - **`enum-1` · `curate.action` needs a `CURATE_ACTIONS` constant** (`shelves.py` compares
   'promoted'/'withdrawn' inline). The only real entry in `mcp/server.py`'s `ENUM_TODO`; `grid_axis.axis`
   there is deliberately NOT an enum (dimensions grow). → `shelves.py`, `mcp/server.py`.
+- **`enum-2` · The relationship vocabulary has synonyms and a singleton tail.** *Open — measured
+  2026-11-22.* `same_form` (489) / `same_form_as` (100) / `shares_form_with` (1) are three spellings of
+  one relation, so a query for the first **silently misses 101 edges**; `related` (15) / `relates_to`
+  (1) / `related_to` (1) likewise. Of 39 types, nine are singletons. **This must be deduped before
+  `bound-1` lands**, or the new relationships inherit the rot. → `corpus.py` (`_graft_edge`).
+
+### The reversal — a card that knows its own limit
+
+- **`bound-1` · No card in the keeping carries a limit.** *Designed, not built — `docs/THE_REVERSAL.md`
+  (2026-11-22).* Zero limit/bound/scope/caveat/reversal keys across **1,478,343 rows**. Build:
+  `data/reversal_bridges.jsonl` (an overlay in the existing `*_bridges.jsonl` idiom, so no card file is
+  rewritten and it survives seed regeneration) + a loader sibling of `_apply_bridges` (reciprocal
+  attach, 0-FP endpoint test, warn on unresolved) + **one line in the `house` envelope**, which is the
+  change that turns 946,739 silent cards into countable wants. Three twin kinds — `relative`,
+  `parallel`, `mirror`. Ties to `keeping-3`, `enum-2`.
+- **`bound-2` · Reflection is undefined for a proposition.** *Open — the real blocker.* `self_bounding`
+  is *falsifiable* (fixed points come in pairs or not at all, always a tritone apart, so the overlay is
+  checkable by counting rows per axis: 0 or 2, never 1) but not *derivable* — nothing yet says what it
+  means to reflect a claim. Until it does, `self_bounding` is a check, not a construction.
+- **`bound-3` · Migrate the 118 existing limiting edges into the field**, not beside it. Two ways to say
+  one thing is how `same_form_as` happened.
+- **`bound-4` · Load rules to enforce.** `reverses_mirror` without an `axis` is **rejected**, not warned
+  — an unreproducible twin is worse than none. Open: axis per-shelf or per-row; whether an `unbounded`
+  card is rankable at all on a claim query.
+- **`bound-5` · Attribution for the mirror material.** *~~Open~~ **DONE 2026-11-22** — attribution
+  corrected in `docs/THE_REVERSAL.md`.* The frames are **Áureo Puerta Carreño's**
+  (*El Patrón Secreto de la Música*, thesecretpatternofmusic.com, 2017–; a book, a research body and a
+  shop). **The standing rule it leaves behind:** the mod-12 arithmetic is public — the Tonnetz is
+  Euler's, reflection is arithmetic, and I recomputed every number rather than taking it. His
+  presentation, naming and diagrams are his. **Use the mathematics, never the wall.** Same rule that
+  governs Greene: we may hold every brick a living author built from, and never copy their wall.
+
+---
+
+## On the bench right now (2026-11-22) — uncommitted, and the owner's calls
+
+**Nothing below is committed.** `master` at `b61c87a`, working tree carrying six modified and five
+untracked files across four unrelated pieces of work. The first item is not a task, it is a risk:
+this much uncommitted change is one bad command from gone.
+
+- **`bench-1` · Commit or shelve the working tree.** Four separable changes sharing one tree:
+  (a) the crisis gate — `ask.py`, `crisis_semantic.py`, `tests/test_crisis_coverage.py`, all contracts
+  verified both ways; (b) the Riemann/FFT work — `verifiers/riemann_accel.py`, `verifiers/number_theory.py`,
+  `capabilities.py`, `tests/test_riemann_fft.py`; (c) the family battery — `eval/family_questions.json`,
+  `eval/RESULTS_FAMILY.md`, `tools/family_battery.py`; (d) the design docs — `docs/THE_REVERSAL.md`,
+  this sheet. They want **separate commits**, not one. Secrets scan was clean on (a) and (d).
+
+**Owner's call, not engineering** — carried forward and still open:
+
+- **`own-1` · An outstanding credential rotation and spend limit at a third-party provider.**
+  *Owner-only; details are in the private ops log, deliberately not in this public file.* The engine
+  side is closed — the `/speak` door is gated (`0a51b59`) and mints nothing without the operator — so
+  this is an account action, not a code change. **Highest consequence on this sheet: it is money, and
+  it lives outside the repo.**
+- **`own-2` · `nh-traffic.timer` is DISABLED**, so `data/traffic.json` is stale and **The Bridge is
+  showing numbers that are not true**. Either re-enable the timer or make the panel say the data is stale.
+- **`own-3` · 63 stick entries carry older seals.** Matt decides before any listing.
+- **`own-4` · `stick_mint.py` refuses handler entries, and `riemann` is one** — so no new Riemann mark
+  can reach the shelf by *any* route. Verification is the sweep, so there is no shortcut around it.
+- **`own-5` · The FFT main sum is built, and it is not the bottleneck.** 1e6 went 423.6s → 166.8s, but
+  the Z sweep is now 17.7s of that: **89% is the counting pass.** A component speedup is not a system
+  speedup; the next work is the counter, not the transform.
+- **`own-6` · 11 food cards are shelved `agriculture`,** so the `foods` shelf is live by accident.
+  Rename or re-shelf; `corpus.EXTRA_CARD_SOURCES` hides any unregistered card file.
+- **`own-7` · PCK gates vote instead of vetoing.** `K.admit` is `trues >= Q` (Q=2), so a False gate does
+  not stop an action — adding 20 always-deny gates changed **nothing**. Restore deadlocks 40/40 with $0
+  reserved and $100M idle; registry ∩ ledger packet types = **zero**.
 
 ---
 
@@ -161,4 +310,5 @@ superseded by WORLD. · the harmony + timeline viewers, the Steward link, the si
 cleanup (`03a9322`).
 
 *Blocked on Matt (not engineering): `node-2` (hardware), `steward-1` (business model), `surface-1`
-(which door first). Everything else is ours to route.*
+(which door first), and the whole `own-*` block above — `own-1` (the unrevoked voice key) first.
+Everything else is ours to route.*
