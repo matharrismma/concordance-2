@@ -130,8 +130,31 @@ measurements are below. The net still catches everything it is pinned to catch �
 - **`crisis-6` · 80 tests unverified.** *Open.* `test_ask.py` and `test_lead.py` skip for want of the
   corpus; only the three crisis files actually ran. The gate has never been exercised end-to-end here.
 
-**Standing operational law, not a task:** crisis tests run ALONE (a documented global-cache ordering
-race). Re-confirmed 2026-11-22 — run alone: 24 passed, 1 xfailed, identical to the mixed run.
+- **`crisis-7` · `test_crisis_threshold.py` is not covered by the race guard.** *Open — found
+  2026-11-22 while checking whether CI violates the law below. It does not; this file does.* The
+  autouse `_backstop_from_real_data` fixture lives in `test_crisis_coverage.py`.
+  `test_crisis_profession.py` pulls it in the pytest way — `from test_crisis_coverage import (...)`
+  with `# noqa: F401`, which **registers** the fixture for that module. `test_crisis_threshold.py`
+  instead does `import test_crisis_coverage as T`, a **module-alias import, which does not register
+  another module's autouse fixture**. That file imports `crisis_semantic` and is *about* the
+  threshold, which lives in the artifact — so its assertions are exposed to the same poisoned cache,
+  decided by collection order. CI is currently green, so either the order is favourable or the
+  assertions do not reach the artifact; **verify which, then either import the fixture name or move
+  it to a conftest** so no crisis file can miss it again.
+
+**The "run them ALONE" law was STALE — struck 2026-11-22.** It read as standing operational law here
+and the SOP it pointed at (`crisis.md`) never documented it at all; the only real account of the race
+is a docstring in `test_crisis_coverage.py`, which is the right place for the mechanism and the wrong
+place for a law. The race itself is specific and was already closed: `test_ask` sets
+`CONCORDANCE_DATA_DIR` to an **empty tempdir at import**, `crisis_semantic` loads its artifact **once**
+into a module global, and whichever data dir wins that first `_load()` is settled by collection order
+— co-collected, the cache is poisoned with "artifact absent" and blind red-team recall silently falls
+to the substring-only floor (**37 vs 58**), a safety gate reporting false-red on nothing but test
+order. `_backstop_from_real_data` closes it by saving both globals, pointing at the real data dir,
+dropping the cache, reloading, and restoring on the way out. **So the whole suite in one process is
+fine** — CI (`coverage run -m pytest -q`) passed on `64a470d`, and locally alone and mixed gave
+identical crisis results. The law should never have outlived its fix. → SOP `crisis.md` wants the
+mechanism written into it.
 
 **Standing owner decision, not a defect (2026-11-22):** the ambiguous presence branch
 ("no reason for me to be here") is caught, and the five ordinary sentences it sweeps are pinned
