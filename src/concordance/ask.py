@@ -216,6 +216,50 @@ _CRISIS_PATTERNS = tuple(re.compile(p) for p in (
     r"\bif i (?:just )?(?:didn'?t|never) (?:come|came|make it) home\b.{0,40}\b(?:nobody|no one)\b.{0,15}\b(?:surprised|notice|miss)\b",
     # giving things away, and feeling lighter / "won't need them"
     r"\bgiv(?:e|ing)\b.{0,10}\b(?:away )?my (?:things|stuff|belongings|possessions|tools)\b.{0,40}\b(?:lighter|won'?t (?:be )?need|settled|free)\b",
+    # ── 2026-11-21: the families the eval/family_questions.json run exposed. The backstop was MEASURED
+    # near-random on unseen phrasings (benign median 0.5500 vs cry median 0.5284; the benign line
+    # out-scores the cry in 52% of pairs), and ask.classify sent "there is no reason for me to be here
+    # any more" to `search` — a cry answered with a practical card, live. These are DETERMINISTIC and
+    # auditable, each anchored so the benign reading cannot match, and they only ADD.
+    # ONLY UNAMBIGUOUS OBJECTS in this entry; the ambiguous PRESENCE phrasing is the next entry,
+    # added 2026-11-22 on the owner's explicit decision.
+    r"\bno (?:reason|point|sense)\b.{0,12}\b(?:to be alive|to live|to keep living|to go on|to keep going|to carry on)\b"
+    r"|\b(?:dont|do not) see (?:the|any) (?:point|reason)\b.{0,16}\bin (?:living|going on|keeping going)\b",
+    # 2026-11-22: THE AMBIGUOUS PRESENCE BRANCH -- "no reason for me to be here". Matt was asked
+    # and chose this trade explicitly, because it CANNOT be disambiguated: the same words are a
+    # cry AND an ordinary sentence about a meeting or a finished job. A venue lookahead would
+    # exclude the benign readings and would ALSO suppress a real cry that happens to name a job,
+    # so the only choice is which error to take. The owner took the false positive, and the
+    # engine's own asymmetry agrees: a missed person is the cost that matters.
+    # MEASURED COST, not an estimate: 5/5 of the cry phrasings caught, and 6 of 10 ordinary
+    # sentences written to contain the phrase are swept. The substring net has NO guard layer
+    # (guarded() only suppresses the semantic backstop), so nothing downstream can overrule a
+    # fire from here. KEPT NARROW ON MEASUREMENT: a wider first draft adding "stick around" /
+    # "hang around" / "stay here" / "be around" caught ZERO extra cries and bought FOUR extra
+    # false positives, so presence-in-the-world is in and staying-at-a-place is out.
+    # It adds 0 to RED_TEAM_BLIND, so NO RATCHET MOVES -- the only evidence this helps anyone is
+    # the one eval/family_questions.json row and the phrasings above. The accepted false positives
+    # are pinned FIRING in tests/test_crisis_coverage.py, so reversing this means reopening the
+    # decision rather than quietly "fixing a false positive".
+    r"\bno (?:reason|point|sense)\b.{0,16}\b(?:to be here|to still be here|in me being here|in my being here)\b",
+    # indifference to waking. The lookahead keeps "…if i didnt wake up BEFORE THE ALARM" out (swept by
+    # my controls): a qualifier naming a time of waking makes it an ordinary sentence about sleep.
+    r"\b(?:wouldn'?t|would not|dont|do not) (?:mind|care)\b.{0,20}\bif i (?:didn'?t|did not|never) "
+    r"(?:wake up|woke up)\b(?!\s*(?:before|until|till|in time|for|by)\b)"
+    r"|\bwish i could close my eyes\b.{0,30}\b(?:not|never)\b.{0,20}\bopen them\b"
+    r"|\b(?:hope|wish)\b.{0,14}\bi (?:dont|do not) wake up\b(?!\s*(?:before|until|till|in time|for|by)\b)",
+    # perceived burdensomeness — the strongest single predictor, and none of it is a keyword
+    r"\b(?:my )?family (?:deserves|deserve) better\b.{0,30}\b(?:carrying|carry) me\b"
+    r"|\bi'?m (?:just )?dead weight\b|\bburden that never gets (?:any )?lighter\b"
+    r"|\bbecome the problem in (?:everybody|everyone)s? li(?:fe|ves)\b",
+    # entrapment — anchored to the FEELING, so "only one door left to hang on the shed" (my controls
+    # swept it) cannot match: a door count is carpentry unless someone says they are trapped.
+    r"\bi (?:feel|am|'?m) (?:trapped|stuck|cornered)\b.{0,40}\b(?:only|just) one (?:door|way out|exit)\b"
+    r"|\bno (?:exit|way out)\b.{0,30}\bexcept one\b",
+    # the affairs put in order, told to no one as a plan
+    r"\b(?:written|wrote) (?:letters|a letter)\b.{0,30}\b(?:children|kids|wife|husband|family)\b.{0,40}"
+    r"\b(?:affairs|papers|will|things) in order\b"
+    r"|\bput (?:my|all my) affairs in order\b.{0,30}\b(?:written|wrote) (?:letters|a letter)\b",
 ))
 
 # Requests to grade, rank, or label the user's OWN child are a child-protection matter however they

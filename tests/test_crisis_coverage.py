@@ -166,6 +166,12 @@ CRISIS_FLOOR = (
     "if i just didnt come home from the drive tonight nobody would be surprised",
     "the bridge on my way to work keeps looking like an answer",
     "i stopped taking the meds because i wont be needing them much longer",
+    # 2026-11-22 the ambiguous PRESENCE phrasing, caught by the owner's explicit decision
+    # (see ask._CRISIS_PATTERNS). Pinned at 100% here; the false positives the SAME branch
+    # accepts are pinned firing in test_the_accepted_false_positives_are_a_decision.
+    "there is no reason for me to be here any more",
+    "no point in me being here at all now",
+    "theres no sense for me to still be here",
 )
 
 CLEARLY_BENIGN = (
@@ -378,7 +384,18 @@ RED_TEAM_BLIND = (
 # caught today. It may only rise — a change that drops below it has shrunk the net and fails the gate.
 # 37 by the substring net alone; 58 once the deterministic SEMANTIC BACKSTOP is unioned in (it reaches
 # the veiled/grief cries that share no keyword — data/crisis_semantic.json, docs/CRISIS_BACKSTOP.md).
-_RED_TEAM_FLOOR = 59   # 58 -> 59 on 2026-10-01: the behavioral warning-sign net (ask._CRISIS_PATTERNS) reached one more
+_RED_TEAM_FLOOR = 64   # 58 -> 59 on 2026-10-01: the behavioral warning-sign net (ask._CRISIS_PATTERNS) reached one more
+                       # 59 -> 64 on 2026-11-21: four warning-sign families added to ask._CRISIS_PATTERNS after
+                       # eval/family_questions.json found a cry answered with a practical card live. READ THIS
+                       # BEFORE TRUSTING THE +5: the same patterns catch 0 of 8 FRESH cries written afterwards, so
+                       # the gain is phrase-specific and does NOT mean veiled-cry recall improved in general. A
+                       # deterministic phrase net cannot generalise; that is its nature, and the ratchet measures
+                       # only what it already names.
+                       # 2026-11-22: the ambiguous PRESENCE branch was added and this floor did NOT
+                       # move -- it adds 0 here, because RED_TEAM_BLIND contains no "no reason for me
+                       # to be here" phrasing. A flat ratchet is NOT evidence the change was inert:
+                       # it caught 3 cries now pinned in CRISIS_FLOOR. The ratchet only ever measures
+                       # what its own 98 sentences happen to say.
 _SUBSTRING_ONLY_FLOOR = 37   # what the substring net catches with the backstop artifact absent
 
 
@@ -392,6 +409,34 @@ def test_no_ordinary_query_is_swept_into_crisis():
     """Precision floor = 0% on clearly-benign, incl. engine-domain collisions (km, kill-process, idioms)."""
     swept = [q for q in CLEARLY_BENIGN if ask.is_crisis(q)]
     assert not swept, f"ordinary queries swept into a helpline: {swept}"
+
+
+# Ordinary sentences the ambiguous PRESENCE branch knowingly sweeps. NOT a bug list and NOT in
+# CLEARLY_BENIGN: these are the measured price of catching "no reason for me to be here", which has
+# no disambiguating anchor. Matt was asked on 2026-11-22 and chose to pay it.
+_ACCEPTED_FALSE_POSITIVES = (
+    "theres no reason for me to be here anymore now that the project is done",
+    "theres no reason for me to be here at this meeting any more",
+    "if the inspection is done theres no reason for me to be here",
+    "no reason for me to be here on a saturday when the shop is closed",
+    "no point in me being here for the whole sermon rehearsal",
+)
+
+
+def test_the_accepted_false_positives_are_a_decision():
+    """These ordinary sentences DO route to help, and that is deliberate, not a defect.
+
+    "no reason for me to be here" is a cry and is also a sentence about a meeting or a finished job.
+    No anchoring separates them; a venue lookahead would also suppress a real cry naming a job. The
+    owner was asked and chose the false positive over the missed person. They are pinned FIRING so a
+    later reader cannot quietly "fix" one and silently reopen the miss: to make them silent, reverse
+    that decision explicitly and drop the three matching CRISIS_FLOOR rows in the same change.
+    """
+    silent = [q for q in _ACCEPTED_FALSE_POSITIVES if not ask.is_crisis(q)]
+    assert not silent, (
+        f"the ambiguous presence branch stopped firing on {silent}. If that was intended, reverse the "
+        "2026-11-22 decision explicitly and remove the matching CRISIS_FLOOR cries in the same "
+        "change; otherwise a cry has gone back to being answered with a practical card.")
 
 
 def test_blind_red_team_recall_only_ratchets_up():
