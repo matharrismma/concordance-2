@@ -97,6 +97,20 @@
     border-radius:7px;padding:.55rem 1rem;cursor:pointer}
   .foot{color:var(--muted2);font-size:.78rem;margin-top:2rem;border-top:1px solid var(--hair);padding-top:.9rem}
   .meta{color:var(--muted2);font-size:.74rem}
+  /* THE ACTION SIDE (2026-11-22). Until now every tile on this panel was a readout and the only
+     thing an operator could do was reload. A probe is one bounded job with a receipt. */
+  .probes{display:flex;flex-wrap:wrap;gap:.5rem;margin:.55rem 0 .2rem}
+  .probe{position:relative}
+  .probe[disabled]{background:#3a3027;border-color:#2e2620;color:var(--muted2);cursor:not-allowed}
+  .probe.busy{opacity:.65;cursor:progress}
+  .probe-note{color:var(--muted2);font-size:.72rem;margin:.1rem 0 1.3rem}
+  .probe-out{margin:.2rem 0 1.4rem;border-left:3px solid var(--hair);padding:.55rem .8rem}
+  .probe-out.pass{border-left-color:var(--pass)}
+  .probe-out.fail{border-left-color:var(--fail)}
+  .probe-out .v{font-weight:600}
+  .probe-out .n{color:var(--muted2);font-size:.78rem;margin-top:.3rem}
+  .probe-out pre{white-space:pre-wrap;word-break:break-word;font-size:.72rem;color:var(--muted2);
+    margin:.45rem 0 0;max-height:11rem;overflow:auto}
 </style>
 </head>
 <body>
@@ -117,6 +131,11 @@
   </div>
 
   <div id="dash" hidden>
+    <h2>Probes <span class="sub">· one bounded job each, operator-only · a probe never touches the keeping, the ledger or a seal · every answer is verdict · cost · next step</span></h2>
+    <div class="probes" id="probes"></div>
+    <p class="probe-note" id="probes-note"></p>
+    <div id="probe-out" class="card probe-out" hidden></div>
+
     <h2>The authority chain <span class="sub">· Main proposes · Steward admits · Conductor runs · Reflex enforces · Scribe records · witness seals</span></h2>
     <div class="chain" id="chain"></div>
 
@@ -180,6 +199,7 @@ function render(d){
   document.getElementById("live").style.color="var(--pass)";
   document.getElementById("updated").textContent="updated "+new Date().toLocaleTimeString();
   document.getElementById("ident").textContent=(d.surface||"")+" surface · v"+(d.version||"—");
+  if(!PROBES.length)loadProbes();   // the action side, fetched once
 
   var C=d.components||{};
   // the chain
@@ -296,17 +316,80 @@ function render(d){
     (ig.ok?'<span class="ok">✓ verified</span>':'<span class="bad">✗ FAILED</span>');
 }
 
+var PROBES=[],PROBE_BUSY=false;
+function loadProbes(){
+  // GET lists; it executes nothing. The catalog says which buttons can run HERE, so a probe whose
+  // inputs are absent is greyed out rather than handing back a failure that reads like a defect.
+  return fetch("/helm/probe?t="+Date.now(),{headers:TOKEN?{"X-Helm-Token":TOKEN}:{},cache:"no-store"})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){if(!d||!d.probes)return;PROBES=d.probes;drawProbes();})
+    .catch(function(){/* the instruments still stand without the action side */});
+}
+function drawProbes(){
+  var host=document.getElementById("probes");
+  host.innerHTML=PROBES.map(function(p,i){
+    var why=p.available?p.what:(p.what+" \u2014 unavailable here: "+p.unavailable_because);
+    return '<button class="probe" data-i="'+i+'"'+(p.available?"":" disabled")+
+           ' title="'+esc(why)+'">'+esc(p.label)+"</button>";
+  }).join("");
+  var off=PROBES.filter(function(p){return !p.available;});
+  document.getElementById("probes-note").textContent = off.length
+    ? off.map(function(p){return p.label+": "+p.unavailable_because;}).join(" \u00b7 ")
+    : "";
+  Array.prototype.forEach.call(host.querySelectorAll(".probe"),function(b){
+    b.addEventListener("click",function(){fire(PROBES[+b.dataset.i],b);});
+  });
+}
+function fire(p,btn){
+  var out=document.getElementById("probe-out");
+  PROBE_BUSY=true;                       // hold the 15s poll until this answers
+  btn.classList.add("busy");btn.disabled=true;
+  out.hidden=false;out.className="card probe-out";
+  out.innerHTML='<div class="v">'+esc(p.label)+' — running…</div>';
+  fetch("/helm/probe",{method:"POST",cache:"no-store",
+      headers:Object.assign({"content-type":"application/json"},TOKEN?{"X-Helm-Token":TOKEN}:{}),
+      body:JSON.stringify({probe:p.probe})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      out.className="card probe-out "+(res.ok?"pass":"fail");
+      var d=res.detail,extra="";
+      if(d&&d.stdout)extra=d.stdout;
+      else if(d&&d.stderr)extra=d.stderr;
+      else if(d)extra=JSON.stringify(d,null,1);
+      out.innerHTML='<div class="v">'+esc(res.label||p.label)+" — "+esc(res.verdict)+"</div>"+
+        '<div class="n">'+num(res.ms)+" ms"+
+        (res.refreshed?(" · refreshed "+esc(res.refreshed.file)):"")+
+        " · next: "+esc(res.next||"—")+"</div>"+
+        (extra?"<pre>"+esc(extra)+"</pre>":"");
+      // a probe that refreshed a derived cache has just made a tile true again — re-read it
+      if(res.refreshed)refresh();
+    })
+    .catch(function(e){
+      out.className="card probe-out fail";
+      out.innerHTML='<div class="v">'+esc(p.label)+" — the panel could not reach the probe</div>";
+    })
+    .then(function(){PROBE_BUSY=false;btn.classList.remove("busy");btn.disabled=false;});
+}
+
 function closed(){
   document.getElementById("dash").hidden=true;
   document.getElementById("closed").hidden=false;
   document.getElementById("live").style.color="var(--fail)";
 }
 
+var REFRESHING=false;
 function refresh(){
+  // ONE READ IN FLIGHT AT A TIME. Observed 2026-11-22 in the browser: a cold /helm.json took ~34s
+  // and the 15s timer fired a SECOND one behind it, each competing for the same reads — the panel
+  // queuing requests against itself before any probe is involved. A skipped tick costs nothing;
+  // the next one is 15s away.
+  if(REFRESHING)return Promise.resolve();
+  REFRESHING=true;
   return fetch("/helm.json?t="+Date.now(),{headers:TOKEN?{"X-Helm-Token":TOKEN}:{},cache:"no-store"})
     .then(function(r){if(r.status===404){closed();return null;}if(!r.ok)return null;return r.json();})
     .then(function(d){if(d)render(d);})
-    .catch(function(){/* keep the last good view */});
+    .catch(function(){/* keep the last good view */})
+    .then(function(){REFRESHING=false;});
 }
 document.getElementById("signin").addEventListener("submit",function(e){
   e.preventDefault();var v=document.getElementById("tok").value.trim();if(!v)return;
@@ -315,7 +398,10 @@ document.getElementById("signin").addEventListener("submit",function(e){
   refresh().then(function(){var c=document.getElementById("dash").hidden;
     document.getElementById("err").textContent=c?"That token didn't open the Helm.":"";});
 });
-refresh();setInterval(refresh,15000);
+// The 15s poll PAUSES while a probe is in flight. Measured 2026-11-22: /helm.json answers in ~1s
+// idle and took 47.8s during a 36s chain walk, so an unguarded poll queues two or three slow reads
+// behind the probe and the panel appears to hang — a pile-up the panel inflicted on itself.
+refresh();setInterval(function(){if(!PROBE_BUSY)refresh();},15000);
 </script>
 </body>
 </html>

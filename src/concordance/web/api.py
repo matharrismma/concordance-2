@@ -3997,6 +3997,39 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 return self._static("helm.html")
             return self._json(404, {"error": "not found"})
 
+        def _helm_probe(self, u, method: str) -> None:
+            """THE HELM's probes — operator-gated, allow-listed, bounded. GET returns the catalog
+            (executes nothing); POST {"probe": "<id>"} fires one and returns the same four things
+            every time: verdict, ok, cost in ms, and the one next step.
+
+            Matt's decision 2026-11-22: this handler MAY spawn the tools directly instead of
+            queueing them for the desk. helm_probes.py is where that power is fenced — no value
+            from a request ever reaches an argv, argv is always an explicit list with -I and never
+            a shell, and a probe whose inputs are missing declines rather than running (which is
+            what stops `traffic` writing a file of zeros over a good traffic.json on the desk).
+
+            404 to everyone who is not the operator — the same hide-existence rule as /helm.json.
+            NOTE the status code is about the REQUEST, never the verdict: a probe that ran and
+            found a broken chain is a 200 with ok=false. Only an unknown id is a 400."""
+            from .keep import request_is_operator
+            from . import helm_probes
+            q = {k: v[0] for k, v in parse_qs(u.query).items()}
+            peer_ip = self.client_address[0] if self.client_address else ""
+            if not request_is_operator(peer_ip, self.headers, q):
+                return self._json(404, {"error": "not found"})
+            if method == "GET":
+                return self._json(200, {"probes": helm_probes.catalog()},
+                                  {"cache-control": "no-store"})
+            n = int(self.headers.get("content-length") or 0)
+            raw = self.rfile.read(n) if n else b""
+            try:
+                body = json.loads(raw or b"{}") or {}
+            except (ValueError, TypeError):
+                body = {}
+            res = helm_probes.run(body.get("probe") or q.get("probe") or "")
+            bad_id = res.get("verdict") == "no such probe"
+            return self._json(400 if bad_id else 200, res, {"cache-control": "no-store"})
+
         def _do(self, method: str) -> None:
             """Catch-all: any unhandled exception becomes a clean JSON 500 for the CALLER — never a
             dropped connection or a leaked traceback (that would defeat the Server-header
@@ -4080,6 +4113,8 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                                                "/keep", "/keep.html", "/keep.json",
                                                "/bridge", "/bridge.html", "/bridge.json"):
                 return self._helm(u)  # operator-gated panel — THE HELM
+            if u.path == "/helm/probe" and method in ("GET", "POST"):
+                return self._helm_probe(u, method)   # the panel's ACTION side, gated
             if method == "GET" and u.path.startswith("/s/"):  # server-rendered citable receipt
                 h = u.path[3:].split("/")[0].strip()
                 status, html = render_seal_html(h, cas.fetch_anywhere(h))
