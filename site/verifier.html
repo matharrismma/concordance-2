@@ -109,19 +109,25 @@
     <h1>Your model asserts.<br><em>This checks.</em></h1>
     <p class="lede">Hand it a claim. Get a <strong>verdict</strong>, the <strong>worked trail</strong>,
       and a <strong>receipt</strong> anyone can re-check without trusting you — or us.
-      Arithmetic, constants, units, formulas, dosages, rates, statutes. No model in the loop.
+      Arithmetic, constants, units, formulas, dose arithmetic, rates, statutes. No model in the loop.
       No key. No account.</p>
 
     <div class="tool">
       <textarea id="src" spellcheck="false"
-        placeholder="Paste a claim your agent produced.&#10;e.g.  a 70 kg adult at 15 mg/kg takes 1050 mg">the speed of light is 299792458 m/s</textarea>
+        placeholder="Paste a claim your agent produced.&#10;e.g.  $1,000 at 5% interest compounded annually for 2 years grows to $1,102.50">the speed of light is 299792458 m/s</textarea>
       <div class="bar">
         <button class="btn" id="go">Check it</button>
+        <!-- THE PRESETS ARE LIVE FIXTURES (2026-11-23). Each button declares the verdict it must return
+             (data-expect); tests/test_integrity_release.py and the deploy gate (tools/door_integrity.py)
+             run every one and refuse a page whose example does not do what it says. The old dosage and
+             simple-interest examples reached nothing; a medication dose was also the wrong thing to put on
+             the front page — HOLDS beside a dose reads as "a safe dose" when only the arithmetic was checked. -->
         <div class="egs">
-          <button class="eg" data-eg="a 70 kg adult dosed at 15 mg/kg receives 1050 mg">dosage</button>
-          <button class="eg" data-eg="$2,400 at 6% simple interest for 3 years is $432">finance</button>
-          <button class="eg" data-eg="a 10 kg mass at 9.8 m/s^2 exerts 98 N">physics</button>
-          <button class="eg" data-eg="the speed of light is 299792459 m/s">a wrong one</button>
+          <button class="eg" data-eg="a 10 kg mass at 9.8 m/s^2 exerts 98 N" data-expect="HOLDS">physics</button>
+          <button class="eg" data-eg="$1,000 at 5% interest compounded annually for 2 years grows to $1,102.50" data-expect="HOLDS">finance</button>
+          <button class="eg" data-eg="the molar mass of water is 18.015 g/mol" data-expect="HOLDS">chemistry</button>
+          <button class="eg" data-eg="The speed of light is 299792458 m/s. Every even number greater than 2 is the sum of two primes." data-expect="PARTIAL">a partial one</button>
+          <button class="eg" data-eg="the speed of light is 299792459 m/s" data-expect="BROKEN">a wrong one</button>
         </div>
       </div>
       <div class="out" id="out" aria-live="polite"></div>
@@ -218,6 +224,13 @@
   function cls(v){ return v === "CONFIRMED" ? "ok" : v === "MISMATCH" ? "no" : "idle"; }
   function word(v){ return v === "CONFIRMED" ? "holds" : v === "MISMATCH" ? "does not hold" : "not checked"; }
 
+  // THE VERDICT IS THE ENGINE'S (2026-11-23). This page used to compute its own headline from the counts
+  // (broken > 0 → DOES NOT HOLD, anything else → HOLDS), so a PARTIAL — a checked claim beside text that
+  // was never checked — was shown as HOLDS. The headline is now the API's `verdict`, word for word.
+  // NH_VERDICTS is pinned to src/concordance/verdicts.py by tests/test_integrity_release.py: edit both or neither.
+  var NH_VERDICTS = {"HOLDS":["HOLDS","pass"],"PARTIAL":["PARTIAL","idle"],"BROKEN":["DOES NOT HOLD","broken"],"INCOMPLETE":["NOT CHECKED","idle"],"NOTHING_TO_CHECK":["NOTHING TO CHECK","idle"],"SYSTEM_ERROR":["COULD NOT RUN","idle"],"QUARANTINE":["NOT SENT","idle"]};
+  var TINT = { pass: "var(--pass)", broken: "var(--broken)", idle: "var(--idle)" };
+
   function render(d) {
     var checks = d.checks || [];
     if (!checks.length) {
@@ -225,20 +238,28 @@
         "No checkable claim was found. State it as a number with its unit — it would rather miss a claim than check the wrong one.") + "</div>";
       out.className = "out on"; return;
     }
+    var v = NH_VERDICTS[d.verdict] || [String(d.verdict || "NOT CHECKED"), "idle"];   // unknown → itself, never a pass
+    var cov = d.coverage || {}, left = cov.unchecked_text || [], declined = cov.governed || [];
     var broken = d.broken || 0;
-    var head = broken > 0 ? "DOES NOT HOLD" : (d.unchecked && !d.held) ? "NOT CHECKED" : "HOLDS";
-    var tint = broken > 0 ? "var(--broken)" : (d.unchecked && !d.held) ? "var(--idle)" : "var(--pass)";
-    var h = '<div class="verdict"><b style="color:' + tint + '">' + head + "</b>" +
+    var h = '<div class="verdict"><b style="color:' + TINT[v[1]] + '">' + esc(v[0]) + "</b>" +
             '<span class="n">' + (d.held || 0) + " held · " + broken + " broken · " +
-            (d.unchecked || 0) + " unchecked</span></div>";
+            (d.unchecked || 0) + " unchecked" +
+            (left.length ? " · " + left.length + " passage" + (left.length === 1 ? "" : "s") + " not checked" : "") +
+            "</span></div>";
     h += checks.map(function (c) {
       return '<div class="chk ' + cls(c.verdict) + '"><div class="c">' + esc(c.claim) +
              "  — " + word(c.verdict) + "</div>" +
              (c.detail ? '<div class="d">' + esc(c.detail) + "</div>" : "") +
              (c.domain ? '<div class="dom">' + esc(c.domain) + "</div>" : "") + "</div>";
     }).join("");
+    if (left.length) h += '<div class="chk idle"><div class="c">Not checked — this verdict does not cover:</div>' +
+        left.map(function (t) { return '<div class="d">' + esc(t) + "</div>"; }).join("") + "</div>";
+    if (declined.length) h += '<div class="chk idle"><div class="c">Declined — not asserted plainly (a negation, a report or a condition):</div>' +
+        declined.map(function (g) { return '<div class="d">' + esc((g && g.claim) || g) + "</div>"; }).join("") + "</div>";
     var r = d.receipt || d.cite_url;
-    if (r) h += '<div class="receipt">Sealed. Every claim, every check, one permanent link: ' +
+    if (r) h += '<div class="receipt">Sealed. The receipt covers the ' + checks.length + " check" +
+                (checks.length === 1 ? "" : "s") + " above" +
+                ((left.length || declined.length) ? " — not the text marked not checked or declined" : "") + ": " +
                 '<a href="' + esc(r) + '" target="_blank" rel="noopener">the receipt →</a></div>';
     out.innerHTML = h; out.className = "out on";
   }

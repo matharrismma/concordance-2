@@ -66,6 +66,16 @@ DOOR_ROUTES: Dict[str, str] = {
     "/passage": "read_passage", "/word_study": "word_study", "/cross_refs": "cross_references",
 }
 
+# A RECEIPT IS SERVED AS IT WAS SEALED (2026-11-23, the improvement plan's integrity release). The house
+# ending used to be merged INTO every door's answer — including the sealed record GET /seal and the
+# seal_fetch tool return. A receipt is content-addressed: one added key and its bytes no longer hash to the
+# seal that cites them, so tools/verify_seal.py — the checker that lets a stranger trust a receipt without
+# trusting us — called every receipt fetched from either public door TAMPERED (measured live, 3 of 3; each
+# MATCHED once `house` was removed). These doors still end the house way, but BESIDE the record, never in
+# it: the web door sends the ending in the X-NH-House header, the agent door in the result's `_meta`.
+RAW_ROUTES = frozenset({"/seal"})
+RAW_TOOLS = frozenset({"seal_fetch"})
+
 ALL_DOORS = frozenset(t for ts in TOOL_DOORS.values() for t in ts)
 ENDS = "a verdict or a card · the trail · a seal · one next step"
 

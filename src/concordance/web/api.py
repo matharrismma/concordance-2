@@ -4359,6 +4359,9 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             if (u.path == "/ask" and isinstance(payload, dict) and payload.get("gate_open")
                     and not session_gate_open):
                 extra = {"Set-Cookie": "nh_gate=open; Path=/; Max-Age=31536000; SameSite=Lax"}
+            raw_h = raw_house_header(u.path, status, payload, q)   # a receipt's ending, beside it — never in it
+            if raw_h:
+                extra = dict(extra or {}, **raw_h)
             if isinstance(payload, dict) and isinstance(payload.get("_sse"), list):
                 self._sse(status, payload["_sse"])      # the OpenAI door's streaming form
                 return
@@ -4632,6 +4635,22 @@ def dispatch(method, path, query, body, config, session_gate_open=False, operato
     if status == 200 and isinstance(payload, dict) and "error" not in payload:
         from .. import doors as _doors
         tool = _doors.DOOR_ROUTES.get(path)
-        if tool:
+        if tool and path not in _doors.RAW_ROUTES:   # a receipt is served as sealed — its ending rides in a header
             payload = dict(payload, house=_doors.house(tool, payload, query if isinstance(query, dict) else None))
     return status, payload
+
+
+def raw_house_header(path, status, payload, query) -> Optional[Dict[str, str]]:
+    """The house ending for a RAW route (doors.RAW_ROUTES), as a response header instead of a key.
+
+    The body of GET /seal is the sealed record byte for byte, so tools/verify_seal.py can re-check it
+    unchanged; the door's one next step travels beside it as X-NH-House (ASCII JSON — header-safe)."""
+    import json
+    from .. import doors as _doors
+    if path not in _doors.RAW_ROUTES or status != 200 or not isinstance(payload, dict) or "error" in payload:
+        return None
+    tool = _doors.DOOR_ROUTES.get(path)
+    if not tool:
+        return None
+    h = _doors.house(tool, payload, query if isinstance(query, dict) else None)
+    return {"X-NH-House": json.dumps(h, ensure_ascii=True, separators=(",", ":"))}

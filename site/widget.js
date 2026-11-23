@@ -95,7 +95,14 @@
     var held = report.held || 0,
       broken = report.broken || 0,
       unchecked = report.unchecked || 0;
-    var dotClass = broken > 0 ? "warn" : "";
+    // THE VERDICT IS THE ENGINE'S (2026-11-23). This badge used to claim verification with a
+    // green dot whenever nothing broke — on a stranger's page, for a PARTIAL whose rest was never checked.
+    // Now the head is the auditor's own verdict. NH_VERDICTS is pinned to src/concordance/verdicts.py by
+    // tests/test_integrity_release.py: edit both or neither.
+    var NH_VERDICTS = {"HOLDS":["HOLDS","pass"],"PARTIAL":["PARTIAL","idle"],"BROKEN":["DOES NOT HOLD","broken"],"INCOMPLETE":["NOT CHECKED","idle"],"NOTHING_TO_CHECK":["NOTHING TO CHECK","idle"],"SYSTEM_ERROR":["COULD NOT RUN","idle"],"QUARANTINE":["NOT SENT","idle"]};
+    var v = NH_VERDICTS[report.verdict] || [String(report.verdict || "NOT CHECKED"), "idle"]; // unknown → itself, never a pass
+    var dotClass = { pass: "", broken: "warn", idle: "slate" }[v[1]];
+    var left = (report.coverage && report.coverage.unchecked_text) || [];
     var summary =
       found +
       " claim" +
@@ -104,7 +111,8 @@
       held +
       " held" +
       (broken ? ", " + broken + " broken" : "") +
-      (unchecked ? ", " + unchecked + " not checkable" : "");
+      (unchecked ? ", " + unchecked + " not checkable" : "") +
+      (left.length ? "; " + left.length + " passage" + (left.length === 1 ? "" : "s") + " of the text not checked" : "");
     var receiptUrl = report.seal && (report.seal.cite_url || report.seal.permanent_ref);
     var receipt = receiptUrl
       ? '<a href="' + esc(receiptUrl) + '" target="_blank" rel="noopener">the permanent receipt →</a>'
@@ -112,7 +120,9 @@
     wrap.innerHTML =
       '<div class="nh-head"><span class="nh-dot ' +
       dotClass +
-      '"></span>Verified by Narrow Highway</div>' +
+      '"></span>' +
+      esc(v[0]) +
+      " — checked by Narrow Highway</div>" +
       '<div class="nh-line">' +
       esc(summary) +
       "</div>" +

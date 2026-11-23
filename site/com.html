@@ -590,7 +590,11 @@ fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
   var VCLS={holds:"v-holds",broken:"v-broken",slate:"v-slate"},
       VTXT={holds:"HOLDS",broken:"BROKEN",slate:"CANNOT CHECK"};
   function vesc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
-  function setVerdict(v){ vchip.className="verdict-chip mono "+VCLS[v]; vchip.textContent=VTXT[v]; vchip.classList.add("show"); }
+  function setVerdict(v, word){ vchip.className="verdict-chip mono "+VCLS[v]; vchip.textContent=word||VTXT[v]; vchip.classList.add("show"); }
+  // THE VERDICT IS THE ENGINE'S (2026-11-23). This chip used to read HOLDS whenever nothing broke — a PARTIAL
+  // included. NH_VERDICTS is pinned to src/concordance/verdicts.py by tests/test_integrity_release.py.
+  var NH_VERDICTS = {"HOLDS":["HOLDS","pass"],"PARTIAL":["PARTIAL","idle"],"BROKEN":["DOES NOT HOLD","broken"],"INCOMPLETE":["NOT CHECKED","idle"],"NOTHING_TO_CHECK":["NOTHING TO CHECK","idle"],"SYSTEM_ERROR":["COULD NOT RUN","idle"],"QUARANTINE":["NOT SENT","idle"]};
+  var TONE_CHIP={pass:"holds",broken:"broken",idle:"slate"};
   function reset(){ vchip.className="verdict-chip mono"; vchip.textContent=""; trail.innerHTML=""; elim.textContent="";
     sealEl.classList.remove("in"); hashEl.textContent=""; hashEl.removeAttribute("href"); }
   function render(res, text){
@@ -599,7 +603,11 @@ fetch(<span class="st">"https://narrowhighway.com/audit"</span>, {
     if(found>0){
       trail.innerHTML=(res.checks||[]).map(function(c){
         return '<li class="in"><span class="dom">'+vesc(c.domain||"")+'</span><span class="step">'+vesc(c.detail||c.claim||"")+'</span></li>'; }).join("");
-      setVerdict(broken>0?"broken":"holds");
+      var v=NH_VERDICTS[res.verdict]||[String(res.verdict||"CANNOT CHECK"),"idle"];   // unknown → itself, never a pass
+      setVerdict(TONE_CHIP[v[1]], v[0]);
+      var left=(res.coverage||{}).unchecked_text||[];
+      if(left.length){ elim.innerHTML='<span style="color:var(--slate)">not checked &mdash; the verdict does not cover: '+
+        left.map(vesc).join(" &middot; ")+'</span>'; }
       if(res.receipt){ var h=String(res.receipt).replace(/^.*\//,"");
         hashEl.textContent=(h.length>14?h.slice(0,6)+"…"+h.slice(-4):h);
         hashEl.setAttribute("href",res.receipt); sealEl.classList.add("in"); }

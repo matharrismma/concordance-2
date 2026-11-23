@@ -145,22 +145,41 @@ function render(res){
     outEl.innerHTML = '<div class="note">'+esc(res.note || "No checkable number was found. The auditor checks sums, percentages, pay, interest, dates, and labels — it would rather miss a claim than check the wrong one.")+'</div>';
     return;
   }
+  // THE VERDICT IS THE ENGINE'S (2026-11-23). This page used to print an all-clear whenever
+  // nothing broke — including a PARTIAL, where part of the text was never checked. Now the headline follows
+  // the auditor's `verdict`. NH_VERDICTS is pinned to src/concordance/verdicts.py by
+  // tests/test_integrity_release.py: edit both or neither.
+  var NH_VERDICTS = {"HOLDS":["HOLDS","pass"],"PARTIAL":["PARTIAL","idle"],"BROKEN":["DOES NOT HOLD","broken"],"INCOMPLETE":["NOT CHECKED","idle"],"NOTHING_TO_CHECK":["NOTHING TO CHECK","idle"],"SYSTEM_ERROR":["COULD NOT RUN","idle"],"QUARANTINE":["NOT SENT","idle"]};
   var held = res.held||0, broken = res.broken||0, unchecked = res.unchecked||0;
-  var big = broken>0 ? "A number does not hold." : "Every number checked out.";
-  var bigColor = broken>0 ? "var(--red)" : "var(--green)";
-  var h = '<div class="verdict"><span class="big" style="color:'+bigColor+'">'+big+'</span>'+
-          '<span class="count">'+held+' hold · '+broken+' broken · '+unchecked+' not checked · '+res.claims_found+' found</span></div>';
+  var v = NH_VERDICTS[res.verdict] || [String(res.verdict||"NOT CHECKED"), "idle"];   // unknown → itself, never a pass
+  var cov = res.coverage || {}, left = cov.unchecked_text || [], declined = cov.governed || [];
+  var BIG = {HOLDS: "Every number found checked out.", PARTIAL: "What was checked holds — but not all of it was checked.",
+             BROKEN: "A number does not hold."};
+  var big = BIG[res.verdict] || v[0];
+  var bigColor = {pass: "var(--green)", broken: "var(--red)", idle: "var(--graphite)"}[v[1]];
+  var h = '<div class="verdict"><span class="big" style="color:'+bigColor+'">'+esc(big)+'</span>'+
+          '<span class="count">'+held+' hold · '+broken+' broken · '+unchecked+' not checked · '+res.claims_found+' found'+
+          (left.length ? ' · '+left.length+' passage'+(left.length===1?'':'s')+' not checked' : '')+'</span></div>';
   h += res.results.map(function(a){
     var cls = statusClass(a.status);
     return '<div class="claim '+cls+'"><div class="q">'+esc(a.claim)+
       '<span class="tag '+cls+'">'+statusWord(a.status)+'</span></div>'+
       (a.detail?'<div class="d">'+esc(a.detail)+'</div>':'')+'</div>';
   }).join("");
+  if(left.length){
+    h += '<div class="claim unchecked"><div class="q">Not checked — this verdict does not cover:</div>'+
+         left.map(function(t){ return '<div class="d">'+esc(t)+'</div>'; }).join("")+'</div>';
+  }
+  if(declined.length){
+    h += '<div class="claim unchecked"><div class="q">Declined — not asserted plainly (a negation, a report or a condition):</div>'+
+         declined.map(function(g){ return '<div class="d">'+esc((g && g.claim) || g)+'</div>'; }).join("")+'</div>';
+  }
   var sealUrl = res.seal && (typeof res.seal === "string" ? res.seal : res.seal.cite_url);
   if(sealUrl){
-    h += '<div class="sealbox">Sealed report. Every claim listed, every check shown, one link that proves it: '+
+    h += '<div class="sealbox">Sealed report. Every claim it found is listed with its check: '+
          '<a href="'+esc(sealUrl)+'" target="_blank" rel="noopener">the receipt →</a>'+
-         '<div class="note" style="margin-top:4px">Send the link with your quote. Your customer sees every number was verified.</div></div>';
+         '<div class="note" style="margin-top:4px">Send the link with your quote. Your customer sees which numbers were checked and what each check found'+
+         ((left.length || declined.length) ? ' — and that the text marked not checked was not.' : '.')+'</div></div>';
   }
   h += '<div class="note">'+esc(res.note || "")+'</div>';
   outEl.innerHTML = h;

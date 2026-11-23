@@ -1958,6 +1958,12 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
         # or a card, the trail, a seal, ONE next step — so an agent is never handed a lobby.
         # An internal's ending points back to the door it serves; plumbing says it is plumbing.
         from .. import doors as _doors
+        if name in _doors.RAW_TOOLS and isinstance(result, dict):
+            # A RECEIPT IS SERVED AS IT WAS SEALED (2026-11-23): merging `house` into the record made every
+            # fetched receipt fail tools/verify_seal.py. The ending rides in the result's _meta, beside it.
+            return {"jsonrpc": "2.0", "id": rid, "result": {
+                "content": [{"type": "text", "text": json.dumps(result, ensure_ascii=False)}], "isError": False,
+                "_meta": {"house": _doors.house(name, result, args)}}}
         if name in _doors.TOOL_VERB and isinstance(result, dict):
             result = dict(result, house=_doors.house(name, result, args))
         return {"jsonrpc": "2.0", "id": rid, "result": {
