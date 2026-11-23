@@ -364,5 +364,97 @@ for the only tool here that makes things smaller by removing what reality never 
 - **No generator was written for any card class.** The claim that none exists is an argument from
   contingency plus a measured absence of motifs — not a proof that no renderer could do better.
 - **Lekktor's mechanism is uncited** beyond "profiling, finding and removing dead code".
-- **Nothing was changed.** `tools/slot_dispatch.py` and `tools/Code_Score.py` only read; no card,
+- **Nothing was changed.** `tools/slot_dispatch.py` and `Code_Score.py` (the owner's file, kept outside this repo) only read; no card,
   stick or seal was touched.
+
+## 10. How .kkrieger handles text and shapes — read from its source
+
+**2026-11-23.** Matt: *"Look at KKreigers handling of text and shapes."* Read directly from
+`farbrausch/fr_public/werkkzeug3_kkrieger` (BSD), not from summaries — none of the searches reached a
+write-up, and the code answers it exactly.
+
+### Text: name the font, render at load, cache only where it is checked
+
+`Bitmap_Text` (`genbitmap.cpp:1952`) is one of 31 texture operators. Its parameters include
+`sChar *text, sChar *font` — **the font is a name, not data.** It calls `sSystem->FontBegin`, which
+(`_start.cpp:5653`) asks Windows GDI for it: `CreateFont`, then `GetCharABCWidths` for each glyph's
+metrics, then `ExtTextOut` to draw. **Not one glyph is stored in the 96 KB.** Four mechanics:
+
+1. **Render big, then reduce.** `const sInt alias = 4;` sits beside a commented-out `alias = 2`. The
+   string is drawn at 4x in each axis and each output pixel is the mean of a 4x4 block (`>>4`).
+2. **An atlas, built once.** In "page" mode the operator renders all 256 characters into one texture
+   and records each letter's position and ABC widths in `kenv->Letters[page]`, so any later string
+   is drawn from the atlas by metrics.
+3. **The editor caches; the release regenerates.** The cached path is compiled only under
+   `#if !sINTRO`. It stores coverage at **3 bits per pixel** (`*data++ = fade>>5`, expanded back by
+   bit replication on read).
+4. **The cache checks itself before it is trusted.** The blob carries a format tag (`data[0] = 3`),
+   the page flag and the bitmap's dimensions, and it is used **only if all of them still match** —
+   otherwise it is ignored and re-rendered.
+
+### Shapes: primitives, operators, and one register that says what goes where
+
+`genmesh.cpp` defines 48 operators: primitives (`Cube`, `Cylinder`, `Sphere`, `Torus`, `Grid`,
+`SingleVert`), modifiers (`Extrude`, `Bevel`, `Subdivide`, `Bend`, `Displace`, `Perlin`,
+`Multiply`), and a **selection family** — `SelectCube`, `SelectSphere`, `SelectAngle`,
+`SelectRandom`, `SelectGrow`, `SelectFace`, `SelectAll`, `SelectLogic`.
+
+**The selection is a 32-bit mask on every face.** Selectors *write* a bit (`dmask`, `dmode`);
+operators *read* one and act only there — `Mesh_Subdivide(…, sInt mask, …)`,
+`Mesh_Bevel(…, sInt mask, …)` — and `Mesh_Extrude(…, sInt smask, sInt dmask, …)` reads a source
+mask and writes what it creates into a destination mask for the next operator. `SelectLogic` combines
+two masks into a third. **One register, 32 slots, written once by an explicit operator and read by
+explicit operators** — so two spellings of the same selection can never disagree.
+
+Two more structural facts:
+
+- **Two languages joined by one converter.** The editor's `genmesh` (48 operators) is converted by
+  `Mesh_ToMin` into the runtime's `genminmesh` (34 operators, adding bones, animation baking and
+  `Compress`). A rich language to author in, a minimal one to ship, one conversion between them.
+- **`meshcoder_unused.cpp`.** A complete mesh compressor — 8-bit coordinate quantization, a
+  connectivity traversal, halfedge reconstruction — kept in the tree with `_unused` in its name. **No
+  comment records why.** The plausible reason, that a build which stores no meshes has nothing to
+  code, is inference and is labelled as such.
+
+### What transfers here
+
+**1. Render at use, and provenance becomes automatic.** §8 found that a card's `body` is prose
+rendered from the record's own fields, stored with nothing marking it as ours rather than the
+source's. `Bitmap_Text` never ships its output: it keeps the inputs and renders at load. If a body
+were rendered at answer time from the fields, **the renderer could stamp its own output** — this
+sentence, from that row, by that template — where a stored string cannot know it was ever rendered.
+That closes the §8 gap structurally rather than by labelling 903,738 cards.
+
+**2. One register, not six spellings.** Measured on 60,000 cards of `source_cards.jsonl`:
+
+    shelf <-> source.domain <-> call.head     each fixes the other two on every card: ONE dimension
+    kind, box, surface                         constant on all 60,000: zero information here
+    bands == facets.subject                    identical sets on 47.7% of cards
+    subject already inside bands               63.0%
+
+Six addressing fields carry **one** varying dimension, spelled three ways. Werkkzeug is the inverse —
+one field holding 32. **Ours agree today on all 60,000 cards; the risk is structural, not current:**
+nothing stops a seed writing one spelling and not the others, and retrieval keyed on one would then
+disagree silently with display keyed on another.
+
+**3. A cache that validates its key before use.** The text blob refuses itself if its format,
+page or size no longer match. Our record holds the opposite case — a warm `_search_cache` that let
+one question borrow the previous question's hits.
+
+**4. We already made the editor/runtime cut.** `genmesh` → `Mesh_ToMin` → `genminmesh` is the same
+shape as the keeping engine and the lean `Concordance-V3` verifier core, with `test_boundary.py`
+pinning the line between them.
+
+### What does not transfer
+
+**"Name it, don't ship it" is refused as a content policy.** .kkrieger can name Arial because it
+targets Windows and has nothing to protect. This engine serves families offline with no account; the
+keeping has to carry what it cites, or a family off the network gets a name instead of a fact. The
+idea survives in one place already: a stick names a computation in its `expr` and lets the evaluator
+supply it — which is exactly right for a law and exactly wrong for a contingent fact (§9).
+
+### What this does not establish
+
+- **The 60,000-card measurement covers one file**, and there only six shelf values appear.
+- **No render-at-use path was built or measured** — its cost at answer time is unknown.
+- **Nothing was changed.** The source was read through the GitHub API into the terminal, not saved.
