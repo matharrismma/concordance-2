@@ -216,6 +216,24 @@ joint on this map supplies a missing step for any of the six open questions. The
 would transfer, and where the field itself converges: the Weil conjectures at the centre — the Riemann hypothesis
 over finite fields, a theorem — while the Riemann hypothesis itself stays open.
 
+*Precision, 2026-11-22 (a claimed proof, now machine-checked).* On **2026-11-20** a Claude-assisted proof of RH was
+released as **Lean code** — the unsigned 4-page note at `alpo.ge/remark.pdf`, which this project read on the day and
+did not endorse; outside reporting now names the author as **Levent Alpöge** (the domain reads as his own surname).
+On **2026-11-21** the Lean/Mathlib community reported the statement and the proof correct, and a separate rebuild —
+another machine, networking disabled, sources read-only — reproduced the proof export **byte for byte**.
+
+By this page's own law that is a **bound chain, and the strongest kind: machine-checked**. Name exactly what it
+binds. It binds the **formal statement** to Mathlib's axioms. It does **not** bind the step from that formal
+statement to the Riemann hypothesis **as Clay states it** — the formalization gap — and there is as yet no human
+write-up, no peer review, and no Clay acceptance; Clay still lists the problem unsolved, and the early reporting
+disagrees with itself. **So the line above stands, with its date on it:** RH stays open *on this map* until that
+last step is bound.
+
+**Nothing in the store moved.** No stick was minted, no seal touched, no shelf edited — the rule is that the keeping
+never moves on a claim, and a claim that has compiled is still a claim about the thing it compiled. The one check
+that would settle it here is cheap and specific: **read the Lean theorem statement and see whether it says what RH
+says.** That is a step this engine can take; it has not taken it.
+
 *Precision, 2026-10-09 (Matt: "Proven Riemann?"):* an earlier draft of this section and the joint card's title said
 "the one proven Riemann hypothesis"; on the map the label truncated to exactly the wrong reading. The Riemann
 hypothesis is NOT proven. Deligne 1974 proved the Weil conjectures, its analogue over finite fields. The wording was
