@@ -82,15 +82,58 @@ def _first(seq, *keys):
     return None
 
 
+# The params that carry a PERSON'S OWN PROSE, as opposed to a reference, an id or a domain. Only
+# these are redacted: a verse ref or a card id cannot carry PII, and redacting them would break a
+# step that is meant to run as written.
+_PROSE_PARAMS = ("text", "claim", "query", "q", "word")
+
+
 def _step(do: str, door: str, tool: str = None, params: dict = None, web: str = None) -> dict:
+    """One step. Any prose param is redacted HERE, at the single point every ending passes through,
+    so no branch can forget (ask-2: the discern ending echoed the submitted text un-redacted, and
+    the Gateway's browser-side stripping does not reach this door).
+
+    HONEST LIMIT, measured 2026-11-22: redact.py catches EMAIL, SSN, CARD and IP. It does NOT catch
+    a phone number in any common shape, and it cannot catch a NAME. So this reduces the echo; it
+    does not end it. The path where that matters most does not echo prose at all -- see
+    _help_ending, which carries no text."""
     s = {"do": do, "door": door}
     if tool:
         s["tool"] = tool
     if params:
+        if any(k in params for k in _PROSE_PARAMS):
+            try:
+                from . import redact as _redact
+                params = dict(params)
+                for k in _PROSE_PARAMS:
+                    v = params.get(k)
+                    if isinstance(v, str) and v:
+                        params[k] = _redact.redact(v)[0]
+            except Exception:  # noqa: BLE001 - an ending must never break the answer
+                pass
         s["params"] = params
     if web:
         s["web"] = web
     return s
+
+
+def _help_ending(r: dict) -> dict:
+    """HELP FIRST, in ONE place. A cry carries no path on purpose: a person in crisis needs real
+    people, not a quest, and no tool performs this step. The resources ARE the trail, and NO prose
+    is carried forward -- nothing of what the person typed is echoed back out.
+
+    This lived inline in the `ask` branch from 2026-10-02, where the generic ending had been
+    pointing a cry AT discern. The discern branch never got the same guard, so it pointed a cry
+    BACK at ask: a person in crisis handed a loop between two doors, with their own words, name and
+    means repeated in the envelope. A guard each branch must remember is a guard the next branch
+    forgets, so it is decided once, above the branches, and a new door inherits it by existing."""
+    first = _first(r.get("resources"), "label")
+    return {
+        "kind": "help",
+        "trail": "resources" if "resources" in r else None,
+        "next_step": _step("Reach a real person right now — " + (str(first["label"]) if first else
+                           "call or text 988 (US), or findahelpline.com for your country"), "WALK"),
+    }
 
 
 def _status_is(step, *statuses) -> bool:
@@ -111,6 +154,14 @@ def _arg(args, *keys) -> str:
 def house(tool: str, r: dict, args: dict = None) -> dict:
     """The house ending for a door tool's answer `r` (a dict without "error"); `args` = the request."""
     verb = TOOL_VERB.get(tool, "")
+    # HELP FIRST ON EVERY DOOR — decided FIRST, above the internal/plumbing early return and above
+    # every per-tool branch. If this answer is a cry, the ending is help, whatever produced it.
+    # discern() already returns kind="crisis" AND the resources; the envelope used to throw both
+    # away for every tool but `ask`. Placed here rather than below because a test of "every door"
+    # caught `parable` — an INTERNAL — returning a pointer to another tool instead of help, which is
+    # the same defect one level up. An internal that can see a cry inherits this too.
+    if str(r.get("kind") or "") == "crisis":
+        return {"door": verb, "seal": None, "ends": ENDS, **_help_ending(r)}
     kind, trail, seal, nxt = "answer", None, None, None
     asked = _arg(args, "query", "q", "claim", "text", "ref", "word", "id")
     if tool not in ALL_DOORS:
@@ -222,16 +273,8 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
             ref = anchor.get("ref") if isinstance(anchor, dict) else (anchor if isinstance(anchor, str) else None)
             top = _first(r.get("results"), "id")
             q = str(r.get("q") or r.get("query") or asked)
-            if str(r.get("kind") or "") == "crisis":
-                # A crisis answer carries no path on purpose (a person in crisis needs real people,
-                # not a quest) — so the generic "name what you brought" ending reached it, pointing a
-                # cry at `discern` (caught 2026-10-02). Help is the ending. No tool performs this
-                # step; a real person does. The resources ARE the trail.
-                kind, trail = "help", "resources" if "resources" in r else None
-                first = _first(r.get("resources"), "label")
-                nxt = _step("Reach a real person right now — " + (str(first["label"]) if first else
-                            "call or text 988 (US), or findahelpline.com for your country"), "WALK")
-            elif ref:
+            # a cry never reaches here: _help_ending answered above, for every door at once.
+            if ref:
                 nxt = _step(do, "WORD", "read_passage", {"ref": ref})
             elif top:
                 nxt = _step(do, "WALK", "card_get", {"id": top["id"]})
@@ -240,6 +283,8 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
             else:
                 nxt = _step(do, "WALK", "discern", {"text": q})
         elif tool == "discern":
+            # a cry never reaches here either (ask-1: it used to, and was answered with "ask it" —
+            # the opposite of help-first — carrying the person's raw words into the params).
             kind, trail = "discernment", "why"
             own = r.get("next")
             nxt = own if isinstance(own, dict) else _step("ask it", "WALK", "ask", {"text": str(r.get("input") or asked)})

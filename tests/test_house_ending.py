@@ -208,3 +208,94 @@ def test_a_found_fact_is_cited_and_a_want_is_the_one_step():
     body, err = _call("verify", {"claim": "the atomic mass of iron is 55.845"})
     assert not err and body["verdict"] == "INCOMPLETE" and body["found_fact"]["agrees"] is True
     assert body["house"]["next_step"]["tool"] == "lookup"
+
+# ── ask-1 / ask-2: the ending on a cry, at EVERY door, carrying none of the person's words ──────
+#
+# A test above already loops `for tool in sorted(doors.ALL_DOORS)` over several answer shapes,
+# INCLUDING {"kind": "crisis", ...} — and asserts only that the step is executable as given. It
+# visited this defect on every door and asked the wrong question of it, which is why the defect
+# survived: a cry at the `discern` door was answered `next_step: "ask it"` → tool `ask`, while the
+# ask branch's own 2026-10-02 guard sent it back. A person in crisis, handed a loop between two
+# doors, with their own words in the params. Fixed by deciding help-first ONCE in house(), above
+# the per-tool branches and above the internal/plumbing early return.
+
+CRY = ("I'm 41, my name is Matt Harris, reach me at matt@example.com or 555-0134. "
+       "I don't want to be here anymore and I have my dad's pills.")
+_CRISIS = {"kind": "crisis", "input": CRY,
+           "resources": [{"label": "Call or text 988 — US Suicide & Crisis Lifeline, 24/7"}],
+           # the shape the discern branch used to prefer over help
+           "next": {"do": "ask it", "door": "WALK", "tool": "ask", "params": {"text": CRY}}}
+
+
+def test_a_cry_ends_with_help_at_EVERY_door_and_not_only_ask():
+    """The property the loop above should have asserted. `discern` is the one that was broken; the
+    parametrisation is what keeps door eighteen from being broken too."""
+    for tool in sorted(doors.ALL_DOORS):
+        h = doors.house(tool, dict(_CRISIS), {"text": CRY})
+        assert h["kind"] == "help", (tool, h)
+        assert h["trail"] == "resources", tool
+        assert h["next_step"]["do"].startswith("Reach a real person right now"), tool
+        assert "988" in h["next_step"]["do"], tool
+        assert "tool" not in h["next_step"], (tool, h["next_step"])   # a real person performs it
+        assert "params" not in h["next_step"], (tool, h["next_step"])
+
+
+def test_a_cry_at_an_INTERNAL_also_ends_with_help():
+    """Found by parametrising: `parable` is an INTERNAL, so house() returned its "the door it serves
+    is ask" pointer BEFORE any crisis check — the same defect one level up. The guard therefore sits
+    above that early return."""
+    for tool in ("parable", "card_connections", "cards_stats"):
+        h = doors.house(tool, dict(_CRISIS), {"text": CRY})
+        assert h["kind"] == "help", (tool, h)
+        assert h["next_step"]["do"].startswith("Reach a real person right now"), tool
+
+
+def test_the_crisis_ending_echoes_nothing_the_person_typed():
+    """ask-2. Not "the PII is redacted" — NOTHING is carried. redact.py cannot catch a name or a
+    phone, so on the path where the stakes are highest the ending carries no prose at all."""
+    blob = json.dumps(doors.house("discern", dict(_CRISIS), {"text": CRY}), ensure_ascii=False)
+    for leak in ("Matt Harris", "matt@example.com", "555-0134", "dad's pills",
+                 "be here anymore", "I'm 41"):
+        assert leak not in blob, f"the envelope echoed {leak!r} back out"
+
+
+def test_the_results_own_next_step_cannot_smuggle_the_text_back():
+    step = doors.house("discern", dict(_CRISIS), {"text": CRY})["next_step"]
+    assert step["do"] != "ask it"
+    assert CRY not in json.dumps(step, ensure_ascii=False)
+
+
+def test_an_ordinary_step_still_runs_as_written_but_with_prose_redacted():
+    q = "my neighbour owes me money, email me at me@example.com about it"
+    h = doors.house("discern", {"kind": "dispute", "input": q, "why": []}, {"text": q})
+    step = h["next_step"]
+    assert h["kind"] == "discernment"
+    assert step["tool"] == "ask" and "text" in step["params"]      # still executable
+    assert "me@example.com" not in json.dumps(h)
+    assert "[EMAIL_1]" in step["params"]["text"]
+    assert "my neighbour owes me money" in step["params"]["text"]  # only the identifier is replaced
+
+
+def test_a_reference_param_is_never_mangled_by_redaction():
+    """Only prose is redacted — a ref, an id or a domain must survive or the step stops running."""
+    h = doors.house("read_passage", {"ref": "John 3:16", "verses": [{"ref": "John 3:16"}]},
+                    {"ref": "John 3:16"})
+    assert "John 3:16" in json.dumps(h["next_step"], ensure_ascii=False)
+    h = doors.house("define", {"word": "mercy", "senses": [{"sense": "x"}]}, {"word": "mercy"})
+    assert h["next_step"]["params"]["word"] == "mercy"
+
+
+def test_RECORDED_LIMIT_the_redactor_catches_no_phone_and_no_name():
+    """Measured 2026-11-22 and filed as `ask-5`: redact.py catches EMAIL, SSN, CARD, IP — and no
+    phone in any common shape, nor a name. That is WHY the crisis ending removes the prose instead
+    of redacting it; trusting redaction would have been false confidence.
+
+    A TRIPWIRE, not a requirement: if this fails because redact.py grew a phone or name pattern,
+    that is good news — delete the assertion and close `ask-5` on the sheet."""
+    from concordance import redact
+    for shape in ("call 555-0134", "call (512) 555-0134", "call +1 512 555 0134"):
+        assert redact.redact(shape)[0] == shape, f"redact.py now catches {shape!r} — see docstring"
+    assert redact.redact("my name is Matt Harris")[0] == "my name is Matt Harris"
+    for shape, tag in (("a@b.com", "EMAIL"), ("123-45-6789", "SSN"),
+                       ("4111 1111 1111 1111", "CARD"), ("192.168.4.11", "IP")):
+        assert tag in redact.redact(shape)[1].popitem()[0], shape

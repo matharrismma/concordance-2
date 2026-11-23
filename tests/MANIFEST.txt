@@ -450,3 +450,6 @@ test_stick_mint.py
 test_mint_ship.py
 test_jacobian_entry.py
 test_sky_entry.py
+test_helm_discern.py
+test_helm_phone.py
+test_helm_probes.py

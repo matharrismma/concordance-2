@@ -189,10 +189,31 @@ positive over the missed person. Silencing one of them means reversing that deci
 dropping the three matching `CRISIS_FLOOR` cries in the same change.
 
 ## ask — the Walk door · reviewed live 2026-11-21
-- **`ask-1` · `house.next_step` contradicts crisis-first on a cry.** *Open.* The envelope's next step
-  says "ask it" on a suicide cry, which is the opposite of help-first. → SOP `ask.md`; `discern.py`.
-- **`ask-2` · The envelope re-emits raw PII.** *Open.* The discern envelope echoes the submitted text
-  un-redacted. The Gateway strips PII in the browser (`surface-1`); this door does not. → `discern.py`.
+- **`ask-1` · `house.next_step` contradicted crisis-first on a cry.** **FIXED 2026-11-22.** Both this
+  and `ask-2` were the same two lines, and **not in `discern.py`** where this sheet pointed — in
+  `doors.py`'s `house()`. `discern()` already returned `kind="crisis"` **and** the resources; the
+  envelope threw both away for every tool except `ask`. So a cry at the `discern` door was answered
+  `next_step: "ask it"` → tool `ask`, while the `ask` branch's own guard (added 2026-10-02, when the
+  generic ending was caught pointing a cry **at** discern) sent it back: **a person in crisis handed a
+  loop between two doors.** Fixed at the path — `_help_ending()` is decided ONCE, above the per-tool
+  branches **and above the internal/plumbing early return**. That placement came from the test: a
+  parametrised "every door" case caught `parable`, an INTERNAL, answering a cry with a pointer to
+  another tool. 18 pins in `tests/test_doors_help_first.py`. → `doors.py`; SOP `ask.md`.
+- **`ask-2` · The envelope re-emitted raw PII.** **FIXED 2026-11-22.** The same step carried the
+  submitted text into its params, so the envelope echoed the person's words back — measured on a
+  realistic cry, it returned the name, email, phone, age and the means. Two changes: on a cry the
+  ending now carries **no prose at all** (no tool, no params — nothing to ride along), and `_step()`
+  redacts prose params (`text`/`claim`/`query`/`q`/`word`, never `ref`/`id`/`domain`) at the single
+  point every ending passes through. A reference param is left intact so a step still runs as
+  written. → `doors.py`.
+- **`ask-5` · `redact.py` catches no phone number and no name.** *Open — measured 2026-11-22.* It
+  catches **EMAIL, SSN, CARD, IP** and misses `555-0134`, `(512) 555-0134` and `+1 512 555 0134`, and
+  cannot catch a name without NER (which the engine refuses). **This is why `ask-2`'s fix removes the
+  prose rather than trusting redaction** — relying on it would have been false confidence. A phone
+  pattern is cheap and would also strengthen the Gateway (`surface-1`), which shares the redactor.
+  `tests/test_doors_help_first.py` pins the gap as a **tripwire**: when redact.py grows the pattern
+  that test fails, and the instruction in its docstring is to delete the assertion and close this.
+  → `redact.py`.
 - **`ask-3` · "Genuinely names the subject" is an overclaim.** *Open.* The test behind the phrase is
   **one shared stem** (`ask._title_names_subject` is `bool(subj & title)`). Either weaken the claim or
   strengthen the test. → `ask.py`.
