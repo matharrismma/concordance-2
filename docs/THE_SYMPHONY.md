@@ -227,3 +227,106 @@ keys* should get the convergents of log₂(3/2), cited and checked — not a `re
 - The `card_v_225533310c11` receipt shows the four music checks pass. **Nothing here shows any
   cross-domain bridge passing, because none exists to run.** Every row of the §2 table is a claim
   about two formulas being the same, verified by reading them — not by a check the engine ran.
+
+## 8. The song of the universe — §2's fourth row, built
+
+**2026-11-23.** Matt: *"We are looking for a song and a way to produce the song. The song of the
+universe."* This section builds the row §2 listed as **integer period ratios — resonance is
+consonance**, and it is the first thing in this document that is not a design. `tools/universe_song.py`
+prints every figure below and writes the audio; no dependency beyond the standard library.
+
+### What makes it a mapping and not a composition
+
+The engine does not generate. So a song of the universe has to be found already playing, and the only
+honest way to make it audible is a transformation that changes **no interval**. That transformation
+exists and is exact: multiplying every frequency by **2^n** shifts pitch by n octaves and leaves every
+ratio untouched. The universe can therefore be transposed into human hearing with nothing added and
+nothing bent, and **the octave count is the citation**.
+
+### Where the song actually is: locked phases, not constants
+
+Not between unrelated constants — §4 below refuses that. The music is where gravity holds bodies in
+integer period ratios. There the ratio does not *resemble* an interval, it **is** the interval, in the
+same integers.
+
+| pair | ratio | cents | interval | error | lock |
+|---|---|---|---|---|---|
+| Moon spin : orbit | 1.0000000 | 0.00 | unison | ±0.00 | 1:1 tidal |
+| Mercury spin : orbit | 1.4999966 | 701.95 | **fifth** | −0.004 | 3:2 spin–orbit |
+| Titan : Hyperion | 1.3343397 | 499.35 | **fourth** | +1.31 | 4:3 mean-motion |
+| Enceladus : Dione | 1.9974306 | 1197.77 | octave | −2.23 | 1:2 |
+| Mimas : Tethys | 2.0031391 | 1202.72 | octave | +2.72 | 2:4 |
+| Neptune : Pluto | 1.5045939 | 707.25 | **fifth** | +5.29 | 2:3 |
+| Io : Europa | 2.0072948 | 1206.30 | octave | +6.30 | Laplace |
+| Europa : Ganymede | 2.0146968 | 1212.68 | octave | +12.68 | Laplace |
+| Ganymede : Callisto | 2.3326429 | 1466.36 | **REFUSED** | +266.36 | not in the resonance |
+
+A pair earns an interval name only if the lock is a documented resonance **and** the ratio lands
+within 30 cents of a just interval. Ganymede : Callisto fails the second test by 266 cents and is
+refused rather than rounded — Callisto sits outside the Laplace resonance, and the number says so.
+
+### The exact law is not the ratio
+
+The pairwise Laplace ratios are octaves **6.30 and 12.68 cents sharp**. What is exactly zero is a
+three-body relation among the mean motions *n* = 1/P:
+
+    n_Io − 3·n_Europa + 2·n_Ganymede = +1.575×10⁻¹⁰ cycles/day   (2.787×10⁻¹⁰ of n_Io)
+
+So the thing you *hear* is a detuned octave; the thing that is *true* is that relation. A resonance is
+a locked phase, not a tidy fraction, and anyone reporting 1:2:4 as exact has rounded the universe to
+fit the music.
+
+**Checked by the engine**, exact rational arithmetic, `seal=false` (a probe never writes). Three
+`HOLDS`, each decided symbolically rather than sampled:
+
+| claim, as given to `verify` | verdict |
+|---|---|
+| `abs(10⁹/1769137786 − 3·10⁹/3551181041 + 2·10⁹/7154552960) < 1/10⁹` | **HOLDS** (symbolic) |
+| `abs(879691/586462 − 3/2) < 1/100000` — Mercury is a fifth to one part in 10⁵ | **HOLDS** (symbolic) |
+| `abs(21276609/15945421 − 4/3) < 1/500` — Titan : Hyperion is a perfect fourth | **HOLDS** (symbolic) |
+
+### Producing it: the detuning is the music
+
+`tools/universe_song.py` writes a 48.6 s WAV. Each pair sounds three tones at once — the low voice at
+220 Hz, the **pure** interval above it, and the universe's **actual** interval — ordered tightest lock
+first, so the beat audibly speeds up as the lock loosens. The beat rate is the resonance's own error,
+and it is left in rather than smoothed out:
+
+    Moon        0.0000 Hz      Mimas:Tethys      0.6906 Hz
+    Mercury     0.0008 Hz      Neptune:Pluto     1.0106 Hz
+    Titan:Hyp   0.2214 Hz      Io:Europa         1.6049 Hz
+    Encel:Dione 0.5653 Hz      Io:Ganymede       9.6999 Hz
+
+The first two segments are silent: **a perfect lock has nothing to beat against.** This is the same
+instrument as the `shor_song` receiver — a period heard as a zero beat — pointed at the solar system.
+
+### What is refused
+
+1. **The music of the spheres, as consonance between unrelated bodies.** §3 of the tool transposes
+   nine physical frequencies (Schumann, the sidereal day and year, a pulsar, a solar p-mode, the
+   hydrogen 21 cm line, caesium-133) into one octave, and two pairs land on the same pitch — the
+   hydrogen line falls **1.38 cents** from the Earth–ionosphere cavity, 27 octaves up. The easy
+   rebuttal is *not* used, because it is false: 36 pairs at 1.38 cents gives an expected count of
+   0.083, about an 8% chance, so "you would expect one" would be wrong. The actual reason to refuse
+   is that **the table was not pre-registered** — nine voices were chosen out of an unbounded pool
+   after seeing them, and a coincidence found that way has no p-value. The refusal rests on
+   mechanism: nothing couples hydrogen's hyperfine splitting to a planetary cavity.
+2. **The CMB acoustic peaks as a harmonic series.** They are genuine standing waves, but the
+   multipoles run ℓ ≈ 220, 537, 810 — ratios **1 : 2.441 : 3.682**, not 1 : 2 : 3. Baryon loading
+   shifts them and alternates their heights: a driven oscillator, not a plucked string.
+3. **Any meaning beyond the mechanics.** Gravity locks phases; that is the whole reason the intervals
+   above are real. It is beautiful because it is true, not arranged to be beautiful.
+
+### What this does not establish
+
+- **Periods are CITED, not sealed here.** Their last digits differ between sources, which moves every
+  cents figure at the ~0.1 c level. The three engine receipts are unaffected: their bands (10⁻⁵,
+  1/500, 10⁻⁹) are far wider than that spread.
+- **The cents column is not engine-checked**, and cannot be — see `verify-3` in
+  [REMAINING.md](REMAINING.md). `1200·log(r)/log(2)` is rejected by the mathematics parse guard for
+  every *r*, so the one quantity every musician uses is the one the moat cannot see. That gap was
+  found by this work and includes a value this repo has already sealed.
+- **GW150914 is cited, not reproduced.** Its chirp swept ~35→250 Hz in the final 0.2 s (LIGO/Virgo
+  2016) and is the one voice here that needs **no** transposition — it arrives inside human hearing.
+- **Nothing in the keeping moved.** No card minted, no stick touched, no seal written. The audio is
+  an output, not a record.

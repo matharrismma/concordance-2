@@ -52,6 +52,24 @@ SOP before trusting it; this sheet is a map, the running engine is the territory
   `check` tool description in `mcp/server.py` with **no handler in this repo**, yet
   `mcp__concordance__find_verifier` is a live runtime tool — reconcile (implement, or correct the
   description). Do not guess-remove. → `mcp/server.py`. Legacy: review 2026-09-03.
+- **`verify-3` · A cents claim is not checkable, and that includes one we SEALED.** *Open.*
+  `1200*log(r)/log(2)` — the standard form of every musical interval — returns **INCOMPLETE** with
+  `detail` "not checkable: a power past the bound is not computed", for **every** `r`: decimal
+  (`log(2.00729481)/log(2)`), integer ratio (`log(3551181041/1769137786)/log(2)`) **and exact
+  fraction (`1200*log(5/4)/log(2)`)**. That last one is the value this repo already seals as
+  `harmonics.the_pure_major_third_in_cents` = 386.3137138648348, so a sealed number cannot be
+  re-checked through the equality door. `log(2)/log(2)` passes (it cancels), and `log(r)` alone
+  passes — the trigger is base-2 log of anything that does not cancel. Cause is named in the code:
+  `verifiers/mathematics.py:856` says `_parse` "rejects '#'-truncation, giant exponents, oversized
+  ASTs", and sympy rewrites `log(r)/log(2)` into a form carrying a huge rational exponent. Two
+  separate defects: (a) the guard misfires on a legitimate expression; (b) the message reads as a
+  verdict about the claim rather than a limit of the checker — an operator would relay it as a
+  refusal. The 2026-11-15 note that a "cents-level interval/comma check is a want" recorded the
+  symptom; this is the cause. Workaround in use: assert the RATIO in exact rationals with
+  `mode=inequality` (`lhs`/`rhs`/`op`), which decides symbolically and HOLDS.
+  → `verifiers/mathematics.py`, `data/sticks/harmonics.json`; found by `tools/universe_song.py`.
+  Note also that `mode=equality` is EXACT — a truncated decimal returns BROKEN with the residual, so
+  it is not a tolerance door. Found 2026-11-23.
 
 ## keeping — the Corpus · handicap 2 · degraded
 - **`keeping-1` · ~67% of the keeping is a pointer, not an answer (STOCKING).** *Open — growth, not
