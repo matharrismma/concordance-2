@@ -4069,6 +4069,34 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                                         "error": "one of subscription, test or forget is required"})
             return self._json(200, res, {"cache-control": "no-store"})
 
+        def _helm_discern(self, u, method: str) -> None:
+            """THE HELM's discernment tier — operator-gated. GET lists (executes nothing); POST
+            {"discernment": "<id>"} runs its probes serially and returns ONE verdict with the trail
+            of every probe that fed it.
+
+            A discernment has THREE outcomes, not two: it holds (ok=true, tell=true), it does not
+            hold and names which inputs disagree (ok=false, tell=true), or it CANNOT BE JUDGED and
+            names the missing input (tell=false). Same rule as the probes on status codes: only an
+            unknown id is a 400; everything a discernment actually decided is a 200."""
+            from .keep import request_is_operator
+            from . import helm_discern
+            q = {k: v[0] for k, v in parse_qs(u.query).items()}
+            peer_ip = self.client_address[0] if self.client_address else ""
+            if not request_is_operator(peer_ip, self.headers, q):
+                return self._json(404, {"error": "not found"})
+            if method == "GET":
+                return self._json(200, {"discernments": helm_discern.catalog()},
+                                  {"cache-control": "no-store"})
+            n = int(self.headers.get("content-length") or 0)
+            raw = self.rfile.read(n) if n else b""
+            try:
+                body = json.loads(raw or b"{}") or {}
+            except (ValueError, TypeError):
+                body = {}
+            res = helm_discern.run(body.get("discernment") or q.get("discernment") or "")
+            bad_id = res.get("verdict") == "no such discernment"
+            return self._json(400 if bad_id else 200, res, {"cache-control": "no-store"})
+
         def _do(self, method: str) -> None:
             """Catch-all: any unhandled exception becomes a clean JSON 500 for the CALLER — never a
             dropped connection or a leaked traceback (that would defeat the Server-header
@@ -4131,7 +4159,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                          "# Agents: read /llms.txt, then use /search and /card. No login, and\n"
                          "# nothing here records who read what.\n"
                          "User-agent: *\nAllow: /\nDisallow: /helm\nDisallow: /helm.html\n"
-                         "Disallow: /helm/probe\nDisallow: /helm/push\n"
+                         "Disallow: /helm/probe\nDisallow: /helm/push\nDisallow: /helm/discern\n"
                          "Disallow: /keep\nDisallow: /keep.html\n"
                          "Disallow: /bridge\nDisallow: /bridge.html\n"
                          "Disallow: /improve\nDisallow: /improve.html\n\n"
@@ -4157,6 +4185,8 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 return self._helm_probe(u, method)   # the panel's ACTION side, gated
             if u.path == "/helm/push" and method in ("GET", "POST"):
                 return self._helm_push(u, method)    # the operator's own phone, gated
+            if u.path == "/helm/discern" and method in ("GET", "POST"):
+                return self._helm_discern(u, method) # several probes → ONE verdict, gated
             if method == "GET" and u.path.startswith("/s/"):  # server-rendered citable receipt
                 h = u.path[3:].split("/")[0].strip()
                 status, html = render_seal_html(h, cas.fetch_anywhere(h))

@@ -146,6 +146,10 @@
   </div>
 
   <div id="dash" hidden>
+    <h2>Discernment <span class="sub">· several probes → ONE verdict · it may answer <em>I cannot tell</em> and name what is missing, which is the point</span></h2>
+    <div class="probes" id="discerns"></div>
+    <p class="probe-note" id="discerns-note"></p>
+
     <h2>Probes <span class="sub">· one bounded job each, operator-only · a probe never touches the keeping, the ledger or a seal · every answer is verdict · cost · next step</span></h2>
     <div class="probes" id="probes"></div>
     <p class="probe-note" id="probes-note"></p>
@@ -219,6 +223,7 @@ function render(d){
   document.getElementById("updated").textContent="updated "+new Date().toLocaleTimeString();
   document.getElementById("ident").textContent=(d.surface||"")+" surface · v"+(d.version||"—");
   if(!PROBES.length)loadProbes();   // the action side, fetched once
+  if(!DISCERNS.length)loadDiscerns();
   if(!PUSH)loadPhone();             // and the operator's own phone
 
   var C=d.components||{};
@@ -336,7 +341,7 @@ function render(d){
     (ig.ok?'<span class="ok">✓ verified</span>':'<span class="bad">✗ FAILED</span>');
 }
 
-var PROBES=[],PROBE_BUSY=false;
+var PROBES=[],PROBE_BUSY=false,DISCERNS=[];
 function loadProbes(){
   // GET lists; it executes nothing. The catalog says which buttons can run HERE, so a probe whose
   // inputs are absent is greyed out rather than handing back a failure that reads like a defect.
@@ -344,6 +349,51 @@ function loadProbes(){
     .then(function(r){return r.ok?r.json():null;})
     .then(function(d){if(!d||!d.probes)return;PROBES=d.probes;drawProbes();})
     .catch(function(){/* the instruments still stand without the action side */});
+}
+function loadDiscerns(){
+  return fetch("/helm/discern?t="+Date.now(),{headers:TOKEN?{"X-Helm-Token":TOKEN}:{},cache:"no-store"})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){if(!d||!d.discernments)return;DISCERNS=d.discernments;drawDiscerns();})
+    .catch(function(){});
+}
+function drawDiscerns(){
+  var host=document.getElementById("discerns");
+  host.innerHTML=DISCERNS.map(function(d,i){
+    return '<button class="probe" data-d="'+i+'" title="'+esc(d.question)+'">'+esc(d.label)+"</button>";
+  }).join("");
+  document.getElementById("discerns-note").textContent=DISCERNS.map(function(d){
+    return d.label+": fires "+d.fires+(d.fires===1?" probe":" probes");
+  }).join(" \u00b7 ");
+  Array.prototype.forEach.call(host.querySelectorAll(".probe"),function(b){
+    b.addEventListener("click",function(){discern(DISCERNS[+b.dataset.d],b);});
+  });
+}
+function discern(d,btn){
+  var out=document.getElementById("probe-out");
+  PROBE_BUSY=true;btn.classList.add("busy");btn.disabled=true;
+  out.hidden=false;out.className="card probe-out";
+  out.innerHTML='<div class="v">'+esc(d.label)+" \u2014 running "+d.fires+(d.fires===1?" probe":" probes")+"\u2026</div>";
+  fetch("/helm/discern",{method:"POST",cache:"no-store",
+      headers:Object.assign({"content-type":"application/json"},TOKEN?{"X-Helm-Token":TOKEN}:{}),
+      body:JSON.stringify({discernment:d.discernment})})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      // THREE outcomes, so three colours: held, did not hold, or could not be judged.
+      out.className="card probe-out "+(res.tell===false?"":(res.ok?"pass":"fail"));
+      var trail=(res.trail||[]).map(function(t){
+        return (t.ok?"\u2713":"\u2717")+" "+t.probe+": "+(t.verdict||"\u2014");
+      }).join("\n");
+      out.innerHTML='<div class="v">'+esc(res.label||d.label)+" \u2014 "+esc(res.verdict)+"</div>"+
+        '<div class="n">'+num(res.ms)+" ms"+
+        (res.missing&&res.missing.length?(" \u00b7 missing: "+esc(res.missing.join(", "))):"")+
+        " \u00b7 next: "+esc(res.next||"\u2014")+"</div>"+
+        (trail?"<pre>"+esc(trail)+"</pre>":"");
+    })
+    .catch(function(){
+      out.className="card probe-out fail";
+      out.innerHTML='<div class="v">'+esc(d.label)+" \u2014 the panel could not reach the discernment</div>";
+    })
+    .then(function(){PROBE_BUSY=false;btn.classList.remove("busy");btn.disabled=false;});
 }
 function drawProbes(){
   var host=document.getElementById("probes");
