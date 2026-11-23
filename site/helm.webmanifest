@@ -1,0 +1,11 @@
+{
+  "name": "The Helm — Narrow Highway",
+  "short_name": "The Helm",
+  "description": "The operator's panel: the engine read live, probes that act, and the few alerts allowed to wake you.",
+  "start_url": "/helm.html",
+  "scope": "/helm.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#15110c",
+  "theme_color": "#15110c"
+}

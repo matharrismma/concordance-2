@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#15110c">
+<link rel="manifest" href="/helm.webmanifest">
 <script src="/shell.js"></script>
 <meta name="robots" content="noindex, nofollow">
 <title>The Helm — Narrow Highway</title>
@@ -111,6 +113,19 @@
   .probe-out .n{color:var(--muted2);font-size:.78rem;margin-top:.3rem}
   .probe-out pre{white-space:pre-wrap;word-break:break-word;font-size:.72rem;color:var(--muted2);
     margin:.45rem 0 0;max-height:11rem;overflow:auto}
+  .phone{display:flex;flex-wrap:wrap;gap:.5rem;margin:.55rem 0 .2rem}
+  /* ON A PHONE (2026-11-22). The grids were already fluid -- every one is auto-fill/auto-fit with a
+     minmax, so they reflow on their own. What a phone actually needed was THUMBS: a 44px tap target
+     (Apple's minimum), buttons that do not sit shoulder to shoulder, and a title that does not eat
+     the first screen. */
+  @media (max-width:640px){
+    .wrap{padding:1rem .85rem 3rem}
+    h1{font-size:1.45rem}
+    .lede{font-size:.88rem;margin-bottom:1rem}
+    .probes,.phone{gap:.6rem}
+    .probe,.phone button{min-height:44px;flex:1 1 100%}
+    .probe-out pre{max-height:14rem}
+  }
 </style>
 </head>
 <body>
@@ -135,6 +150,10 @@
     <div class="probes" id="probes"></div>
     <p class="probe-note" id="probes-note"></p>
     <div id="probe-out" class="card probe-out" hidden></div>
+
+    <h2>This phone <span class="sub">· add the Helm to your home screen, then allow alerts · only three things may ever wake you: a safety pin failing, the chain disagreeing with itself, a lever waiting at the desk</span></h2>
+    <div class="phone" id="phone"></div>
+    <p class="probe-note" id="phone-note"></p>
 
     <h2>The authority chain <span class="sub">· Main proposes · Steward admits · Conductor runs · Reflex enforces · Scribe records · witness seals</span></h2>
     <div class="chain" id="chain"></div>
@@ -200,6 +219,7 @@ function render(d){
   document.getElementById("updated").textContent="updated "+new Date().toLocaleTimeString();
   document.getElementById("ident").textContent=(d.surface||"")+" surface · v"+(d.version||"—");
   if(!PROBES.length)loadProbes();   // the action side, fetched once
+  if(!PUSH)loadPhone();             // and the operator's own phone
 
   var C=d.components||{};
   // the chain
@@ -371,6 +391,94 @@ function fire(p,btn){
     .then(function(){PROBE_BUSY=false;btn.classList.remove("busy");btn.disabled=false;});
 }
 
+var PUSH=null;
+function b64u(s){
+  var pad="=".repeat((4-s.length%4)%4);
+  var raw=atob((s+pad).replace(/-/g,"+").replace(/_/g,"/"));
+  var a=new Uint8Array(raw.length);
+  for(var i=0;i<raw.length;i++)a[i]=raw.charCodeAt(i);
+  return a;
+}
+function loadPhone(){
+  return fetch("/helm/push?t="+Date.now(),{headers:TOKEN?{"X-Helm-Token":TOKEN}:{},cache:"no-store"})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){if(!d)return;PUSH=d;drawPhone();})
+    .catch(function(){/* the panel stands without the phone row */});
+}
+function drawPhone(){
+  var host=document.getElementById("phone"),note=document.getElementById("phone-note"),bits=[];
+  if(!PUSH){host.innerHTML="";return;}
+  if(!PUSH.available){
+    host.innerHTML="";
+    note.textContent="Alerts unavailable here \u2014 "+(PUSH.unavailable_because||"unknown reason");
+    return;
+  }
+  if(!("serviceWorker" in navigator)||!("PushManager" in window)){
+    host.innerHTML="";
+    note.textContent="This browser cannot take alerts. On iPhone, add the Helm to the home screen first, then open it from there.";
+    return;
+  }
+  if(PUSH.devices>0){
+    bits.push('<button id="p-test">Send a test</button>');
+    bits.push('<button id="p-forget">Forget these devices</button>');
+  }else{
+    bits.push('<button id="p-sub">Send alerts to this device</button>');
+  }
+  host.innerHTML=bits.join("");
+  var lines=[num(PUSH.devices)+(PUSH.devices===1?" device registered":" devices registered")];
+  if(!PUSH.delivery_enabled)lines.push("delivery is OFF on this host, so nothing is sent yet \u2014 a device can still register");
+  note.textContent=lines.join(" \u00b7 ");
+  var sub=document.getElementById("p-sub");
+  if(sub)sub.addEventListener("click",function(){askPush(sub);});
+  var tst=document.getElementById("p-test");
+  if(tst)tst.addEventListener("click",function(){postPhone({test:true},tst);});
+  var fgt=document.getElementById("p-forget");
+  if(fgt)fgt.addEventListener("click",function(){postPhone({forget:true},fgt);});
+}
+function phoneOut(cls,head,sub){
+  var out=document.getElementById("probe-out");
+  out.hidden=false;out.className="card probe-out "+cls;
+  out.innerHTML='<div class="v">'+esc(head)+"</div>"+(sub?'<div class="n">'+esc(sub)+"</div>":"");
+}
+function postPhone(body,btn){
+  btn.disabled=true;
+  return fetch("/helm/push",{method:"POST",cache:"no-store",
+      headers:Object.assign({"content-type":"application/json"},TOKEN?{"X-Helm-Token":TOKEN}:{}),
+      body:JSON.stringify(body)})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(body.test){
+        phoneOut(res.sent?"pass":"fail","Test alert \u2014 sent to "+num(res.sent||0)+" of "+num(res.devices||0),
+                 res.why_nothing_arrived||res.error||"if it did not arrive, check the notification permission on the device");
+      }else if(body.forget){
+        phoneOut("pass","Devices forgotten","this panel will not reach any phone until one registers again");
+      }
+      return loadPhone();
+    })
+    .catch(function(){phoneOut("fail","The panel could not reach its own phone door","");})
+    .then(function(){btn.disabled=false;});
+}
+function askPush(btn){
+  // iOS only grants this to an INSTALLED page, which is why the heading says home screen first.
+  btn.disabled=true;
+  Promise.resolve()
+    .then(function(){return navigator.serviceWorker.register("/sw.js");})
+    .then(function(){return Notification.requestPermission();})
+    .then(function(perm){
+      if(perm!=="granted")throw new Error("permission "+perm);
+      return navigator.serviceWorker.ready;
+    })
+    .then(function(reg){
+      return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(PUSH.key)});
+    })
+    .then(function(s){return postPhone({subscription:s.toJSON()},btn);})
+    .catch(function(e){
+      phoneOut("fail","This device was not registered",
+               String(e&&e.message||e)+" \u2014 on iPhone the Helm must be opened from the home screen before it may ask");
+      btn.disabled=false;
+    });
+}
+
 function closed(){
   document.getElementById("dash").hidden=true;
   document.getElementById("closed").hidden=false;
@@ -402,6 +510,10 @@ document.getElementById("signin").addEventListener("submit",function(e){
 // idle and took 47.8s during a 36s chain walk, so an unguarded poll queues two or three slow reads
 // behind the probe and the panel appears to hang — a pile-up the panel inflicted on itself.
 refresh();setInterval(function(){if(!PROBE_BUSY)refresh();},15000);
+// Registered so the panel can be INSTALLED and can take alerts. sw.js is network-first for
+// documents and never caches /helm.json or /helm/*, so the panel cannot show a cached number.
+if("serviceWorker" in navigator){window.addEventListener("load",function(){
+  navigator.serviceWorker.register("/sw.js").catch(function(){});});}
 </script>
 </body>
 </html>

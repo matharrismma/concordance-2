@@ -4030,6 +4030,45 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
             bad_id = res.get("verdict") == "no such probe"
             return self._json(400 if bad_id else 200, res, {"cache-control": "no-store"})
 
+        def _helm_push(self, u, method: str) -> None:
+            """THE HELM on the operator's phone — operator-gated, like the rest of the panel.
+
+            GET  → {available, delivery_enabled, key, devices}: the VAPID PUBLIC key (which is what
+                   the browser needs as applicationServerKey) and how many devices are registered.
+            POST {"subscription": {...}} registers THIS device · {"test": true} sends one
+                   notification · {"forget": true} drops every device.
+
+            The Helm's subscription key is a server-side SECRET and is never accepted from a
+            request. The site's own /push/subscribe is unauthenticated by design (a mesh node is
+            keyed by its own public fingerprint), so reusing it here would let a stranger who
+            guessed that key either receive the operator's alerts or silence his phone —
+            see helm_push.py. A malformed body is the only 400; a host that cannot push says so
+            in a 200 with ok=false, because that is not the caller's mistake."""
+            from .keep import request_is_operator
+            from . import helm_push
+            q = {k: v[0] for k, v in parse_qs(u.query).items()}
+            peer_ip = self.client_address[0] if self.client_address else ""
+            if not request_is_operator(peer_ip, self.headers, q):
+                return self._json(404, {"error": "not found"})
+            if method == "GET":
+                return self._json(200, helm_push.status(), {"cache-control": "no-store"})
+            n = int(self.headers.get("content-length") or 0)
+            raw = self.rfile.read(n) if n else b""
+            try:
+                body = json.loads(raw or b"{}") or {}
+            except (ValueError, TypeError):
+                body = {}
+            if body.get("forget"):
+                res = helm_push.forget()
+            elif body.get("test"):
+                res = helm_push.test()
+            elif isinstance(body.get("subscription"), dict):
+                res = helm_push.subscribe(body["subscription"])
+            else:
+                return self._json(400, {"ok": False,
+                                        "error": "one of subscription, test or forget is required"})
+            return self._json(200, res, {"cache-control": "no-store"})
+
         def _do(self, method: str) -> None:
             """Catch-all: any unhandled exception becomes a clean JSON 500 for the CALLER — never a
             dropped connection or a leaked traceback (that would defeat the Server-header
@@ -4092,6 +4131,7 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                          "# Agents: read /llms.txt, then use /search and /card. No login, and\n"
                          "# nothing here records who read what.\n"
                          "User-agent: *\nAllow: /\nDisallow: /helm\nDisallow: /helm.html\n"
+                         "Disallow: /helm/probe\nDisallow: /helm/push\n"
                          "Disallow: /keep\nDisallow: /keep.html\n"
                          "Disallow: /bridge\nDisallow: /bridge.html\n"
                          "Disallow: /improve\nDisallow: /improve.html\n\n"
@@ -4115,6 +4155,8 @@ def build_server(host: str = "127.0.0.1", port: int = 8000, surface: str = "secu
                 return self._helm(u)  # operator-gated panel — THE HELM
             if u.path == "/helm/probe" and method in ("GET", "POST"):
                 return self._helm_probe(u, method)   # the panel's ACTION side, gated
+            if u.path == "/helm/push" and method in ("GET", "POST"):
+                return self._helm_push(u, method)    # the operator's own phone, gated
             if method == "GET" and u.path.startswith("/s/"):  # server-rendered citable receipt
                 h = u.path[3:].split("/")[0].strip()
                 status, html = render_seal_html(h, cas.fetch_anywhere(h))
