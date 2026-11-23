@@ -179,3 +179,190 @@ What it says:
 4. **Mint the `note` kind deliberately.** It is the only kind in the keeping that is mostly distinct
    content at scale, and there are 5,539 of them against 903,738 reference cards. Whatever process
    produces notes is the process that produces answers.
+
+## 8. .kkrieger, and why a generator is not our size argument
+
+**2026-11-23.** Matt: *"Kkreiger game design."* `.kkrieger` (.theprodukkt, a Farbrausch spin-off,
+2004) is a complete first-person shooter in **97,280 bytes** — a Guinness record for fewest bytes for
+an FPS. It stores no textures and no meshes, only *their creation history*: a generator graph authored
+in `.werkkzeug`, packed with Fabian Giesen's `kkrunchy` (released 2014, BSD/public domain), expanded
+into memory at startup. The notorious load time **is** the decompression.
+
+That is §1–§3's accounting in a shipped artifact, so it is worth asking the question directly: of the
+bytes this keeping holds, how many are the cited fact and how many are its expansion?
+`tools/creation_history.py` answers it.
+
+### The measurement, and it refutes the obvious move
+
+Sampled 120,000 cards / 115.9 MB of `data/source_cards.jsonl`. Every byte is attributed to exactly
+one bucket per class, and a **floor of 500 cards per class** applies — below it, "this key is
+constant" cannot be told from "there is only one example," which is the artifact that made a first
+pass report 84.3%.
+
+| class | cards | bytes | constant keys | varying |
+|---|---|---|---|---|
+| `card_src_food` | 7,793 | 8,852,001 | 40.8% | 54.0% |
+| `card_src_port_tcp` | 5,914 | 5,185,019 | 55.5% | 37.4% |
+| `card_src_port_udp` | 5,524 | 4,838,630 | 55.6% | 37.3% |
+| `card_src_star` | 1,722 | 1,589,160 | 50.5% | 42.8% |
+| **classes ≥ floor** | **20,953** | **20,464,810** | **48.8%** | **45.0%** |
+
+Roughly half of a reference card is a key whose value is byte-identical across its whole class —
+`kind`, `box`, `author`, `visibility`, `lifecycle_stage`, `volatility`, `surface`, `generated`,
+`created_at`, `updated_at`, plus a `source` block and a `connections` block repeated verbatim per
+card (989,711 B and 919,574 B respectively, in `card_src_food` alone).
+
+**And removing all of it loses to `gzip`:**
+
+    remove every constant key (schema-aware, nothing inferred) .... 1.95x
+    gzip -9, same bytes, knows nothing about cards ................ 14.96x   (38,949,908 -> 2,602,870)
+
+**gzip wins by 7.7x.** So *procedural generation is not a size argument for this keeping.* A
+general-purpose compressor already removes more than schema knowledge does, because it also eats the
+repeated **prose** that a constant-key analysis has to leave in `varying`. If the goal is bytes, the
+answer is to compress the files, not to build a generator.
+
+Two further reasons the .kkrieger trade does not transfer:
+
+1. **We have no uniformity to exploit.** Only four classes in 120,000 cards reach 500 members, and
+   together they are just **17.7%** of the sampled bytes. The reference bulk is not a few vast
+   uniform tables; it is very many small ones. Procedural compression pays off on uniformity.
+2. **Our generator can never be self-contained, by doctrine.** `.kkrieger`'s 97,280 bytes need
+   nothing external, because a procedural rock has no ground truth — *the generator IS the truth.*
+   Our 82 `seed_*.py` files are **864,613 bytes** against ~326 MB of cards, but that is a
+   code-to-data ratio, **not** a compression ratio: the seeds read USDA, GeoNames, IANA, NNDC,
+   Gutenberg. A seed that could produce a place card without GeoNames would be **inventing places**.
+   Quoting 377x here would be a category error.
+
+### What does transfer: the generator is the authored artifact
+
+The lesson is architectural, not spatial. For `.kkrieger` the werkkzeug graph is the source of truth
+and every texture is derived and disposable. The same is already true here — seeds are tracked, cards
+are built from them — but it has never been **priced**. If the 326 MB is a rebuildable cache, then
+what must be reviewed, backed up and trusted is the seed plus the cited source, and the card store is
+a build output. That reframes `own-2` and the shelf-cost work in §7: the cost side of a shelf is not
+only its resident bytes but its **rebuild** cost, which this document has not measured and which
+running the seeds casually would be the wrong way to find out.
+
+### One finding with a product consequence: the prose is a rendering, and nothing says so
+
+**`generated` is false on 40,000 of 40,000 sampled cards** — not one carries `true`. The flag means
+what `airlock.py:26` says it means: the facts are not authored here. But the `body` **is** machine
+rendered from the fields by a template, and nothing on the card marks it as ours rather than the
+source's. The evidence:
+
+- **57.8%** of body tokens already appear in the same record's other fields.
+- The templates show through: *"Port 1/tcp is assigned to tcpmux: TCP Port Service Multiplexer."*,
+  a nuclide reading *"1 protons"*, and a star whose name joined badly into **"Tau Phe Phe"**.
+
+So a card's `body` is our sentence about a cited row, carrying no marker distinguishing it from a
+quotation of that row. An agent reading `body` can reasonably take it as source text. That is a
+narrower and more fixable thing than it sounds — it is a provenance label on the prose, not a change
+to any fact — and it sits squarely under the covenant's *distinguish citation from proof* and
+*carry provenance through every transformation*.
+
+### What this does not establish
+
+- **No RAM or load-time figure for `.kkrieger` is quoted here.** The widely repeated numbers trace to
+  forum posts; the one "512 MB minimum" is a quoted beta spec, not a developer measurement. The
+  decode cost is qualitatively certain (generation at startup) and **not** quantified in any source
+  I could stand behind.
+- **The sample is 120,000 cards of one file**, not the keeping. `source_cards.jsonl` is 406 MB of a
+  1,418.8 MB jsonl total, and that total is far above the 326.3 MB across the 70 *registered*
+  sources — unregistered files remain a known hazard.
+- **Our own rebuild cost is unmeasured**, as said above.
+- **Nothing was changed.** No card, no stick, no seal. `tools/creation_history.py` only reads.
+
+## 9. Lekktor, a tool per slot, and the law that has to be there first
+
+**2026-11-23.** Matt: *"Lekktor … It's a video game design. We can learn from game design. You need a
+tool for each task to render what fits in that slot. You need a language that communicates what goes
+where."* With `Code_Score.py` attached — which already **is** that design.
+
+### The design, and its own proof
+
+`Code_Score.py` holds three renderers and a three-byte language that says which one owns a slot:
+`GR1` a grid generator, `SC1` an arithmetic-motif encoder, `ZL1` plain zlib. `restore(frame)`
+dispatches on the tag; `min(choices, key=len)` runs a competition and the winner takes the slot. Its
+demo, run here:
+
+    zlib -9 on a 39,930-byte triangle list ......... 8,410 bytes
+    score + zlib .................................... 422 bytes
+    the grid generator (GR1) .......................... 5 bytes
+
+**1,682x between the general compressor and the right tool.** And `grid_recipe` shows the other half
+of the idea: regenerate the canonical mesh, then store only the rows that deviate — one changed
+triangle costs 23 bytes, not a new file. Generate the reference; keep the margin.
+
+§8 compared gzip against *constant-key removal* and concluded a generator was not a size argument
+here. That comparison was wrong — constant-key removal is one trick, not a renderer. So the
+competition was run properly.
+
+### The competition, on real card classes
+
+`tools/slot_dispatch.py`, 120,000 cards of `source_cards.jsonl`. Every card is canonicalised to
+compact sorted-key JSON first, so gzip and the columnar renderer are judged on identical bytes, and
+**every renderer must rebuild its slot exactly or it is disqualified rather than scored.**
+
+| class | cards | canonical | ZL1 | CL1 columnar | SC1 motif | winner |
+|---|---|---|---|---|---|---|
+| `card_src_food` | 7,793 | 8,392,214 | **535,354** | 691,920 | 691,920 | ZL1 |
+| `card_src_port_tcp` | 5,914 | 4,824,265 | **341,838** | 365,488 | 355,351 | ZL1 |
+| `card_src_port_udp` | 5,524 | 4,501,666 | **316,469** | 341,754 | 332,623 | ZL1 |
+| `card_src_star` | 1,722 | 1,484,118 | 93,723 | **80,878** | 80,878 | CL1 |
+
+    one global gzip ................. 1,287,384
+    per-slot winner + tag ........... 1,274,539   = 1.01x better
+
+**Per-slot dispatch buys 1%.** The columnar renderer wins exactly one class. And the motif encoder,
+run directly on 2.8 MB of raw card bytes, finds **zero** motifs — not one arithmetic progression of
+length three, with a clean round trip. It beat the columnar form only on the two *port* classes, the
+only ones holding a near-dense integer sequence.
+
+### Why: a generator exists only where there is a law
+
+This does not refute the design. It locates where it pays. `GR1` reaches 5 bytes because a 32×32
+triangle mesh **is fully determined by one integer**. Nothing in these card classes is determined by
+anything: *"Port 5/tcp is assigned to rje"* is a decision someone made at IANA, and a star's
+magnitude is a measurement. **The content is contingent, so there is no generator, because there is
+no law** — and that is precisely why it must be stored and cited rather than produced. gzip wins
+because gzip is the right renderer for contingent text.
+
+Which means the registry already exists in this engine, and the language that says what goes where is
+`kind`:
+
+- **cards** carry contingent facts → store, cite, compress. The slot's renderer is an entropy coder.
+- **sticks** carry lawful facts → store the **expression** and regenerate the value. A stick's
+  `expr` + `value` *is* `GR1`: `schumann_ideal` keeps `299792458*sqrt(2)/(2*pi*6371000)` and the
+  number falls out of it. That is a generator with a citation attached.
+
+So the useful question Matt's design raises is not "compress the cards better" but **"which card
+content is actually lawful, and therefore belongs in a stick?"** One hint, weak but present: the
+single class where the structure-aware renderer won is `card_src_star`, the class with the most
+internal mathematical relation among its fields.
+
+### Lekktor is the tool we need most and cannot run
+
+Lekktor is the third tool in that chain and the only **subtractive** one: per the GitHub blog on
+`fr_public`, a tool for profiling, finding and removing dead-code sections, by Giesen and Ohlerich.
+Its internals are not documented in any source reached here, and none is invented.
+
+Its requirement is the whole point: **you must run the thing and watch what executes.** This repo has
+a long list of findings that are precisely Lekktor's input — nine dead shelves, 96.8% of cards
+`reference` against 3.82% that help a family, boost arms that fix 0 of 15, a 9.0x exact-title boost
+that fired once in 76,010 candidates, twenty always-deny kernel gates that changed nothing, five test
+files that never ran under a green gate.
+
+Every one of those was found by hand. **The instrument that would find them automatically is off:**
+the traffic timer (`own-2`). §7 named it as blocking shelf pricing; it also blocks the entire
+subtractive half of this toolchain. That raises `own-2` from an accounting gap to the prerequisite
+for the only tool here that makes things smaller by removing what reality never asked for.
+
+### What this does not establish
+
+- **1.01x is a result about four classes**, 17.7% of the sampled bytes, in one file.
+- **No generator was written for any card class.** The claim that none exists is an argument from
+  contingency plus a measured absence of motifs — not a proof that no renderer could do better.
+- **Lekktor's mechanism is uncited** beyond "profiling, finding and removing dead code".
+- **Nothing was changed.** `tools/slot_dispatch.py` and `tools/Code_Score.py` only read; no card,
+  stick or seal was touched.
