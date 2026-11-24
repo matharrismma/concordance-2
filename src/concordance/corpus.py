@@ -411,6 +411,8 @@ def rehydrate(card: Optional[dict]) -> Optional[dict]:
     if not isinstance(full, dict):
         return card
     full["connections"] = card.get("connections", full.get("connections") or [])
+    from . import card_corrections as _corr       # a frozen card is corrected on read, as a resident one is at load
+    _corr.apply_one(full)
     # The call number and facets are LIVE too — classified onto the resident stub AFTER the shard
     # was frozen, so the stub is authoritative and the shard's copy (if any) is stale. Carry them
     # over like the graph, so a rehydrated card (a browse brief, the /card page) shows where it sits.
@@ -1622,6 +1624,15 @@ def load_cards(path: Optional[Path] = None,
             _log.warning("bridges: %d of %d row(s) still unresolved at the end of the load, by overlay %s — "
                          "no edge attached for them on either card (0-FP); each overlay's warning names examples",
                          _ph["bridge_rows_unresolved"], _ph["bridge_rows"], _ph["bridge_unresolved_by_overlay"])
+    # THE CARD CORRECTIONS (2026-11-23, card_corrections.py): tracked field corrections Matt directed — the WEB as
+    # the user-facing translation on his devotionals, the raven sermon cut to what Scripture says — applied to the
+    # resident cards here, after the bridges, the way the overlays are: the box's card files are never rewritten.
+    # Fail-closed per card (a value that is not the expected one leaves the card untouched); counted, never silent.
+    from . import card_corrections as _corr
+    _ph["card_corrections"] = _corr.apply(out)
+    if _ph["card_corrections"]["mismatch"]:
+        _log.warning("card corrections: %d row(s) left unapplied — the card no longer holds the expected value: %s",
+                     _ph["card_corrections"]["mismatch"], _ph["card_corrections"]["mismatched"])
     _ph["extras_ms"] = round((_pc() - _t_extras) * 1000.0, 1)
     _ph["frozen_df_ms"] = round(_ph["frozen_df_ms"], 1)
     LOAD_PHASES.update(_ph)
@@ -2072,8 +2083,10 @@ def default_corpus(path: Optional[Path] = None) -> Corpus:
                 if _cc.enabled() and _p_main.exists():
                     cc_state = "miss"
                     try:
+                        from . import card_corrections as _corr   # a changed correction must rebuild, never be cached past
                         cc_key = _cc.make_key(source_files(path), frozen_shelves(),
-                                              code=_cc.code_fingerprint([Path(__file__)]))
+                                              code=_cc.code_fingerprint([Path(__file__), Path(_corr.__file__),
+                                                                         _corr.TABLE_PATH]))
                         cc_path = _cc.cache_path(_p_main.parent, cc_key)
                     except OSError:
                         cc_key = cc_path = None

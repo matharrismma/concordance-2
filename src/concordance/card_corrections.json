@@ -1,0 +1,1033 @@
+{
+ "about": "card_corrections.py applies these at load. Each change names the value (or the sha256 of the body) it expects; body changes are character spans cut from that exact body - no prose is stored here.",
+ "corrections": [
+  {
+   "id": "card_n_0ef59894726c",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "John 10:8–10 NKJV",
+     "new": "John 10:8–10"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "John 10:8–10 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "John 10:8–10"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "John 10:8–10 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "John 10:8–10",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_234d9306cebe",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "1 Corinthians 6:9–11 NKJV",
+     "new": "1 Corinthians 6:9–11"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "1 Corinthians 6:9–11 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "1 Corinthians 6:9–11"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "1 Corinthians 6:9–11 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "1 Corinthians 6:9–11",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_462dd2ad643c",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "2 Chronicles 25:7–9 NKJV",
+     "new": "2 Chronicles 25:7–9"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "2 Chronicles 25:7–9 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "2 Chronicles 25:7–9"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "2 Chronicles 25:7–9 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "2 Chronicles 25:7–9",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_47ef7cadb694",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "1 Corinthians 9:25–27 NKJV",
+     "new": "1 Corinthians 9:25–27"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "1 Corinthians 9:25–27 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "1 Corinthians 9:25–27"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "1 Corinthians 9:25–27 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "1 Corinthians 9:25–27",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_569c4e416971",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "1 Thessalonians 5:22–24 NKJV",
+     "new": "1 Thessalonians 5:22–24"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "1 Thessalonians 5:22–24 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "1 Thessalonians 5:22–24"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "1 Thessalonians 5:22–24 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "1 Thessalonians 5:22–24",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_6529f05c2d0d",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "John 15:1–3 NKJV",
+     "new": "John 15:1–3"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "John 15:1–3 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "John 15:1–3"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "John 15:1–3 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "John 15:1–3",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_6ae2bda95465",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Psalm 5:1–3 NKJV",
+     "new": "Psalm 5:1–3"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Psalm 5:1–3 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Psalm 5:1–3"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Psalm 5:1–3 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Psalm 5:1–3",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_714a3d277588",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Romans 12:1–2 NKJV",
+     "new": "Romans 12:1–2"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Romans 12:1–2 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Romans 12:1–2"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Romans 12:1–2 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Romans 12:1–2",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_7e27e8be7086",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Luke 22:41–42 NKJV",
+     "new": "Luke 22:41–42"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Luke 22:41–42 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Luke 22:41–42"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Luke 22:41–42 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Luke 22:41–42",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_7f2f52140183",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "1 Peter 5:9–11 NKJV",
+     "new": "1 Peter 5:9–11"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "1 Peter 5:9–11 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "1 Peter 5:9–11"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "1 Peter 5:9–11 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "1 Peter 5:9–11",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_82c6ff8858b3",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Galatians 2:19–21 NKJV",
+     "new": "Galatians 2:19–21"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Galatians 2:19–21 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Galatians 2:19–21"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Galatians 2:19–21 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Galatians 2:19–21",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_9b276ed995a5",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "body",
+     "old_sha256": "ad4a05bec0abc272cfa4cddae9d335a9d06887e3593351efe703d75e5fd075e9",
+     "spans": [
+      [
+       55,
+       60,
+       " (World English Bible)"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_a1e237176346",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Isaiah 41:9–10 NKJV",
+     "new": "Isaiah 41:9–10"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Isaiah 41:9–10 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Isaiah 41:9–10"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Isaiah 41:9–10 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Isaiah 41:9–10",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_b71f054ebab7",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "James 1:2–4 NKJV",
+     "new": "James 1:2–4"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "James 1:2–4 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "James 1:2–4"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "James 1:2–4 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "James 1:2–4",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_cbc9c6746232",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Mark 10:43–45 NKJV",
+     "new": "Mark 10:43–45"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Mark 10:43–45 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Mark 10:43–45"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Mark 10:43–45 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Mark 10:43–45",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_d3a772440323",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Deuteronomy 32:8–9, Romans 12:1 NKJV",
+     "new": "Deuteronomy 32:8–9, Romans 12:1"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Deuteronomy 32:8–9, Romans 12:1 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Deuteronomy 32:8–9, Romans 12:1"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Deuteronomy 32:8–9, Romans 12:1 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Deuteronomy 32:8–9, Romans 12:1",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_d5f02e243b2e",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "1 Corinthians 16:13–14 NKJV",
+     "new": "1 Corinthians 16:13–14"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "1 Corinthians 16:13–14 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "1 Corinthians 16:13–14"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "1 Corinthians 16:13–14 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "1 Corinthians 16:13–14",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_d955d35adfea",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Matthew 6:19–21 NKJV",
+     "new": "Matthew 6:19–21"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Matthew 6:19–21 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Matthew 6:19–21"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Matthew 6:19–21 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Matthew 6:19–21",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_da3fcc4964a7",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Psalm 118:21–23 NKJV",
+     "new": "Psalm 118:21–23"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Psalm 118:21–23 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Psalm 118:21–23"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Psalm 118:21–23 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Psalm 118:21–23",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_e43b652f1e07",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Luke 9:23–25 NKJV",
+     "new": "Luke 9:23–25"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Luke 9:23–25 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Luke 9:23–25"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Luke 9:23–25 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Luke 9:23–25",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_ed96d3cb2c75",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Ephesians 6:16–17 NKJV",
+     "new": "Ephesians 6:16–17"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Ephesians 6:16–17 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Ephesians 6:16–17"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Ephesians 6:16–17 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Ephesians 6:16–17",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_efae8ffda953",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "James 1:16–18 NKJV",
+     "new": "James 1:16–18"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "James 1:16–18 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "James 1:16–18"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "James 1:16–18 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "James 1:16–18",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_f157633186e4",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Psalm 117:1–2 NKJV",
+     "new": "Psalm 117:1–2"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Psalm 117:1–2 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Psalm 117:1–2"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Psalm 117:1–2 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Psalm 117:1–2",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_f5afcf5cece3",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "Proverbs 3:5–6 NKJV",
+     "new": "Proverbs 3:5–6"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "Proverbs 3:5–6 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "Proverbs 3:5–6"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "Proverbs 3:5–6 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "Proverbs 3:5–6",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_f95275c429a8",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "source.ref",
+     "old": "1 Corinthians 15:30–32 NKJV",
+     "new": "1 Corinthians 15:30–32"
+    },
+    {
+     "path": "bands",
+     "old": [
+      "devotional",
+      "reflection",
+      "1 Corinthians 15:30–32 NKJV"
+     ],
+     "new": [
+      "devotional",
+      "reflection",
+      "1 Corinthians 15:30–32"
+     ]
+    },
+    {
+     "path": "facets.subject",
+     "old": [
+      "1 Corinthians 15:30–32 NKJV",
+      "devotional",
+      "reflection"
+     ],
+     "new": [
+      "1 Corinthians 15:30–32",
+      "devotional",
+      "reflection"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_fb71205ce8c4",
+   "rule": "web-user-facing",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Use the WEB as the user facing content.\"",
+   "changes": [
+    {
+     "path": "body",
+     "old_sha256": "6c94c7204ab750f6f8b7eda2d57b5bba2259eb210986ae4eb47b802599e0cf58",
+     "spans": [
+      [
+       88,
+       93,
+       " (World English Bible)"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_91dc28d5681a",
+   "rule": "raven-scriptural-only",
+   "date": "2026-11-23",
+   "directive": "Matt: \"Cut the raven story if it isn't scriptural.\"",
+   "changes": [
+    {
+     "path": "body",
+     "old_sha256": "d4aee59b434cde4687b5d66f92159753edf444e58cb2253cdeb188ebdaa29a95",
+     "spans": [
+      [
+       168,
+       305,
+       ""
+      ],
+      [
+       769,
+       790,
+       ""
+      ],
+      [
+       851,
+       972,
+       ""
+      ],
+      [
+       1001,
+       1046,
+       " (Leviticus 11:15)."
+      ],
+      [
+       1046,
+       1149,
+       ""
+      ],
+      [
+       2079,
+       2471,
+       ""
+      ],
+      [
+       2583,
+       2644,
+       ""
+      ],
+      [
+       2820,
+       2834,
+       ""
+      ]
+     ]
+    }
+   ]
+  }
+ ]
+}

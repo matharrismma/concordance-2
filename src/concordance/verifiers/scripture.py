@@ -65,6 +65,37 @@ def _parse_ref(ref: str) -> Optional[Tuple[str, int, int]]:
 #   "John 3:16" · "John 3:16-18" · "John 3" · "1 John 1:9"
 _PASSAGE_RE = re.compile(r"^\s*([1-3]?\s*[A-Za-z][A-Za-z. ]*?)\s*(\d+)(?::(\d+)(?:\s*-\s*(\d+))?)?\s*$")
 
+# THE REFERENCE AS PEOPLE WRITE IT (2026-11-23). Every parser above matched only an ASCII hyphen and nothing after
+# the last number, so "John 15:1–3" (an en dash — how print, word processors and Matt's own devotionals write a
+# range) and "John 15:1-3 NKJV" (a translation tag) both answered "could not parse passage": 24 of his devotional
+# references opened nothing, and so would any range a person or an agent pastes. clean_ref turns every dash form
+# into a hyphen and lifts a trailing translation tag off the reference, returning it so the caller can say plainly
+# which text it is showing instead: this node reads the World English Bible.
+_DASHES = dict.fromkeys(map(ord, "‐‑‒–—―−﹘﹣－"), "-")
+_TRANSLATION_TAG = re.compile(
+    r"\s*[(\[]?\s*\b(NKJV|NKJ|KJV|AKJV|KJ21|NIV|NIRV|ESV|NASB|NASB95|NASB2020|NLT|NRSV|NRSVUE|RSV|ASV|CSB|HCSB|"
+    r"AMP|AMPC|MSG|NET|CEV|GNT|GNB|YLT|WEB|WEBBE|BSB|LSB|NABRE|NAB|NCV|TLB|DRA|DRB|LEB|GW|ISV)\b\s*[)\]]?\s*[.,;:]?\s*$",
+    re.IGNORECASE)
+_HELD_TAGS = {"WEB", "WEBBE"}
+
+
+def clean_ref(ref: str) -> Tuple[str, Optional[str]]:
+    """("John 15:1-3", "NKJV") for "John 15:1–3 NKJV"; (ref with dashes normalised, None) when there is no tag."""
+    s = (ref or "").translate(_DASHES)
+    m = _TRANSLATION_TAG.search(s)
+    if m and s[:m.start()].strip():
+        return s[:m.start()].strip(), m.group(1).upper()
+    return s.strip(), None
+
+
+def _translation_note(out: Dict[str, Any], tag: Optional[str]) -> Dict[str, Any]:
+    """Say which text is shown when the reference asked for one this node does not hold."""
+    if tag and tag not in _HELD_TAGS:
+        out["translation_asked"] = tag
+        out["translation_note"] = (f"{tag} is not held here; the text shown is the "
+                                   f"{out.get('translation') or 'World English Bible'}")
+    return out
+
 
 class Bible:
     """An indexed WEB Bible: (book, chapter, verse) -> text, plus a book-alias map."""
@@ -181,6 +212,7 @@ class Bible:
         return cached
 
     def resolve(self, ref: str) -> Dict[str, Any]:
+        ref = clean_ref(ref)[0]                  # dashes and a translation tag, as people write a reference
         if not self.idx:
             return {"ref": ref, "text": "", "status": "source_missing",
                     "detail": "bible_en.jsonl not provisioned (run tools/migrate_bible.py)"}
@@ -210,6 +242,7 @@ class Bible:
         """Read a whole passage — a single verse, a verse range, or a whole chapter — as an
         ordered list of WEB verses. Found, never generated; degrades gracefully when unprovisioned.
         The Bible is the focus: 'we hold every thread so you can take your time and comprehend.'"""
+        ref = clean_ref(ref)[0]                  # dashes and a translation tag, as people write a reference
         if not self.idx:
             return {"ref": ref, "verses": [], "count": 0, "status": "source_missing",
                     "detail": "bible_en.jsonl not provisioned (run tools/migrate_bible.py)"}
@@ -519,6 +552,7 @@ def resolve_ref(ref: str, lang: Optional[str] = None, *, edition: Any = None,
     the book was named in ("Juan 3:16" → Reina-Valera): {ref, text, status, lang, translation}. A book beyond
     the 66 is read from the canon layers in `edition` (eng-web by default, engDRA on request), only when the 66
     recognise no book name at all, as `added` allows (ADDED_MODES)."""
+    ref, tag = clean_ref(ref)
     eng, detected = localize_ref(ref)
     l = _choose_lang(lang, detected)
     if l != "en" and not _bible_path(l).exists():
@@ -532,8 +566,8 @@ def resolve_ref(ref: str, lang: Optional[str] = None, *, edition: Any = None,
     if l == "en":
         layered = _beside_the_66(b, eng, out, "ref", edition, added)
         if layered is not None:
-            return layered
-    return _edition_note(out, edition)
+            return _translation_note(layered, tag)
+    return _translation_note(_edition_note(out, edition), tag)
 
 
 def read_passage(ref: str, lang: Optional[str] = None, *, edition: Any = None,
@@ -543,6 +577,7 @@ def read_passage(ref: str, lang: Optional[str] = None, *, edition: Any = None,
     lang, translation}. The core reading primitive the study experience is built on. A book beyond the 66 is
     read from the canon layers in `edition` (eng-web by default, engDRA on request), only when the 66 recognise
     no book name at all, as `added` allows (ADDED_MODES), and labelled with its edition, numbering and standing."""
+    ref, tag = clean_ref(ref)
     eng, detected = localize_ref(ref)
     l = _choose_lang(lang, detected)
     if l != "en" and not _bible_path(l).exists():
@@ -556,11 +591,11 @@ def read_passage(ref: str, lang: Optional[str] = None, *, edition: Any = None,
     if l == "en":
         layered = _beside_the_66(b, eng, out, "passage", edition, added)
         if layered is not None:
-            return layered
+            return _translation_note(layered, tag)
     if out.get("status") == "ok":
         meta = next((x for x in languages() if x["lang"] == l), None)
         out["translation"] = (meta or {}).get("translation")
-    return _edition_note(out, edition)
+    return _translation_note(_edition_note(out, edition), tag)
 
 
 def passage_text(ref: str) -> str:

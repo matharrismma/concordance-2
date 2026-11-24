@@ -420,6 +420,7 @@ test_warm_voice.py
 test_warrant.py
 test_watch.py
 test_wayfind.py
+test_web_scripture_and_card_corrections.py
 test_witness.py
 test_wordcraft.py
 test_workshop.py
