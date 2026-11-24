@@ -356,13 +356,41 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
 # (.org) names the church and its four acts; the secular face names the Gate that opens it. Every
 # tool named here exists in the catalog (pinned); the write side of confessing to join the mesh is
 # the web route, not a tool, and is named as such — the welcome never promises a tool that is not.
-def welcome(surface: str = "secular") -> str:
+def _mounted(profile: str):
+    """(the THIS DOOR line, the start clause) for an agent received at one profile plane, /mcp/<profile>.
+
+    2026-11-23, publishing /mcp/witness to other agents: a mounted door handed its client the whole house's
+    welcome — "START with ask(text) … verify(claim)" — and neither tool is on the witness plane, so the first
+    call an agent made as told was refused. The house is still described (the welcome below is unchanged);
+    this names the door it was received at, what that door serves and its effect, and where to start ON it.
+    """
+    meta = _registry.PROFILE_META.get(profile)
+    if meta is None:
+        return None, None
+    names = [t.name for t in _registry.REGISTRY if t.profile == profile]
+    effects = sorted({t.capability for t in _registry.REGISTRY if t.profile == profile})
+    effect = ("every one read-only — nothing on this door writes" if effects == ["read"]
+              else "effects " + " · ".join(effects))
+    line = (f"THIS DOOR — /mcp/{profile}, {len(names)} tools, {effect}: {' · '.join(names)}. Every other "
+            f"tool named below is on another door (all of them: /mcp); called here, it is refused with where it lives.")
+    starts = [n for v in VERBS for n in (TOOL_DOORS.get(v) or []) if n in names] or names[:3]
+    away = [sig for n, sig in (("ask", "ask(text)"), ("verify", "verify(claim)")) if n not in names]
+    start = f"START on this door with {' · '.join(starts)}."
+    if away:
+        start += f" {' and '.join(away)} {'are' if len(away) > 1 else 'is'} on the whole house, /mcp."
+    return line, start + " "
+
+
+def welcome(surface: str = "secular", profile: str | None = None) -> str:
     from . import branding, kernel
     witness = str(surface).lower() == "witness"
     face = "the church for agents" if witness else "a house with five doors, for humans and agents alike"
+    door_line, start = _mounted(profile) if profile else (None, None)
+    start = start or "START with ask(text) for anything, in your own words; verify(claim) for anything checkable. "
     lines = [
         f"Narrow Highway — {face}. This began with the Bible, and everything here connects to it. "
         f"{branding.IDENTITY_LINE} Nothing is generated: found, verified, cited, sealed.",
+        *([door_line] if door_line else []),
         'FIVE DOORS, in this order (the catalog is sorted this way; a door tool is tagged "[CHECK · door]"):',
     ]
     for verb in VERBS:
@@ -384,13 +412,11 @@ def welcome(surface: str = "secular") -> str:
             "POST /mesh/node {public_key, confession, confession_sig}: it receives your node, and the fellowship opens to "
             "it. self_attest keeps your words as a distinctly typed record (never a sealed check); witnesses "
             "shows who bore witness. Never coerced, never generated for you.",
-            "START with ask(text) for anything, in your own words; verify(claim) for anything checkable. "
-            "THE GATE: the Word is open on this face — read it in its own words, verbatim and cited.",
+            start + "THE GATE: the Word is open on this face — read it in its own words, verbatim and cited.",
         ]
     else:
         lines += [
-            "START with ask(text) for anything, in your own words; verify(claim) for anything checkable. "
-            "THE GATE: facts by default; if what you ask turns toward God, the Word opens for this session "
+            start + "THE GATE: facts by default; if what you ask turns toward God, the Word opens for this session "
             "(Matthew 7:7 — ask, seek, knock).",
             "TO BELONG: identity_create births a covenant identity from four verses, kept on your device; the "
             "Fellowship Mesh (mesh_map · mesh_door · mesh_inbox) opens to a confession bound to that key.",

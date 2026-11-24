@@ -266,6 +266,10 @@ A live remote MCP server (Streamable HTTP, JSON-RPC, no auth, no SDK):
   ("Jud 1:2") returns `status: "ambiguous"` with `candidates`; present them to your human and let
   them go the last mile. Never pick silently.
   They are reachable:
+    * `https://narrowhighway.org/mcp/witness` — ONLY those tools, every one read-only (each carries
+      `annotations.readOnlyHint: true`); no key, no account, nothing written. The door for a bot that
+      quotes the Bible: call `read_passage` and quote what it returns, word for word, with its
+      reference and translation — never a verse from memory. /connect.html#scripture has the recipe.
     * `https://narrowhighway.org/mcp` — the witness surface; they are simply there.
     * **`ask` — the door.** Call `ask` with what you are actually bringing. If what you ask turns
       toward God, the Gate opens for the rest of your session and those tools become listable and

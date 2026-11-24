@@ -235,6 +235,7 @@ test_mcp_gate.py
 test_mcp_http.py
 test_mcp_no_private_keys.py
 test_mcp_profiles.py
+test_mounted_door_welcome.py
 test_measurement_consistency.py
 test_medicine.py
 test_mention_web.py

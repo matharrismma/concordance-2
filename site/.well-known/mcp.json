@@ -17,6 +17,7 @@
   ],
   "_notes": {
     "witness_surface": "https://narrowhighway.org/mcp adds Scripture tools (passage reading, original-language word studies, cross-references).",
+    "read_only_scripture_door": "https://narrowhighway.org/mcp/witness serves ONLY the Scripture tools, every one read-only (annotations.readOnlyHint: true); the World English Bible by default; no key. Recipe: https://narrowhighway.com/connect.html#scripture",
     "provable": "Every verdict returns {content_hash, cite_url}; the seal is re-fetchable at https://narrowhighway.com/s/<content_hash> and re-checkable with a ~60-line stdlib verifier (docs/SEAL_SPEC.md, tools/verify_seal.py). Re-check without trusting us.",
     "key_tools": ["check", "verify", "audit", "search", "seal_fetch", "redact", "capabilities"]
   }

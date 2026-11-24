@@ -1910,7 +1910,7 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
         return {"jsonrpc": "2.0", "id": rid, "result": {
             "protocolVersion": negotiated, "capabilities": {"tools": {}},
             "serverInfo": {"name": "narrow-highway", "version": __version__, "surface": config.surface},
-            "instructions": _welcome_doors.welcome(config.surface)}}
+            "instructions": _welcome_doors.welcome(config.surface, profile)}}
     if method == "tools/list":
         tools = [dict(t, inputSchema=_strictify(_apply_enums(t["name"],
                                     t.get("inputSchema") or {"type": "object", "properties": {}})))
@@ -1918,8 +1918,15 @@ def handle(request: dict, config: EngineConfig, session: Optional[Dict[str, Any]
         if profile is not None:
             allowed = PROFILES[profile]["tools"]
             # the mounted plane and nothing else — plus the effect class, machine-readable,
-            # so a client can review risk from the listing instead of from prose
-            tools = [dict(t, effect=allowed[t["name"]]) for t in tools if t["name"] in allowed]
+            # so a client can review risk from the listing instead of from prose. The same class rides
+            # in the protocol's own field (2026-11-23, publishing /mcp/witness to other agents): a client
+            # reads `annotations.readOnlyHint` and never our `effect`, so without it every call on the
+            # read-only door was presented as one that might write. True only for `read`; every other
+            # class stays unhinted, so the client keeps its own default and asks.
+            tools = [dict(t, effect=allowed[t["name"]],
+                          annotations=dict(t.get("annotations") or {},
+                                           readOnlyHint=allowed[t["name"]] == "read"))
+                     for t in tools if t["name"] in allowed]
         return {"jsonrpc": "2.0", "id": rid, "result": {"tools": tools}}
     if method == "tools/call":
         p = request.get("params") or {}

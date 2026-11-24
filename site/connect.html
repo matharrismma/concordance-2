@@ -83,7 +83,43 @@
   cards, the connection graph, the grid, daily readings. Call <code>capabilities</code> for the
   exact, live tool count.
   The witness surface, <code>https://narrowhighway.org/mcp</code>, adds Scripture tools:
-  passage reading, original-language word studies, cross-references.</p>
+  passage reading, original-language word studies, cross-references — or take
+  <a href="#scripture">only those, read-only</a>.</p>
+
+  <h2 id="scripture">Scripture for any agent — the read-only door</h2>
+  <p class="sub">For a Grok bot, a GPT, a Claude project — any agent that quotes the Bible. One URL
+  serves only the Scripture tools, and every one of them only reads: no key, no account, nothing
+  written, nothing kept.</p>
+  <pre>https://narrowhighway.org/mcp/witness</pre>
+
+  <div class="step"><b>Grok</b> — in Grok, open <i>Connectors</i>, add a custom connector, and paste
+    the URL. A connector belongs to the account that adds it: the bots you build there can use it;
+    someone else's bot needs its own.</div>
+
+  <div class="step"><b>Claude</b> — Settings → Connectors → <i>Add custom connector</i> → paste the
+    URL. <b>Claude Code:</b>
+    <pre>claude mcp add --transport http nh-scripture https://narrowhighway.org/mcp/witness</pre></div>
+
+  <div class="step"><b>Any MCP client</b> — Streamable HTTP, no auth. <code>tools/list</code> returns
+    the Scripture tools only, each marked <code>readOnlyHint: true</code>: <code>read_passage</code>,
+    <code>word_study</code>, <code>cross_references</code>, <code>commentary</code>,
+    <code>harmony</code>, <code>canon</code>, <code>teachings</code>, <code>timeline</code> and the rest
+    of the study tables. Everything else in the house is on <code>/mcp</code>; called here, a tool is
+    refused and told where it lives.</div>
+
+  <div class="step"><b>What comes back</b> — the text as found, never generated: the World English
+    Bible (public domain) by default, other held public-domain translations by <code>lang</code>. A
+    reference opens the way people write it — <code>John 15:1–3</code>, <code>John 15:1-3 NKJV</code> —
+    and when the translation asked for is not held, the answer says so: <i>“NKJV is not held here; the
+    text shown is the World English Bible.”</i></div>
+
+  <div class="step"><b>A recipe for a bot that quotes Scripture</b> — paste into its instructions:
+    <pre>When you quote the Bible, call read_passage on the Narrow Highway connector
+and quote the text it returns word for word, with its reference and its
+translation. Never quote a verse from memory. If read_passage cannot open a
+reference, say so and ask which passage is meant. For what a word meant in
+the original language, use word_study; for related passages, cross_references.
+Say plainly that the verse text was found, not written by you.</pre></div>
 
   <h2>Or raw HTTP — one call</h2>
   <p class="sub">Everything the connector does is plain JSON over HTTP.</p>
