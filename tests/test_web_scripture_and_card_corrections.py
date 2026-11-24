@@ -9,6 +9,7 @@ Matt: "Use the WEB as the user facing content." and "Cut the raven story if it i
 from __future__ import annotations
 
 import copy
+import importlib.util
 import json
 import re
 import sys
@@ -83,22 +84,34 @@ def test_the_table_is_complete_and_says_why():
 REFERENCE_OR_NOTHING = re.compile(r"^( \([1-3]? ?[A-Z][a-z]+ \d+:\d+(–\d+)?\))?\.?$")
 
 
-OURS = {"author": "operator", "source.authority_tier": "operator"}
+def _minted_here(row, old_sha256):
+    """True when the row names a tracked tool and constant (`minted_by`) whose text hashes to the body it expects:
+    the card's text is OURS, already public in this repo. The `author` field cannot say this — 33 devotionals and
+    80 parables carry "operator", as the RAS card does."""
+    mb = row.get("minted_by") or {}
+    f = ROOT / str(mb.get("file", ""))
+    if not (str(mb.get("file", "")).startswith("tools/") and f.is_file() and mb.get("name")):
+        return False
+    spec = importlib.util.spec_from_file_location("_minted_" + f.stem, f)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    text = getattr(mod, mb["name"], None)
+    return isinstance(text, str) and C._sha(text) == old_sha256
 
 
 def test_no_prose_of_his_is_stored_only_spans_and_references():
     """His sermons and devotionals stay out of the public repo: a body change is spans of a hashed body, and the
     only text a span may insert is a Scripture reference (or a translation name), never his words. The one
-    exception (2026-11-24, the RAS card) is our own short wording on our own card: a row whose `expects` pins the
-    card's author AND tier to "operator", which card_corrections checks fail-closed before it changes anything."""
+    exception (2026-11-24, the RAS card) is our own short wording on a body our own tracked tool minted: the row's
+    `minted_by` names the tool and constant, and that constant's hash must be the body the row expects."""
     for r in _rows():
         for ch in r["changes"]:
             if ch["path"] == "body":
                 assert "new" not in ch and len(ch["old_sha256"]) == 64 and ch["spans"], r["id"]
+                ours = _minted_here(r, ch["old_sha256"])
                 for s, e, rep in ch["spans"]:
                     assert 0 <= int(s) < int(e)
-                    assert (r.get("expects") == OURS or rep == " (World English Bible)"
-                            or REFERENCE_OR_NOTHING.match(rep)), (r["id"], rep)
+                    assert ours or rep == " (World English Bible)" or REFERENCE_OR_NOTHING.match(rep), (r["id"], rep)
     text = C.TABLE_PATH.read_text(encoding="utf-8")
     assert max(len(t) for t in re.findall(r'"([^"]*)"', text)) < 200        # no paragraph anywhere in the table
 

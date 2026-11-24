@@ -1,5 +1,5 @@
 {
- "about": "card_corrections.py applies these at load. Each change names the value (or body sha256) it expects. A span inserts a reference, or our own wording on an operator card (expects). No prose of Matt's.",
+ "about": "card_corrections.py applies these at load. Each change names the value (or body sha256) it expects. A span inserts a reference, or our wording on text our tracked tool minted (minted_by).",
  "corrections": [
   {
    "id": "card_n_0ef59894726c",
@@ -1034,6 +1034,10 @@
    "rule": "ras-what-its-sources-say",
    "date": "2026-11-24",
    "directive": "Matt: \"Yes, correct it\" — the RAS card says only what its sources say.",
+   "minted_by": {
+    "file": "tools/add_ras_bridge.py",
+    "name": "RAS_BODY"
+   },
    "expects": {
     "author": "operator",
     "source.authority_tier": "operator"

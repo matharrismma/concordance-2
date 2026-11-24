@@ -22,8 +22,11 @@ code, reviewed and versioned, and is applied to the in-memory card on every load
 NO PROSE OF HIS IN THE REPO. A body change never stores his text: it names the sha256 of the body it expects and
 the character spans to cut from that exact body, `spans: [[start, end, replacement], ...]`, where a replacement is
 "" or a Scripture reference (" (Leviticus 11:15)"). Field changes store only references and tags. The one
-exception is OUR OWN wording on OUR OWN card: a row whose `expects` pins `author` and `source.authority_tier` to
-"operator" may insert a short sentence of ours — and that guard is fail-closed, so it can never land on his.
+exception is OUR OWN wording on text OUR OWN TRACKED TOOL MINTED: such a row names `minted_by` (the tool file and
+the constant holding the body), and the table test checks that the body hash the row expects IS that constant's —
+text already public in this repo, never his. The `author` field cannot say whose a card is (33 devotionals and 80
+parables carry "operator", as the RAS card does; corrected 2026-11-24 after 1876410 claimed it could). `expects`
+is only an extra fail-closed pin on fields the card must still hold.
 
 FAIL-CLOSED. Every entry names the value it expects to find. A card whose current value differs — a box copy
 that has moved on, a regenerated file — is left exactly as it is and counted as `mismatch`; a card is never
@@ -109,7 +112,7 @@ def apply_one(card: Optional[dict], rows: Optional[List[dict]] = None) -> str:
         if row.get("rule") in done:
             return "already"
         if not all(_get(card, p) == v for p, v in (row.get("expects") or {}).items()):
-            return "mismatch"                 # `expects` guards whose card it is (author, tier): fail closed
+            return "mismatch"                 # `expects`: fields the card must still hold, fail closed (not who wrote it)
         changes = row.get("changes") or []
         if not changes or not all(_matches(card, ch) for ch in changes):
             return "mismatch"                 # fail closed: the card is left exactly as it is

@@ -51,11 +51,13 @@ def _corrected():
     return c
 
 
-def test_one_row_for_our_own_card_and_none_for_his():
+def test_one_row_keyed_to_the_text_our_tool_minted_and_none_for_his_cards():
     r = _row()
     assert r["id"] == A.RAS_ID == "card_n_ras7gate0recv"
     assert "Yes, correct it" in r["directive"] and r["date"] == "2026-11-24"
-    assert r["expects"] == {"author": "operator", "source.authority_tier": "operator"}
+    assert r["minted_by"] == {"file": "tools/add_ras_bridge.py", "name": "RAS_BODY"}
+    body = [ch for ch in r["changes"] if ch["path"] == "body"][0]
+    assert body["old_sha256"] == C._sha(A.RAS_BODY)                         # the proof it is ours: our tool's text
     assert not any(x["id"] in (A.EYE_ID, FLOOR_ID) for x in _rows())     # his eye devotional and floor: untouched
 
 
@@ -113,7 +115,16 @@ def test_what_was_right_is_kept():
         assert s in body, s
 
 
-def test_the_guard_never_lets_it_land_on_his_card():
+def test_an_operator_marked_card_with_other_text_is_refused():
+    """The eye devotional carries author "operator" and tier "operator", exactly as the RAS card does — so the
+    author field is no guard. The body hash is: any other text, under this card's id, is left as it is."""
+    c = _card(body="The light of the body is the eye.")
+    assert c["author"] == "operator" and c["source"]["authority_tier"] == "operator"
+    before = copy.deepcopy(c)
+    assert C.apply_one(c, [_row()]) == "mismatch" and c == before
+
+
+def test_the_expects_pin_refuses_a_card_whose_author_or_tier_changed():
     for kw in ({"author": "matt"}, {"source": dict(A.RAS_CARD["source"], authority_tier="matt")}):
         c = _card(**kw)
         before = copy.deepcopy(c)
