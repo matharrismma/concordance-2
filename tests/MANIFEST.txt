@@ -305,6 +305,7 @@ test_push.py
 test_quantum_computing.py
 test_query_subject.py
 test_quorum.py
+test_ras_card_correction.py
 test_reachability.py
 test_reachable_from_the_floor.py
 test_readwith.py

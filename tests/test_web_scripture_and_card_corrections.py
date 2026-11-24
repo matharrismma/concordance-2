@@ -83,16 +83,22 @@ def test_the_table_is_complete_and_says_why():
 REFERENCE_OR_NOTHING = re.compile(r"^( \([1-3]? ?[A-Z][a-z]+ \d+:\d+(–\d+)?\))?\.?$")
 
 
+OURS = {"author": "operator", "source.authority_tier": "operator"}
+
+
 def test_no_prose_of_his_is_stored_only_spans_and_references():
     """His sermons and devotionals stay out of the public repo: a body change is spans of a hashed body, and the
-    only text a span may insert is a Scripture reference (or a translation name), never his words."""
+    only text a span may insert is a Scripture reference (or a translation name), never his words. The one
+    exception (2026-11-24, the RAS card) is our own short wording on our own card: a row whose `expects` pins the
+    card's author AND tier to "operator", which card_corrections checks fail-closed before it changes anything."""
     for r in _rows():
         for ch in r["changes"]:
             if ch["path"] == "body":
                 assert "new" not in ch and len(ch["old_sha256"]) == 64 and ch["spans"], r["id"]
                 for s, e, rep in ch["spans"]:
                     assert 0 <= int(s) < int(e)
-                    assert rep == " (World English Bible)" or REFERENCE_OR_NOTHING.match(rep), (r["id"], rep)
+                    assert (r.get("expects") == OURS or rep == " (World English Bible)"
+                            or REFERENCE_OR_NOTHING.match(rep)), (r["id"], rep)
     text = C.TABLE_PATH.read_text(encoding="utf-8")
     assert max(len(t) for t in re.findall(r'"([^"]*)"', text)) < 200        # no paragraph anywhere in the table
 
@@ -155,7 +161,7 @@ def test_a_body_change_is_keyed_on_the_hash_of_the_body_it_replaces():
 
 def test_apply_counts_every_outcome_and_never_raises_on_an_absent_card():
     cards = {"card_x": _card()}
-    st = C.apply(cards)            # the real table: card_x is not in it, and its 27 ids are absent here
+    st = C.apply(cards)            # the real table: card_x is not in it, and every id in it is absent here
     assert st["rows"] == len(_rows()) and st["applied"] == 0 and st["absent"] == len(_rows())
 
 

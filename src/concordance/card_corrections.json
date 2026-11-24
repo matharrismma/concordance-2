@@ -1,5 +1,5 @@
 {
- "about": "card_corrections.py applies these at load. Each change names the value (or the sha256 of the body) it expects; body changes are character spans cut from that exact body - no prose is stored here.",
+ "about": "card_corrections.py applies these at load. Each change names the value (or body sha256) it expects. A span inserts a reference, or our own wording on an operator card (expects). No prose of Matt's.",
  "corrections": [
   {
    "id": "card_n_0ef59894726c",
@@ -1024,6 +1024,99 @@
        2820,
        2834,
        ""
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "card_n_ras7gate0recv",
+   "rule": "ras-what-its-sources-say",
+   "date": "2026-11-24",
+   "directive": "Matt: \"Yes, correct it\" — the RAS card says only what its sources say.",
+   "expects": {
+    "author": "operator",
+    "source.authority_tier": "operator"
+   },
+   "changes": [
+    {
+     "path": "title",
+     "old": "The Reticular Activating System — the gate of reception",
+     "new": "The Reticular Activating System — arousal, one part of attention"
+    },
+    {
+     "path": "body",
+     "old_sha256": "c078a81beab520d624f41a8a719dbd96e552b3d9f90b97448294a9558fb7a490",
+     "spans": [
+      [
+       0,
+       69,
+       "The reticular activating system serves an alerting, or arousal, function (WordNet): it keeps the brain awake and alert"
+      ],
+      [
+       69,
+       119,
+       ". That is one part of attention; no source held here says it chooses what is attended to."
+      ],
+      [
+       327,
+       372,
+       "; the nursing textbook held here says it regulates arousal, attention and consciousness (OpenStax, Fundamentals of Nursing, 29.1)."
+      ],
+      [
+       372,
+       494,
+       " The neuroscience textbook held here lists it as one of the structures that implement attention, beside the superior colliculus, the pulvinar and the dorsal and ventral attentional networks,"
+      ],
+      [
+       494,
+       568,
+       " and treats decisions and goals under executive function (OpenStax, Introduction to Behavioral Neuroscience, 19.2 and 19.6)."
+      ],
+      [
+       625,
+       662,
+       "Here is the resonance, kept honest."
+      ],
+      [
+       777,
+       833,
+       "'Having eyes, don’t you see? Having ears, don’t you hear?'"
+      ],
+      [
+       990,
+       1063,
+       "'If therefore your eye is sound, your whole body will be full of light' (Matthew 6:22)."
+      ],
+      [
+       1063,
+       1166,
+       " The RAS keeps the body awake to receive, but no source held here makes it the chooser of what is received."
+      ],
+      [
+       1166,
+       1299,
+       " This is not the claim that Jesus meant the RAS, nor that we have found a bodily gate for what he described; it is a reading set beside the science."
+      ],
+      [
+       1300,
+       1357,
+       "VERDICT: RESONANCE (a reading, never a proof)."
+      ],
+      [
+       1438,
+       1515,
+       "credits the RAS with a choosing the sources do not give it, inflates that into manifestation, and is REFUSED."
+      ],
+      [
+       1572,
+       1604,
+       "Calibrate attention to its Source"
+      ],
+      [
+       1707,
+       1770,
+       "The door and the light are the same One."
       ]
      ]
     }
