@@ -1,4 +1,17 @@
-# MCP registry submission — PREPARED, NOT SUBMITTED
+# MCP registry submission
+
+> **LISTED (checked 2026-11-23).** The public registry already holds the server:
+> `GET https://registry.modelcontextprotocol.io/v0/servers?search=narrowhighway` returns
+> **`com.narrowhighway/concordance` v2.0.0, status `active`, one remote: `https://narrowhighway.com/mcp`**
+> (streamable HTTP). The `com.narrowhighway` namespace is verified by the domain key served at
+> `https://narrowhighway.com/.well-known/mcp-registry-auth`.
+>
+> It was NOT published from the `server.json` beside this file, which still names
+> `io.github.matharrismma/concordance` v2.0.0a0 with both the `.com` and `.org` remotes; and
+> `site/.well-known/mcp.json` names a third identity, `io.github.matharrismma/narrow-highway` v1.0.0.
+> Three names for one server: which is canonical — and whether the listing should also name the
+> read-only profiles (`/mcp/witness`, `/mcp/core`) instead of only the full catalog — is the
+> operator's call. The text below is the original playbook, kept as written.
 
 `server.json` is the manifest for listing Narrow Highway's MCP server in the public
 [MCP registry](https://registry.modelcontextprotocol.io) so agents can discover it.
