@@ -815,6 +815,15 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     r["resolved_from"] = sid
         return _ok(r) if r.get("ok") else _err(404, r.get("error", "no such stick"))
 
+    if method == "GET" and path == "/sticks/recheck":
+        # THE STICK RE-CHECK (2026-11-25): every sealed mark on the sticks re-read - its record present, unaltered and
+        # HOLDS, and whether today's catalog mints the same seal. Read-only; the nightly live assay and every deploy
+        # gate read it through one probe, so a lost or altered record surfaces without anyone looking for it.
+        from .. import stick_recheck as _rc
+        r = _rc.recheck()
+        r["problems"] = [p for p in r.get("problems") or [] if p.get("integrity") in _rc.FAILING][:50]
+        return _ok(r)
+
     if method == "GET" and path == "/status":
         # THE STATUS DOOR (2026-11-25): the tick stick's own reading for a question named plainly ("the Riemann
         # hypothesis", "P versus NP") - CITED, never a computed verdict, never a receipt. The words are not echoed.
@@ -3485,6 +3494,7 @@ ROUTES = [
     {"path": "/sticks", "methods": ("GET",), "api": True},
     {"path": "/stick", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/status", "methods": ("GET",), "api": True, "rl": "read"},   # THE STATUS DOOR: a named question's stick, read (2026-11-25)
+    {"path": "/sticks/recheck", "methods": ("GET",), "api": True, "rl": "read"},   # every sealed mark re-read: present, unaltered, HOLDS (2026-11-25)
     {"path": "/chains", "methods": ("GET",), "api": True, "rl": "read"},   # walk a discovery lineage / find where two chains connect (2026-10-07)
     {"path": "/tick", "methods": ("POST",), "rl": True},
     {"path": "/sync/manifest", "methods": ("GET",), "api": True, "rl": "read"},

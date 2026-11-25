@@ -124,6 +124,7 @@ GOLDEN_API_GET = {
     "/benchmarks",   # deliberate addition (THE ENGINE MEASURES ITSELF IN PUBLIC — Gen 3 · 7; 2026-10-04)
     "/sticks", "/stick",   # deliberate addition (THE TICK STICK — open questions with sealed marks; 2026-10-05)
     "/status",   # deliberate addition (THE STATUS DOOR — a named question's stick, read; 2026-11-25)
+    "/sticks/recheck",   # deliberate addition (THE STICK RE-CHECK — every sealed mark re-read; 2026-11-25)
     "/chains",   # deliberate addition (CHAINS / FLOORS / CONNECTIONS — walk a lineage / find where two chains meet; 2026-10-07)
     # deliberate addition 2026-08-01 — what the engine writes goes in wearing its open question,
     # and the first reader to recall it is asked to close it. `/unchecked` publishes the standing
@@ -205,6 +206,7 @@ GOLDEN_READ_LIMITED = {
     "/components",  # the vacuum-tube map — cheap (import resolution + one small JSON read), generous bucket like /systems
     "/tv/automaton",  # scans the witness cloud to let a witness testify in his own PD words — read-bucket limited like /witness
     "/status",  # THE STATUS DOOR (2026-11-25) folds the stick ledger per request — read bucket, like /chains
+    "/sticks/recheck",  # THE STICK RE-CHECK (2026-11-25) reads every sealed mark's record per request — read bucket
 }
 
 

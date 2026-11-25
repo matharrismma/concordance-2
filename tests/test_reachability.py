@@ -62,6 +62,8 @@ AGENT_ONLY = {
     "/sticks", "/stick", "/tick",
     # THE STATUS DOOR (2026-11-25): an agent/API read - the verify door carries the same answer for a page
     "/status",
+    # THE STICK RE-CHECK (2026-11-25): read by the nightly live assay and the deploy gate, not by a page
+    "/sticks/recheck",
     # CHAINS / FLOORS / CONNECTIONS (2026-10-07): an agent/API read — walk a lineage, find where two chains meet
     "/chains",
     # The six MCP profile mounts (task #123): an agent's client mounts one plane by URL;

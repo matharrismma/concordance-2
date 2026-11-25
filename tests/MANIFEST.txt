@@ -460,3 +460,4 @@ test_helm_probes.py
 test_rh_proved_and_ns_restated.py
 test_stick_audit_2026_11_25.py
 test_status_door.py
+test_recheck_sticks.py

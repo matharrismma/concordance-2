@@ -256,3 +256,4 @@
 {"id": "status.yang.mills.mass.gap.reads.open", "path": "/status", "query": {"q": "the Yang-Mills mass gap"}, "expect": [{"at": "found", "eq": true}, {"at": "stick", "eq": "stick_yang_mills_existence_and_mass_gap"}, {"at": "status", "eq": "OPEN"}]}
 {"id": "status.the.hodge.conjecture.reads.open", "path": "/status", "query": {"q": "the Hodge conjecture"}, "expect": [{"at": "found", "eq": true}, {"at": "stick", "eq": "stick_hodge_conjecture"}, {"at": "status", "eq": "OPEN"}]}
 {"id": "status.birch.and.swinnerton.dyer.reads.open", "path": "/status", "query": {"q": "the Birch and Swinnerton-Dyer conjecture"}, "expect": [{"at": "found", "eq": true}, {"at": "stick", "eq": "stick_birch_and_swinnerton_dyer_conjecture"}, {"at": "status", "eq": "OPEN"}]}
+{"id": "sticks.every.sealed.mark.present.unaltered.and.holds", "path": "/sticks/recheck", "expect": [{"at": "ok", "eq": true}, {"at": "failing", "eq": 0}, {"at": "integrity.MATCHES", "exists": true}]}
