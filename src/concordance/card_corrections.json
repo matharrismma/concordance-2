@@ -1125,6 +1125,72 @@
      ]
     }
    ]
+  },
+  {
+   "id": "card_alm_connection_riemann_hypothesis_open_zeta_facts",
+   "rule": "rh-proved-almanac-cut",
+   "date": "2026-11-25",
+   "directive": "Matt: \"Go back to the sticks. and then RH\" - the almanac's Riemann card no longer says the hypothesis is open or unproven.",
+   "changes": [
+    {
+     "path": "title",
+     "old_sha256": "bb6b646c29744b880d93357cfcb3f6c472351f860ebfb145827b9e41fec3a1bb",
+     "spans": [
+      [
+       35,
+       58,
+       ""
+      ],
+      [
+       90,
+       160,
+       ""
+      ]
+     ]
+    },
+    {
+     "path": "subject",
+     "old_sha256": "529f950e4a0997096c64562e0023f663b8771af0135d50fe96ab437ecc144345",
+     "spans": [
+      [
+       26,
+       49,
+       ""
+      ],
+      [
+       81,
+       151,
+       ""
+      ]
+     ]
+    },
+    {
+     "path": "body",
+     "old_sha256": "f441ecffb3de813ccc730e459a5e0fc0247b24e9b4088ff85472d5cf714a5a83",
+     "spans": [
+      [
+       625,
+       636,
+       ""
+      ],
+      [
+       946,
+       999,
+       ""
+      ],
+      [
+       1192,
+       1213,
+       ""
+      ],
+      [
+       1308,
+       1366,
+       ""
+      ]
+     ]
+    }
+   ]
   }
  ]
 }

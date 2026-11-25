@@ -1,0 +1,30 @@
+{
+ "schema": 1,
+ "name": "navier_stokes_restated",
+ "aliases": [
+  "navier_stokes_restated"
+ ],
+ "doc": "RESTATED FOR PRECISION, 2026-11-25 (Matt: 'Go back to the sticks'): two notes, never a seal, on the existing Navier-Stokes existence and smoothness stick (tools/seed_navier_stokes_attempt_2.py and tools/seed_navier_stokes_rounds_3_7.py minted the marks they correct). A minted mark cannot be edited and an unsealed one cannot be retracted, so each correction is minted beside what it corrects: the Type-II overclaim of rounds 2 and 7, and the reversed reading of Tao (2019) in rounds 3 and 7. create() finds the stick and leaves it as it is.",
+ "seals": [],
+ "sticks": [
+  {
+   "question": "Navier-Stokes existence and smoothness",
+   "statement": "Do smooth, globally defined solutions exist for the three-dimensional incompressible Navier-Stokes equations with smooth initial data?",
+   "field": "physics",
+   "references": [
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "by": "Narrow Highway - the Navier-Stokes stick restated for precision, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[rounds 2 and 7 - restated for precision, 2026-11-25] Round 2's exclusion and note, and round 7's terminus, say that Necas-Ruzicka-Sverak (1996) and Tsai (1998) leave only a NON-self-similar (Type-II) singularity. That inference is wrong, and it marked as closed a region that is still open. NRS showed that a Leray self-similar solution in L^3 is zero, and Tsai extended it to the local energy class: together they exclude an EXACTLY self-similar blow-up profile. They do not exclude Type-I blow-up in general - it is excluded only in special classes, such as axisymmetric flow (Chen-Strain-Tsai-Yau 2008-2009; Koch-Nadirashvili-Seregin-Sverak 2009; Seregin-Sverak 2009) - nor backward DISCRETELY self-similar blow-up: Chae and Wolf (2017) show such a solution has only one point singularity at the blow-up time, and remove it only when the scaling parameter is near 1. So the narrowed target reads 'not exactly self-similar', not 'Type-II'. The blow-up Alpöge and Buckmaster announced on 2026-11-20 - backward discretely self-similar, at the Type-I rate - lies in exactly this region; it rests on a computer-assisted certificate not yet released, so the question stays open."
+    },
+    {
+     "kind": "note",
+     "claim": "[rounds 3 and 7 - restated for precision, 2026-11-25] Round 3 says Tao (2019) shows a critically bounded solution 'can blow up no faster than a triple exponential in A', and round 7 that the L^3 norm goes to infinity 'at a triple-exponentially bounded rate'. That reads Tao backwards. A solution with ||u||_{L^inf_t L^3_x} <= A does not blow up at all (Escauriaza-Seregin-Sverak 2003); Tao's triple exponential in A bounds its higher-regularity norms. What follows for a blow-up is a LOWER bound on its rate: at a finite blow-up time T*, the critical L^3 norm must blow up at a rate (log log log 1/(T* - t))^c or faster, for an infinite sequence of times approaching T* and some absolute constant c > 0 (T. Tao, Quantitative bounds for critically bounded solutions to the Navier-Stokes equations, arXiv:1908.04958). So in the narrowed target the L^3 norm goes to infinity at least that fast along a sequence of times: the escape is bounded below, not above."
+    }
+   ]
+  }
+ ]
+}

@@ -8,8 +8,8 @@ the seven Millennium problems onto the same graph, in the same two files, as the
 
   * a FLOOR, card_floor_millennium — part_of the one Floor of Discovery. Its PARTS are what is PROVEN or OBSERVED:
     the ten joints where two of the problems meet at one established thing (GUE statistics, the L-function
-    machinery, the Weil conjectures (the Riemann hypothesis over finite fields, Deligne 1974 - the hypothesis itself
-    stays open), the Tate conjecture, Bochner's vanishing,
+    machinery, the Weil conjectures (the Riemann hypothesis over finite fields, Deligne 1974 - a different theorem
+    from the hypothesis itself), the Tate conjecture, Bochner's vanishing,
     the renormalization group, the sign problem, Manin's algorithm, the Diophantine form of RH, Arnold's geodesics).
   * seven OPEN ENDS, card_question_<problem> — the questions as the Clay Mathematics Institute states them, each
     pointing at its tick stick, where what is sealed, cited and open is read live. They hang off the floor
@@ -90,15 +90,17 @@ def _joint(slug: str, title: str, body: str, bands: List[str]) -> dict:
 
 FLOOR_CARD = {
     "id": FLOOR, "kind": "note",
-    "title": "The Millennium floor - seven open questions, and where they connect",
+    "title": "The Millennium floor - the seven questions, and where they connect",
     "body": ("The seven Millennium Prize Problems on the one map of reality. The FLOOR is what is proven or observed: "
              "the joints where two of the questions meet at one established thing - the GUE statistics shared by zeta "
              "zeros and the lattice Dirac operator, the one L-function machinery, the Weil conjectures (the Riemann "
-             "hypothesis over finite fields, a theorem by Deligne 1974 - the Riemann hypothesis itself stays open), the "
+             "hypothesis over finite fields, a theorem by Deligne 1974, a different theorem from the hypothesis itself), the "
              "Tate conjecture that is Hodge's arithmetic twin and BSD over function fields, "
              "Bochner's vanishing under positive Ricci curvature, the renormalization group, the NP-hard sign problem, "
              "Manin's algorithm under finite Sha, the Diophantine form of RH, Arnold's geodesic flow. The questions "
-             "are the OPEN ENDS hanging off that floor; one of them, Poincare, is closed (Perelman 2002-2003). Nothing "
+             "are the OPEN ENDS hanging off that floor; two of them are closed: Poincare (Perelman 2002-2003), and the "
+             "Riemann hypothesis, proved - a machine-checked Lean proof (Alpoge 2026, certified by the Lean FRO and the "
+             "Mathlib Initiative); no human-readable proof yet. Nothing "
              "is unified here: each joint is a join mathematics already made, found and cited, sealed where it is "
              "arithmetic. Riemann and Navier-Stokes share no joint - recorded as a miss. Historically the joints are "
              "where the proofs came from: Perelman imported a PDE into topology; Wiles' modularity gave BSD its "
@@ -115,7 +117,9 @@ FLOOR_CARD = {
 QUESTIONS = [
     _question("riemann", "The Riemann hypothesis", "stick_riemann_hypothesis",
               "Every non-trivial zero of the Riemann zeta function has real part one half.",
-              "Open.", ["zeta", "primes", "number theory"]),
+              "PROVED - a machine-checked Lean proof (L. Alpoge, released 2026-11-20; statement and proof certified "
+              "by the Lean FRO and the Mathlib Initiative, 2026-11-21); no human-readable proof yet, and the Clay "
+              "prize not awarded.", ["zeta", "primes", "number theory"]),
     _question("bsd", "The Birch and Swinnerton-Dyer conjecture", "stick_birch_and_swinnerton_dyer_conjecture",
               "The rank of the group of rational points of an elliptic curve over Q equals the order of vanishing "
               "of its L-function at s = 1, and the leading coefficient is the product of its arithmetic invariants.",
@@ -174,11 +178,12 @@ JOINTS = [
          title="The Weil conjectures (Deligne 1974): the Riemann hypothesis over finite fields, a theorem",
          body=("The Weil conjectures are the analogue of the Riemann hypothesis for the zeta functions of varieties "
                "over FINITE FIELDS, and they are a theorem (Deligne 1974): every eigenvalue of Frobenius on the i-th "
-               "cohomology has absolute value q^(i/2). The Riemann hypothesis itself - zeta over the rationals - stays "
-               "OPEN, and Deligne's proof has not transferred to it. The proof runs on weights - the finite-field shadow "
+               "cohomology has absolute value q^(i/2). The Riemann hypothesis itself - zeta over the rationals - is a "
+               "different theorem, proved in 2026 by a machine-checked Lean proof (Alpoge), with no human-readable "
+               "proof yet. Deligne's proof runs on weights - the finite-field shadow "
                "of Hodge theory - and the positivity it establishes is what Mulmuley's geometric complexity theory, the "
-               "one road to P versus NP not excluded by a barrier, leans on. A proven analogue at the centre, three open "
-               "questions around it."),
+               "one road to P versus NP not excluded by a barrier, leans on. A proven analogue at the centre; around it the "
+               "Riemann hypothesis, now proved (machine-checked), and two open questions, Hodge and P versus NP."),
          bands=["weil conjectures", "finite fields", "weights"], joins=("riemann", "hodge", "p_vs_np"),
          cites=("deligne_1974", "mulmuley_2011"), seal=""),
     dict(slug="tate_conjecture",

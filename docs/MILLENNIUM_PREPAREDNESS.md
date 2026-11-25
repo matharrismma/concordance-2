@@ -195,7 +195,7 @@ mathematics already made, cited to its record (the records carded by `tools/card
 |---|---|---|---|
 | GUE statistics | Riemann ↔ Yang–Mills | Montgomery 1973, Odlyzko 1987, Verbaarschot 1994, Berry–Keating 1999 | the Riemann stick's spacing witness |
 | One L-function machinery | Riemann ↔ BSD | Wiles 1995 | ξ(s) = ξ(1 − s) at s = 0.3; L(11a1, 1) |
-| The Weil conjectures (RH over finite fields, a theorem; RH itself open) | Riemann ↔ Hodge ↔ P vs NP | Deligne 1974, Mulmuley 2011 | cited |
+| The Weil conjectures (RH over finite fields, a theorem; RH itself a different theorem, proved 2026, machine-checked) | Riemann ↔ Hodge ↔ P vs NP | Deligne 1974, Mulmuley 2011 | cited |
 | The Tate conjecture | Hodge ↔ BSD | Tate 1965, Artin–Tate 1966, Milne 1975 | cited |
 | Bochner's vanishing | Hodge ↔ Poincaré | Bochner 1946, Myers 1941, Hamilton 1982 | Myers on the unit S³ |
 | The renormalization group | Yang–Mills ↔ Navier–Stokes | Wilson 1974, Forster–Nelson–Stephen 1977 | the running coupling; the Kolmogorov scale |
@@ -212,9 +212,10 @@ no joint; the map shows the indirect path (through Yang–Mills) and says so. `G
 
 Nothing is unified by us. The historical fact the floor records is that the joints are where the proofs came from —
 Perelman imported a PDE into topology, Wiles' modularity gave BSD its L-function — and the honest state is that no
-joint on this map supplies a missing step for any of the six open questions. The map says where a step taken on one
+joint on this map supplies a missing step for any of the five open questions. The map says where a step taken on one
 would transfer, and where the field itself converges: the Weil conjectures at the centre — the Riemann hypothesis
-over finite fields, a theorem — while the Riemann hypothesis itself stays open.
+over finite fields, a theorem — and the Riemann hypothesis itself, a different theorem, is now proved: a
+machine-checked Lean proof (Alpöge, 2026), with no human-readable proof yet (below, 2026-11-25).
 
 *Precision, 2026-11-22 (a claimed proof, now machine-checked).* On **2026-11-20** a Claude-assisted proof of RH was
 released as **Lean code** — the unsigned 4-page note at `alpo.ge/remark.pdf`, which this project read on the day and
@@ -233,6 +234,22 @@ last step is bound.
 never moves on a claim, and a claim that has compiled is still a claim about the thing it compiled. The one check
 that would settle it here is cheap and specific: **read the Lean theorem statement and see whether it says what RH
 says.** That is a step this engine can take; it has not taken it.
+
+*Precision, 2026-11-25 (the last step is bound; Matt: "Go back to the sticks. and then RH").* The paragraph above
+was wrong when written: the statement HAD been read, on 2026-11-20, at the pinned revision — it is Mathlib's own
+`RiemannHypothesis`, every zero of zeta other than the trivial ones (and s ≠ 1) has real part 1/2, the hypothesis
+as Clay states it. On 2026-11-21 the Lean FRO and the Mathlib Initiative certified **both the statement and the
+proof**; `#print axioms` gives only propext, Classical.choice and Quot.sound; independent checkers accept it,
+among them nanoda, lean4lean and the formally verified con-leche and con-ron; and with an independent
+formalization of Robin (1984) it yields Robin's inequality for every n > 5040 — a statement with no zeta function
+in it. So the formalization gap is closed and the chain is bound: **the Riemann hypothesis is proved — a
+machine-checked Lean proof (Alpöge, 2026); no human-readable proof yet.** Not yet: a proof mathematicians can
+read, and the Clay prize (publication and two years). GRH is proved for Dirichlet L-functions only. This engine
+did not re-run the proof (83-99 GiB, up to 72 hours); it cites the certification. The store now moves: the
+Riemann stick carries a cited `closed` mark, as the Poincaré stick does (`data/sticks/riemann_proved.json`),
+with restated notes beside the five minted marks that said open; the floor, question and Weil-joint cards
+(`tools/seed_millennium_chain.py`), the Deligne source card (`tools/card_millennium_sources.py`) and the
+almanac's Riemann card (`card_corrections.json`) no longer say it is open.
 
 *Precision, 2026-10-09 (Matt: "Proven Riemann?"):* an earlier draft of this section and the joint card's title said
 "the one proven Riemann hypothesis"; on the map the label truncated to exactly the wrong reading. The Riemann

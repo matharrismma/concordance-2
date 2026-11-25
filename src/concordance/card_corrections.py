@@ -18,6 +18,11 @@ code, reviewed and versioned, and is applied to the in-memory card on every load
      RESONANCE), and it quoted Mark 8:18 and Matthew 6:22 in the King James wording. It now says what WordNet and
      the two OpenStax textbooks the keeping holds say — arousal, one part of attention, never the chooser — and
      quotes the WEB. Matt's own cards it links to (the eye devotional, the floor) are untouched.
+  4. (2026-11-25) "Go back to the sticks. and then RH." The Riemann hypothesis is proved - a machine-checked Lean
+     proof (Alpoge, 2026-11-20; statement and proof certified by the Lean FRO and the Mathlib Initiative); no
+     human-readable proof yet. The almanac's Riemann card said it was "still-OPEN", "UNPROVEN" and that "no proof
+     exists". Its text came from box data (data/almanac/resealed.jsonl), not a tracked tool, so it cannot be
+     proven ours: the row only CUTS those claims (title, subject, body) and adds no words.
 
 NO PROSE OF HIS IN THE REPO. A body change never stores his text: it names the sha256 of the body it expects and
 the character spans to cut from that exact body, `spans: [[start, end, replacement], ...]`, where a replacement is

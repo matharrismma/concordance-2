@@ -457,3 +457,4 @@ test_sky_entry.py
 test_helm_discern.py
 test_helm_phone.py
 test_helm_probes.py
+test_rh_proved_and_ns_restated.py

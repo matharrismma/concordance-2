@@ -426,8 +426,9 @@ SOURCES: List[Dict[str, str]] = [
          title="La conjecture de Weil. I", venue="Publ. Math. IHÉS 43 (1974) 273–307", doi="10.1007/BF02684373",
          arxiv="", url="https://doi.org/10.1007/BF02684373",
          free="http://www.numdam.org/item/PMIHES_1974__43__273_0/", license=L_NUMDAM,
-         role="the Weil joint: the Riemann hypothesis for varieties over FINITE FIELDS, a theorem - the Riemann "
-              "hypothesis itself stays open (Riemann ↔ Hodge ↔ P vs NP)",
+         role="the Weil joint: the Riemann hypothesis for varieties over FINITE FIELDS, a theorem - a different "
+              "theorem from the Riemann hypothesis itself, proved in 2026 by a machine-checked Lean proof, no "
+              "human-readable proof yet (Riemann ↔ Hodge ↔ P vs NP)",
          want=""),
     dict(key="mulmuley_2011", problem="joint", kind="paper", authors="K. D. Mulmuley", year="2011",
          title="On P vs. NP and geometric complexity theory", venue="J. ACM 58 (2011) 5:1–26",

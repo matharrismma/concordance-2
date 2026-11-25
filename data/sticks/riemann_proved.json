@@ -1,0 +1,83 @@
+{
+ "schema": 1,
+ "name": "riemann_proved",
+ "aliases": [
+  "riemann_proved",
+  "rh_proved"
+ ],
+ "doc": "THE RIEMANN HYPOTHESIS, PROVED - a machine-checked Lean proof, 2026-11-25 (Matt: 'Go back to the sticks. and then RH'): one cited closed mark, never a seal, on the Riemann hypothesis stick, in the shape of the Poincare stick's closed mark (data/sticks/poincare_next.json), and four notes beside the five minted marks that say the hypothesis is open (on the Riemann, P versus NP, symmetry and final-assembly sticks). A minted mark cannot be edited and an unsealed one cannot be retracted. The engine did not re-run the proof; the closed mark cites the certification. create() finds each stick and leaves it as it is.",
+ "seals": [],
+ "sticks": [
+  {
+   "question": "Riemann hypothesis",
+   "statement": "Every non-trivial zero of the Riemann zeta function has real part 1/2.",
+   "field": "number_theory",
+   "references": [
+    "Riemann, Ueber die Anzahl der Primzahlen unter einer gegebenen Grösse (1859)",
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "by": "Narrow Highway - the Riemann hypothesis proved, restated for precision, 2026-11-25",
+   "marks": [
+    {
+     "kind": "closed",
+     "claim": "Every non-trivial zero of the Riemann zeta function has real part 1/2: PROVED - a machine-checked Lean proof (L. Alpöge, released 2026-11-20); no human-readable proof yet. On 2026-11-21 the Lean FRO and the Mathlib Initiative certified both the statement and the proof. The statement is Mathlib's own RiemannHypothesis (read here at the pinned revision on 2026-11-20); #print axioms on the headline theorems gives only propext, Classical.choice and Quot.sound; and the proof is accepted by Lean's kernel and by independent checkers - nanoda, lean4lean, and con-leche and con-ron, which carry a formal proof that they cannot accept a false proof. With an independent formalization of Robin (1984) it yields Robin's inequality for every n > 5040 and Lagarias's for every n >= 1, statements with no zeta function in them. NOT YET: a proof mathematicians can read; the Clay prize, whose rules ask for publication and two years. The generalized hypothesis is proved for Dirichlet L-functions only. The engine has not re-run the proof (the kernel checks need 83-99 GiB of memory and up to 72 hours); this mark cites the certification and seals nothing. The bounds on this stick stay as they were: zeros counted and checked here, now instances of a theorem.",
+     "source": "L. Alpöge, Lean proof of the Riemann hypothesis and GRH for Dirichlet L-functions (released 2026-11-20, alpo.ge); Lean FRO and Mathlib Initiative, joint statement (2026-11-21); A. Sutherland, verification record, math.mit.edu/~drew/grh (2026-11-24)"
+    },
+    {
+     "kind": "note",
+     "claim": "[restated for precision, 2026-11-25] Two notes on this stick say the hypothesis is open: the joints note of 2026-10-09 ('while the hypothesis itself stays open') and the AI-era note of 2026-11-13 ('the Riemann hypothesis remains open'). Both were true when minted. Since 2026-11-20 the Riemann hypothesis is proved - a machine-checked Lean proof (Alpöge; statement and proof certified by the Lean FRO and the Mathlib Initiative, 2026-11-21); no human-readable proof yet - see this stick's closed mark. The rest of both notes stands: Deligne's 1974 theorem is the Riemann hypothesis over FINITE FIELDS, a different theorem; a lower bound on the proportion of zeros on the critical line is not the hypothesis; and the 67.2% bound itself is still a claim the engine has not re-derived."
+    }
+   ]
+  },
+  {
+   "question": "P versus NP",
+   "statement": "Is every problem whose solutions can be verified in polynomial time also solvable in polynomial time?",
+   "field": "computer_science",
+   "references": [
+    "S. Cook, The complexity of theorem-proving procedures, STOC (1971)",
+    "Clay Mathematics Institute, Millennium Prize Problems (2000)"
+   ],
+   "by": "Narrow Highway - the Riemann hypothesis proved, restated for precision, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[the joints - restated for precision, 2026-11-25] The joints note of 2026-10-09 says 'the Riemann hypothesis itself stays open'. Since 2026-11-20 the Riemann hypothesis is proved - a machine-checked Lean proof (Alpöge; statement and proof certified by the Lean FRO and the Mathlib Initiative, 2026-11-21); no human-readable proof yet. The joint itself is unchanged: Deligne 1974, the Weil conjectures - the Riemann hypothesis for varieties over FINITE FIELDS - is still the theorem whose positivity Mulmuley's geometric complexity theory leans on. P versus NP stays open."
+    }
+   ]
+  },
+  {
+   "question": "The symmetry",
+   "statement": "Across the Riemann arc one structure recurs: the zeros sit on the fixed set of a symmetry. The functional equation reflects s to 1-s about Re = 1/2; a self-adjoint operator reflects its spectrum onto the real line; the Cayley map carries that line to the unit circle; Frobenius pins |alpha| = sqrt(q). RH is the statement that the zeros are as symmetric as the law allows.",
+   "field": "meta",
+   "references": [
+    "the functional equation's reflection s <-> 1-s, fixed line Re = 1/2",
+    "self-adjoint -> real line; Cayley -> unit circle; Frobenius -> |alpha| = sqrt(q)",
+    "stick_hilbert_polya, stick_finite_field_riemann, stick_the_smith_chart_the_cayley_transform"
+   ],
+   "by": "Narrow Highway - the Riemann hypothesis proved, restated for precision, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[the classical face - restated for precision, 2026-11-25] The note of 2026-10-07 ends: where the symmetry has no operator, 'the classical RH stays open'. Since 2026-11-20 the classical Riemann hypothesis is proved - a machine-checked Lean proof (Alpöge; statement and proof certified by the Lean FRO and the Mathlib Initiative, 2026-11-21); no human-readable proof yet. By Tao's account (2026-11-20) the proof draws on the Langlands program and arithmetic geometry. Whether it supplies the self-adjoint operator this stick's first face looks for has not been read here, so that face stays as minted: the zeros are now pinned to the line by a proof, and no operator is named here."
+    }
+   ]
+  },
+  {
+   "question": "The final assembly",
+   "statement": "The pieces assembled into one movement — the calibration constellation: the sealed anchors the model of reality is checked against, and how they connect, with Christ as the datum. Found, never generated; sealed, never asserted; evidence, never proof.",
+   "field": "meta",
+   "references": [
+    "docs/ASSEMBLY.md",
+    "docs/THE_WATCH.md",
+    "docs/COMPONENTS.md"
+   ],
+   "by": "Narrow Highway - the Riemann hypothesis proved, restated for precision, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[limb: the Riemann symmetry constellation - restated for precision, 2026-11-25] The limb note of 2026-10-06 ends 'the classical RH stays the open mark'. It is no longer open: since 2026-11-20 the Riemann hypothesis is proved - a machine-checked Lean proof (Alpöge; statement and proof certified by the Lean FRO and the Mathlib Initiative, 2026-11-21); no human-readable proof yet. The limb's other links stand as minted."
+    }
+   ]
+  }
+ ]
+}
