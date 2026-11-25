@@ -1128,41 +1128,27 @@
   },
   {
    "id": "card_alm_connection_riemann_hypothesis_open_zeta_facts",
-   "rule": "rh-proved-almanac-cut",
+   "rule": "rh-proved-almanac",
    "date": "2026-11-25",
-   "directive": "Matt: \"Go back to the sticks. and then RH\" - the almanac's Riemann card no longer says the hypothesis is open or unproven.",
+   "directive": "Matt: \"Go back to the sticks. and then RH\"; \"Yes, it's ours\" - the almanac's Riemann card says it is proved, machine-checked, in the WEB.",
+   "minted_by": {
+    "file": "tools/almanac_rh_card.py",
+    "name": "RH_BODY"
+   },
+   "expects": {
+    "author": "engine",
+    "shelf": "almanac"
+   },
    "changes": [
     {
      "path": "title",
-     "old_sha256": "bb6b646c29744b880d93357cfcb3f6c472351f860ebfb145827b9e41fec3a1bb",
-     "spans": [
-      [
-       35,
-       58,
-       ""
-      ],
-      [
-       90,
-       160,
-       ""
-      ]
-     ]
+     "old": "Almanac: The Riemann Hypothesis -- an open question about where the zeta function vanishes, with the established facts sealed and the conjecture marked honestly",
+     "new": "Almanac: The Riemann Hypothesis -- proved by a machine-checked Lean proof (2026), with the zeta facts around it sealed"
     },
     {
      "path": "subject",
-     "old_sha256": "529f950e4a0997096c64562e0023f663b8771af0135d50fe96ab437ecc144345",
-     "spans": [
-      [
-       26,
-       49,
-       ""
-      ],
-      [
-       81,
-       151,
-       ""
-      ]
-     ]
+     "old": "The Riemann Hypothesis -- an open question about where the zeta function vanishes, with the established facts sealed and the conjecture marked honestly",
+     "new": "The Riemann Hypothesis -- proved by a machine-checked Lean proof (2026), with the zeta facts around it sealed"
     },
     {
      "path": "body",
@@ -1170,23 +1156,38 @@
      "spans": [
       [
        625,
-       636,
-       ""
+       672,
+       "statement about this function, proved in 2026 by a machine-checked Lean proof (no human-readable proof yet), that"
       ],
       [
+       855,
        946,
-       999,
-       ""
+       "It pins down the distribution of primes: the prime count differs from Li(x) by at most a constant times sqrt(x) log x (von Koch, 1901)."
       ],
       [
-       1192,
-       1213,
-       ""
+       964,
+       1019,
+       "the proof is machine-checked, not yet one mathematicians can read; the Lean FRO and the Mathlib Initiative certified its statement and proof on 2026-11-21. The hypothesis had been checked"
       ],
       [
+       1088,
+       1214,
+       "it is one of the Clay Millennium Prize problems, the prize not awarded (its rules ask for publication and two years) -- numerical agreement was evidence, not proof."
+      ],
+      [
+       1282,
        1308,
+       "NOT the Hypothesis itself: the engine cites its proof (Alpöge, 2026) and did not re-run it."
+      ],
+      [
+       1309,
        1366,
-       ""
+       "We map what is proven, and say how it was proven."
+      ],
+      [
+       1492,
+       1645,
+       "'For now we see in a mirror, dimly, but then face to face. Now I know in part, but then I will know fully, even as I was also fully known' (1 Corinthians 13:12)."
       ]
      ]
     }

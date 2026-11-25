@@ -21,8 +21,9 @@ code, reviewed and versioned, and is applied to the in-memory card on every load
   4. (2026-11-25) "Go back to the sticks. and then RH." The Riemann hypothesis is proved - a machine-checked Lean
      proof (Alpoge, 2026-11-20; statement and proof certified by the Lean FRO and the Mathlib Initiative); no
      human-readable proof yet. The almanac's Riemann card said it was "still-OPEN", "UNPROVEN" and that "no proof
-     exists". Its text came from box data (data/almanac/resealed.jsonl), not a tracked tool, so it cannot be
-     proven ours: the row only CUTS those claims (title, subject, body) and adds no words.
+     exists". Its text came from box data (data/almanac/resealed.jsonl), so the first row only cut those claims;
+     then Matt: "Yes, it's ours". tools/almanac_rh_card.py now holds the card's text (the row's minted_by), and
+     the card says it is proved, machine-checked, and quotes 1 Corinthians 13:12 in the WEB.
 
 NO PROSE OF HIS IN THE REPO. A body change never stores his text: it names the sha256 of the body it expects and
 the character spans to cut from that exact body, `spans: [[start, end, replacement], ...]`, where a replacement is

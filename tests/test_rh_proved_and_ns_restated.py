@@ -7,10 +7,11 @@ stick's rounds 2 and 7 said Necas-Ruzicka-Sverak and Tsai leave only a Type-II s
 self-similar profile only), and rounds 3 and 7 read Tao (2019) backwards (his bound on the blow-up rate is from
 below). A minted mark cannot be edited and an unsealed one cannot be retracted, so the corrections are new marks
 minted beside them (data/sticks/riemann_proved.json, data/sticks/navier_stokes_restated.json); the cards are
-corrected in their tracked seeds and, for the almanac card whose text is not ours to prove, by a cut-only row.
+corrected in their tracked seeds, and the almanac card by a card_corrections row (Matt: "Yes, it's ours"; its
+text is held in tools/almanac_rh_card.py).
 
-These pin the precision rule (the qualifier travels inside the text a label keeps), that the almanac row only cuts,
-and that nothing these files now say calls RH open.
+These pin the precision rule (the qualifier travels inside the text a label keeps), the almanac row's provenance
+and result, and that nothing these files now say calls RH open.
 """
 from __future__ import annotations
 
@@ -26,6 +27,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 from concordance import card_corrections as C  # noqa: E402
 from concordance import tickstick as TS  # noqa: E402
 import seed_millennium_chain as M  # noqa: E402
+import almanac_rh_card as A  # noqa: E402
 
 # the old words a restated note quotes, inside quotation marks, so a reader sees what it restates
 QUOTED_OLD = ("while the hypothesis itself stays open", "the Riemann hypothesis remains open",
@@ -85,18 +87,39 @@ def test_the_millennium_seed_no_longer_calls_rh_open():
     assert "seven open questions" not in floor["title"] and "Poincare (Perelman 2002-2003)" in floor["body"]
 
 
-def test_the_almanac_row_only_cuts_and_stores_no_text_of_the_card():
-    rows = [r for r in C.table() if r["rule"] == "rh-proved-almanac-cut"]
-    assert len(rows) == 1 and rows[0]["id"] == "card_alm_connection_riemann_hypothesis_open_zeta_facts"
-    row = rows[0]
-    assert "minted_by" not in row and [c["path"] for c in row["changes"]] == ["title", "subject", "body"]
-    for ch in row["changes"]:
-        assert "new" not in ch and "old" not in ch and len(ch["old_sha256"]) == 64
-        assert ch["spans"] and all(rep == "" and 0 <= s < e for s, e, rep in ch["spans"])
+def _almanac_row():
+    rows = [r for r in C.table() if r["id"] == "card_alm_connection_riemann_hypothesis_open_zeta_facts"]
+    assert len(rows) == 1 and rows[0]["rule"] == "rh-proved-almanac"
+    return rows[0]
+
+
+def test_the_almanac_row_is_keyed_to_the_text_held_as_ours():
+    row = _almanac_row()
+    assert row["minted_by"] == {"file": "tools/almanac_rh_card.py", "name": "RH_BODY"}
+    title, subject, body = row["changes"]
+    assert (title["path"], subject["path"], body["path"]) == ("title", "subject", "body")
+    assert title["old"] == A.RH_TITLE and subject["old"] == A.RH_SUBJECT
+    assert body["old_sha256"] == C._sha(A.RH_BODY)                      # the held text IS the body the row expects
+    assert all(len(rep) < 200 and 0 <= s < e for s, e, rep in body["spans"])
+
+
+def test_the_corrected_almanac_card_says_proved_with_its_qualifier_and_quotes_the_web():
+    card = {"id": _almanac_row()["id"], "author": "engine", "shelf": "almanac",
+            "title": A.RH_TITLE, "subject": A.RH_SUBJECT, "body": A.RH_BODY}
+    assert C.apply_one(card, [_almanac_row()]) == "applied"
+    assert "machine-checked Lean proof" in card["title"][:90]
+    b = card["body"]
+    assert "proved in 2026 by a machine-checked Lean proof (no human-readable proof yet)" in b
+    assert "For now we see in a mirror, dimly" in b and "through a glass" not in b
+    for gone in ("still-OPEN", "UNPROVEN", "no proof exists", "open question as open"):
+        assert gone not in b, gone
+    assert not RH_OPEN.search(card["title"] + " " + b)
+    assert b.endswith(A.RH_BODY[A.RH_BODY.index("VERDICT"):])          # the verdict and the closing line stand
 
 
 def test_the_almanac_row_leaves_a_card_that_moved_on_exactly_as_it_is():
-    row = [r for r in C.table() if r["rule"] == "rh-proved-almanac-cut"][0]
-    card = {"id": row["id"], "title": "x", "subject": "y", "body": "z"}
-    assert C.apply_one(card, [row]) == "mismatch"
-    assert card == {"id": row["id"], "title": "x", "subject": "y", "body": "z"}
+    row = _almanac_row()
+    card = {"id": row["id"], "author": "engine", "shelf": "almanac", "title": A.RH_TITLE, "subject": A.RH_SUBJECT,
+            "body": A.RH_BODY + " "}
+    before = dict(card)
+    assert C.apply_one(card, [row]) == "mismatch" and card == before
