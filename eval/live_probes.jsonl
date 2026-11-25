@@ -258,3 +258,4 @@
 {"id": "status.birch.and.swinnerton.dyer.reads.open", "path": "/status", "query": {"q": "the Birch and Swinnerton-Dyer conjecture"}, "expect": [{"at": "found", "eq": true}, {"at": "stick", "eq": "stick_birch_and_swinnerton_dyer_conjecture"}, {"at": "status", "eq": "OPEN"}]}
 {"id": "sticks.every.sealed.mark.present.unaltered.and.holds", "path": "/sticks/recheck", "expect": [{"at": "ok", "eq": true}, {"at": "failing", "eq": 0}, {"at": "integrity.MATCHES", "exists": true}]}
 {"id": "sticks.graph.one.piece.and.no.stick.alone", "path": "/sticks/graph", "expect": [{"at": "counts.components", "eq": 1}, {"at": "counts.unlinked", "eq": 0}, {"at": "counts.dead", "eq": 0}]}
+{"id": "sticks.graph.every.form.membership.proved.on.the.ledger", "path": "/sticks/graph", "expect": [{"at": "counts.forms", "eq": 13}, {"at": "counts.unverified_forms", "eq": 0}, {"at": "counts.components", "eq": 1}]}

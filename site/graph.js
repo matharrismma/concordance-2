@@ -12,12 +12,16 @@
   // Shelf hues — legible on both the light card pages and the dark map.
   var SHELF = {
     codex: "#c9a24a", classics: "#9b7bc0", dictionary: "#4f93c0", patristics: "#ce7f4f",
-    hymns: "#5fb089", recipes: "#b89152", maker: "#c56aa0", animation: "#8fae52", atlas: "#4fb0a8"
+    hymns: "#5fb089", recipes: "#b89152", maker: "#c56aa0", animation: "#8fae52", atlas: "#4fb0a8",
+    // the stick map's own nodes (2026-11-25): a form recurring on many planes, a work on a chain
+    form: "#e07b9a", chain: "#6fa8dc"
   };
   var REL = { references: "#c9a24a", cites: "#c9a24a", proof_text: "#5fb089", see_also: "#8592a4", parallels: "#9b7bc0", illuminates: "#cf9f5a",
     // the planes (transparencies): nesting = the Floor's gold, found links = green,
     // crossings = bright brass — the vias, where the layers register
-    nested: "#c9a24a", found: "#5fb089", crossing: "#eed69b" };
+    nested: "#c9a24a", found: "#5fb089", crossing: "#eed69b",
+    // the stick map (2026-11-25): the same form on different planes, the lineage down a chain, a topic-only link (faint)
+    form: "#e07b9a", chain: "#6fa8dc", topic: "#3e4552" };
   function shelfColor(s) { return SHELF[s] || "#8a93a3"; }
   function relColor(k) { return REL[k] || "#8592a4"; }
 

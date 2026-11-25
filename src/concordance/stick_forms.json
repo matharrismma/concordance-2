@@ -1,0 +1,444 @@
+{
+ "about": "THE SAME FORM ON DIFFERENT PLANES (Matt, 2026-11-25: 'systems are fractals on planes. Different planes will have the same fractal.'). Each form is an equation or structure; each member is a stick whose OWN sealed or cited mark carries it, and `evidence` is a verbatim piece of that mark. stick_graph checks every piece against the ledger and drops a membership it cannot find. Notes never count as evidence.",
+ "forms": [
+  {
+   "id": "log_ratio",
+   "title": "A ratio read as its logarithm",
+   "law": "level = k log(ratio): stops, decibels, cents, pH, bits",
+   "members": [
+    {
+     "stick": "stick_photography_exposure_reciprocity_angle_of_view_hyperfocal",
+     "evidence": "EV = log2(64 x 250)"
+    },
+    {
+     "stick": "stick_fiber_optic_calibration",
+     "evidence": "3.0102999566 dB"
+    },
+    {
+     "stick": "stick_harmonics_chords_are_different_shapes_of_the_same_note_a_rol",
+     "evidence": "1200 log2(5/4) = 386.3 cents"
+    },
+    {
+     "stick": "stick_the_symphony",
+     "evidence": "1.955 cents flat"
+    },
+    {
+     "stick": "stick_the_vacuum_triode_a_small_voltage_at_the_grid_governs_a_larg",
+     "evidence": "20 log10(20) = 26.0 dB"
+    },
+    {
+     "stick": "stick_a_superheterodyne_receiver_the_engine_as_a_transceiver_every",
+     "evidence": "18.75 dB (sealed)"
+    },
+    {
+     "stick": "stick_chemistry_reactions_and_solutions_verified_and_sealed",
+     "evidence": "the logarithm of the hydrogen-ion"
+    },
+    {
+     "stick": "stick_cybersecurity_entropy_tls_cvss_subnets_and_ports_sealed",
+     "evidence": "16 log2(94) = 104.87 bits"
+    },
+    {
+     "stick": "stick_p_versus_np",
+     "evidence": "The length of the input is the logarithm of the number"
+    },
+    {
+     "stick": "stick_acoustics_waves_loudness_and_harmonics",
+     "evidence": "measured in decibels, a logarithm"
+    },
+    {
+     "stick": "stick_fractals_as_maps_and_sorting_algorithms_the_same_shape_at_ev",
+     "evidence": "log2(1024!)"
+    }
+   ]
+  },
+  {
+   "id": "bounded_modes",
+   "title": "A bounded thing rings at its modes",
+   "law": "a cavity, a string, a lattice or a circuit resonates where its size or stiffness sets it",
+   "members": [
+    {
+     "stick": "stick_a_superheterodyne_receiver_the_engine_as_a_transceiver_every",
+     "evidence": "100 uH resonates at 1 MHz"
+    },
+    {
+     "stick": "stick_consciousness_as_a_receiver_the_crystal_radio",
+     "evidence": "an inductor and a capacitor resona"
+    },
+    {
+     "stick": "stick_resonators_helmholtz_the_cavity_fabry_perot_one_shape_modes_",
+     "evidence": "The lowest mode of a rectangular cavity"
+    },
+    {
+     "stick": "stick_photonics_guided_resonant_active_and_nonlinear_light_sealed",
+     "evidence": "FSR = c / (n_g L)"
+    },
+    {
+     "stick": "stick_the_schumann_resonance_the_earth_ionosphere_cavity_s_fundame",
+     "evidence": "perfect spherical cavity, the lowest standing"
+    },
+    {
+     "stick": "stick_condensed_matter_the_solid_state_through_alpha_sealed",
+     "evidence": "vibrates at omega = 2 sqrt(K/m)"
+    },
+    {
+     "stick": "stick_the_quantum_harmonic_oscillator_zero_point_and_the_ladder",
+     "evidence": "the spacing is always exactly hbar omega"
+    },
+    {
+     "stick": "stick_harmonics_chords_are_different_shapes_of_the_same_note_a_rol",
+     "evidence": "A string at 110 Hz also sounds 220, 330"
+    },
+    {
+     "stick": "stick_acoustics_waves_loudness_and_harmonics",
+     "evidence": "rings at integer multiples, the harmonic series"
+    }
+   ]
+  },
+  {
+   "id": "exponential",
+   "title": "Change in proportion to amount",
+   "law": "dN/dt = -N/tau or +rN: decay and growth by a fixed factor per step",
+   "members": [
+    {
+     "stick": "stick_archaeology_the_decay_clock_dated_and_sealed",
+     "evidence": "t = -(5730/ln 2) ln(0.5) = 5730"
+    },
+    {
+     "stick": "stick_earth_science_the_planet_read_in_deep_time",
+     "evidence": "after two half-lives a quarter remains"
+    },
+    {
+     "stick": "stick_education_how_a_mind_learns_and_is_taught",
+     "evidence": "retention falls as e^(-t/S)"
+    },
+    {
+     "stick": "stick_laplace_differential_equations_and_where_entropy_fits",
+     "evidence": "A dissipative mode decays as e^(-sigma t)"
+    },
+    {
+     "stick": "stick_navier_stokes_existence_and_smoothness",
+     "evidence": "its energy decays as e^(-4 nu t)"
+    },
+    {
+     "stick": "stick_markov_chains_and_mcmc",
+     "evidence": "0.4^10 = 1.05e-4"
+    },
+    {
+     "stick": "stick_e_the_number_of_continuous_growth",
+     "evidence": "e = lim (1 + 1/n)^n, continuous growth"
+    },
+    {
+     "stick": "stick_economics_the_finance_arithmetic_verified_and_sealed",
+     "evidence": "A = P(1 + r/n)^(nt)"
+    },
+    {
+     "stick": "stick_nuclear_physics_binding_decay_and_the_strong_force",
+     "evidence": "An unstable nucleus decays by a fixed half-life"
+    }
+   ]
+  },
+  {
+   "id": "eigen",
+   "title": "Split into the directions a map only stretches",
+   "law": "A v = lambda v: eigenvalues and the basis that diagonalizes",
+   "members": [
+    {
+     "stick": "stick_every_matrix_is_a_rotation_and_a_stretch_the_singular_value_",
+     "evidence": "its eigenvalues are 45 and 5"
+    },
+    {
+     "stick": "stick_hermitian_operators_real_eigenvalues_the_observables",
+     "evidence": "A Hermitian operator has REAL eigenvalues"
+    },
+    {
+     "stick": "stick_the_hilbert_polya_conjecture",
+     "evidence": "has eigenvalues solving lambda^2 - 4 lambda + 3 = 0"
+    },
+    {
+     "stick": "stick_fibonacci",
+     "evidence": "phi solves x^2 = x + 1, the characteristic equat"
+    },
+    {
+     "stick": "stick_finite_field_the_weil_riemann_hypothesis",
+     "evidence": "Frobenius eigenvalue alpha = 3 + 4i"
+    },
+    {
+     "stick": "stick_quantum_gravity",
+     "evidence": "The area operator has eigenvalues"
+    },
+    {
+     "stick": "stick_tensors_how_the_data_is_arranged_inside_the_bubbles_componen",
+     "evidence": "fix both eigenvalues"
+    },
+    {
+     "stick": "stick_am_and_fm_with_diagonalization_a_message_rides_a_carrier_and",
+     "evidence": "the frame where a matrix is only its numbers"
+    },
+    {
+     "stick": "stick_change_of_domain_solve_in_the_eigenbasis_map_back",
+     "evidence": "[Fibonacci by the eigenbasis]"
+    },
+    {
+     "stick": "stick_markov_chains_and_mcmc",
+     "evidence": "The chain's second eigenvalue is 1 - a - b = 0.4"
+    },
+    {
+     "stick": "stick_linear_algebra_vectors_and_matrices_computed_and_sealed",
+     "evidence": "equals the sum of the eigenvalues"
+    }
+   ]
+  },
+  {
+   "id": "superposition",
+   "title": "A whole as a sum of waves",
+   "law": "superposition and Fourier: every component at once, added",
+   "members": [
+    {
+     "stick": "stick_dirichlet_s_theorem_think_of_polar_coordinates",
+     "evidence": "It is a Fourier transform on the group"
+    },
+    {
+     "stick": "stick_am_and_fm_with_diagonalization_a_message_rides_a_carrier_and",
+     "evidence": "The product of two cosines is a sum of two"
+    },
+    {
+     "stick": "stick_harmonics_chords_are_different_shapes_of_the_same_note_a_rol",
+     "evidence": "the amplitude vector over the series"
+    },
+    {
+     "stick": "stick_a_torus_and_the_waveforms_inside_the_prime_numbers_the_zeros",
+     "evidence": "one wave per zero"
+    },
+    {
+     "stick": "stick_change_of_domain_solve_in_the_eigenbasis_map_back",
+     "evidence": "[the Fourier flip]"
+    },
+    {
+     "stick": "stick_using_imaginary_numbers_c_completes_r_lift_and_return",
+     "evidence": "the Laplace and Fourier transforms"
+    },
+    {
+     "stick": "stick_joined_bubbles_every_domain_a_sphere_in_a_form_clustered_by_",
+     "evidence": "[superposition - a sphere in two places at once]"
+    },
+    {
+     "stick": "stick_quantum_computing_qubits_and_superposition",
+     "evidence": "A qubit is a superposition of 0 and 1"
+    },
+    {
+     "stick": "stick_the_double_slit_experiment",
+     "evidence": "Interference - the mark of a wave"
+    }
+   ]
+  },
+  {
+   "id": "inverse_square",
+   "title": "A conserved flux spread over a sphere",
+   "law": "strength ~ 1/r^2, because a sphere's area is 4 pi r^2",
+   "members": [
+    {
+     "stick": "stick_electromagnetism_and_geometry",
+     "evidence": "[the inverse square IS the sphere]"
+    },
+    {
+     "stick": "stick_astronomy_orbits_and_distances_verified_and_sealed",
+     "evidence": "F = G m1 m2 / r^2"
+    },
+    {
+     "stick": "stick_is_gravity_a_force_geometry_decided_by_the_light_that_bends",
+     "evidence": "g = G M / R^2"
+    },
+    {
+     "stick": "stick_gradients_and_line_integrals_over_vector_fields_from_maxwell",
+     "evidence": "E = 1/r^2 (k q = 1)"
+    }
+   ]
+  },
+  {
+   "id": "extremum",
+   "title": "The path taken makes a quantity stationary",
+   "law": "least action, least time, the constrained optimum",
+   "members": [
+    {
+     "stick": "stick_the_principle_of_least_action",
+     "evidence": "[least action - the straight path wins]"
+    },
+    {
+     "stick": "stick_the_path_continuously_finding_new_paths_between_two_points_t",
+     "evidence": "Bernoulli's brachistochrone, 1696"
+    },
+    {
+     "stick": "stick_the_lagrangian_the_hamiltonian_s_dual_and_the_path",
+     "evidence": "Fermat's least-time principle"
+    },
+    {
+     "stick": "stick_gradients_and_line_integrals_over_vector_fields_from_maxwell",
+     "evidence": "the path actually taken makes S stationary"
+    },
+    {
+     "stick": "stick_one_path_many_entries_a_self_healing_matrix_not_many_paths",
+     "evidence": "the one path of stationary action"
+    },
+    {
+     "stick": "stick_lagrange_multipliers",
+     "evidence": "the constrained optimum is a real extremum"
+    },
+    {
+     "stick": "stick_logistics_the_optimization_core_verified_and_sealed",
+     "evidence": "[the knapsack optimum]"
+    }
+   ]
+  },
+  {
+   "id": "conservation",
+   "title": "A symmetry keeps a quantity",
+   "law": "Noether: what does not change under a shift is conserved",
+   "members": [
+    {
+     "stick": "stick_noether_s_theorem_every_symmetry_a_conservation_law",
+     "evidence": "Noether forces momentum to be conserved"
+    },
+    {
+     "stick": "stick_thermodynamics_the_arrow_and_the_one_end",
+     "evidence": "by the first law"
+    },
+    {
+     "stick": "stick_where_two_domains_connect_geometry_to_algebra_algebra_to_qua",
+     "evidence": "momentum and energy conserved as for two billiard balls"
+    }
+   ]
+  },
+  {
+   "id": "diagonal",
+   "title": "A system turned on itself",
+   "law": "the diagonal: Godel's sentence, Turing's halting, the hierarchy theorem",
+   "members": [
+    {
+     "stick": "stick_godel_s_incompleteness_theorems",
+     "evidence": "self-reference (the diagonal lemma)"
+    },
+    {
+     "stick": "stick_p_versus_np",
+     "evidence": "The theorem works by diagonalization"
+    },
+    {
+     "stick": "stick_computer_science_bits_logic_and_what_can_be_computed",
+     "evidence": "knowing it would decide the halting problem"
+    }
+   ]
+  },
+  {
+   "id": "scale_free",
+   "title": "The same law at every scale",
+   "law": "a power law: one exponent ties size to count",
+   "members": [
+    {
+     "stick": "stick_navier_stokes_existence_and_smoothness",
+     "evidence": "eta = (nu^3 / epsilon)^(1/4)"
+    },
+    {
+     "stick": "stick_navier_stokes_dissonance_and_dispersion",
+     "evidence": "scales as lambda^(d-2)"
+    },
+    {
+     "stick": "stick_most_linguistics_are_math_outside_a_set_vocabulary_list",
+     "evidence": "Word frequencies follow a power law"
+    },
+    {
+     "stick": "stick_fractals_as_maps_and_sorting_algorithms_the_same_shape_at_ev",
+     "evidence": "A fractal's dimension is the exponent"
+    },
+    {
+     "stick": "stick_sports_analytics_pythagorean_expectation_elo_games_behind",
+     "evidence": "W = 750^2 / (750^2 + 600^2)"
+    }
+   ]
+  },
+  {
+   "id": "normal_law",
+   "title": "The bell curve",
+   "law": "the normal law: mean, sigma, and its area sqrt(pi)",
+   "members": [
+    {
+     "stick": "stick_statistics_the_normal_law_and_the_method_of_science",
+     "evidence": "the standard deviation is sqrt"
+    },
+    {
+     "stick": "stick_manufacturing_sigma_control_limits_capability_stack_up",
+     "evidence": "the six-sigma level"
+    },
+    {
+     "stick": "stick_pi_the_constant_of_the_circle_is_the_constant_of_rotation",
+     "evidence": "The bell curve's area is pi's square root"
+    },
+    {
+     "stick": "stick_higher_dimensional_spheres_and_the_gamma_function",
+     "evidence": "the half-integer, the Gaussian"
+    },
+    {
+     "stick": "stick_the_dot_abstracted_dirac_s_delta_the_inner_product_and_the_w",
+     "evidence": "A Gaussian of width sigma = 1/100"
+    }
+   ]
+  },
+  {
+   "id": "effort_flow",
+   "title": "An effort drives a flow",
+   "law": "pressure drives fluid, voltage drives current, E drives H: flow = effort / impedance",
+   "members": [
+    {
+     "stick": "stick_navier_stokes_existence_and_smoothness",
+     "evidence": "under pressure gradient G"
+    },
+    {
+     "stick": "stick_a_superheterodyne_receiver_the_engine_as_a_transceiver_every",
+     "evidence": "I = K V^{3/2}"
+    },
+    {
+     "stick": "stick_the_vacuum_triode_a_small_voltage_at_the_grid_governs_a_larg",
+     "evidence": "The grid's small voltage sets how much current reaches the plate"
+    },
+    {
+     "stick": "stick_electromagnetism_and_geometry",
+     "evidence": "the fixed ratio of E to H in every plane wave"
+    }
+   ]
+  },
+  {
+   "id": "unit_circle",
+   "title": "Turning on the circle",
+   "law": "modulus one: e^(i theta), roots of unity, reflection on |Gamma| = 1",
+   "members": [
+    {
+     "stick": "stick_dirichlet_s_theorem_think_of_polar_coordinates",
+     "evidence": "A Dirichlet character maps each residue to a root of unity"
+    },
+    {
+     "stick": "stick_finite_field_the_weil_riemann_hypothesis",
+     "evidence": "|alpha| = sqrt(25) = 5 = sqrt(q) EXACTLY"
+    },
+    {
+     "stick": "stick_the_smith_chart_the_cayley_transform",
+     "evidence": "on the unit circle, total reflection"
+    },
+    {
+     "stick": "stick_trigonometry_an_approximation_but_not_complete",
+     "evidence": "(1/2)^2 = 1.0 (sealed) - the unit circle"
+    },
+    {
+     "stick": "stick_fibonacci",
+     "evidence": "the fifth roots of unity"
+    },
+    {
+     "stick": "stick_using_imaginary_numbers_c_completes_r_lift_and_return",
+     "evidence": "e^(i theta) turns trigonometry into algebra"
+    },
+    {
+     "stick": "stick_pi_the_constant_of_the_circle_is_the_constant_of_rotation",
+     "evidence": "anywhere a rotation or a sum over all directions hides"
+    }
+   ]
+  }
+ ]
+}

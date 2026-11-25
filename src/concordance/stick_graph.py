@@ -11,7 +11,16 @@ The graph reads every connection the keeping already RECORDS for a stick, and in
   nested    - a stick belongs to a floor: the node its chart charts, walked up the chain map; or a floor card it names;
               or the floor its own `field` names. Every floor is part of the one Floor of Discovery.
 
-FLOORS AND JOINTS ARE NODES, never cliques: three sticks under one floor are three lines to that floor, not three lines
+  form      - the SAME FORM on different planes (Matt, 2026-11-25: "systems are fractals on planes. Different planes
+              will have the same fractal."): a stick belongs to a form hub (stick_forms.json) only when a verbatim piece
+              of its own SEALED or CITED mark carries that form - checked here against the ledger, never against a note.
+  chain     - DOWN CHAIN: the lineage the chain map records (a work builds on a work), drawn as itself; a stick joins it
+              at a work its own card builds on or cites, or that its own cited text names (author and year), and the
+              lineage is walked back to its root, which sits under its floor.
+  topic     - a found link that shares only a topic (stick_link_kinds.json, the audit of 2026-11-25): kept, drawn faint,
+              never counted as a cross-link.
+
+FLOORS, JOINTS AND FORMS ARE NODES, never cliques: three sticks under one floor are three lines to that floor, not three lines
 between each other, so a shared floor never reads as a found link and the shape stays the shape the keeping holds.
 Whatever no recorded connection reaches stays ALONE and is counted - a missing link is reported, never filled in.
 
@@ -31,6 +40,7 @@ ROOT_FLOOR = "card_k_floor_of_discovery"
 _STICK = re.compile(r"\bstick_[a-z0-9_]{3,}")
 _CARD = re.compile(r"\bcard_[a-z0-9_]{3,}")
 _NESTING = ("part_of", "open_end_of", "builds_on", "member_of", "enables")
+_NOT_LINEAGE = ("card_floor_", "card_joint_", "card_question_", "card_chart_", "card_spine_")
 _FIELD_HUE = {"mathematics": "dictionary", "number_theory": "hymns", "physics": "atlas", "meta": "classics",
               "engineering": "maker", "computer_science": "recipes", "linguistics": "patristics"}
 _CHAIN: Dict[str, Any] = {"key": None, "cards": {}, "out": {}}
@@ -76,6 +86,37 @@ def _chain(data_dir=None) -> Tuple[Dict[str, dict], Dict[str, List[Tuple[str, st
                 add(b.get("a"), b.get("b"), b.get("relationship"))
     _CHAIN.update({"key": key, "cards": cards, "out": out})
     return cards, out
+
+
+_TABLES: Dict[str, Any] = {"key": None, "forms": [], "topic": set()}
+_EVIDENCE = TS.SEALED_KINDS + TS.CITED_KINDS
+_HERE = Path(__file__).resolve().parent
+
+
+def _tables() -> Tuple[List[dict], Set[frozenset]]:
+    """stick_forms.json and stick_link_kinds.json beside this file, re-read when either changes."""
+    files = (_HERE / "stick_forms.json", _HERE / "stick_link_kinds.json")
+    key = tuple(f.stat().st_mtime_ns if f.exists() else None for f in files)
+    if _TABLES["key"] != key:
+        forms, topic = [], set()
+        try:
+            forms = (json.loads(files[0].read_text(encoding="utf-8")) or {}).get("forms") or []
+        except (OSError, ValueError):
+            forms = []
+        try:
+            for pr in (json.loads(files[1].read_text(encoding="utf-8")) or {}).get("topic") or []:
+                topic.add(frozenset((pr.get("a"), pr.get("b"))))
+        except (OSError, ValueError):
+            topic = set()
+        _TABLES.update({"key": key, "forms": forms, "topic": topic})
+    return _TABLES["forms"], _TABLES["topic"]
+
+
+def _cited_text(st: Dict[str, Any]) -> str:
+    """What a stick CITES: its references, its marks' sources, and every mark that is not a note."""
+    return " ".join([str(r) for r in st.get("references") or []] +
+                    [str(t.get("source") or "") + " " + (str(t.get("claim") or "") if t.get("kind") != "note" else "")
+                     for t in st.get("ticks") or []])
 
 
 def _text(st: Dict[str, Any]) -> str:
@@ -190,7 +231,63 @@ def graph(data_dir=None) -> Dict[str, Any]:
         f = "card_floor_" + str(st.get("field") or "")
         if sid not in nested and f in floors:
             link(sid, f, "nested", "field")
-    used_floors = {e["target"] for e in edges.values() if e["kind"] == "nested"}
+    # 5. DOWN CHAIN - the lineage the chain map records, drawn as itself
+    lineage = set()
+    for a, outs in out.items():
+        for b, rel in outs:
+            if rel == "builds_on":
+                lineage.update((a, b))
+    lineage = {c for c in lineage if c and not c.startswith(_NOT_LINEAGE)}
+    works: Dict[str, Tuple[str, str]] = {}
+    for c in lineage:
+        m = re.match(r"^(?:[A-Z]\.\s*)*([A-Z][A-Za-z\-' ]{1,40}?)\s+(\d{4})\b", str((cards.get(c) or {}).get("title") or ""))
+        if m:
+            works[c] = (m.group(1).split()[-1].split("-")[0], m.group(2))
+    attach: Dict[str, Set[str]] = {}
+    for cid, sid in stands.items():
+        for b, rel in out.get(cid, []):
+            if rel in ("builds_on", "cites") and b in lineage:
+                attach.setdefault(sid, set()).add(b)
+    for sid, st in sticks.items():
+        text = _cited_text(st)
+        for c, (sur, yr) in works.items():
+            if sur in text and yr in text and re.search(rf"\b{re.escape(sur)}\b[^.;]{{0,40}}\b{yr}\b", text):
+                attach.setdefault(sid, set()).add(c)
+    chain_nodes: Set[str] = set()
+    for sid in sorted(attach):
+        for c in sorted(attach[sid]):
+            link(sid, c, "chain", "cites")
+            stack = [c]
+            while stack:
+                x = stack.pop()
+                if x in chain_nodes:
+                    continue
+                chain_nodes.add(x)
+                for b, rel in out.get(x, []):
+                    if rel == "builds_on" and b in lineage:
+                        link(x, b, "chain", "builds_on")
+                        stack.append(b)
+                    elif rel in ("part_of", "open_end_of", "member_of") and b in floors:
+                        link(x, b, "nested", rel)
+    # 6. THE SAME FORM ON DIFFERENT PLANES - each membership proved by the stick's own sealed or cited mark
+    forms, topic = _tables()
+    form_meta: Dict[str, dict] = {}
+    unverified = []
+    for f in forms:
+        fid = "form:" + str(f.get("id"))
+        for m in f.get("members") or []:
+            ms, ev = m.get("stick"), str(m.get("evidence") or "")
+            mst = sticks.get(ms)
+            if mst and ev and any(ev in str(t.get("claim") or "") for t in mst.get("ticks") or [] if t.get("kind") in _EVIDENCE):
+                link(ms, fid, "form", ev[:80])
+                form_meta[fid] = f
+            else:
+                unverified.append({"form": f.get("id"), "stick": ms})
+    # 7. A found link that shares only a topic is kept, drawn faint, and never counted as a cross-link
+    for e in edges.values():
+        if e["kind"] == "found" and frozenset((e["source"], e["target"])) in topic:
+            e["kind"] = "topic"
+    used_floors = {e["target"] for e in edges.values() if e["kind"] == "nested" and e["target"] in floors}
     for f in sorted(used_floors):                              # every floor is part of the one Floor of Discovery
         link(f, ROOT_FLOOR, "nested", "part_of")
 
@@ -206,6 +303,17 @@ def graph(data_dir=None) -> Dict[str, Any]:
             nodes.append({"id": nid, "kind": "stick", "title": st.get("question") or nid, "closed": closed,
                           "shelf": "codex" if closed else _FIELD_HUE.get(str(st.get("field") or ""), "other"),
                           "degree": degree[nid]})
+        elif nid in form_meta:
+            f = form_meta[nid]
+            planes = set()                                      # a member's plane: its floor, else its own field
+            for ms in {m.get("stick") for m in f.get("members") or []}:
+                fl = {e["target"] for e in edges.values() if e["kind"] == "nested" and e["source"] == ms and e["target"] in floors}
+                planes |= fl or {"field:" + str((sticks.get(ms) or {}).get("field") or ms)}
+            nodes.append({"id": nid, "kind": "form", "title": f.get("title") or nid, "law": f.get("law"),
+                          "planes": len(planes), "shelf": "form", "degree": degree[nid] * 2})
+        elif nid in chain_nodes:
+            nodes.append({"id": nid, "kind": "chain", "title": (cards.get(nid) or {}).get("title") or nid,
+                          "shelf": "chain", "degree": degree[nid]})
         elif nid == ROOT_FLOOR:
             nodes.append({"id": nid, "kind": "root", "title": "The Floor of Discovery", "shelf": "patristics",
                           "degree": degree[nid] * 2})
@@ -216,7 +324,8 @@ def graph(data_dir=None) -> Dict[str, Any]:
                           "shelf": "animation" if kind == "joint" else "patristics", "degree": degree[nid]})
     links = list(edges.values())
     stick_nodes = {n["id"] for n in nodes if n["kind"] == "stick"}
-    cross = {e["source"] for e in links if e["kind"] != "nested"} | {e["target"] for e in links if e["kind"] != "nested"}
+    real = [e for e in links if e["kind"] not in ("nested", "topic")]
+    cross = {e["source"] for e in real} | {e["target"] for e in real}
     adj: Dict[str, Set[str]] = {}
     for e in links:
         adj.setdefault(e["source"], set()).add(e["target"])
@@ -243,7 +352,10 @@ def graph(data_dir=None) -> Dict[str, Any]:
         "counts": {"sticks": len(sticks), "linked": len(stick_nodes), "unlinked": len(sticks) - len(stick_nodes),
                    "only_nested": len(stick_nodes - cross), "floors": sum(1 for n in nodes if n["kind"] == "floor"),
                    "joints": sum(1 for n in nodes if n["kind"] == "joint"), "links": len(links),
-                   "by_kind": kinds, "via_alias": kinds.get("crossing", 0), "dead": len(dead), "components": comps},
+                   "by_kind": kinds, "via_alias": kinds.get("crossing", 0), "dead": len(dead), "components": comps,
+                   "forms": sum(1 for n in nodes if n["kind"] == "form"), "chain_works": len(chain_nodes),
+                   "sticks_on_a_chain": len(attach), "unverified_forms": len(unverified)},
+        "unverified_forms": unverified[:50],
         "note": ("Every line is a connection the keeping records: a stick naming a stick or a card, a card on the chain "
                  "map charting, building on or citing another, a joint two questions meet at, the floor a stick sits "
                  "under. Floors and joints are nodes, never cliques. A stick nothing reaches is listed as alone."),

@@ -1,0 +1,50 @@
+{
+ "about": "Links a stick's own note draws that share only a TOPIC - no form, no lineage, no part - found by the audit of 2026-11-25 (Matt: 'Don't make them artificial'). The notes are minted and stay; the graph draws these as 'topic', faint, so they never pass for the shape.",
+ "topic": [
+  {
+   "a": "stick_godel_s_incompleteness_theorems",
+   "b": "stick_time_and_space_emergent_and_relational",
+   "why": "the same author's work, not the same form"
+  },
+  {
+   "a": "stick_education_how_a_mind_learns_and_is_taught",
+   "b": "stick_the_mind_the_neuron_computation_and_the_hard_problem",
+   "why": "a subject and its setting"
+  },
+  {
+   "a": "stick_law_structural_checks_on_public_domain_us_law_sealed",
+   "b": "stick_formal_logic_boolean_algebra_inference_forms_nand_and_nor",
+   "why": "an analogy: a checklist read as AND"
+  },
+  {
+   "a": "stick_nutrition_the_body_s_fuel_counted",
+   "b": "stick_agriculture_soil_sun_and_chemistry_into_food",
+   "why": "food is grown: a topic"
+  },
+  {
+   "a": "stick_semantic_relations_synonymy_and_the_is_a_hierarchy",
+   "b": "stick_morphology_a_word_is_prefix_root_and_suffix",
+   "why": "layers of one subject"
+  },
+  {
+   "a": "stick_semantic_relations_synonymy_and_the_is_a_hierarchy",
+   "b": "stick_syntax_a_real_parse_tree_or_none",
+   "why": "layers of one subject"
+  },
+  {
+   "a": "stick_transliteration_romanizing_the_original_tongue",
+   "b": "stick_scripture_study_is_the_eigenbasis_round_trip_flip_work_flip_",
+   "why": "a use, not a form"
+  },
+  {
+   "a": "stick_earth_science_the_planet_read_in_deep_time",
+   "b": "stick_geography_the_measured_earth",
+   "why": "one planet, different measures"
+  },
+  {
+   "a": "stick_sorting_algorithms_the_roll_and_the_bound_none_can_beat",
+   "b": "stick_fractals_as_maps_and_sorting_algorithms_the_same_shape_at_ev",
+   "why": "a shared metaphor"
+  }
+ ]
+}

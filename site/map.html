@@ -225,7 +225,7 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
   <!-- WHERE THE STICKS POINT — the stick names each stick carries, drawn as edges (live from /sticks/graph) -->
   <section class="blk" id="sticks">
     <div class="sec-h"><h2>Where the sticks point</h2><span class="n">live from /sticks/graph</span></div>
-    <p style="color:var(--ink-soft); margin:.2rem 0 1rem; max-width:66ch; font-size:.95rem">Each tick stick holds one question and the marks the engine can stand behind. Every line is a connection the keeping records, and none is drawn by likeness: each stick sits under its floor, every floor under the one Floor of Discovery (<span style="color:#ce7f4f">orange</span>, gold lines); a <span style="color:#5fb089">green</span> line is a found link &mdash; a stick names another, or their cards meet on the chain map; an olive node is a joint where two questions meet (<span style="color:#9b7bc0">purple</span> lines); a <span style="color:#eed69b">brass</span> line is an old name read through to the stick it means. A <span style="color:#c9a24a">gold</span> stick is a question closed by a cited proof. Tap any node to open it.</p>
+    <p style="color:var(--ink-soft); margin:.2rem 0 1rem; max-width:66ch; font-size:.95rem">Each tick stick holds one question and the marks the engine can stand behind. Systems are fractals on planes: the same form recurs on different planes, and every line here is a connection the keeping records &mdash; none is drawn by likeness. A <span style="color:#e07b9a">rose</span> node is a FORM (a ratio read as its logarithm, a bounded thing ringing at its modes, change in proportion to amount&hellip;), and a stick joins it only where its own sealed mark carries that form. A <span style="color:#6fa8dc">blue</span> node is a work on a CHAIN, the lineage down from a floor, joined where a stick cites it. Each stick sits under its floor, every floor under the one Floor of Discovery (<span style="color:#ce7f4f">orange</span>, gold lines); <span style="color:#5fb089">green</span> is a found link, <span style="color:#9b7bc0">purple</span> a joint where two questions meet, <span style="color:#eed69b">brass</span> an old name read through; a faint line shares only a topic. A <span style="color:#c9a24a">gold</span> stick is a question closed by a cited proof. Tap any node to open it.</p>
     <div class="constel">
       <canvas id="stickCanvas" aria-label="the tick sticks and the sticks each names"></canvas>
       <div id="stickStatus">Reading the sticks&hellip;</div>
@@ -495,9 +495,17 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
       if(!g||!g.nodes||!g.nodes.length){ st.textContent="No stick names another yet."; return; }
       var v=new window.NHGraph.View(cv,"dark");
       v.onpick=function(n){
+        if(n.kind==="form"){
+          var mem=(window.__stickGraph&&window.__stickGraph.links||[]).filter(function(l){ return l.kind==="form" && l.target===n.id; });
+          var t={}; ((window.__stickGraph&&window.__stickGraph.nodes)||[]).forEach(function(x){ t[x.id]=x.title; });
+          panel.innerHTML='<h3 style="margin:.2rem 0">'+e2(n.title)+'</h3><p style="margin:.2rem 0 .6rem;color:var(--ink-soft)">'+e2(n.law||"")+
+            ' &mdash; the same form on '+(n.planes||0)+' planes.</p>'+mem.map(function(l){ return '<div style="margin:.25rem 0">'+e2(t[l.source]||l.source)+
+            ' <span style="color:var(--ink-soft)">&middot; &ldquo;'+e2(l.via||"")+'&rdquo;</span></div>'; }).join("");
+          return;
+        }
         if(n.kind && n.kind!=="stick"){
           panel.innerHTML='<h3 style="margin:.2rem 0">'+e2(n.title)+'</h3><p style="margin:.2rem 0 .6rem;color:var(--ink-soft)">'+
-            (n.kind==="joint"?"A joint: one established thing two questions meet at.":"A floor: what is proven or observed, with the sticks that sit under it.")+
+            (n.kind==="joint"?"A joint: one established thing two questions meet at.":(n.kind==="chain"?"A work on a chain: the lineage runs down from its floor, each work building on the one before.":"A floor: what is proven or observed, with the sticks that sit under it."))+
             ' <a href="/card/'+encodeURIComponent(n.id)+'" style="color:var(--seal)">Open the card</a></p>';
           return;
         }
@@ -513,12 +521,14 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
           panel.innerHTML=h;
         });
       };
-      var shown=g.links.map(function(l){ return {source:l.source, target:l.target, kind:(l.kind==="joint"?"parallels":(l.kind==="nested"?"nested":l.kind))}; });
+      window.__stickGraph=g;
+      var shown=g.links.map(function(l){ return {source:l.source, target:l.target, kind:(l.kind==="joint"?"parallels":l.kind)}; });
       v.setData(g.nodes, shown, null);
       var c=g.counts||{}, k=c.by_kind||{};
-      st.textContent=(c.linked||0)+" of "+(c.sticks||0)+" sticks, under "+(c.floors||0)+" floors, with "+(c.joints||0)+" joints: "+
-        (c.links||0)+" lines ("+(k.found||0)+" found, "+(k.joint||0)+" at joints, "+(k.crossing||0)+" through an old name, "+(k.nested||0)+" nesting). "+
-        (c.only_nested||0)+" sit under their floor with no cross-link yet"+(c.unlinked?"; "+c.unlinked+" stand alone":"")+
+      st.textContent=(c.linked||0)+" of "+(c.sticks||0)+" sticks, under "+(c.floors||0)+" floors; "+(c.forms||0)+" forms recurring across planes; "+
+        (c.chain_works||0)+" works on the chains ("+(c.sticks_on_a_chain||0)+" sticks join them): "+(c.links||0)+" lines ("+(k.form||0)+" form, "+(k.chain||0)+" chain, "+
+        (k.found||0)+" found, "+(k.joint||0)+" at joints, "+(k.crossing||0)+" through an old name, "+(k.topic||0)+" topic only, "+(k.nested||0)+" nesting). "+
+        (c.only_nested||0)+" with no cross-link yet"+(c.unlinked?"; "+c.unlinked+" stand alone":"")+(c.unverified_forms?"; "+c.unverified_forms+" form memberships not found in the ledger":"")+
         (c.components>1?"; "+c.components+" separate pieces":"")+(c.dead?"; "+c.dead+" name a stick not kept here yet":"")+".";
     }).catch(function(){ st.textContent="The sticks could not be read just now."; });
   }
