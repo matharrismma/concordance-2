@@ -52,6 +52,9 @@ VERIFIERS: Dict[str, str] = {
     "nicolas": _P + "number_theory", "nicolas_criterion": _P + "number_theory",
     # the sight picture: S(T), the signed residual of the zero count, tracked against RH's Selberg envelope
     "count_residual": _P + "number_theory", "s_of_t": _P + "number_theory",
+    # the zeros play the primes: the explicit formula (von Mangoldt 1895) and Landau's formula (1912) read the prime
+    # powers off the stored zeros, checked against the sieve (2026-11-24, Matt: "Music of primes")
+    "explicit_formula": _P + "number_theory", "zeros_to_primes": _P + "number_theory",
     "combinatorics": _P + "combinatorics",
     # the Rational Root Theorem: the complete set of rational roots of an integer-coefficient
     # polynomial, enumerated (p | a_0, q | a_n) and tested exactly (2026-10-12)

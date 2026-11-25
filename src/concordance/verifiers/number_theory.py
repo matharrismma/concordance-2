@@ -1177,9 +1177,204 @@ def verify_count_residual(spec):
                          f"and never walk off, as RH requires. Evidence, not a proof.", data)
 
 
+_EF_MAX_X = 1000                    # a finite door on the work; the clarity rule below is what refuses a verdict
+_EF_TAPER = 2.0                     # the higher zeros fade as exp(-(1/2)(2 gamma/T)^2): a cut-off sum rings (Gibbs)
+_EF_CLEAR_LO = math.log(2) / 3      # |reading| at or below this says "not a prime power"
+_EF_CLEAR_HI = 2 * math.log(2) / 3  # at or above this, "a prime power"; anything else is UNCLEAR, and refused
+
+
+def _ef_lambda(X: int) -> List[float]:
+    """von Mangoldt's Lambda(n) for n <= X by sieve: log p when n = p^k, else 0. The independent route."""
+    lam = [0.0] * (X + 1)
+    s = bytearray([1]) * (X + 1)
+    s[0:2] = b"\x00\x00"
+    for i in range(2, int(math.isqrt(X)) + 1):
+        if s[i]:
+            s[i * i::i] = bytearray(len(range(i * i, X + 1, i)))
+    for q in range(2, X + 1):
+        if s[q]:
+            m = q
+            while m <= X:
+                lam[m] = math.log(q)
+                m *= q
+    return lam
+
+
+def _ef_roots(n: int) -> List[int]:
+    """Every integer b >= 2 with b^k = n for some k >= 1 (n itself is always one)."""
+    out: List[int] = []
+    for k in range(1, n.bit_length() + 1):
+        b = round(n ** (1.0 / k))
+        for c in (b - 1, b, b + 1):
+            if c >= 2 and c ** k == n and c not in out:
+                out.append(c)
+    return out
+
+
+def verify_explicit_formula(spec):
+    """THE ZEROS PLAY THE PRIMES (Riemann stick, 2026-11-24, Matt: "Music of primes"). Riemann's 1859 point: the
+    primes are carried by the zeros of zeta. Each zero 1/2 + i*gamma is a wave in log x; summed, the waves cancel
+    everywhere except at the prime powers. Here the primes <= X are READ from the stored zeros alone
+    (data/zeta_zeros.jsonl, Odlyzko's table) by two transforms, and each reading is checked against the sieve:
+      1. the staircase: the Riemann-von Mangoldt explicit formula (von Mangoldt 1895)
+         psi(x) = x - sum_rho x^rho/rho - log(2 pi) - 1/2 log(1 - x^-2), summed over the stored zeros. The step at n,
+         psi(n + 1/2) - psi(n - 1/2), reads Lambda(n): log p at n = p^k, 0 elsewhere. Its HEIGHT names the prime p
+         (the root b of n with log b nearest the step), so the zeros say which n are prime, not only where.
+      2. the spectrum: Landau's formula (1912), sum_{0<gamma<=T} x^rho = -(T/2 pi) Lambda(x) + O(log T) for fixed x,
+         so with rho = 1/2 + i gamma, -(2 pi sqrt(n)/T) sum cos(gamma log n) reads Lambda(n) too.
+    Both readings must equal the sieve's prime powers (and the staircase their primes) for the claim to hold.
+    THE WINDOW: a sum cut off at the last stored zero rings (the Gibbs effect), so both sums fade the higher zeros by
+    exp(-(1/2)(2 gamma/T)^2), the standard smoothing; the spectrum is normalised by the window's own mass in place of T.
+    FAIL-CLOSED where the zeros cannot hear: the ringing grows with x and with fewer zeros, so a reading is CLEAR only
+    when |r| <= log(2)/3 (not a prime power) or r >= 2 log(2)/3 (a prime power); any other reading at any n <= X
+    means no verdict (lower X, or use more zeros). Measured 2026-11-24: with all 10,000 stored zeros both readings
+    stay clear to n = 356 (the spectrum is the weaker; the staircase alone stays clear past 1,200); unwindowed, 179.
+    HONEST LIMITS: the explicit formula and Landau's formula are theorems that hold whether or not RH is true; the
+    stored zeros are used as 1/2 + i*gamma because these zeros are verified to lie on the line (far beyond this
+    height). So this checks that the stored zeros reproduce the primes. It does NOT bear on RH either way.
+      NUM_VERIFY: {"explicit_formula_to": 100, "claimed_zeros_give_primes": true}
+                  optional "claimed_primes": [2, 3, 5, ...] (the primes <= X the zeros give) and
+                  "explicit_formula_zeros": N (use only the first N stored zeros)"""
+    name = "number_theory.explicit_formula"
+    try:
+        X = int(spec.get("explicit_formula_to"))
+    except (TypeError, ValueError):
+        return error(name, "explicit_formula_to must be an integer (read the primes up to X)")
+    if not (2 <= X <= _EF_MAX_X):
+        return error(name, f"explicit_formula_to {X} out of range: 2 .. {_EF_MAX_X} (with the stored zeros the "
+                           f"readings stay clear only to ~356; the door is finite)")
+    g = _load_zeta_gammas()
+    if not g or len(g) < 10:
+        return na(name, "the explicit formula needs data/zeta_zeros.jsonl (the zeta zeros table)")
+    try:
+        import numpy as np
+    except ImportError:
+        return na(name, "the explicit formula needs numpy")
+    n_use = spec.get("explicit_formula_zeros")
+    if n_use is not None:
+        try:
+            n_use = int(n_use)
+        except (TypeError, ValueError):
+            return error(name, "explicit_formula_zeros must be an integer")
+        if not (10 <= n_use <= len(g)):
+            return error(name, f"explicit_formula_zeros {n_use} out of range: 10 .. {len(g)} (the zeros stored)")
+        g = g[:n_use]
+    gam = np.asarray(g, dtype=float)
+    if not (gam[0] > 14.0 and bool(np.all(np.diff(gam) > 0))):
+        return error(name, "the stored zeros are not an increasing list above 14: the table is damaged; nothing is read")
+    T = float(gam[-1])
+    fade = np.exp(-0.5 * (_EF_TAPER * gam / T) ** 2)
+    mass = T * math.sqrt(math.pi / 2) / _EF_TAPER * math.erf(_EF_TAPER / math.sqrt(2))   # integral of the fade, 0..T
+    w = fade / (0.25 + gam * gam)
+
+    def psi_rebuilt(xs):
+        out = np.empty(len(xs))
+        for i in range(0, len(xs), 64):
+            x = xs[i:i + 64]
+            ph = np.outer(np.log(x), gam)
+            re = ((0.5 * np.cos(ph) + gam * np.sin(ph)) * w).sum(axis=1)   # sum of fade * Re(x^(i gamma) / rho)
+            out[i:i + 64] = x - 2.0 * np.sqrt(x) * re - math.log(2 * math.pi) - 0.5 * np.log(1.0 - x ** -2.0)
+        return out
+
+    ns = np.arange(2, X + 1, dtype=float)
+    stair = np.diff(psi_rebuilt(np.arange(1.5, X + 1.0, 1.0)))          # the step at n = 2 .. X
+    spec_read = np.empty(len(ns))
+    for i in range(0, len(ns), 64):
+        spec_read[i:i + 64] = (np.cos(np.outer(np.log(ns[i:i + 64]), gam)) * fade).sum(axis=1)
+    spec_read = -(2 * math.pi / mass) * np.sqrt(ns) * spec_read
+    lam = _ef_lambda(X)
+    data: Dict[str, Any] = {
+        "x_to": X, "zeros_used": len(gam), "height_T": round(T, 6),
+        "window": f"each zero weighted exp(-(1/2)({_EF_TAPER:g} gamma/T)^2); the spectrum divided by the window's mass",
+        "routes": ["the explicit formula (von Mangoldt 1895): the step of the rebuilt psi at n",
+                   "Landau's formula (1912): -(2 pi sqrt(n)/T) sum cos(gamma log n)",
+                   "the sieve (independent): Lambda(n) = log p at n = p^k"],
+        "means": ("the stored zeros of zeta, summed as Riemann's explicit formula and as Landau's formula, "
+                  "reproduce the prime powers <= X and nothing else. Both formulas are theorems that hold "
+                  "with or without RH; this is NOT evidence for RH and makes no claim about any zero")}
+    def _clear(r: float) -> bool:
+        return abs(r) <= _EF_CLEAR_LO or r >= _EF_CLEAR_HI
+
+    unclear = [int(n) for n, a, b in zip(ns, stair, spec_read) if not (_clear(a) and _clear(b))]
+    if unclear:
+        data["unclear_at"] = unclear[:20]
+        data["unclear_count"] = len(unclear)
+        return na(name, f"with {len(gam):,} zeros the readings are unclear at {len(unclear)} number(s) <= {X} "
+                        f"(first n = {unclear[0]}): the zeros cannot hear every number this far. Lower X or use more "
+                        f"zeros. No verdict.", data)
+    primes_read: List[int] = []
+    powers_read: List[List[int]] = []
+    wrong: List[int] = []
+    for n_f, a in zip(ns, stair):
+        n = int(n_f)
+        if a >= _EF_CLEAR_HI:
+            b = min(_ef_roots(n), key=lambda c: abs(math.log(c) - a))
+            if lam[n] == 0.0 or abs(math.log(b) - lam[n]) > 1e-12:
+                wrong.append(n)
+            if b == n:
+                primes_read.append(n)
+            else:
+                powers_read.append([n, b, round(math.log(n) / math.log(b))])
+        elif lam[n] > 0.0:
+            wrong.append(n)
+    spec_pp = {int(n) for n, b in zip(ns, spec_read) if b >= _EF_CLEAR_HI}
+    sieve_pp = {n for n in range(2, X + 1) if lam[n] > 0.0}
+    spec_wrong = sorted(spec_pp ^ sieve_pp)
+    pp_idx = [n - 2 for n in sorted(sieve_pp)]
+    other_idx = [n - 2 for n in range(2, X + 1) if lam[n] == 0.0]
+    lam_pp = np.array([lam[n] for n in sorted(sieve_pp)])
+    holds = not wrong and not spec_wrong
+    st_ratio = stair[pp_idx] / lam_pp
+    sp_ratio = spec_read[pp_idx] / lam_pp
+    data.update({
+        "primes_read": primes_read, "prime_count_read": len(primes_read),
+        "prime_powers_read": powers_read,
+        "staircase_step_over_log_p": [round(float(st_ratio.min()), 4), round(float(st_ratio.max()), 4)],
+        "staircase_max_abs_elsewhere": round(float(np.abs(stair[other_idx]).max()), 4) if other_idx else 0.0,
+        "spectrum_over_log_p": [round(float(sp_ratio.min()), 4), round(float(sp_ratio.max()), 4)],
+        "spectrum_max_abs_elsewhere": round(float(np.abs(spec_read[other_idx]).max()), 4) if other_idx else 0.0,
+        "psi_at_x_plus_half": {"rebuilt_from_zeros": round(float(psi_rebuilt(np.array([X + 0.5]))[0]), 6),
+                               "exact": round(float(sum(lam)), 6)},
+        "clear_band": [round(_EF_CLEAR_LO, 6), round(_EF_CLEAR_HI, 6)],
+        "staircase_disagrees_at": wrong[:20], "spectrum_disagrees_at": spec_wrong[:20],
+        "zeros_give_primes": holds,
+    })
+    claimed = spec.get("claimed_zeros_give_primes")
+    claimed_primes = spec.get("claimed_primes")
+    if claimed is None and claimed_primes is None:
+        return na(name, "claim claimed_zeros_give_primes (true/false) or claimed_primes (the primes <= X)", data)
+    if not holds:
+        where = (wrong or spec_wrong)[:5]
+        msg = (f"the stored zeros do NOT reproduce the primes <= {X}: the readings disagree with the sieve at "
+               f"{where} (a damaged table or a broken sum)")
+        if claimed is not None and not bool(claimed) and claimed_primes is None:
+            return confirm(name, msg + "; matches the claim that they do not", data)
+        return mismatch(name, msg, data)
+    if claimed is not None and not bool(claimed):
+        return mismatch(name, f"the {len(gam):,} stored zeros DO give the primes <= {X} ({len(primes_read)} primes, "
+                              f"every prime power, nothing else); claimed they do not", data)
+    if claimed_primes is not None:
+        try:
+            cp = sorted({int(v) for v in claimed_primes})
+        except (TypeError, ValueError):
+            return error(name, "claimed_primes must be a list of integers")
+        if cp != primes_read:
+            extra = [v for v in cp if v not in primes_read][:10]
+            missing = [v for v in primes_read if v not in cp][:10]
+            return mismatch(name, f"the zeros give {len(primes_read)} primes <= {X}; the claimed list differs "
+                                  f"(not prime: {extra}; left out: {missing})", data)
+    lo, hi = data["staircase_step_over_log_p"]
+    return confirm(name, f"from {len(gam):,} stored zeros alone (T = {T:.2f}, windowed): the explicit formula steps by log p at "
+                         f"every prime power <= {X} ({lo:.3f}-{hi:.3f} of log p) and nowhere else (max "
+                         f"{data['staircase_max_abs_elsewhere']:.3f}); Landau's formula agrees; both equal the sieve: "
+                         f"{len(primes_read)} primes. The zeros give the primes. A theorem shown, not evidence for RH.",
+                   data)
+
+
 _RULES = [
     (lambda nv: ("critical_line_height" in nv and "claimed_zeros_on_line" in nv), verify_critical_line),
     (lambda nv: ("residual_check" in nv and "claimed_residual_consistent" in nv), verify_count_residual),
+    (lambda nv: ("explicit_formula_to" in nv and ("claimed_zeros_give_primes" in nv or "claimed_primes" in nv)), verify_explicit_formula),
     (lambda nv: ("robin_to" in nv and ("claimed_robin_holds" in nv or "claimed_closest_approach_n" in nv)), verify_robin),
     (lambda nv: ("schoenfeld_to" in nv and ("claimed_schoenfeld_holds" in nv or "claimed_closest_approach_n" in nv)), verify_schoenfeld),
     (lambda nv: ("zero_count_height" in nv and "claimed_zero_count" in nv), verify_zero_count),
