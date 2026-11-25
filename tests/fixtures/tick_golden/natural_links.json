@@ -1,0 +1,297 @@
+{
+ "entry": "natural_links",
+ "rc": 0,
+ "seals": {},
+ "sticks": {
+  "stick_a_torus_and_the_waveforms_inside_the_prime_numbers_the_zeros": {
+   "field": "number_theory",
+   "question": "A torus, and the waveforms inside the prime numbers - the zeros of zeta as the music the primes are made of",
+   "references": [
+    "B. Riemann, Ueber die Anzahl der Primzahlen unter einer gegebenen Groesse (1859)",
+    "H. von Mangoldt (1895): the explicit formula psi(x) = x - sum x^rho/rho - log 2pi - (1/2) log(1 - x^-2)",
+    "A. M. Odlyzko: the zeros of zeta computed to great height; gamma_1 = 14.134725...",
+    "B. Mazur, W. Stein, Prime Numbers and the Riemann Hypothesis (2016): the prime waves drawn",
+    "L. Kronecker (1884), H. Weyl (1916): an irrational winding on the torus is dense",
+    "Zu Chongzhi (5th c.): the Milu 355/113",
+    "1 Corinthians 14:7-8; Psalm 19:1-4; Job 38:7",
+    "stick_riemann_hypothesis (the zeros verified to T = 1000 on this node)"
+   ],
+   "statement": "Riemann's explicit formula writes the prime staircase as a smooth main term plus one wave per zero of zeta: amplitude sqrt(x) over the zero, frequency gamma in log x - music periodic in the logarithm, not in x. The first wave repeats every factor 1.56 in x. The smooth count misses by a few at 100 (li(100) = 30.1 against 25 primes) and the waves make up exactly the difference. On a torus two frequencies close their orbit only when their ratio is rational; the prime waves' frequencies are, as far as is known, incommensurable, so their joint motion fills the torus and never repeats: the primes look random and are not.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where the music is, and where it is not] The explicit formula writes the primes as a sum of waves - the same mathematics as the harmonics of stick_harmonics_chords_are_different_shapes_of_the_same_note_a_rol, a sum of sinusoids. But the frequencies here are the zeros' heights, not whole-number multiples of one tone, so the primes' music is not a harmonic series and has none of the commas of stick_the_symphony. Since 2026-11-20 every wave's amplitude is proved to be sqrt(x) / |rho| - the Riemann hypothesis, a machine-checked Lean proof (stick_riemann_hypothesis); no human-readable proof yet.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_astronomy_orbits_and_distances_verified_and_sealed": {
+   "field": "",
+   "question": "Astronomy - orbits and distances, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] Orbits and distances are astronomy's floor (card_floor_astronomy). The ephemeris stick (stick_ephemeris_the_sky_s_calendar_sealed) places the same bodies on a given date, and stick_the_sky_as_a_data_stream reads the sky's own clocks (aberration, precession) from them.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_dirac_s_large_numbers_hypothesis": {
+   "field": "physics",
+   "question": "Dirac's Large Numbers Hypothesis",
+   "references": [
+    "P. A. M. Dirac, The Cosmological Constants, Nature 139 (1937) 323",
+    "P. A. M. Dirac, A New Basis for Cosmology, Proc. Roy. Soc. A 165 (1938) 199"
+   ],
+   "statement": "The large dimensionless ratios of nature are all near 10^40 and, Dirac conjectured, causally linked — so the gravitational constant would weaken as the universe ages (G proportional to 1/t). It is a physical conjecture about whether a coincidence of magnitudes is a law.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] Dirac (1937) set the large dimensionless numbers side by side: the electric to gravitational attraction between a proton and an electron, e^2 / (4 pi eps0 G m_p m_e), about 2.3e39, against the age of the universe in atomic units. Its e^2 / (4 pi eps0) is alpha hbar c, the constant of stick_the_fine_structure_constant; the hypothesis that G drifts is a claim about the constants stick_the_fine_tuned_constants_intelligent_design_and_engineering weighs, and lunar laser ranging bounds any such drift tightly.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_economics_the_finance_arithmetic_verified_and_sealed": {
+   "field": "",
+   "question": "Economics - the finance arithmetic, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] The finance arithmetic - compound interest, present value, the annuity - is economics' floor (card_floor_economics). The mortgage payment of stick_real_estate_mortgage_cap_rate_ltv_and_coverage_sealed is that annuity applied to a loan, and stick_labor_wages_overtime_and_the_minimum_sealed computes the wage side of the same ledger.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_fiber_optic_calibration": {
+   "field": "engineering",
+   "question": "Fiber optic calibration",
+   "references": [],
+   "statement": "Recover a true signal through a lossy medium by referencing it to a known launch and combining many references so the distortion of any one cancels. The engine's calibration method, named in hardware.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] An optical fibre guides light by total internal reflection - the guided light of stick_photonics_guided_resonant_active_and_nonlinear_light_sealed - and its calibration (loss in dB per km, reflections located in time) is optics measured (stick_optics_how_light_bends_focuses_and_slows, card_floor_optics).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_godel_s_incompleteness_theorems": {
+   "field": "mathematics",
+   "question": "Godel's incompleteness theorems",
+   "references": [
+    "K. Godel, Uber formal unentscheidbare Satze..., Monatsh. Math. Phys. 38 (1931) 173",
+    "L. Kirby & J. Paris, Accessible independence results for Peano arithmetic, Bull. LMS 14 (1982) 285 (Goodstein's theorem is true but PA-unprovable)"
+   ],
+   "statement": "No consistent, effectively axiomatised formal system strong enough for arithmetic can prove every truth it can express, nor prove its own consistency. Completeness and self-certification are impossible. Unlike the other sticks, this is not an open conjecture — it is PROVEN (Godel 1931); what it guarantees is permanent openness: the one hole that is a theorem.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[the links Godel's own work makes] Turing (1936) answered Hilbert's decision problem with the diagonal method Godel used in 1931; the halting problem's undecidability (stick_computer_science_bits_logic_and_what_can_be_computed) yields a proof of the first incompleteness theorem. Godel's letter to von Neumann (20 March 1956) asked whether proofs could be found in time growing like n or n^2 - the question P versus NP (stick_p_versus_np) made precise (Cook 1971). The Riemann hypothesis is equivalent to a single Diophantine equation having no solutions (Davis, Matiyasevich, Robinson 1976), a sentence of the kind Godel's theorems are about; its 2026 machine-checked proof (stick_riemann_hypothesis) is certified relative to set theory, as the second theorem says it must be. And Godel's rotating universe (1949) was his argument that time does not objectively pass (stick_time_and_space_emergent_and_relational).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_grassmann_s_law_aspirate_dissimilation_verified": {
+   "field": "linguistics",
+   "question": "Grassmann's law - aspirate dissimilation, verified",
+   "references": [],
+   "statement": "The first of two successive aspirates loses its aspiration (Greek, Sanskrit).",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] Grassmann's law (1863) is an Indo-European sound law (card_floor_indo_european): in Sanskrit and Greek, of two aspirates in successive syllables the first loses its aspiration. It explained a set of apparent exceptions to Grimm's law (stick_grimm_s_law_a_regular_sound_correspondence_verified), as Verner's law (1875) explained another (stick_verner_s_law_accent_conditioned_voicing_verified).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_information_theory_the_measure_of_a_message_verified_and_sea": {
+   "field": "",
+   "question": "Information theory - the measure of a message, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] Shannon's entropy, H = - sum p log2 p (1948), measures a message. The password and key entropy of stick_cybersecurity_entropy_tls_cvss_subnets_and_ports_sealed is the same measure; stick_a_superheterodyne_receiver_the_engine_as_a_transceiver_every cites Shannon's channel capacity; and Maxwell's demon (stick_entropy_is_never_decreased_only_concentrated_maxwell_s_demon) is where information meets thermodynamic entropy (Szilard 1929, Landauer 1961). Computer science is its floor (card_floor_computer_science).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_law_structural_checks_on_public_domain_us_law_sealed": {
+   "field": "",
+   "question": "Law - structural checks on public-domain US law, sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] Structural checks on public-domain US law are law's floor (card_floor_law): what is checked is the arithmetic and structure of the published text, never a legal judgment.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_most_linguistics_are_math_outside_a_set_vocabulary_list": {
+   "field": "linguistics",
+   "question": "Most linguistics are math - outside a set vocabulary list",
+   "references": [
+    "Chomsky: a finite grammar generates infinite sentences (recursion)",
+    "Zipf's law: the r-th most common word has frequency proportional to 1/r",
+    "Shannon: the entropy and redundancy of printed language"
+   ],
+   "statement": "A fixed vocabulary is the floor, not the language. A finite lexicon plus a grammar generates an unbounded space of sentences (generative combinatorics), and word frequencies obey a power law (Zipf: frequency times rank is roughly constant). Syntax is formal grammar, text has measurable entropy - the structure of language is mathematical.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] The parts of language this stick calls mathematical are already sticks: the closed class of function words (stick_closed_class_part_of_speech_the_function_words), a word's prefix, root and suffix (stick_morphology_a_word_is_prefix_root_and_suffix), and the entropy and redundancy of text (stick_information_theory_the_measure_of_a_message_verified_and_sea).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_music_theory_intervals_and_tuning_verified_and_sealed": {
+   "field": "",
+   "question": "Music theory - intervals and tuning, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] The octave 2/1 and the fifth 3/2 sealed here are music's floor (card_floor_music). Twelve of these fifths against seven octaves, (3/2)^12 / 2^7, is the Pythagorean comma of stick_the_symphony, and the ratios come from the harmonic series of stick_harmonics_chords_are_different_shapes_of_the_same_note_a_rol.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_pi_the_constant_of_the_circle_is_the_constant_of_rotation": {
+   "field": "mathematics",
+   "question": "Pi - the constant of the circle is the constant of rotation",
+   "references": [
+    "Archimedes, Measurement of a Circle (c. 250 BC): 223/71 < pi < 22/7 by the 96-gon",
+    "J. Machin (1706): pi/4 = 4 atan(1/5) - atan(1/239), 100 digits by hand",
+    "Madhava (c. 1400), J. Gregory (1671), G. W. Leibniz (1676): the arctangent series",
+    "J. H. Lambert (1768): pi is irrational; F. Lindemann (1882): pi is transcendental",
+    "L. Euler, Introductio in analysin infinitorum (1748): e^(i pi) + 1 = 0",
+    "the Gaussian integral (Laplace 1812): int exp(-x^2) dx = sqrt pi",
+    "1 Kings 7:23; 2 Chronicles 4:2; Proverbs 8:27",
+    "src/concordance/verifiers/base.py - stated_precision: the claim's own figures set the bar"
+   ],
+   "statement": "Pi was never found; it was fenced. Archimedes narrowed it between 223/71 and 22/7 by elimination; Machin's identity is exact and its series carried the digits; the obvious series is true and useless (error ~ 1/N). The molten sea's 30 cubits round 10 is a one-figure measure of a vessel, judged at its stated precision: to one figure pi is 3 - neither the charge nor the gematria trick survives. Pi appears where there is no circle (the Gaussian integral, Stirling, Coulomb) because it is the constant of rotation; e^(i pi) = -1 is the half-turn. Irrational and transcendental by cited theorem: no fraction ends it and no compass squares the circle.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] pi is in the volume of every sphere (stick_higher_dimensional_spheres_and_the_gamma_function: V_n carries pi^(n/2)), in e^(i pi) = -1 (stick_complex_numbers_bombelli_and_the_square_root_of_minus_one), and in the radian, the measure of turning (stick_trigonometry_an_approximation_but_not_complete).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_probability_the_distributions_verified_and_sealed": {
+   "field": "",
+   "question": "Probability - the distributions, verified and sealed",
+   "references": [],
+   "statement": "",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] The distributions sealed here are statistics' floor (card_floor_statistics). Monte Carlo (stick_monte_carlo) estimates with them by sampling, and MCMC (stick_markov_chains_and_mcmc) samples a target distribution by walking a chain.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_the_aharonov_bohm_effect": {
+   "field": "physics",
+   "question": "The Aharonov-Bohm effect",
+   "references": [
+    "Y. Aharonov and D. Bohm, Phys. Rev. 115 (1959) 485",
+    "A. Tonomura et al., Phys. Rev. Lett. 56 (1986) 792 (definitive, flux shielded)"
+   ],
+   "statement": "A charged particle's phase is shifted by the electromagnetic potential even in a region where the field is zero; the shift is set by the enclosed flux, a global property, not by any local force.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] Aharonov and Bohm (1959): an electron circling a region of magnetic flux picks up a phase e Phi / hbar even where the field itself is zero - the vector potential of stick_electromagnetism_and_geometry acts. The phase depends only on the flux enclosed, a topological fact (stick_topology_and_euler_s_formula); it is quantum mechanics (stick_quantum_mechanics_the_quantum_and_its_limits), observed by Tonomura and coauthors (1986).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_the_jacobian_conjecture": {
+   "field": "mathematics",
+   "question": "The Jacobian conjecture",
+   "references": [
+    "Ott-Heinrich Keller, Ganze Cremona-Transformationen, Monatshefte für Mathematik und Physik 47 (1939), 299-306, doi:10.1007/bf01695502",
+    "S. Gao, Counterexamples to the Jacobian conjecture in dimensions greater than two, arXiv:2608.00222v2 (v1 31 Jul 2026, v2 4 Nov 2026), Section 3.4, Theorem 3.3",
+    "L. Alpöge, announcement on X, https://x.com/__alpoge__/status/2079028340955197566 (dated July 19, 2026 by Gao)",
+    "T. Tao, A digestion of the Jacobian conjecture counterexample, What's new, 21 July 2026, https://terrytao.wordpress.com/2026/07/21/a-digestion-of-the-jacobian-conjecture-counterexample/"
+   ],
+   "statement": "Keller's question (1939): for every n >= 2, must a polynomial map F: C^n -> C^n whose Jacobian determinant is a nonzero constant have a polynomial inverse?",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] The conjecture's hypothesis is a determinant: det of the Jacobian matrix of F is a nonzero constant. Near a point F is its Jacobian matrix, a rotation and a stretch (stick_every_matrix_is_a_rotation_and_a_stretch_the_singular_value_), and |det| is the product of the stretches - so the hypothesis says F scales volume by one constant factor everywhere. Whether that forces F to be invertible is the question; in dimension three it does not (this stick).",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_the_path_continuously_finding_new_paths_between_two_points_t": {
+   "field": "physics",
+   "question": "The path - continuously finding new paths between two points; that is life",
+   "references": [
+    "Johann Bernoulli 1696, the brachistochrone: the cycloid, not the chord",
+    "Fermat's least time -> Snell's law; Hamilton's principle; Euler-Lagrange",
+    "Feynman 1948, Space-Time Approach to Non-Relativistic Quantum Mechanics (the sum over paths)",
+    "the random walk: expected displacement ~ sqrt(N) (Pearson 1905, Einstein 1905)",
+    "Psalm 16:11; Proverbs 3:6; Matthew 7:14; John 14:6; Isaiah 30:21",
+    "src/concordance/chains.py - walk and intersect: paths between two points in the keeping"
+   ],
+   "statement": "Between two points there is never one path but every path. A stone takes the one of stationary action, found only by comparison with all its neighbours; in the sum over histories the wrong paths cancel and the stationary one survives - what is not the answer is eliminated, so the narrow path is illuminated by what survives. Life keeps sampling. The fastest path is not the straight line; light bends to find least time; blind search reaches only sqrt(N). The way is offered, never chosen for you.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] A path between two fixed points is what the principle of least action chooses (stick_the_principle_of_least_action): the action is stationary on the path taken; the Lagrangian (stick_the_lagrangian_the_hamiltonian_s_dual_and_the_path) is what it sums, and Feynman's path integral sums over every path between the two points.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_the_sky_as_a_data_stream": {
+   "field": "ephemeris",
+   "question": "The sky as a data stream",
+   "references": [
+    "J. Bradley, A letter to Dr. Edmond Halley giving an account of a new discovered motion of the fix'd stars, Phil. Trans. R. Soc. 35, no. 406, 637-661 (1728, the year Crossref gives), doi:10.1098/rstl.1727.0064; read at archive.org, philosophicaltra3517roya",
+    "G. B. Airy, On a supposed alteration in the amount of astronomical aberration of light, produced by the passage of the light through a considerable thickness of refracting medium, Proc. R. Soc. 20, 35-39 (1872, Crossref), doi:10.1098/rspl.1871.0011; read at archive.org, proceedingso20187172roya",
+    "IAU 2012 Resolution B2: the astronomical unit is 'a conventional unit of length equal to 149 597 870 700 m exactly' (iau.org's IAU2012_English.pdf, read at web.archive.org's copy); c = 299 792 458 m/s, a defining constant of the SI (BIPM, The International System of Units, 9th edition, 2019)",
+    "Wikipedia, Earth (infobox, epoch J2000): eccentricity 0.0167086, sidereal period 365.256363004 d; Wikipedia, Aberration (astronomy): constant of aberration 20.49552 arcsec at J2000; Wikipedia, Astronomical constant: kappa 20.49552 arcsec, a day of 86400 s. No source read states the seal's formula.",
+    "N. Capitaine, P. T. Wallace, J. Chapront, Expressions for IAU 2000 precession quantities, A&A 412, 567-586 (2003), doi:10.1051/0004-6361:20031539, P03, adopted by the IAU in 2006; read through ERFA's copy (github.com/liberfa/erfa): src/p06e.c, obl06.c and erfam.h, and apci13.c for note A",
+    "Ptolemy, Almagest VII.2, on Hipparchus and the precession, in G. J. Toomer's translation (1998), p. 328, as quoted on Wikipedia's Axial precession page, which also gives the rate accepted today as 'about 50\" per year or 1° in 72 years'",
+    "D. J. Fixsen, The Temperature of the Cosmic Microwave Background, ApJ 707, 916-920 (2009), arXiv:0911.1955; Planck Collaboration, Planck 2018 results. I. Overview and the cosmological legacy of Planck, A&A 641, A1 (2020), arXiv:1807.06205, read at ar5iv: Sect. 2.1, Tables 2 and 3",
+    "H. Hellwig, R. F. C. Vessot, M. W. Levine, P. W. Zitzewitz, D. W. Allan, D. J. Glaze, Measurement of the Unperturbed Hydrogen Hyperfine Transition Frequency, IEEE Trans. Instrum. Meas. IM-19 (4), 200-209 (1970), doi:10.1109/TIM.1970.4313902; read at NIST's copy, tf.nist.gov/general/pdf/13.pdf",
+    "Wikipedia, Pioneer plaque: the hydrogen transition's period, 0.704 ns, and wavelength, 21.106 cm, as the plaque's units of time and length, and its 14 pulsars' periods in that unit; NASA, Pioneer 10 (www.nasa.gov/missions/pioneer/pioneer-10/, served at science.nasa.gov/mission/pioneer-10/)",
+    "Gaia Collaboration, A. Vallenari et al., Gaia Data Release 3: Summary of the content and survey properties, A&A 674, A1 (2023), doi:10.1051/0004-6361/202243940; ESA, Gaia DR3 (cosmos.esa.int/web/gaia/dr3): 1,811,709,771 sources; the Gaia DR3 documentation, the gaia_source datamodel: source_id",
+    "USNO, Earth's seasons for 2024 (aa.usno.navy.mil/api/seasons?year=2024): the June solstice at 2024-06-20 20:51 UT; JPL Horizons (ssd.jpl.nasa.gov/api/horizons.api): the Sun (10), geocentric and from 40.7128 N, 74.006 W at sea level, on 2024-06-20, read 2026-11-14",
+    "The NANOGrav Collaboration, G. Agazie et al., The NANOGrav 15 yr Data Set: Evidence for a Gravitational-wave Background, ApJL 951, L8 (2023), doi:10.3847/2041-8213/acdac6, arXiv:2306.16213, read at arXiv and ar5iv"
+   ],
+   "statement": "Star and sun positions are a public stream of data anyone can recompute; what does it carry, and what can be read back from it?",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] The sky read as a data stream is astronomy's floor (card_floor_astronomy); the ephemeris stick (stick_ephemeris_the_sky_s_calendar_sealed) places the same bodies on a date.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_verner_s_law_accent_conditioned_voicing_verified": {
+   "field": "linguistics",
+   "question": "Verner's law - accent-conditioned voicing, verified",
+   "references": [],
+   "statement": "Grimm's fricatives voice unless the PIE accent preceded (the Germanic Grammatischer Wechsel).",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the natural links, 2026-11-25",
+     "claim": "[where it sits] Verner's law (1875) is an Indo-European sound law (card_floor_indo_european): in Proto-Germanic, whether a fricative was voiced depended on where the older accent fell. It explained the exceptions to Grimm's law (stick_grimm_s_law_a_regular_sound_correspondence_verified) that the law alone left standing.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

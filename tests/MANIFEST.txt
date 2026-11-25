@@ -463,3 +463,4 @@ test_stick_audit_2026_11_25.py
 test_status_door.py
 test_recheck_sticks.py
 test_stick_graph.py
+test_natural_links.py
