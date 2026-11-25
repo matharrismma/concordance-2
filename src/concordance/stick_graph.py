@@ -69,7 +69,7 @@ def graph(data_dir=None) -> Dict[str, Any]:
         closed = any(t.get("kind") == "closed" for t in st.get("ticks") or [])
         nodes.append({"id": sid, "title": st.get("question") or sid, "closed": closed,
                       "shelf": "codex" if closed else _FIELD_HUE.get(str(st.get("field") or ""), "other"),
-                      "degree": degree[sid] * 2})
+                      "degree": degree[sid]})
     return {
         "nodes": nodes, "links": links,
         "dead": [{"id": k, "named_by": sorted(set(v))} for k, v in sorted(dead.items())],
