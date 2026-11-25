@@ -1201,6 +1201,10 @@ def _call_tool(name: str, args: dict, config: EngineConfig, gate_open: bool = Fa
                     out.update(_ff.verify_fallback(claim))
                 except Exception:  # noqa: BLE001 — the find is a bonus; never break the verdict
                     pass
+                if out.get("status"):                        # THE STATUS DOOR (2026-11-25): the stick's reading, cited
+                    out["means"] = ("no deterministic extractor recognized a checkable claim in these words, so there is no "
+                                    "computed verdict; the keeping charts this question on a tick stick, and `status` holds "
+                                    "the stick's own reading - CITED, not a verdict, and it does not judge these words.")
                 if out.get("structured"):                    # H7 (2026-10-08): the words carry a number — a template, not a dead end
                     out["means"] = ("no deterministic extractor recognized a checkable claim in these words; this says "
                                     "NOTHING about whether the claim is true. `structured` holds a template for the "

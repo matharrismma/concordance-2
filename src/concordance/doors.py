@@ -208,6 +208,11 @@ def house(tool: str, r: dict, args: dict = None) -> dict:
                             f"({said}) — cite the table itself",
                             "FIND", "lookup", {"kind": str(look.get("kind") or "element"),
                                                "params": dict(look.get("params") or {})})
+            elif isinstance(r.get("status"), dict) and r["status"].get("link"):
+                # THE STATUS DOOR (2026-11-25): a charted question, cited from its stick - the one step reads the stick
+                st = r["status"]
+                nxt = _step(f"a question the keeping charts, not a computed verdict: its stick reads {st.get('status')} - "
+                            "read what is sealed, cited and open", "FIND", web=str(st["link"]))
             elif isinstance(r.get("want"), dict) and r["want"].get("query"):
                 # R5: the keeping holds nothing on this yet — the one step is the want, and the library goes to find it
                 nxt = _step("the keeping holds nothing on this yet — open the want, and the library goes to find a "

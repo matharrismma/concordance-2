@@ -384,6 +384,20 @@ def verify_fallback(claim: str, checked: Optional[str] = None,
         out["note"] = (f"No computable claim to prove here — but the keeping's own sourced table holds this: "
                        f"{fact_sentence(ff)}. FOUND and cited, not a computed verdict; no receipt.")
         return out
+    # THE STATUS DOOR (2026-11-25): a question the keeping charts on a tick stick, named plainly, is answered by the
+    # stick's own reading - CITED, not a computed verdict, no receipt - instead of three cards or a want.
+    try:
+        from . import status as _status
+        st = _status.status_of(claim or "")
+    except Exception:  # noqa: BLE001 - the status is a bonus; never break the verify answer
+        st = None
+    if st:
+        out["status"] = st
+        out["found"] = []
+        out["note"] = ("No computable claim to prove here - but " + _status.sentence(st) + ". CITED from the stick, "
+                       "not a computed verdict; no receipt. The stick says what is sealed, cited and open; it does not "
+                       "judge these words.")
+        return out
     subject = ff["subject"] if ff else None
     try:
         hits = search(checked or claim, limit=3) or []

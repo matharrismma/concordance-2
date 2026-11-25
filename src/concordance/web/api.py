@@ -815,6 +815,25 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     r["resolved_from"] = sid
         return _ok(r) if r.get("ok") else _err(404, r.get("error", "no such stick"))
 
+    if method == "GET" and path == "/status":
+        # THE STATUS DOOR (2026-11-25): the tick stick's own reading for a question named plainly ("the Riemann
+        # hypothesis", "P versus NP") - CITED, never a computed verdict, never a receipt. The words are not echoed.
+        from .. import status as _status, doors as _dr
+        q = (query.get("q") or query.get("question") or "").strip()
+        if not q:
+            return _err(400, "q required: a question named plainly, e.g. ?q=the Riemann hypothesis")
+        st = _status.status_of(q[:2000])
+        if not st:
+            return _ok({"found": False,
+                        "note": ("No tick stick charts a question these words name plainly. GET /sticks lists the "
+                                 "questions the keeping charts; a claim with a number in it goes to POST /verify."),
+                        "house": {"door": "FIND", "kind": "status", "trail": None, "seal": None, "ends": _dr.ENDS,
+                                  "next_step": _dr._step("list the questions the keeping charts", "FIND", web="/sticks")}})
+        return _ok({"found": True, **st,
+                    "house": {"door": "FIND", "kind": "status", "trail": "stick", "seal": None, "ends": _dr.ENDS,
+                              "next_step": _dr._step("read the stick: what is sealed, cited, closed and open", "FIND",
+                                                     web=st["link"])}})
+
     if method == "POST" and path == "/stick":
         from .. import tickstick as _ts
         if not isinstance(body, dict):
@@ -3465,6 +3484,7 @@ ROUTES = [
     # THE TICK STICK (2026-10-05): an open question, the marks the engine can stand behind, the fit they establish
     {"path": "/sticks", "methods": ("GET",), "api": True},
     {"path": "/stick", "methods": ("GET", "POST"), "api": True, "rl": True},
+    {"path": "/status", "methods": ("GET",), "api": True, "rl": "read"},   # THE STATUS DOOR: a named question's stick, read (2026-11-25)
     {"path": "/chains", "methods": ("GET",), "api": True, "rl": "read"},   # walk a discovery lineage / find where two chains connect (2026-10-07)
     {"path": "/tick", "methods": ("POST",), "rl": True},
     {"path": "/sync/manifest", "methods": ("GET",), "api": True, "rl": "read"},
