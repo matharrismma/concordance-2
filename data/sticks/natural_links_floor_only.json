@@ -1,0 +1,693 @@
+{
+ "schema": 1,
+ "name": "natural_links_floor_only",
+ "aliases": [
+  "natural_links_floor_only"
+ ],
+ "doc": "THE NATURAL LINKS, II, 2026-11-25 (Matt: 'Find all connections'): one note on each of the 48 sticks that sat only under a floor, naming the sticks it truly connects to, the relation stated. Nothing is linked by likeness alone.",
+ "seals": [],
+ "sticks": [
+  {
+   "question": "Acoustics - waves, loudness, and harmonics",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Sound is the pressure wave whose frequencies music theory sets in ratios (stick_music_theory_intervals_and_tuning_verified_and_sealed); a string or air column sounds the harmonic series (stick_harmonics_chords_are_different_shapes_of_the_same_note_a_rol); and a closed cavity's lowest mode is the Helmholtz resonance (stick_resonators_helmholtz_the_cavity_fabry_perot_one_shape_modes_)."
+    }
+   ]
+  },
+  {
+   "question": "Agriculture - soil, sun, and chemistry into food",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Crops grow in soil (stick_soil_science_the_living_skin_of_the_land); Haber-Bosch is a chemical equilibrium, N2 + 3H2 <-> 2NH3, run hot and under pressure (stick_physical_chemistry_rate_equilibrium_acid_base_redox); and the 10 percent rule this stick cites - plants are cheaper food than meat - is ecology's (stick_ecology_energy_and_number_in_the_living_world)."
+    }
+   ]
+  },
+  {
+   "question": "Archaeology - the decay clock, dated and sealed",
+   "statement": "Every radiometric age is the exponential decay law read backwards: t = -(T_half / ln 2) ln(N/N0).",
+   "field": "archaeology",
+   "references": [
+    "W. F. Libby, Radiocarbon Dating (1952; Nobel lecture 1960)",
+    "H. Godwin, Half-life of radiocarbon, Nature 195 (1962) 984",
+    "M. Stuiver & H. A. Polach, Discussion: reporting of 14C data, Radiocarbon 19 (1977) 355",
+    "A. H. Jaffey et al., Precision measurement of half-lives of U-235 and U-238, Phys. Rev. C 4 (1971) 1889"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The decay clock is the same law that dates the Earth itself (stick_earth_science_the_planet_read_in_deep_time); the decay is nuclear (stick_nuclear_physics_binding_decay_and_the_strong_force); and t = -(T_half / ln 2) ln(N/N0) is the exponential of stick_e_the_number_of_continuous_growth read backwards."
+    }
+   ]
+  },
+  {
+   "question": "Chess - the rules decide: mate, stalemate, legality, material",
+   "statement": "A claim about a chess position is decided by the Laws of Chess applied to the position - computed by the move generator, never judged.",
+   "field": "chess",
+   "references": [
+    "FIDE Laws of Chess (2023), Articles 1-5",
+    "F.-A. D. Philidor, Analyse du jeu des Echecs (1749) - the smothered mate",
+    "src/concordance/chess.py - the perft-proven move generator (tests/test_chess.py)"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Chess is a finite two-player zero-sum game of perfect information, so (Zermelo 1913) one side can force a win or both can force a draw - game theory's object (stick_game_theory_equilibrium_dilemmas_and_strategy); the move generator that decides a position is an algorithm (stick_computer_science_bits_logic_and_what_can_be_computed)."
+    }
+   ]
+  },
+  {
+   "question": "Condensed matter - the solid state through alpha, sealed",
+   "statement": "The solid state's quantized resistances, lattice diffraction, electron gas and phonon gas are closed-form relations over h, e, alpha, k_B and the lattice.",
+   "field": "condensed_matter",
+   "references": [
+    "C. Kittel, Introduction to Solid State Physics, 8th ed. (2005), Tables 5.1 and 6.1",
+    "K. von Klitzing, G. Dorda, M. Pepper, Phys. Rev. Lett. 45 (1980) 494",
+    "B. D. Josephson, Phys. Lett. 1 (1962) 251",
+    "CODATA 2018 / the 2019 SI: h and e exact, so R_K and K_J are exact"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The resistance quantum R_K = h/e^2 is mu_0 c / (2 alpha): the solid state's plateaus measure the fine-structure constant (stick_the_fine_structure_constant); its electron and phonon gases are quantum mechanics (stick_quantum_mechanics_the_quantum_and_its_limits); its lattices are how atoms pack (stick_materials_science_how_atoms_pack_and_solids_behave)."
+    }
+   ]
+  },
+  {
+   "question": "Document validation - the check digits, sealed",
+   "statement": "A check digit is a theorem of modular arithmetic: the weighted sum of a valid identifier is 0 mod 11 (ISBN-10) or 0 mod 10 (ISBN-13, EAN, UPC, Luhn).",
+   "field": "document_validation",
+   "references": [
+    "ISO 2108:2017, International Standard Book Number",
+    "H. P. Luhn, US Patent 2,950,048 (1960); ISO/IEC 7812-1",
+    "GS1 General Specifications, section 7.9 (check digit calculation)",
+    "J. A. Gallian, Error detection methods, ACM Computing Surveys 28 (1996) 504"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] A check digit is one redundant symbol: it detects a single wrong digit and cannot correct it - the information-theory stick's own example (stick_information_theory_the_measure_of_a_message_verified_and_sea)."
+    }
+   ]
+  },
+  {
+   "question": "Earth science - the planet, read in deep time",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Deep time is read by the decay clock archaeology uses for the recent past (stick_archaeology_the_decay_clock_dated_and_sealed); the decay is nuclear (stick_nuclear_physics_binding_decay_and_the_strong_force); the planet it reads is the one geography measures (stick_geography_the_measured_earth)."
+    }
+   ]
+  },
+  {
+   "question": "Ecology - energy and number in the living world",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Energy flows one way up a food chain, most of it lost as heat at each step - the second law at work (stick_thermodynamics_the_arrow_and_the_one_end); the 10 percent rule is why plants are cheaper food than meat (stick_agriculture_soil_sun_and_chemistry_into_food); the living world it counts is biology's (stick_biology_the_genetic_code_and_the_tree_of_life)."
+    }
+   ]
+  },
+  {
+   "question": "Education - how a mind learns and is taught",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Learning is something a mind does (stick_the_mind_the_neuron_computation_and_the_hard_problem); the forgetting curve e^(-t/S) (after Ebbinghaus, 1885) is the exponential of stick_e_the_number_of_continuous_growth."
+    }
+   ]
+  },
+  {
+   "question": "Exercise science - METs, calories and heart-rate zones, sealed",
+   "statement": "Energy cost and training intensity are arithmetic over three measured inputs: the activity's MET, the body's mass, and the heart's range.",
+   "field": "exercise_science",
+   "references": [
+    "B. E. Ainsworth et al., 2011 Compendium of Physical Activities, Med. Sci. Sports Exerc. 43 (2011) 1575",
+    "H. Tanaka, K. D. Monahan, D. R. Seals, Age-predicted maximal heart rate revisited, J. Am. Coll. Cardiol. 37 (2001) 153",
+    "M. J. Karvonen, E. Kentala, O. Mustala, Ann. Med. Exp. Biol. Fenn. 35 (1957) 307"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The calories an activity burns are the other side of the calories food supplies (stick_nutrition_the_body_s_fuel_counted); heart-rate zones and MET are physiology, the body measured (stick_medicine_the_body_measured_and_mended)."
+    }
+   ]
+  },
+  {
+   "question": "Formal logic - Boolean algebra, inference forms, NAND and NOR",
+   "statement": "Every law of propositional logic is a theorem of the two-element Boolean algebra, decided by its truth table.",
+   "field": "formal_logic",
+   "references": [
+    "G. Boole, The Laws of Thought (1854)",
+    "H. M. Sheffer, A set of five independent postulates for Boolean algebras (1913)"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Boolean algebra is the logic of the bit and the circuit (stick_computer_science_bits_logic_and_what_can_be_computed); propositional logic is decidable by truth table and complete, while arithmetic is where Godel's incompleteness begins (stick_godel_s_incompleteness_theorems); modal logic, the philosophy stick's check, is built on it (stick_philosophy_modality_ethics_knowledge_and_identity_sealed)."
+    }
+   ]
+  },
+  {
+   "question": "Game theory - equilibrium, dilemmas, and strategy",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Chess is a finite zero-sum game of perfect information (stick_chess_the_rules_decide_mate_stalemate_legality_material); equilibrium in markets and bargaining is economics' use of the same idea (Nash 1950) (stick_economics_the_finance_arithmetic_verified_and_sealed)."
+    }
+   ]
+  },
+  {
+   "question": "Geography - the measured Earth",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Eratosthenes (about 240 BC) measured the Earth's circumference from the Sun's angle at two cities - astronomy (stick_astronomy_orbits_and_distances_verified_and_sealed) and trigonometry (stick_trigonometry_an_approximation_but_not_complete); a degree of latitude is that circumference over 360."
+    }
+   ]
+  },
+  {
+   "question": "Get fairly close, with a proven bound",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The bound is Taylor's remainder, which rests on the derivative (stick_integrals_and_derivatives_the_fundamental_theorem); Monte Carlo gets fairly close by sampling, with an error that shrinks like 1/sqrt(N) (stick_monte_carlo)."
+    }
+   ]
+  },
+  {
+   "question": "History and chronology - counting years with no year zero",
+   "statement": "A span of years is an exact integer: signed subtraction within an era, and from_BCE + to_CE - 1 across the boundary, because the Christian era has no year 0.",
+   "field": "history_chronology",
+   "references": [
+    "Dionysius Exiguus, Liber de Paschate (AD 525) - the anno Domini count",
+    "Bede, De temporum ratione (AD 725) - counting backward from the Incarnation",
+    "E. G. Richards, Mapping Time: The Calendar and its History (1998), ch. 2",
+    "ISO 8601 / astronomical year numbering: year 0 = 1 BC (Cassini, 1740)"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] No year zero is the calendar's convention (Dionysius Exiguus, 525) (stick_the_calendar_keeping_time_by_sun_and_number); astronomers insert a year 0 so that subtraction works, as the sky's calendar does (stick_ephemeris_the_sky_s_calendar_sealed)."
+    }
+   ]
+  },
+  {
+   "question": "Hydrology - the water cycle and the flow of rivers",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The water cycle runs through the atmosphere's heat engine (stick_meteorology_the_atmosphere_as_a_heat_engine), draws most of its evaporation from the sea (stick_oceanography_the_salt_sea_in_motion), and soaks into the land (stick_soil_science_the_living_skin_of_the_land)."
+    }
+   ]
+  },
+  {
+   "question": "Language typology - the families of tongues",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] English's place in the Indo-European family is marked by the Germanic consonant shift (stick_grimm_s_law_a_regular_sound_correspondence_verified); typology also sorts languages by how they build words - isolating, agglutinative, fusional (stick_morphology_a_word_is_prefix_root_and_suffix)."
+    }
+   ]
+  },
+  {
+   "question": "Law - structural checks on public-domain US law, sealed",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] A structural check is a conjunction - offer AND acceptance AND consideration AND capacity AND legality - decided as Boolean logic decides it (stick_formal_logic_boolean_algebra_inference_forms_nand_and_nor); overtime and the minimum wage are statute, which the labor stick computes (stick_labor_wages_overtime_and_the_minimum_sealed)."
+    }
+   ]
+  },
+  {
+   "question": "Linear algebra - vectors and matrices, computed and sealed",
+   "statement": "Every claim about vectors and matrices is decided by the arithmetic of the vector space axioms: products, norms, angles, determinants, eigenvalues, inverses, solutions.",
+   "field": "linear_algebra",
+   "references": [
+    "G. Strang, Introduction to Linear Algebra, 5th ed. (2016)",
+    "A. Cayley, A memoir on the theory of matrices, Phil. Trans. R. Soc. 148 (1858) 17",
+    "J. W. Gibbs & E. B. Wilson, Vector Analysis (1901) - the dot and cross products"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Every matrix is a rotation and a stretch (stick_every_matrix_is_a_rotation_and_a_stretch_the_singular_value_); the eigenvalues of a Hermitian matrix are real, the observables of quantum mechanics (stick_hermitian_operators_real_eigenvalues_the_observables); and a matrix is a graph (stick_matrices_are_graphs_tensors_are_tensor_networks_the_score_is)."
+    }
+   ]
+  },
+  {
+   "question": "Logistics - the optimization core, verified and sealed",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The knapsack problem is NP-complete (Karp 1972), so its optimum is P versus NP's ground (stick_p_versus_np); a constrained optimum with smooth costs is found by Lagrange multipliers (stick_lagrange_multipliers)."
+    }
+   ]
+  },
+  {
+   "question": "Manufacturing - sigma, control limits, capability, stack-up",
+   "statement": "Quality is the normal distribution applied to a specification: defects per million map to sigma, limits sit at three sigma, capability is the spec width over six sigma, and independent tolerances add in quadrature.",
+   "field": "manufacturing",
+   "references": [
+    "W. A. Shewhart, Economic Control of Quality of Manufactured Product (1931)",
+    "M. J. Harry & R. Schroeder, Six Sigma (2000) - the 1.5-sigma shift convention",
+    "ISO 22514-2:2013 process capability; V. E. Kane, Process capability indices, J. Qual. Tech. 18 (1986) 41",
+    "ASME Y14.5 and the RSS method (Bender, SAE 1962)"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Six sigma, control limits and capability are the normal law applied to a specification (stick_statistics_the_normal_law_and_the_method_of_science) - the distributions of stick_probability_the_distributions_verified_and_sealed."
+    }
+   ]
+  },
+  {
+   "question": "Materials science - how atoms pack and solids behave",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] How atoms pack is the solid state (stick_condensed_matter_the_solid_state_through_alpha_sealed); which atoms bond, and how, is the periodic table's quantum mechanics (stick_chemistry_quantum_mechanics_applied_the_periodic_table)."
+    }
+   ]
+  },
+  {
+   "question": "Medicine - the body measured and mended",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Medicine is biology measured and mended (stick_biology_the_genetic_code_and_the_tree_of_life); the body's fuel is counted by nutrition (stick_nutrition_the_body_s_fuel_counted) and its work by exercise science (stick_exercise_science_mets_calories_and_heart_rate_zones_sealed)."
+    }
+   ]
+  },
+  {
+   "question": "Meteorology - the atmosphere as a heat engine",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The atmosphere is a heat engine, its lapse rate an adiabatic expansion (stick_thermodynamics_the_arrow_and_the_one_end); its air is a fluid obeying the Navier-Stokes equations that every weather model solves (stick_navier_stokes_existence_and_smoothness); it carries the water cycle (stick_hydrology_the_water_cycle_and_the_flow_of_rivers)."
+    }
+   ]
+  },
+  {
+   "question": "Metrology - measurement and the SI",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Since 2019 the SI fixes h and e, so the fine-structure constant is measured, not defined (stick_the_fine_structure_constant); a quantity's unit is half of its meaning (stick_units_matter); the second is counted by caesium, a clock (stick_the_clock_tourbillon_faraday_and_the_observer_as_a_predictab)."
+    }
+   ]
+  },
+  {
+   "question": "Molecular geometry - VSEPR shapes and bond angles, sealed",
+   "statement": "A molecule's shape follows from its steric number and lone pairs: electron domains repel to the arrangement of greatest separation, and the bond angle is that arrangement's angle.",
+   "field": "molecular_geometry",
+   "references": [
+    "R. J. Gillespie & R. S. Nyholm, Inorganic stereochemistry, Q. Rev. Chem. Soc. 11 (1957) 339",
+    "R. J. Gillespie, Molecular Geometry (1972)",
+    "CRC Handbook of Chemistry and Physics, Structure of free molecules in the gas phase"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Electron domains are the orbitals of the periodic table's quantum mechanics (stick_chemistry_quantum_mechanics_applied_the_periodic_table); the tetrahedral angle arccos(-1/3) = 109.47 degrees is geometry (stick_geometry_the_shapes_verified_and_sealed)."
+    }
+   ]
+  },
+  {
+   "question": "Networking - addresses, packets, and capacity",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Subnets and ports are sealed in the cybersecurity stick too (stick_cybersecurity_entropy_tls_cvss_subnets_and_ports_sealed); a link's capacity is Shannon's measure (stick_information_theory_the_measure_of_a_message_verified_and_sea)."
+    }
+   ]
+  },
+  {
+   "question": "Noether's theorem - every symmetry a conservation law",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Noether's theorem (1918) is about symmetries of the action, so it lives where the action does (stick_the_principle_of_least_action, stick_the_lagrangian_the_hamiltonian_s_dual_and_the_path); time-translation symmetry conserves the energy the Hamiltonian measures (stick_the_hamiltonian_the_law_of_the_flow)."
+    }
+   ]
+  },
+  {
+   "question": "Nuclear physics - binding, decay, and the strong force",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The strong force is one of the Standard Model's gauge forces (stick_the_standard_model_gauge_forces_and_quarks), quantum chromodynamics a Yang-Mills theory (stick_yang_mills_existence_and_mass_gap); nuclear decay is the clock archaeology reads (stick_archaeology_the_decay_clock_dated_and_sealed)."
+    }
+   ]
+  },
+  {
+   "question": "Nutrition - the body's fuel, counted",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Food energy taken in is the other side of energy spent (stick_exercise_science_mets_calories_and_heart_rate_zones_sealed); food is grown (stick_agriculture_soil_sun_and_chemistry_into_food)."
+    }
+   ]
+  },
+  {
+   "question": "Oceanography - the salt sea in motion",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The sea is the water cycle's great reservoir (stick_hydrology_the_water_cycle_and_the_flow_of_rivers) and trades heat with the air above it (stick_meteorology_the_atmosphere_as_a_heat_engine)."
+    }
+   ]
+  },
+  {
+   "question": "Philosophy - modality, ethics, knowledge and identity, sealed",
+   "statement": "The analytic checks of philosophy are decidable where they are formal: a modal contradiction, a framework's criterion, the source of a claim's warrant, the equality of two property sets.",
+   "field": "philosophy",
+   "references": [
+    "S. Kripke, Semantical considerations on modal logic, Acta Phil. Fennica 16 (1963) 83",
+    "I. Kant, Critique of Pure Reason (1781), Introduction - a priori and a posteriori",
+    "G. W. Leibniz, Discourse on Metaphysics (1686) section 9; M. Black, The identity of indiscernibles, Mind 61 (1952) 153",
+    "J. S. Mill, Utilitarianism (1863); Kant, Groundwork (1785); Aristotle, Nicomachean Ethics; Hobbes, Leviathan (1651)"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Modal logic extends propositional logic (stick_formal_logic_boolean_algebra_inference_forms_nand_and_nor); what a system can know of itself is Godel's question (stick_godel_s_incompleteness_theorems); identity and the hard problem are the mind's (stick_the_mind_the_neuron_computation_and_the_hard_problem)."
+    }
+   ]
+  },
+  {
+   "question": "Photography - exposure, reciprocity, angle of view, hyperfocal",
+   "statement": "A camera's settings are logarithms and tangents: EV counts stops in base 2, the angle of view is 2 atan(d/2f), and the hyperfocal distance is f^2/(N c) + f.",
+   "field": "photography",
+   "references": [
+    "ISO 2720:1974 - exposure meters and the APEX system (EV = log2(N^2/t) at ISO 100)",
+    "Kodak, the sunny-16 rule (film data sheets, 20th c.)",
+    "R. Kingslake, Optics in Photography (SPIE, 1992), ch. 4 and 5",
+    "H. M. Merklinger, The INs and OUTs of FOCUS (1992) - depth of field and hyperfocal"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] A camera is applied optics: the thin lens and the f-number (stick_optics_how_light_bends_focuses_and_slows); its angle of view, 2 atan(d / 2f), is trigonometry (stick_trigonometry_an_approximation_but_not_complete)."
+    }
+   ]
+  },
+  {
+   "question": "Quantum computing - qubits and superposition",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Shor's algorithm is what a quantum computer would do to factoring (stick_quantum_factoring_shor_and_regev); superposition is quantum mechanics (stick_quantum_mechanics_the_quantum_and_its_limits); quantum computers are not known to solve NP-complete problems quickly - BQP and NP are not known to coincide (stick_p_versus_np)."
+    }
+   ]
+  },
+  {
+   "question": "Reservoir computing - a fixed substrate, a trained readout; zero times infinity, the trick of the Riemann sum",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] A delay-loop reservoir is a cavity, its memory the cavity's quality factor (stick_resonators_helmholtz_the_cavity_fabry_perot_one_shape_modes_); the trained readout is a linear map, fitted by least squares (stick_linear_algebra_vectors_and_matrices_computed_and_sealed); the liquid state machine (Maass, Natschlager, Markram 2002) took the idea from cortical circuits (stick_the_mind_the_neuron_computation_and_the_hard_problem)."
+    }
+   ]
+  },
+  {
+   "question": "Resonators - Helmholtz, the cavity, Fabry-Perot: one shape, modes on a bounded domain, a Q that fades",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The Helmholtz resonance is acoustics (stick_acoustics_waves_loudness_and_harmonics); the Fabry-Perot cavity is photonics' resonator (stick_photonics_guided_resonant_active_and_nonlinear_light_sealed); the Earth and ionosphere make a cavity too (stick_the_schumann_resonance_the_earth_ionosphere_cavity_s_fundame)."
+    }
+   ]
+  },
+  {
+   "question": "Semantic relations - synonymy and the IS-A hierarchy",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Word meaning sits beside word structure (stick_morphology_a_word_is_prefix_root_and_suffix) and sentence structure (stick_syntax_a_real_parse_tree_or_none) - the three layers of a language the engine checks."
+    }
+   ]
+  },
+  {
+   "question": "Soil science - the living skin of the land",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Soil is where crops grow (stick_agriculture_soil_sun_and_chemistry_into_food), holds the water that infiltrates (stick_hydrology_the_water_cycle_and_the_flow_of_rivers), and is rock weathered over deep time (stick_earth_science_the_planet_read_in_deep_time)."
+    }
+   ]
+  },
+  {
+   "question": "Sorting algorithms - the roll and the bound none can beat",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] No comparison sort beats log2(n!), about n log n, comparisons - the decision tree whose leaves are the n! orders - a bound of computer science (stick_computer_science_bits_logic_and_what_can_be_computed); sorting and fractals share a shape (stick_fractals_as_maps_and_sorting_algorithms_the_same_shape_at_ev)."
+    }
+   ]
+  },
+  {
+   "question": "Sports analytics - Pythagorean expectation, Elo, games behind",
+   "statement": "A season's record is predicted from runs by a power law, a match by a logistic of the rating gap, and a standing by half the sum of two differences.",
+   "field": "sports_analytics",
+   "references": [
+    "B. James, Baseball Abstract (1980s) - the Pythagorean expectation",
+    "A. E. Elo, The Rating of Chessplayers, Past and Present (1978)",
+    "FIDE Rating Regulations (2024), article 8 - the expected-score table and K factors"
+   ],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Pythagorean expectation and games behind are statistics on a season (stick_statistics_the_normal_law_and_the_method_of_science); Elo's expected score, 1 / (1 + 10^(-gap/400)), is a probability (stick_probability_the_distributions_verified_and_sealed)."
+    }
+   ]
+  },
+  {
+   "question": "Statistics - the normal law and the method of science",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The normal law is one of the distributions (stick_probability_the_distributions_verified_and_sealed); a Gaussian process is the normal law over functions (stick_gaussian_processes_the_form_of_the_map); Monte Carlo is statistics by sampling (stick_monte_carlo)."
+    }
+   ]
+  },
+  {
+   "question": "Syntax - a real parse tree, or none",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] A parse tree is a derivation in a formal grammar, the Chomsky hierarchy computer science shares (stick_computer_science_bits_logic_and_what_can_be_computed); words are built before they are arranged (stick_morphology_a_word_is_prefix_root_and_suffix)."
+    }
+   ]
+  },
+  {
+   "question": "The calendar - keeping time by sun and number",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The sky's calendar is computed in the ephemeris (stick_ephemeris_the_sky_s_calendar_sealed); the year is the Earth's orbit (stick_astronomy_orbits_and_distances_verified_and_sealed); counting years across the era is chronology (stick_history_and_chronology_counting_years_with_no_year_zero)."
+    }
+   ]
+  },
+  {
+   "question": "The Great Vowel Shift - a regular vowel correspondence, verified",
+   "statement": "English long vowels raised and diphthongized regularly (c. 1400-1700).",
+   "field": "linguistics",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] A regular sound correspondence like Grimm's law, but a vowel shift in English (c. 1400-1700) where Grimm's was a consonant shift in Proto-Germanic (stick_grimm_s_law_a_regular_sound_correspondence_verified); English's family is typology's (stick_language_typology_the_families_of_tongues)."
+    }
+   ]
+  },
+  {
+   "question": "The mind - the neuron, computation, and the hard problem",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The mind as a receiver is a stick of its own (stick_consciousness_as_a_receiver_the_crystal_radio); identity and the hard problem are philosophy's (stick_philosophy_modality_ethics_knowledge_and_identity_sealed); the liquid state machine models a cortical circuit as a reservoir (stick_reservoir_computing_a_fixed_substrate_a_trained_readout_zero)."
+    }
+   ]
+  },
+  {
+   "question": "The Nicene confession - the line of historic Christian faith, and where groups depart from it",
+   "statement": "The historic Church confesses the Nicene faith: one God in three co-equal, co-eternal persons; the Son true God of true God, of one substance (homoousios) with the Father; the Holy Spirit the Lord and giver of life. A body that denies this confession, by its own doctrine, departs from the historic Christian line - named here from its own words, as a proposed discernment, never a verdict on any person.",
+   "field": "theology",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] One God in three co-equal persons is the confession the capstone stands on - one reality held together in Christ the cornerstone, the one God, triune (stick_the_capstone)."
+    }
+   ]
+  },
+  {
+   "question": "The Schumann resonance - the Earth-ionosphere cavity's fundamental tone",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] The Earth and the ionosphere form a resonant cavity (stick_resonators_helmholtz_the_cavity_fabry_perot_one_shape_modes_), kept ringing by lightning, some fifty flashes a second worldwide (stick_meteorology_the_atmosphere_as_a_heat_engine)."
+    }
+   ]
+  },
+  {
+   "question": "Transliteration - romanizing the original tongue",
+   "statement": "",
+   "field": "",
+   "references": [],
+   "by": "Narrow Highway - the natural links, 2026-11-25",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[where it connects] Greek and Latin, the two scripts it maps, are both Indo-European (stick_language_typology_the_families_of_tongues); reading the original tongue and returning is the round trip of Scripture study (stick_scripture_study_is_the_eigenbasis_round_trip_flip_work_flip_)."
+    }
+   ]
+  }
+ ]
+}

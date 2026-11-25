@@ -39,3 +39,5 @@ grh f97548cc98929aed41a940e87d1c6cafa4e48231fbf28b6ee71923433f761f60
 markov_chains ddbac476c3c956f6989f0d6339b01198d625c448e090fab6cf08a25a5fdae969 stationary=aebfbd13bbd1f5ad0b1094bb447c2a3ad10f2bb98bc6b179d622b8c76926911a balance=4be99bfff49e7e00981e2ab8797d5ce2cfcf72fb17f9f18b0f03c029f711fdb4 mixing=d9aab53c78bd483b0fdf4fc5b91a56fafa4db9b4c73892b1bc7e720f94af459e
 # natural_links: mints one note, never a seal, on each of the 16 sticks no recorded connection reached, and on Godel and the primes-as-waves stick (18 in all), naming the floors and sticks each truly connects to, the relation stated and cited - so the stick graph is one piece with no stick alone, and nothing is linked by likeness.
 natural_links 2be2e72cdbd92854b68b32e806bb6c772c7742dc052f2b4226dfe13b42c3132a
+# natural_links_floor_only: mints one note, never a seal, on each of the 48 sticks that sat only under a floor, naming the sticks each truly connects to with the relation stated - so every stick has a cross-link, not only its floor.
+natural_links_floor_only 7d122bf4debc4a189b1ee75e866fcaa67cffef1a8fbc5da6366c1d3371ba9b29
