@@ -220,6 +220,17 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
     <div id="floorsOut" class="constel" style="padding:1.1rem"><p class="empty">Reading the floors&hellip;</p></div>
   </section>
 
+  <!-- WHERE THE STICKS POINT — the stick names each stick carries, drawn as edges (live from /sticks/graph) -->
+  <section class="blk" id="sticks">
+    <div class="sec-h"><h2>Where the sticks point</h2><span class="n">live from /sticks/graph</span></div>
+    <p style="color:var(--ink-soft); margin:.2rem 0 1rem; max-width:66ch; font-size:.95rem">Each tick stick holds one open question and the marks the engine can stand behind. A stick names other sticks in its own words; each name is drawn here as a line. <span style="color:#c9a24a">Gold</span> is a question closed by a cited proof. A <span style="color:#eed69b">brass</span> line is an old name the stick still carries, read through to the stick it means. Tap a stick to open it.</p>
+    <div class="constel">
+      <canvas id="stickCanvas" aria-label="the tick sticks and the sticks each names"></canvas>
+      <div id="stickStatus">Reading the sticks&hellip;</div>
+      <div id="stickPanel" style="padding:.6rem 1rem 1rem"></div>
+    </div>
+  </section>
+
   <!-- THE WORD UNDER THE MAP — the concordance of reality (live from /roots), keyed by Scripture -->
   <section class="blk" id="wordmap">
     <div class="sec-h"><h2>The Word under the map</h2><span class="n">live from /roots</span></div>
@@ -470,6 +481,37 @@ footer a{color:var(--ink-soft); text-decoration:none} footer a:hover{color:var(-
       search:"mapSearch", legend:"mapLegend", layers:"mapLayers"});
   }
   mountMap();
+
+  // WHERE THE STICKS POINT — the stick names each stick carries, drawn with the constellation's renderer
+  function mountSticks(){
+    if(!window.NHGraph||!window.NHGraph.View){ setTimeout(mountSticks,120); return; }
+    var cv=document.getElementById("stickCanvas"), st=document.getElementById("stickStatus"), panel=document.getElementById("stickPanel");
+    if(!cv) return;
+    function e2(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+    function gj(path){ return fetch(path,{headers:{accept:"application/json"}}).then(function(r){ return r.ok?r.json():null; }).then(function(j){ return (j&&j.data)?j.data:j; }).catch(function(){ return null; }); }
+    gj("/sticks/graph").then(function(g){
+      if(!g||!g.nodes||!g.nodes.length){ st.textContent="No stick names another yet."; return; }
+      var v=new window.NHGraph.View(cv,"dark");
+      v.onpick=function(n){
+        panel.innerHTML='<p class="empty">Opening '+e2(n.title)+'&hellip;</p>';
+        gj("/stick?id="+encodeURIComponent(n.id)).then(function(s){
+          if(!s){ panel.innerHTML=""; return; }
+          var f=s.fit||{}, marks=(s.ticks||[]).filter(function(m){ return m.kind==="witness"||m.kind==="instance"||m.kind==="bound"; });
+          var h='<h3 style="margin:.2rem 0">'+e2(s.question)+'</h3>';
+          if(s.statement) h+='<p style="margin:.2rem 0 .6rem;color:var(--ink-soft)">'+e2(s.statement)+'</p>';
+          if(f.open) h+='<p style="margin:.2rem 0 .6rem"><strong>'+e2(f.open)+'</strong></p>';
+          h+=marks.slice(0,5).map(function(m){ return '<div style="margin:.25rem 0">'+e2(m.kind)+' &middot; '+e2(String(m.claim||"").slice(0,220))+
+            (m.seal?' <a href="/s/'+encodeURIComponent(m.seal)+'" style="color:var(--seal)">re-check</a>':'')+'</div>'; }).join("");
+          panel.innerHTML=h;
+        });
+      };
+      v.setData(g.nodes, g.links, null);
+      var c=g.counts||{};
+      st.textContent=(c.linked||0)+" sticks that name another, "+(c.links||0)+" lines ("+(c.via_alias||0)+" through an old name); "+
+        (c.unlinked||0)+" stand alone"+(c.dead?"; "+c.dead+" name a stick not kept here yet":"")+".";
+    }).catch(function(){ st.textContent="The sticks could not be read just now."; });
+  }
+  mountSticks();
 
   // Walk the stacks — the library's call-tree, one level at a time (section -> ... -> card).
   function mountStacks(){

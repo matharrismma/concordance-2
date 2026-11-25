@@ -815,6 +815,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
                     r["resolved_from"] = sid
         return _ok(r) if r.get("ok") else _err(404, r.get("error", "no such stick"))
 
+    if method == "GET" and path == "/sticks/graph":
+        # WHERE THE STICKS POINT (2026-11-25): the stick names a stick's statement, references and marks carry, read as
+        # edges - resolved on this node, through the dead-link table, or left dead (a want). Drawn on site/map.html.
+        from .. import stick_graph as _sg
+        return _ok(_sg.graph())
+
     if method == "GET" and path == "/sticks/recheck":
         # THE STICK RE-CHECK (2026-11-25): every sealed mark on the sticks re-read - its record present, unaltered and
         # HOLDS, and whether today's catalog mints the same seal. Read-only; the nightly live assay and every deploy
@@ -3495,6 +3501,7 @@ ROUTES = [
     {"path": "/stick", "methods": ("GET", "POST"), "api": True, "rl": True},
     {"path": "/status", "methods": ("GET",), "api": True, "rl": "read"},   # THE STATUS DOOR: a named question's stick, read (2026-11-25)
     {"path": "/sticks/recheck", "methods": ("GET",), "api": True, "rl": "read"},   # every sealed mark re-read: present, unaltered, HOLDS (2026-11-25)
+    {"path": "/sticks/graph", "methods": ("GET",), "api": True, "rl": "read"},   # where the sticks point: the stick names each carries, as edges (2026-11-25)
     {"path": "/chains", "methods": ("GET",), "api": True, "rl": "read"},   # walk a discovery lineage / find where two chains connect (2026-10-07)
     {"path": "/tick", "methods": ("POST",), "rl": True},
     {"path": "/sync/manifest", "methods": ("GET",), "api": True, "rl": "read"},
