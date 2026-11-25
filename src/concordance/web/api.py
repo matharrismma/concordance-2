@@ -807,6 +807,12 @@ def dispatch(method: str, path: str, query: Dict[str, str], body: Any,
         if not sid:
             return _err(400, "id required (GET /sticks lists them)")
         r = _ts.read(sid)
+        if not r.get("ok"):
+            to = _ts.alias(sid)          # a dead id a mark names (the stick audit, 2026-11-25): read the stick it means
+            if to:
+                r = _ts.read(to)
+                if r.get("ok"):
+                    r["resolved_from"] = sid
         return _ok(r) if r.get("ok") else _err(404, r.get("error", "no such stick"))
 
     if method == "POST" and path == "/stick":

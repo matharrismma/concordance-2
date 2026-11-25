@@ -1,0 +1,40 @@
+{
+ "entry": "grh",
+ "rc": 0,
+ "seals": {},
+ "sticks": {
+  "stick_generalized_riemann_hypothesis": {
+   "field": "number_theory",
+   "question": "Generalized Riemann hypothesis",
+   "references": [
+    "A. Piltz (1884)",
+    "H. Davenport, Multiplicative Number Theory (1967)",
+    "E. Bombieri, The Riemann Hypothesis, Clay Mathematics Institute official problem description (2000)"
+   ],
+   "statement": "Every non-trivial zero of every Dirichlet L-function has real part 1/2; in its wider forms (Dedekind zeta functions, Hecke and automorphic L-functions - the extended and grand Riemann hypotheses), every non-trivial zero of every such function does.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - a missing stick, GRH, 2026-11-25",
+     "claim": "For a fixed modulus q, the Riemann hypothesis for every Dirichlet L-function mod q holds if and only if the primes in each progression a mod q, with a prime to q, are counted to within O(x^(1/2 + epsilon)): psi(x; q, a) = x / phi(q) + O(x^(1/2 + epsilon)) for every epsilon > 0. It is the Riemann hypothesis's error term, spread across the progressions.",
+     "kind": "equivalence",
+     "source": "H. Davenport, Multiplicative Number Theory, 3rd ed., Springer GTM 74 (2000), ch. 20"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, GRH, 2026-11-25",
+     "claim": "[proved for Dirichlet L-functions - machine-checked] The generalized Riemann hypothesis for Dirichlet L-functions is proved - a machine-checked Lean proof (L. Alpöge, released 2026-11-20 with the Riemann hypothesis); no human-readable proof yet. It is the same Lean development whose Riemann hypothesis the Lean FRO and the Mathlib Initiative certified on 2026-11-21; its four GRH statements were read here on 2026-11-20 and say what the hypothesis says; the whole development rests on one theorem, everyCharacter, of which the Riemann hypothesis is the case of the trivial character. The engine has not re-run it and seals nothing for it.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, GRH, 2026-11-25",
+     "claim": "[open beyond Dirichlet] The extended Riemann hypothesis (Dedekind zeta functions of number fields), the hypothesis for Hecke L-functions and the grand Riemann hypothesis (automorphic L-functions) stay OPEN. The 2026 release names the extended hypothesis as a likely extension of its method; it does not prove it.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, GRH, 2026-11-25",
+     "claim": "[on the one map] The Riemann hypothesis is this stick's first case (stick_riemann_hypothesis, now closed); Dirichlet's characters are the unit-circle reading of stick_dirichlet_s_theorem_think_of_polar_coordinates; the Langlands program (stick_the_langlands_program) is where the automorphic L-functions of the grand hypothesis live.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

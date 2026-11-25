@@ -300,6 +300,31 @@ def read(stick_id: str, data_dir: Optional[Path] = None) -> Dict[str, Any]:
     return {"ok": True, **st, "fit": fit(st)}
 
 
+# THE DEAD LINKS (the stick audit, 2026-11-25). Marks, cards and code name 40 sticks by an id they were never minted
+# under: a shortened form (stick_the_dot_abstracted for stick_the_dot_abstracted_dirac_s_delta_...) or an older name
+# (stick_hilbert_polya for stick_the_hilbert_polya_conjecture). A minted mark cannot be edited, so the reader resolves
+# them: stick_aliases.json beside this file, read by GET /stick only - never by read() itself, so a mint, which reads
+# the id create() just returned, can never land on an alias.
+_ALIASES: Dict[str, Any] = {"mtime": None, "map": {}}
+
+
+def alias(stick_id: str) -> Optional[str]:
+    """The stick a dead id names, or None. stick_aliases.json is re-read when it changes; a missing or unreadable
+    table resolves nothing."""
+    p = Path(__file__).with_name("stick_aliases.json")
+    try:
+        mtime = p.stat().st_mtime_ns
+    except OSError:
+        return None
+    if _ALIASES["mtime"] != mtime:
+        try:
+            table = (json.loads(p.read_text(encoding="utf-8")) or {}).get("aliases") or {}
+        except (OSError, ValueError):
+            table = {}
+        _ALIASES.update({"mtime": mtime, "map": {k: v for k, v in table.items() if isinstance(v, str)}})
+    return _ALIASES["map"].get((stick_id or "").strip())
+
+
 def listing(data_dir: Optional[Path] = None) -> Dict[str, Any]:
     sticks = fold(data_dir)
     rows = []

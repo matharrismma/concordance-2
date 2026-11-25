@@ -1,0 +1,64 @@
+{
+ "entry": "markov_chains",
+ "rc": 0,
+ "seals": {
+  "4be99bfff49e7e00981e2ab8797d5ce2cfcf72fb17f9f18b0f03c029f711fdb4": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "markov_two_state_detailed_balance_flow_ratio"
+   ]
+  },
+  "aebfbd13bbd1f5ad0b1094bb447c2a3ad10f2bb98bc6b179d622b8c76926911a": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "markov_two_state_stationary_share_of_state_1"
+   ]
+  },
+  "d9aab53c78bd483b0fdf4fc5b91a56fafa4db9b4c73892b1bc7e720f94af459e": {
+   "axis": "mathematics",
+   "overall": "PASS",
+   "verifiers": [
+    "markov_two_state_distance_after_10_steps"
+   ]
+  }
+ },
+ "sticks": {
+  "stick_markov_chains_and_mcmc": {
+   "field": "mathematics",
+   "question": "Markov chains and MCMC",
+   "references": [
+    "A. A. Markov (1906)",
+    "N. Metropolis, A. W. Rosenbluth, M. N. Rosenbluth, A. H. Teller, E. Teller, J. Chem. Phys. 21 (1953) 1087-1092",
+    "W. K. Hastings, Biometrika 57 (1970) 97-109"
+   ],
+   "statement": "A Markov chain moves between states with probabilities that depend only on the present state; a finite chain that is irreducible and aperiodic settles to one stationary distribution whatever state it starts in. Markov chain Monte Carlo (MCMC) samples a target distribution by building a chain whose stationary distribution is that target.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - a missing stick, Markov chains, 2026-11-25",
+     "claim": "[the stationary distribution, SEALED] A two-state chain that leaves state 1 with probability a = 0.1 and state 2 with probability b = 0.5 spends, in the long run, the share b/(a + b) = 0.5/0.6 = 0.8333 of its time in state 1 (sealed), whatever state it starts in. The chain forgets where it began; that forgetting is what makes it a sampler.",
+     "kind": "instance",
+     "seal": "aebfbd13bbd1f5ad0b1094bb447c2a3ad10f2bb98bc6b179d622b8c76926911a"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, Markov chains, 2026-11-25",
+     "claim": "[detailed balance, SEALED] At that distribution the flow from state 1 to state 2, pi_1 a = (5/6)(0.1), equals the flow back, pi_2 b = (1/6)(0.5): their ratio is 1 (sealed). Metropolis (1953) and Hastings (1970) build a chain to satisfy exactly this balance for a chosen target, so that the target is its stationary distribution.",
+     "kind": "instance",
+     "seal": "4be99bfff49e7e00981e2ab8797d5ce2cfcf72fb17f9f18b0f03c029f711fdb4"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, Markov chains, 2026-11-25",
+     "claim": "[how fast it forgets, SEALED] The chain's second eigenvalue is 1 - a - b = 0.4, so its distance from the stationary distribution shrinks by that factor at every step: after 10 steps it is 0.4^10 = 1.05e-4 of where it began (sealed). A chain whose second eigenvalue is near 1 mixes slowly - the practical limit of every MCMC run.",
+     "kind": "instance",
+     "seal": "d9aab53c78bd483b0fdf4fc5b91a56fafa4db9b4c73892b1bc7e720f94af459e"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, Markov chains, 2026-11-25",
+     "claim": "[where it ties] The Monte Carlo stick names this one, and the Yang-Mills stick already holds two witnesses on this same chain (its fixed point and its balance, from the Markov-chain reading). MCMC is a Monte Carlo method that draws its samples by walking a Markov chain instead of drawing them independently. Lattice gauge theory computes its numbers this way (stick_yang_mills_existence_and_mass_gap). That a finite, irreducible, aperiodic chain converges to its one stationary distribution is a theorem (Perron-Frobenius); the samples are evidence about the target, and the seals here are the arithmetic of one small chain, never the convergence of a large one.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,66 @@
+{
+ "entry": "stale_marks_restated",
+ "rc": 0,
+ "seals": {},
+ "sticks": {
+  "stick_finite_field_the_weil_riemann_hypothesis": {
+   "field": "meta",
+   "question": "Finite field - the Weil Riemann hypothesis",
+   "references": [
+    "A. Weil, Riemann hypothesis for curves over finite fields (1940s)",
+    "P. Deligne, La conjecture de Weil I (1974) - the general case",
+    "the Hasse bound |a| <= 2 sqrt(q) for elliptic curves"
+   ],
+   "statement": "For a smooth projective curve over F_q, the zeta function's reciprocal roots (Frobenius eigenvalues) satisfy |alpha| = sqrt(q) exactly. Equivalently the zeros lie on Re(s) = 1/2. This is proven - the Riemann hypothesis over finite fields is a theorem, not a conjecture.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the stick audit, 2026-11-25",
+     "claim": "[the classical gap - restated for precision, 2026-11-25] The note that names the classical gap says 'This does NOT prove the classical RH' - still true: the Weil conjectures are a theorem about varieties over finite fields. But the gap it names is now closed by another route: the Riemann hypothesis is proved - a machine-checked Lean proof (Alpöge, 2026-11-20); no human-readable proof yet. Whether that route supplies a cohomology for the integers, as the field-with-one-element program seeks, has not been read here.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_the_de_bruijn_newman_constant": {
+   "field": "meta",
+   "question": "The de Bruijn-Newman constant",
+   "references": [
+    "N. G. de Bruijn (1950): Lambda <= 1/2",
+    "C. M. Newman (1976): Lambda exists and is real; conjecture Lambda >= 0",
+    "B. Rodgers & T. Tao (2020, Duke Math. J.): Lambda >= 0, proved",
+    "D.H.J. Polymath (Polymath15, 2019): Lambda <= 0.22"
+   ],
+   "statement": "There is a real constant Lambda such that the heat-flow deformation H_t of the Riemann xi-function has only real zeros exactly when t >= Lambda. The Riemann hypothesis is equivalent to Lambda <= 0; since Lambda >= 0 is now proved, RH is equivalent to Lambda = 0.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the stick audit, 2026-11-25",
+     "claim": "Lambda = 0: it FOLLOWS from the Riemann hypothesis, proved - a machine-checked Lean proof (Alpöge, 2026-11-20); no human-readable proof yet. The chain: the Riemann hypothesis gives Lambda <= 0 (de Bruijn 1950: once H_t has only real zeros, so does every H_s with s > t; Newman 1976 named the threshold Lambda), and Rodgers and Tao (2020) proved Lambda >= 0. Neither of those steps is new; the new link is the Riemann hypothesis. The engine re-derived none of it: the window this stick sealed stands, and its upper end now meets the lower.",
+     "kind": "closed",
+     "source": "N. G. de Bruijn, Duke Math. J. 17 (1950) 197-226; C. M. Newman, Proc. AMS 61 (1976) 245-251; B. Rodgers, T. Tao, Forum Math. Pi 8 (2020) e6; L. Alpöge, Lean proof of RH (2026-11-20)"
+    },
+    {
+     "by": "Narrow Highway - the stick audit, 2026-11-25",
+     "claim": "[the one unfired mark - restated for precision, 2026-11-25] The note that names RH as Lambda = 0 says 'Lambda=0 marked open' and 'we do not claim Lambda = 0'. Both were right when minted. Since 2026-11-20 the Riemann hypothesis is proved - a machine-checked Lean proof (Alpöge, 2026-11-20); no human-readable proof yet - so Lambda <= 0, and with Rodgers-Tao Lambda = 0: see this stick's closed mark. The claim is the chain's, cited; the engine still seals only its window.",
+     "kind": "note"
+    }
+   ]
+  },
+  "stick_the_langlands_program": {
+   "field": "mathematics",
+   "question": "The Langlands program",
+   "references": [
+    "R. P. Langlands, letter to A. Weil (1967)",
+    "A. Wiles, Modular elliptic curves and Fermat's Last Theorem, Ann. Math. 141 (1995) 443",
+    "C. Breuil, B. Conrad, F. Diamond, R. Taylor, J. AMS 14 (2001) 843 (modularity for all E/Q)",
+    "L. Lafforgue, Invent. Math. 147 (2002) 1 (Langlands for GL(n) over function fields)"
+   ],
+   "statement": "Is there a grand unification of mathematics — a precise correspondence between Galois representations (number theory) and automorphic forms (harmonic analysis), with their L-functions equal? The full program is a web of conjectures, largely OPEN over number fields; specific cases are proven. The open question is the general correspondence, not the proven pillars.",
+   "ticks": [
+    {
+     "by": "Narrow Highway - the stick audit, 2026-11-25",
+     "claim": "[the open vision - restated for precision, 2026-11-25] The note of the open vision says the geometric Langlands correspondence 'remains a web of conjectures'. That was wrong when it was minted: Gaitsgory, Raskin and seven coauthors proved the unramified geometric Langlands conjecture for curves over a field of characteristic zero in five papers posted in 2024 (arXiv:2405.03599, 2405.03648, 2409.07051, 2409.08670, 2409.09856), about 800 pages; whether a journal has published them has not been read here. The arithmetic program over number fields - functoriality, the automorphy of arbitrary Galois representations - stays open. By Tao's account (2026-11-20) the machine-checked proof of the Riemann hypothesis draws on the Langlands program.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}

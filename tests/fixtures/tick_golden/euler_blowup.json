@@ -1,0 +1,44 @@
+{
+ "entry": "euler_blowup",
+ "rc": 0,
+ "seals": {},
+ "sticks": {
+  "stick_3d_euler_equations_finite_time_singularity": {
+   "field": "physics",
+   "question": "3D Euler equations - finite-time singularity",
+   "references": [
+    "J. T. Beale, T. Kato, A. Majda, Comm. Math. Phys. 94 (1984) 61-66",
+    "C. Fefferman, Existence and smoothness of the Navier-Stokes equation, Clay Mathematics Institute (2000)"
+   ],
+   "statement": "Can a smooth solution of the three-dimensional incompressible Euler equations, with no force, develop a singularity in finite time?",
+   "ticks": [
+    {
+     "by": "Narrow Highway - a missing stick, 3D Euler, 2026-11-25",
+     "claim": "Beale-Kato-Majda (1984): a smooth solution of the 3D Euler equations stops being smooth at a finite time T* if and only if the time integral of the maximum vorticity, from 0 to T*, is infinite. Blow-up is a statement about vorticity.",
+     "kind": "equivalence",
+     "source": "J. T. Beale, T. Kato, A. Majda, Remarks on the breakdown of smooth solutions for the 3-D Euler equations, Comm. Math. Phys. 94 (1984) 61-66"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, 3D Euler, 2026-11-25",
+     "claim": "[rough data, proved] Elgindi (2021) proved finite-time singularity formation on R^3, with finite energy, for axisymmetric solutions without swirl whose velocity is C^{1,alpha} - Hölder, not smooth - for small alpha (T. M. Elgindi, Ann. of Math. 194 (2021) 647-727). It answers the question for rough data; the smooth question is left where it was.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, 3D Euler, 2026-11-25",
+     "claim": "[smooth data, with a boundary, computer-assisted] Chen and Hou (arXiv:2210.07191 and arXiv:2305.05660, 2022-2023) proved, with a computer-assisted step, a stable nearly self-similar blow-up from smooth data for the 3D axisymmetric Euler equations in a cylinder - with a solid boundary, which is part of the mechanism. Their journal publication has not been read here.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, 3D Euler, 2026-11-25",
+     "claim": "[the torus, 2026 - a Lean theorem, not yet independently built] Alpöge, Buckmaster and Coiculescu released on 2026-11-20 a Lean formalization of a theorem: an odd, divergence-free, C-infinity datum on the torus T^3 whose maximal smooth solution of the UNFORCED Euler equations blows up in finite time, with both Beale-Kato-Majda integrals infinite, the velocity bounded and |curl u(t,0)| going to infinity. Read here on 2026-11-24: the Lean statement matches the paper's Theorem 1.1, the theorem carries no hypothesis, its 738 files hold 0 sorry and 0 axiom declarations, and there is no computer-assisted step; by the authors' account the periodic Beale-Kato-Majda criterion is not formalized. NOT YET: no independent build of the proof has been reported, so this stick is not closed by it. Smooth, finite-energy data on R^3 stays open.",
+     "kind": "note"
+    },
+    {
+     "by": "Narrow Highway - a missing stick, 3D Euler, 2026-11-25",
+     "claim": "[beside Navier-Stokes] The Euler equations are the Navier-Stokes equations without viscosity. An Euler blow-up does not settle the Clay problem (stick_navier_stokes_existence_and_smoothness), which asks about the viscous equations; the Navier-Stokes blow-up Alpöge and Buckmaster announced the same week rests on a computer-assisted certificate not yet released.",
+     "kind": "note"
+    }
+   ]
+  }
+ }
+}
