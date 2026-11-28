@@ -1123,7 +1123,10 @@ def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
         if tol > 0:
             try:
                 lf, rf = float(L), float(R)
-                return _math.isfinite(lf) and _math.isfinite(rf) and abs(lf - rf) <= tol * max(1.0, abs(lf))
+                # the same scale-of-the-quantity rule as numeric mode (2026-11-27); simplify(L - R) == 0
+                # above already settles an exact step, so this only grades a step that is close but not equal
+                return (_math.isfinite(lf) and _math.isfinite(rf)
+                        and abs(lf - rf) <= tol * max(abs(lf), abs(rf)))
             except (TypeError, ValueError):
                 return False
         return False
@@ -1160,6 +1163,48 @@ def verify_calc_chain(spec: Dict[str, Any]) -> VerifierResult:
     return confirm(name, f"all {len(pairs)} steps verified{tail}", data)
 
 
+def _exactly_zero(expr: str, var_names: List[str]) -> bool:
+    """Is this expression zero as MATHEMATICS, rather than as floats? Asked with the rational parse the calc
+    chain already uses (rational=True reads decimals as exact rationals, which only ever tightens), so a
+    decimal that ought to cancel does: 0.1*(5/6) - 0.5*(1/6) is zero, though its float is 1.39e-17.
+
+    sympy's own is_zero answers first and answers nearly always (measured 2026-11-27: every seal expression and
+    every true zero tried, in well under a millisecond); simplify is the fallback for the None it returns when it
+    cannot tell. Anything that cannot be parsed, or that neither can settle, is NOT a proof of zero - this
+    function may only ever say yes when the expression IS zero."""
+    try:
+        parsed = _parse(expr, var_names, rational=True)
+        settled = parsed.is_zero
+        if settled is not None:
+            return bool(settled)
+        return bool(simplify(parsed) == 0)
+    except Exception:       # noqa: BLE001 - never a false "it is zero"
+        return False
+
+
+def _exact_decision(expr: str, var_names: List[str], literal: Any, rel_tol: float):
+    """Decide a comparison the floats cannot: the quantity is below the smallest double, so it evaluated to 0.0
+    and the window around it is 0.0 too. Returns True (the claim holds), False (it does not), or None - the
+    engine cannot settle it and will not guess.
+
+    The claim is read from its own LITERAL, because a number below the double range arrives as 0.0 and carries
+    nothing: float("1e-400") and float("2e-400") are both 0.0. With no literal the claim really is zero, and an
+    expression sympy proves non-zero is then refused, whatever its float says."""
+    try:
+        ex = _parse(expr, var_names, rational=True)
+        cl = _parse(str(literal), [], rational=True) if literal not in (None, "") else _parse("0", [], rational=True)
+        if (ex - cl).is_zero:
+            return True
+        d = abs(ex - cl).evalf(60)
+        a, b = abs(ex).evalf(60), abs(cl).evalf(60)
+        scale = a if a >= b else b
+        if scale == 0:          # neither side is zero and yet the larger is: nothing here can be trusted
+            return None
+        return bool(d / scale <= rel_tol)
+    except Exception:           # noqa: BLE001 - an undecidable comparison is declined, never confirmed
+        return None
+
+
 def verify_numeric(spec: Dict[str, Any]) -> VerifierResult:
     """Evaluate an arithmetic/numeric expression and check a claimed value — the engine as the
     verifier behind any solver (the solver proposes a number, the engine disposes). Exact via sympy,
@@ -1190,9 +1235,56 @@ def verify_numeric(spec: Dict[str, Any]) -> VerifierResult:
     if not _math.isfinite(cv):      # before any window: at the top of the float range a window's own edge is infinite
         return mismatch(name, f"{expr} is finite, and the claim {cv} is not", {"expr": str(expr)})
     diff = abs(fv - cv)
-    threshold = rel_tol * max(1.0, abs(fv))
+    # THE WINDOW IS THE SCALE OF THE QUANTITY, NEVER A FLAT FLOOR (2026-11-27). This was
+    # `rel_tol * max(1.0, abs(fv))` - relative above 1 and a flat ABSOLUTE 1e-9 below it, so for a quantity
+    # far under the tolerance the window swallowed every claim. Measured on the live public door: it
+    # confirmed "the Planck constant is 0", "is 7e-34", "is 1e-20" and "is 1e-9" alike - twenty-five orders
+    # of magnitude of wrong, inside the 0-FP spine. The window is now PEP 485's weak form, which is what
+    # math.isclose computes with abs_tol=0: relative to the LARGER of the two, with no floor at all. PEP 485
+    # weighed a non-zero default absolute tolerance of about 1e-8 and refused it for this very reason - such
+    # a floor "would be far too large if expected values are on order of 1e-9 or smaller". Ours was 1e-9;
+    # the smallest seal in the keeping is 2.08e-43.
+    threshold = rel_tol * max(abs(fv), abs(cv))
     strict_threshold = threshold   # the exact-match window, before any stated-precision widening below
     data = {"expr": str(expr), "computed": fv, "claimed": cv, "rel_tol": rel_tol, "abs_diff": diff}
+    # A CLAIM OF ZERO CANNOT BE JUDGED BY A RELATIVE WINDOW AT ALL. PEP 485 again: "by definition, no value
+    # is small relative to zero". So when the expression is PROVABLY zero the window is widened to admit the
+    # claim and the ordinary path below reports it; everything else is left to the window as it stands. This
+    # branch may only ever ADD a verdict of exact, never take one away, which is what keeps it from calling a
+    # true thing false. It is what keeps a DECIMAL true zero holding: 0.1+0.2-0.3 is zero though its float is
+    # 5.55e-17, and the minted seal change_of_domain.markov_detailed_balance_lambda_1_eigenvector
+    # (0.1*(5/6) - 0.5*(1/6), float 1.39e-17) is exactly that case. hbar is not zero, so the window stands as
+    # computed and refuses it.
+    if cv == 0.0 and _exactly_zero(str(expr), spec.get("variables") or []):
+        # The exact answer IS zero, so admit the claim and let the ORDINARY path below report it, exactly as it
+        # always has. Nothing is added to `data` and no sentence of its own is written here, because a seal's
+        # content hash is computed over this result: ten minted seals are provably-zero expressions
+        # (bombelli, change_of_domain, dirichlet, fourier, game_theory, imaginary_numbers, lebesgue,
+        # navier_stokes, smith_chart, tesseract), and a new field or a new wording would change all ten hashes
+        # and break receipts that are already live. Measured 2026-11-27: a first attempt returned its own
+        # confirm() here and every one of those ten stopped reproducing its golden.
+        threshold = strict_threshold = max(threshold, diff)
+    # A FLOAT THAT UNDERFLOWED IS NOT A ZERO (2026-11-27). A quantity below the smallest double evaluates to
+    # 0.0, so the relative window around it is 0.0 as well and a claim of 0 matched it EXACTLY: 10**-400,
+    # exp(-1000) (really 5.08e-435) and 2**-1100 were all confirmed as zero. That is the same false positive as
+    # the flat floor, reached by another road - "the chance of 1100 heads in a row is 0" is a family-sized case
+    # of it. This is an `elif`, so a PROVEN zero never reaches it and is reported by the ordinary path; what
+    # arrives here is a float that is a placeholder standing in for a number the double range cannot hold, and
+    # a placeholder may not decide the question. It is settled on the exact forms instead, at sixty digits.
+    # (Subnormals need no such care: 10**-320 keeps a real float, and the relative window above - this same
+    # change - refuses a claim of zero on it. Before this change it was confirmed, like everything else.)
+    elif fv == 0.0 and cv == 0.0:
+        data["below_double_range"] = True
+        held = _exact_decision(str(expr), spec.get("variables") or [], spec.get("claimed_literal"), rel_tol)
+        if held is None:
+            return error(name, f"{expr} is below the smallest double and the engine cannot settle it exactly; "
+                               f"it will not guess a verdict")
+        if held:
+            data["exact"] = True
+            return confirm(name, f"{expr} and the claim agree exactly, below the double range.", data)
+        return mismatch(name, f"{expr} is NOT zero - it is smaller than the smallest double, so it reads as 0.0, "
+                              f"and a float that underflowed is no evidence of a zero. State a claim this small "
+                              f"as a literal to have it judged at that scale.", data)
     # STATED PRECISION (2026-10-07), as physical_constants keeps it: the literal as the person wrote it
     # ("1.41421") earns half a unit in its last stated place — two or more significant figures only, so a
     # one-figure "1" never passes as sqrt(2). Only the claim's own literal can widen the window; a structured

@@ -181,7 +181,12 @@ def window_for(spec: Dict[str, Any], literal_key: str, default: float, unit_fact
     hedged = bool(spec.get("hedged"))
     w = stated_window(lit, hedged, unit_factor)
     sp = stated_precision(lit)
-    exact = 1e-9 * max(1.0, abs(float(actual))) if actual is not None else 1e-9
+    # THE WINDOW IS THE SCALE OF THE QUANTITY, NEVER A FLAT FLOOR (2026-11-27). This was
+    # `1e-9 * max(1.0, abs(actual))`, a flat ABSOLUTE 1e-9 for anything below 1, and TEN verifiers take
+    # their default from here - physical_constants and units among them, whose quantities live far below 1
+    # in SI. So "the elementary charge is 0 coulombs" HELD on the live public door: a one-figure literal
+    # earns no stated window and fell onto a floor eleven orders wider than the charge itself.
+    exact = 1e-9 * abs(float(actual)) if actual is not None else 1e-9
     info = {"stated_literal": str(lit), "stated_sigfigs": sp[0] if sp else None, "hedged": hedged,
             "stated_window": w if w is not None else 0.0,
             "rule": ("half a unit in the last stated place (two or more figures); a hedge word doubles it and "
