@@ -465,3 +465,4 @@ test_recheck_sticks.py
 test_stick_graph.py
 test_natural_links.py
 test_stick_forms_and_chains.py
+test_orch_or_entry.py

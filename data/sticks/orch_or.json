@@ -1,0 +1,178 @@
+{
+ "schema": 1,
+ "name": "orch_or",
+ "aliases": [
+  "orch_or",
+  "quantum_consciousness"
+ ],
+ "doc": "ORCH OR - the receiver chart read quantum, 2026-11-27. The brain-as-instrument reading was corrected from fluid to quantum, which is Penrose and Hameroff's Orchestrated Objective Reduction. Nine seals the engine re-derives through its mathematics verifier's numeric check (the thermal floor and crossover frequency at 37 C; why the 40 Hz rhythm is classical; why tryptophan's ultraviolet is quantum; Orch OR's reduction energy for one gamma cycle; the decoherence gap on Tegmark's figure and on the reply's recalculation; the two spin-carrying xenon isotopes' relative potency), an instance mark on each, the hypothesis cited and DECLINED, and three notes: the evidence, the one direct test of the reduction, and the receiver read quantum. One note on the receiver stick points here. Charted on the mind floor by tools/seed_orch_or.py.",
+ "seals": [
+  {
+   "key": "thermal_energy",
+   "nid": "orch_or_thermal_energy",
+   "expr": "1.380649e-23*310.15/1.602176634e-19",
+   "value": 0.026726659112543266,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "thermal_frequency",
+   "nid": "orch_or_thermal_frequency",
+   "expr": "1.380649e-23*310.15/6.62607015e-34/1e12",
+   "value": 6.462477421100047,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "gamma_quanta",
+   "nid": "orch_or_gamma_quanta",
+   "expr": "1.380649e-23*310.15/(6.62607015e-34*40)",
+   "value": 161561935527.50116,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "tryptophan_ratio",
+   "nid": "orch_or_tryptophan_ratio",
+   "expr": "6.62607015e-34*299792458/(280e-9*1.380649e-23*310.15)",
+   "value": 165.67753823080233,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "reduction_energy",
+   "nid": "orch_or_reduction_energy",
+   "expr": "6.62607015e-34/(2*pi)/0.025/1e-33",
+   "value": 4.218287270584626,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "tegmark_gap",
+   "nid": "orch_or_tegmark_gap",
+   "expr": "0.025/1e-13",
+   "value": 250000000000.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "recalculated_gap",
+   "nid": "orch_or_recalculated_gap",
+   "expr": "0.025/1e-4",
+   "value": 250.0,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "xenon_129",
+   "nid": "orch_or_xenon_129",
+   "expr": "70/105",
+   "value": 0.6666666666666666,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  },
+  {
+   "key": "xenon_131",
+   "nid": "orch_or_xenon_131",
+   "expr": "70/99",
+   "value": 0.7070707070707071,
+   "tol": 1e-09,
+   "domain": "mathematics"
+  }
+ ],
+ "sticks": [
+  {
+   "question": "Orch OR - consciousness as quantum vibrations in microtubules",
+   "statement": "Penrose and Hameroff's Orchestrated Objective Reduction (Orch OR) holds that consciousness arises from coherent quantum processes in the microtubules inside neurons, each ending in a gravity-related objective reduction (tau = hbar / E_G), and proposes the brain's EEG rhythms as beat frequencies of faster microtubule vibrations. Can a quantum state in warm, wet tissue last long enough to matter, and is consciousness what it carries? The physics that bounds the question is sealed here; the hypothesis is cited and held open.",
+   "field": "biophysics",
+   "references": [
+    "S. Hameroff and R. Penrose, Physics of Life Reviews 11 (2014) 39-78",
+    "M. Tegmark, Importance of quantum decoherence in brain processes, Phys. Rev. E 61 (2000) 4194-4206",
+    "S. Hagan, S. R. Hameroff and J. A. Tuszynski, Quantum computation in brain microtubules: decoherence and biological feasibility, Phys. Rev. E 65 (2002) 061901",
+    "N. Li et al., Nuclear spin attenuates the anesthetic potency of xenon isotopes in mice, Anesthesiology 129 (2018) 271-277",
+    "S. Khan et al., Microtubule-stabilizer epothilone B delays anesthetic-induced unconsciousness in rats, eNeuro 11 (2024) ENEURO.0291-24.2024",
+    "N. S. Babcock et al., Ultraviolet superradiance from mega-networks of tryptophan in biological architectures, J. Phys. Chem. B 128 (2024) 4035-4046",
+    "S. Donadi et al., Underground test of gravity-related wave function collapse, Nature Physics 17 (2021) 74-78",
+    "BIPM, The International System of Units, 9th edition (2019): h, k_B, e and c exact"
+   ],
+   "by": "Narrow Highway - the receiver chart read quantum, Orch OR, 2026-11-27",
+   "marks": [
+    {
+     "kind": "instance",
+     "seal": "thermal_energy",
+     "claim": "[the thermal floor at body heat, SEALED] At 37 C (310.15 K) the thermal energy is k_B T = 0.02673 eV (sealed; k_B and e are exact in the SI since 2019). A vibration whose quantum h nu lies far below this is classical: heat fills it with many quanta and its graininess is washed out. A quantum effect in warm tissue has to live at or above this energy, or be shielded from the heat."
+    },
+    {
+     "kind": "instance",
+     "seal": "thermal_frequency",
+     "claim": "[the crossover frequency, SEALED] The frequency whose quantum equals body heat is nu = k_B T / h = 6.46 THz (sealed) - terahertz, the range of molecular vibrations. Below it a mode is thermal, above it quantum. Every rhythm the EEG records sits about twelve orders of magnitude below this line."
+    },
+    {
+     "kind": "instance",
+     "seal": "gamma_quanta",
+     "claim": "[the brain's rhythms are classical, SEALED] A 40 Hz gamma oscillation, the rhythm Orch OR ties to conscious moments, has a quantum h nu that is 6.2e-12 of k_B T, so at body heat each such mode holds about k_B T / h nu = 1.6e11 thermal quanta (sealed). The EEG is a classical wave. If a quantum process lies under it, that process must be fast and small, with the EEG its slow classical envelope."
+    },
+    {
+     "kind": "instance",
+     "seal": "tryptophan_ratio",
+     "claim": "[where quantum states do survive in warm protein, SEALED] Tryptophan, the amino acid whose rings form large networks in microtubules, absorbs ultraviolet light near 280 nm. That quantum is h c / lambda = 166 k_B T (sealed): heat almost never excites it (its thermal occupation is about e^-166), so an excitation there stays quantum at 37 C. This is the scale at which a quantum effect in tubulin is physically plausible - electronic and ultraviolet, not the EEG's hertz."
+    },
+    {
+     "kind": "instance",
+     "seal": "reduction_energy",
+     "claim": "[Orch OR's own number, SEALED] Penrose's objective reduction ends a superposition in a time tau = hbar / E_G, where E_G is the gravitational self-energy of the difference between the superposed mass distributions. For one conscious moment per 40 Hz gamma cycle, tau = 25 ms, the theory needs E_G = hbar / tau = 4.2183 in units of 1e-33 joule (sealed), that is 4.2183e-33 J. How many tubulins in superposition would reach it is Hameroff and Penrose's estimate, cited, not sealed here."
+    },
+    {
+     "kind": "instance",
+     "seal": "tegmark_gap",
+     "claim": "[the decoherence objection, SEALED as arithmetic] Tegmark (Phys. Rev. E 2000) computed decoherence times of 1e-13 to 1e-20 s for the brain's degrees of freedom - 1e-13 s, the longest, for kink-like excitations in microtubules - against dynamical times of 1e-3 to 1e-1 s. One 25 ms gamma cycle over his longest figure is 0.025 / 1e-13 = 2.5e11 (sealed): on his numbers a superposition decoheres hundreds of billions of times before one conscious moment completes. The inputs are his estimates, cited; only the ratio is sealed."
+    },
+    {
+     "kind": "instance",
+     "seal": "recalculated_gap",
+     "claim": "[the reply, SEALED as arithmetic] Hagan, Hameroff and Tuszynski (Phys. Rev. E 2002) answered that Tegmark modelled a different system; recalculating for Orch OR's own (superposition separation, dipoles, the dielectric) lengthens the decoherence time to 1e-5 to 1e-4 s. One gamma cycle over their longer figure is 0.025 / 1e-4 = 250 (sealed): still short. They then propose shielding - water ordered around microtubules and pumped by metabolic energy, as a laser stays coherent at room temperature, and actin gel - that would bring it to 1e-2 to 1e-1 s, long enough. That shielding is proposed, not measured; the gap stays open."
+    },
+    {
+     "kind": "instance",
+     "seal": "xenon_129",
+     "claim": "[a quantum property touches anesthesia, SEALED as arithmetic] Li et al. (Anesthesiology 2018; 80 mice) found that xenon's spin-zero isotope 132Xe has a calculated loss-of-righting-reflex ED50 of 70%, and 129Xe, which carries nuclear spin 1/2, 105%. The isotopes are chemically alike and share one polarizability (3.60 cubic angstroms), yet 129Xe is 70/105 = 0.667 as potent (sealed). The ED50s are their measurements, cited; only the ratio is sealed."
+    },
+    {
+     "kind": "instance",
+     "seal": "xenon_131",
+     "claim": "[the second spin isotope, SEALED as arithmetic] In the same study 131Xe, nuclear spin 3/2, had a calculated ED50 of 99%: 70/99 = 0.707 as potent as 132Xe (sealed), while spin-zero 134Xe (72%) matched 132Xe. Both spin-carrying isotopes are weaker. The authors read this as consistent with quantum mechanisms in consciousness; no independent replication was found when this was written (2026-11-27)."
+    },
+    {
+     "kind": "postulate",
+     "claim": "[Orch OR - consciousness as quantum computation in microtubules, CITED and DECLINED] Penrose and Hameroff's Orchestrated Objective Reduction: coherent quantum processes in the microtubules inside neurons, orchestrated by the cell, each end in an objective reduction of the Diosi-Penrose kind - a collapse set by gravity, tau = hbar / E_G, not by an observer - and each reduction is a moment of conscious awareness or choice. Their 2014 review adds that the EEG's correlates of consciousness may be beat frequencies of faster microtubule vibrations. It is a named, testable hypothesis. The engine cannot seal it: no measurement yet shows microtubule coherence lasting milliseconds in a living brain, or a conscious moment as a reduction. So it is cited as a postulate and DECLINED as proof - held open, never laundered into a theorem. The physics around it is sealed above; this reading of it is not. Answers the open end card_question_the_hard_problem, beside the receiver chart (stick_consciousness_as_a_receiver_the_crystal_radio).",
+     "source": "S. Hameroff and R. Penrose, Consciousness in the universe: a review of the 'Orch OR' theory, Physics of Life Reviews 11 (2014) 39-78; R. Penrose, The Emperor's New Mind (1989) and Shadows of the Mind (1994)"
+    },
+    {
+     "kind": "note",
+     "claim": "[what the evidence shows, and what it does not] Three results fit the hypothesis without showing it. (1) Epothilone B, a drug that stabilizes microtubules, delayed isoflurane unconsciousness by 69 s on average in 8 rats (Khan et al., eNeuro 2024; Cohen's d = 1.9), in a before-and-after design; repeated isoflurane alone also lengthened the latency in a separate group of 4 rats, a tolerance the authors argue does not explain the effect. Microtubules matter to anesthesia. (2) The xenon isotopes above: a quantum property, nuclear spin, changes potency - one lab, 80 mice. (3) Ultraviolet superradiance in the tryptophan networks of microtubules (Babcock et al., J. Phys. Chem. B 2024): a collective quantum state predicted across up to 1e5 transition dipoles and seen in fluorescence at thermal equilibrium. None of the three measures consciousness, and none shows a millisecond coherence. Evidence, not proof.",
+     "source": "S. Khan et al., eNeuro 11 (2024) ENEURO.0291-24.2024; N. Li et al., Anesthesiology 129 (2018) 271-277; N. S. Babcock et al., J. Phys. Chem. B 128 (2024) 4035-4046"
+    },
+    {
+     "kind": "note",
+     "claim": "[the one direct test of the reduction] Orch OR's reduction is the Diosi-Penrose model of gravity-related collapse. If such collapse is random, charged particles jiggle and radiate faintly. A dedicated experiment in the Gran Sasso underground laboratory measured that radiation rate; it sets a lower bound on the model's size parameter about three orders of magnitude above earlier bounds, which excludes the form of the model that fixes that size by nature instead of leaving it free (Donadi et al., Nature Physics 2021). Forms that keep it as a free parameter remain open. This is where the physics under Orch OR is tested apart from the biology.",
+     "source": "S. Donadi, K. Piscicchia, C. Curceanu, L. Diosi, M. Laubenstein and A. Bassi, Underground test of gravity-related wave function collapse, Nature Physics 17 (2021) 74-78"
+    },
+    {
+     "kind": "note",
+     "claim": "[the receiver, read quantum] The receiver chart reads the brain as a crystal radio: it tunes to a signal rather than making it. Read quantum, the radio's two organs keep their places: the tuned circuit becomes a fast quantum process (terahertz to ultraviolet, where the seals above say quantum states survive body heat), and the diode's output, the slow envelope, is the EEG - classical, as the gamma seal shows. A crystal radio hears the beat of what it tunes, and Orch OR's 2014 review proposes the same: EEG rhythms as beat frequencies of faster microtubule vibrations. The shape is sealed physics; that consciousness is what it carries is the postulate above, declined. Ties stick_consciousness_as_a_receiver_the_crystal_radio and card_floor_quantum_mechanics.",
+     "source": "the crystal radio (an LC tuned circuit and a diode detector); Hameroff and Penrose (2014), Section 5"
+    }
+   ]
+  },
+  {
+   "question": "Consciousness as a receiver - the crystal radio",
+   "by": "Narrow Highway - the receiver chart read quantum, Orch OR, 2026-11-27",
+   "marks": [
+    {
+     "kind": "note",
+     "claim": "[the quantum form of this reading] The receiver's quantum form is charted beside it: stick_orch_or_consciousness_as_quantum_vibrations_in_microtubules seals why the EEG is classical at body heat (a 40 Hz mode holds about 1.6e11 thermal quanta), where quantum states can survive in warm protein (tryptophan's ultraviolet, 166 k_B T), Orch OR's reduction energy for one gamma cycle, and the decoherence gap; it cites Penrose and Hameroff's hypothesis and declines it as proof, as this stick declines the transmission theory. The non-local rhyme above stays a rhyme."
+    }
+   ]
+  }
+ ]
+}
